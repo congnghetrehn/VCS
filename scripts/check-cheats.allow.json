@@ -1,0 +1,8 @@
+{
+  "_ghi_chu": "Mỗi mục: { \"file\": \"đường/dẫn/posix\", \"max\": số lần tối đa được phép, \"reason\": \"lý do ≥ 10 ký tự, nêu ADR/OQ nếu có\" }. Khóa bắt đầu bằng '_' bị bỏ qua.",
+  "explicit-any": [],
+  "test-skip": [],
+  "eslint-disable": [],
+  "console": [],
+  "time-random": []
+}
