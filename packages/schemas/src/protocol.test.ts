@@ -132,3 +132,111 @@ describe('serverMessageSchema', () => {
     ).toBe(true);
   });
 });
+
+describe('serverMessageSchema — sim.state.locked? + comms.* (P0.8, B4)', () => {
+  const sim = {
+    state: 'RUNNING',
+    simTimeMs: 100,
+    stepCount: 10,
+    timeScale: 1,
+    lagging: false,
+    achievedScale: 1,
+  };
+
+  const stats = {
+    state: 'running',
+    clients: 1,
+    reads: 10,
+    writes: 2,
+    errors: 0,
+  };
+
+  it('sim.state thiếu locked → parse ok; locked true/false → parse ok', () => {
+    expect(serverMessageSchema.safeParse({ type: 'sim.state', ...sim }).success).toBe(true);
+    expect(serverMessageSchema.safeParse({ type: 'sim.state', ...sim, locked: true }).success).toBe(
+      true,
+    );
+    expect(
+      serverMessageSchema.safeParse({ type: 'sim.state', ...sim, locked: false }).success,
+    ).toBe(true);
+  });
+
+  it("sim.state locked: 'yes' → lỗi", () => {
+    expect(
+      serverMessageSchema.safeParse({ type: 'sim.state', ...sim, locked: 'yes' }).success,
+    ).toBe(false);
+  });
+
+  it('comms.status hợp lệ → parse ok', () => {
+    expect(
+      serverMessageSchema.safeParse({
+        type: 'comms.status',
+        gateways: [
+          { id: 'opc1', kind: 'opcua-server', stats, endpoints: ['opc.tcp://127.0.0.1:4840'] },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('comms.status thiếu stats / state lạ / kind lạ → lỗi', () => {
+    const gw = { id: 'opc1', kind: 'opcua-server', stats, endpoints: [] };
+    expect(
+      serverMessageSchema.safeParse({
+        type: 'comms.status',
+        gateways: [{ id: 'opc1', kind: 'opcua-server', endpoints: [] }],
+      }).success,
+    ).toBe(false);
+    expect(
+      serverMessageSchema.safeParse({
+        type: 'comms.status',
+        gateways: [{ ...gw, stats: { ...stats, state: 'flying' } }],
+      }).success,
+    ).toBe(false);
+    expect(
+      serverMessageSchema.safeParse({
+        type: 'comms.status',
+        gateways: [{ ...gw, kind: 's7-server' }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('comms.log 0 entry + 1 entry đủ trường → parse ok', () => {
+    expect(serverMessageSchema.safeParse({ type: 'comms.log', entries: [] }).success).toBe(true);
+    expect(
+      serverMessageSchema.safeParse({
+        type: 'comms.log',
+        entries: [
+          {
+            tWallMs: 1000,
+            gateway: 'opc1',
+            level: 'info',
+            kind: 'session',
+            summary: 'client connected',
+          },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('comms.log kind lạ / thiếu summary → lỗi', () => {
+    const entry = {
+      tWallMs: 1000,
+      gateway: 'opc1',
+      level: 'info',
+      kind: 'session',
+      summary: 'ok',
+    };
+    expect(
+      serverMessageSchema.safeParse({
+        type: 'comms.log',
+        entries: [{ ...entry, kind: 'weird' }],
+      }).success,
+    ).toBe(false);
+    expect(
+      serverMessageSchema.safeParse({
+        type: 'comms.log',
+        entries: [{ tWallMs: 1000, gateway: 'opc1', level: 'info', kind: 'session' }],
+      }).success,
+    ).toBe(false);
+  });
+});

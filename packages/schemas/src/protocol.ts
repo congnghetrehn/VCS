@@ -13,6 +13,9 @@ export const simStateSchema = z.object({
   timeScale: z.union([z.number(), z.literal('max')]),
   lagging: z.boolean(),
   achievedScale: z.number(),
+  /** B4 (M4 §2 hàng 4): khóa điều khiển khi có controller ngoài. Optional,
+   * additive — server P0.8 không bao giờ gửi trường này (OQ-080). */
+  locked: z.boolean().optional(),
 });
 
 export type SimState = z.infer<typeof simStateSchema>;
@@ -106,6 +109,57 @@ const errorMessageSchema = z.object({
   ref: z.string().optional(),
 });
 
+/** Thống kê gateway (M4 §5.3, nguyên văn). */
+export const gatewayStatsSchema = z.object({
+  state: z.enum(['stopped', 'starting', 'running', 'error']),
+  startedAtWallMs: z.number().int().optional(),
+  lastError: z.string().optional(),
+  clients: z.number().int().min(0),
+  reads: z.number().int().min(0),
+  writes: z.number().int().min(0),
+  errors: z.number().int().min(0),
+  monitoredItems: z.number().int().min(0).optional(),
+  subscriptions: z.number().int().min(0).optional(),
+});
+
+export type GatewayStats = z.infer<typeof gatewayStatsSchema>;
+
+/** Trạng thái comms (M4 §5.3 + §10.1; envelope đề xuất ở OQ-076 — P0.8 chỉ
+ * schema, server chưa phát message này). */
+export const commsStatusSchema = z.object({
+  type: z.literal('comms.status'),
+  gateways: z.array(
+    z.object({
+      id: z.string(),
+      kind: z.enum(['opcua-server', 'modbus-server']),
+      stats: gatewayStatsSchema,
+      endpoints: z.array(z.string()),
+    }),
+  ),
+});
+
+export type CommsStatus = z.infer<typeof commsStatusSchema>;
+
+/** Một mục RingLog (M4 §5.4, nguyên văn; `level` giữ string, xem OQ-077). */
+export const commsLogEntrySchema = z.object({
+  tWallMs: z.number().int(),
+  gateway: z.string(),
+  level: z.string(),
+  kind: z.enum(['session', 'request', 'write', 'error', 'info']),
+  summary: z.string(),
+  detail: z.string().optional(),
+});
+
+export type CommsLogEntry = z.infer<typeof commsLogEntrySchema>;
+
+/** Log comms (M4 §5.4; envelope đề xuất ở OQ-076 — P0.8 chỉ schema). */
+export const commsLogSchema = z.object({
+  type: z.literal('comms.log'),
+  entries: z.array(commsLogEntrySchema),
+});
+
+export type CommsLog = z.infer<typeof commsLogSchema>;
+
 export const serverMessageSchema = z.discriminatedUnion('type', [
   welcomeSchema,
   simStateMessageSchema,
@@ -113,6 +167,8 @@ export const serverMessageSchema = z.discriminatedUnion('type', [
   tagsDeltaSchema,
   diagnosticsMessageSchema,
   errorMessageSchema,
+  commsStatusSchema,
+  commsLogSchema,
 ]);
 
 export type ServerMessage = z.infer<typeof serverMessageSchema>;

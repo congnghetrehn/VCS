@@ -1,7 +1,7 @@
 // Test schema project (M0 §4.4, §12.1: nhóm schema ≥ 35 cùng tags-schema).
 import { describe, expect, it } from 'vitest';
-import { projectSchema } from './project.js';
-import { zodIssueParams } from './yaml.js';
+import { PROJECT_SHAPE, projectSchema } from './project.js';
+import { parseYamlWithSchema, zodIssueParams } from './yaml.js';
 import { migrateProject, migrations } from './migrate.js';
 
 const BASE = { schemaVersion: 1, name: 'Demo' };
@@ -139,5 +139,61 @@ describe('migrateProject', () => {
   it('doc không phải object → trả nguyên', () => {
     expect(migrateProject('nope')).toEqual({ doc: 'nope', applied: [] });
     expect(migrateProject(null)).toEqual({ doc: null, applied: [] });
+  });
+});
+
+describe('projectSchema — files.comms/hmi (P0.8, B5)', () => {
+  it('vắng files → defaults đầy đủ', () => {
+    const r = projectSchema.safeParse(BASE);
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.files).toEqual({
+        tags: 'tags/tags.yaml',
+        comms: 'comms/comms.yaml',
+        hmi: 'hmi/',
+      });
+    }
+  });
+
+  it('files chỉ có tags → comms/hmi lấy default', () => {
+    const r = projectSchema.safeParse({ ...BASE, files: { tags: 't/tags.yaml' } });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.files).toEqual({
+        tags: 't/tags.yaml',
+        comms: 'comms/comms.yaml',
+        hmi: 'hmi/',
+      });
+    }
+  });
+
+  it('files.comms/hmi tường minh được giữ', () => {
+    const r = projectSchema.safeParse({
+      ...BASE,
+      files: { tags: 't/tags.yaml', comms: 'c/c.yaml', hmi: 'h/' },
+    });
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.files).toEqual({ tags: 't/tags.yaml', comms: 'c/c.yaml', hmi: 'h/' });
+    }
+  });
+
+  it('files.comms/hmi không báo PRJ-W001', () => {
+    const text = `schemaVersion: 1
+name: Demo
+files:
+  tags: tags/tags.yaml
+  comms: comms/comms.yaml
+  hmi: hmi/
+`;
+    const r = parseYamlWithSchema('vcs.project.yaml', text, projectSchema, {
+      shape: PROJECT_SHAPE,
+    });
+    expect(r.diagnostics.map((d) => d.code)).not.toContain('PRJ-W001');
+    expect(r.value?.files).toEqual({
+      tags: 'tags/tags.yaml',
+      comms: 'comms/comms.yaml',
+      hmi: 'hmi/',
+    });
   });
 });

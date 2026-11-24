@@ -290,3 +290,15 @@ describe('SimulationService — lỗi trong lát (OQ-052)', () => {
     }
   });
 });
+
+describe('SimulationService — sim.state.locked? (P0.8, B4)', () => {
+  it('simState() không chứa key locked (P0.8 không phát; P4.1 sẽ sửa test này)', async () => {
+    const bundle = await makeBundle();
+    const service = new SimulationService(bundle, { now: () => 0 });
+    try {
+      expect('locked' in service.simState()).toBe(false);
+    } finally {
+      service.stop();
+    }
+  });
+});

@@ -68,7 +68,7 @@ function makeProject(
     language: 'vi',
     seed: 1,
     simulation: { stepMs: 10, plcScanMs: 10, timeScale: 1 },
-    files: { tags: 'tags/tags.yaml' },
+    files: { tags: 'tags/tags.yaml', comms: 'comms/comms.yaml', hmi: 'hmi/' },
     controllers,
   };
   return { config, tags, catalog: createTagCatalog(tags), diagnostics };
