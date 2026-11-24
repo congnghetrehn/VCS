@@ -146,6 +146,11 @@ export const PRJ_CATALOG: DiagnosticCatalog = defineDiagnostics({
     title: 'Lệnh step bị bỏ qua khi đang RUNNING',
     hint: 'Pause trước khi step, hoặc dùng run.',
   },
+  'WS-E003': {
+    severity: 'error',
+    title: 'Thông điệp WebSocket không hợp lệ',
+    hint: "Gửi đúng schema giao thức (xem M0 §9.2): hello trước, rồi mới lệnh; timeScale phải là số > 0 hoặc 'max'.",
+  },
 });
 
 /** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E hoặc -W, rồi 3 chữ số. */

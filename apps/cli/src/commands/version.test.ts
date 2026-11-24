@@ -31,7 +31,7 @@ describe('vcs version', () => {
   it('lệnh lạ → CommanderError (index.ts map về exit 3)', async () => {
     const program = createProgram();
     program.exitOverride();
-    await expect(program.parseAsync(['node', 'vcs', 'serve'])).rejects.toMatchObject({
+    await expect(program.parseAsync(['node', 'vcs', 'lạ'])).rejects.toMatchObject({
       code: 'commander.unknownCommand',
     });
   });
