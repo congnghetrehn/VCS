@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@vcs/kernel": "workspace:*",
+    "@vcs/schemas": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "name": "@vcs/runtime-iec",
+  "private": true,
+  "scripts": {
+    "lint": "eslint src",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}
