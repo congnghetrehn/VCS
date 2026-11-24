@@ -9,6 +9,7 @@
     "@playwright/test": "1.65.0",
     "@types/node": "24.19.2",
     "@types/ws": "8.18.2",
+    "@vitest/coverage-v8": "4.1.12",
     "cross-env": "10.1.0",
     "dependency-cruiser": "18.7.2",
     "eslint": "10.14.0",
@@ -40,7 +41,7 @@
     "format": "prettier --write .",
     "lint": "eslint .",
     "review:cheats": "node scripts/check-cheats.mjs",
-    "test": "cross-env NODE_OPTIONS=--expose-gc vitest run",
+    "test": "cross-env NODE_OPTIONS=--expose-gc vitest run --coverage",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json",
     "vcs": "tsx apps/cli/src/index.ts",
     "test:e2e": "node scripts/ensure-web-dist.mjs && playwright test"
