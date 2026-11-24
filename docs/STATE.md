@@ -11,9 +11,9 @@
 ## 1. Vị trí hiện tại
 
 - Milestone: **M0** (P0.1 đã merge vào `develop` qua PR #8, merge commit `e8707f2`, CI 6/6 xanh; P0.2 đã merge vào `develop` qua PR #9, merge commit `f3d769a`, CI 6/6 xanh sau sửa lỗi khai báo `workspace:*`)
-- Prompt đang làm / vừa xong: P0.8 — **XONG LOCAL 2026-11-24** (triển khai theo STATE §15, nhánh `m0/p0.8-interfaces`; test mới 68, tổng 507/507; gate + bench guard xanh ở bản sao sạch `/tmp/vcs-p08`; chưa mở PR). Tiếp theo: **mở PR P0.8, merge, rồi P1.1 plan-first**.
-- Nhánh: `m0/p0.8-interfaces` (từ `9ca4964` = nội dung `develop` sau merge PR #17, develop head `17790f1`)
-- Cập nhật lần cuối: 2026-11-24 bởi AI (M0 đã ký)
+- Prompt đang làm / vừa xong: P1.1 — **✔ triển khai xong 2026-11-25** (STATE §16, nhánh `m1/p1.1-runtime-iec`; OQ-082…091 đóng). Tiếp theo: mở PR P1.1, rồi P1.2 plan-first (cần X-002/S1).
+- Nhánh: `m1/p1.1-runtime-iec` (từ `fd3578e` = nội dung `develop` sau merge PR #19, develop head `aecb372`)
+- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.1 triển khai xong, chờ mở PR)
 
 ## 2. Tiến độ prompt
 
@@ -26,10 +26,10 @@
 | P0.5   | ✔ xong (gate xanh cả bản sao `/tmp` install thật lẫn bản sao chính; test 420/420, 51 test mới; bench guard PASS; đã merge PR #12 `65cd373` vào `develop` 2026-11-24, CI 6/6 xanh sau sửa OQ-056)                                                                                                                                                       | PR #12, nhánh `m0/p0.5-server` (đã merge) | lint/typecheck/depcheck/test/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (420 test, 31 file; 51 test mới) + build tsup xanh + smoke dist | xem §12                                                           |
 | P0.6   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p06` install thật lẫn bản sao chính; vitest 438/438, e2e 5/5 local; bench guard PASS; kiểm cuộn 20 000 dòng: probe PASS 1 lần, đo tay 45,7–60,0 FPS — xem §13; OQ-062 đã quyết (a), A19)                                                                                         | PR #13, nhánh `m0/p0.6-web` (đã merge `471a2ec` 2026-11-24 16:48 +07, CI 8/8 xanh) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (438 test vitest, 35 file; 17 test unit mới + 5 e2e) + build xanh + smoke `GET /` | xem §13 |
 | P0.7   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p07` install thật lẫn bản sao chính; test 439/439 + coverage §13 PASS + e2e 5/5; bench baseline + hồi quy; đã merge PR #14 `0188cf8` vào `develop` 2026-11-24 17:24 +07, CI 8 successful + 2 skipped) | PR #14, nhánh `m0/p0.7-docs` (đã merge) | lint/typecheck/depcheck/test (+coverage)/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (439 test vitest, 35 file; 1 test ghim hash mới) + build xanh + bench PASS | xem §14 |
-| P0.8   | ◐ xong local (gate + bench guard xanh ở bản sao sạch `/tmp/vcs-p08` install thật; test 507/507, 68 test mới; chưa mở PR) | nhánh `m0/p0.8-interfaces` | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` + build xanh 2026-11-24; bench TagDB 4/4 PASS (50,6M ops/s) + orchestrator 447.228 bước/s | xem §15; OQ-075…081 đóng |
+| P0.8   | ✔ xong (gate xanh local; đã merge PR #19 `aecb372` vào `develop` 2026-11-25 00:31 +07, CI 8 successful + 2 skipped) | PR #19, nhánh `m0/p0.8-interfaces` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` + build xanh 2026-11-24 (507 test, 36 file; 68 test mới) + bench TagDB 4/4 + orchestrator 443.627 bước/s | xem §15; OQ-075…081 đóng |
 | P0.9   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | tùy chọn, chờ D-005                                               |
 | G0     | ✔ đã ký 2026-11-24 (gói bằng chứng `docs/acceptance/M0.md`, 12/12 §15 ĐẠT; probe bổ sung 3/3 PASS; Windows 439/439 sau fix OQ-074) | nhánh `m0/g0-acceptance` (đã merge PR #15) | gate xanh 2026-11-24 ở bản sao sạch (439 test + coverage PASS, e2e 5/5, bench PASS, hash ghim khớp 2 lần chạy) | gói nghiệm thu M0 |
-| P1.1   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
+| P1.1   | ✔ xong (gate xanh local; xem §16) | nhánh `m1/p1.1-runtime-iec` | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (651 test, 40 file; 144 test mới) + build xanh + bench guard PASS | xem §16; OQ-082…091 đóng |
 | P1.2   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | cần X-002 (S1)                                                    |
 | P1.3   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P1.4   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
@@ -83,7 +83,7 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 - File/hàm đang sửa: — (G0 xong file nghiệm thu, CHƯA mở PR — xem `docs/acceptance/M0.md`)
 - Test đang hỏng (nguyên văn): — (G0: gate xanh ở bản sao sạch `/tmp/vcs-g0` install thật — vitest 439/439 + coverage §13 PASS (kernel 97,66%, schemas 95,92%, project 97,83%), e2e 5/5, review:cheats SẠCH, diagnostics khớp, build 3/3; bench TagDB 4/4 (set/get 44,8M ops/s), orchestrator 442 432 bước/s; `check-bench-regression` exit 0, không có hồi quy > 20%; hash ghim khớp 2 lần chạy. P0.7 trước đó: TagDB set/get 51,7M ops/s, orchestrator 508 058 bước/s bản chính.)
 - Lệnh tái hiện nhanh: `npx -y pnpm@10.15.0 run lint && npx -y pnpm@10.15.0 run typecheck && npx -y pnpm@10.15.0 run depcheck && npx -y pnpm@10.15.0 run test && npx -y pnpm@10.15.0 run test:e2e && npx -y pnpm@10.15.0 run review:cheats && npx -y pnpm@10.15.0 run docs:diagnostics --check` (ĐÃ CHẠY 2026-11-24 ở P0.6: cả 7 xanh ở cả bản sao `/tmp/vcs-p06` (`pnpm install --frozen-lockfile` exit 0 — OQ-007) lẫn bản sao chính; vitest 438 passed / 35 file (17 test unit mới); e2e 5/5 local (E1–E5, Chromium cài được ở VM — xem §6); depcheck "no violations, 82 modules, 134 dependencies" ở `/tmp` (86 modules, 148 dependencies ở bản chính — lệch do cruise cả `apps/*/dist/` + `test-results/`, không có violation); review:cheats SẠCH, quét 108 file; diagnostics --check khớp, 24 mã). `pnpm bench` ĐÃ CHẠY: set/get 45,4M ops/s (≥10M), flush 5000/0 đổi 0,14 µs (≤50), flush 1000 đổi + 1 sub 0,062 ms (≤1), heap −0,05 MB (<1) — TagDB 4/4 PASS; orchestrator 513 310 bước/s — PASS. `pnpm build` ĐÃ CHẠY: turbo xanh 3 app (server/cli tsup + web vite, `apps/web/dist` có `index.html` + assets); smoke: `vcs serve examples/hello-tags` → `GET /` trả `index.html`, `/api/health` `{"ok":true}`, asset JS 200.
-- Bước tiếp theo cụ thể: **P0.8 xong local 2026-11-24 (STATE §15).** Mở PR P0.8 → `develop`, chờ CI xanh, merge, rồi P1.1 plan-first. OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
+- Bước tiếp theo cụ thể: **mở PR P1.1** (nhánh `m1/p1.1-runtime-iec` → `develop`, plan + triển khai chung một PR), chờ CI xanh, merge; rồi P1.2 plan-first (cần X-002/S1). OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
 - Đẩy qua UI — danh sách file P0.7 (so với `develop` @ `471a2ec`, nhánh `m0/p0.7-docs`, CHƯA mở PR): `package.json` (script `test` thêm `--coverage`, devDep `@vitest/coverage-v8@4.1.12`), `pnpm-lock.yaml`, `vitest.config.ts` (coverage v8, ngưỡng dòng theo glob §13), `apps/cli/src/commands/run.test.ts` (+1 test ghim hash §15.6), `packages/kernel/src/tags.test.ts` (timeout 60 s cho test heap 10M ops khi đo coverage — xem §14), `.github/workflows/ci.yml` (comment coverage + job bench gọi `check-bench-regression.mjs`), `scripts/check-bench-regression.mjs` (mới), `bench/baseline.json` (mới, trung vị 5 mẫu), `docs/architecture.md` (mới), `docs/semantics.md` (mới, phần M0), `docs/adr/0001-package-jit-monorepo.md` … `0007-main-guard-tsup-split.md` (mới), `README.md` (viết lại), `docs/STATE.md`, `docs/open-questions.md` (OQ-071…073 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `coverage/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.6 (so với `develop` @ `65cd373`, nhánh `m0/p0.6-web`, đã merge PR #13 `471a2ec` 2026-11-24): `package.json` (script `test:e2e`, `typecheck` thêm web tsconfig, devDep `@playwright/test@1.65.0`), `pnpm-lock.yaml` (react 19.3.1, react-dom 19.3.1, zustand 5.1.0, @tanstack/react-virtual 3.14.26, vite 8.3.7, @vitejs/plugin-react 6.3.0, tailwindcss 4.3.5, @tailwindcss/vite 4.3.5, @types/react 19.3.0, @types/react-dom 19.3.0, @playwright/test 1.65.0 + link workspace; lưu ý: `vite@8.3.8` trong lockfile là transitive của vitest 4.1.12, đã có từ trước P0.6 — không phải vite của web (8.3.7); `immer`/`use-sync-external-store` là peer optional của zustand, pnpm KHÔNG cài), `tsconfig.json` (exclude `apps/web/**`, include `playwright.config.ts`), `playwright.config.ts`, `.gitignore` (`apps/web/e2e/fixtures/big-project/`, `test-results/`), `.github/workflows/ci.yml` (job `e2e` mới, ubuntu), `scripts/ensure-web-dist.mjs`, `apps/web/package.json` (deps + script `dev`/`build`) + `tsconfig.json` (riêng: lib DOM, jsx react-jsx — root tsconfig lib ES2022 không typecheck được `.tsx`, xem §13) + `vite.config.ts` + `index.html` + `src/{main.tsx,App.tsx,format.ts,format.test.ts,store.ts,store.test.ts,ws-client.ts,ws-client.test.ts,vite-env.d.ts,index.css}` + `src/i18n/{index,vi,en}.ts` + `index.test.ts` + `src/components/{SimBar,TagTable,DiagnosticsPanel}.tsx` + `e2e/{helpers,e1,e2,e3,e4,e5,perf-scroll}.spec.ts` + `e2e/fixtures/gen-big-project.ts`, `apps/server/src/ws.test.ts` (fix OQ-044: test trỏ `webDistDir` vào thư mục tạm trống — kiểm chứng gate của parent), `docs/STATE.md`, `docs/open-questions.md` (OQ-057…OQ-070 đã ghi từ plan; OQ-062 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `apps/web/e2e/fixtures/big-project/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.4 (so với `develop` @ `4a1181a`): `package.json` (script `vcs` + dep `@vcs/project`), `pnpm-lock.yaml` (commander 15.1.0 + link workspace), `tsconfig.base.json` (path `@vcs/kernel/demo`), `.gitignore` (`bench/project-5000/`), `packages/kernel/package.json` (export `./demo`), `packages/kernel/src/{component,errors,orchestrator,builder,pacer,index}.ts` + `demo/{loopback,extension,index}.ts` + test (`orchestrator`, `builder`, `pacer`, `demo/loopback` test), `packages/test-utils/src/sim.ts` + `index.ts` + `sim.test.ts`, `apps/cli/package.json` (commander 15.1.0), `apps/cli/tsconfig.json`, `apps/cli/src/{index,extensions}.ts`, `apps/cli/src/commands/{index,version,validate,run}.ts` + test, `examples/hello-tags/{vcs.project.yaml,tags/tags.yaml}`, `scripts/gen-bench-project.ts`, `bench/orchestrator.bench.ts`, `docs/STATE.md`, `docs/open-questions.md` (OQ-030/031/032). KHÔNG đẩy `node_modules/`, `bench/results.json`, `bench/project-5000/`, file profile tạm (đã xóa).
@@ -834,3 +834,177 @@ Ranh giới validate ≠ normalize (test ghim): `validateTagValue('Real', 0.3000
 **Kết quả triển khai (2026-11-24, nhánh `m0/p0.8-interfaces`):** làm đủ 5 mục code mới + 2 mục đã có sẵn chỉ thêm test; không đổi hành vi (server không phát message mới, web không đổi, hash CLI `21096ab2…1d53` giống hệt 2 lần chạy). **Test mới 68, tổng 507/507 (36 file)** — vượt mục tiêu ≥ 31/≥ 470: validateTagValue 28, requiresAsync 7, files 4, protocol 6, sym: 2, hash pin 1, simState locked 1, test chéo TYPE_RANGES 19. Gate xanh ở bản sao sạch `/tmp/vcs-p08` (install `--frozen-lockfile` thật): lint 0, typecheck sạch, depcheck 82 modules/134 deps, test 507/507 + coverage kernel 97,84%/schemas 95,97%/project 97,83%, e2e 5/5, review:cheats SẠCH, diagnostics --check khớp (24 mã), build 3/3, bench TagDB 4/4 PASS (set/get 50,6M ops/s) + orchestrator 447.228 bước/s, regression exit 0. `pnpm-lock.yaml` không đổi. OQ-075…081 đóng (đã áp dụng). Hình dạng M4/M5 khớp đề xuất trong plan — không mục nào phải dừng ghi SCR.
 
 **Chỗ lệch plan (ghi rõ):** (1) `validateTagValue` bản đầu dùng closure `bad` tạo ở mỗi lần gọi → bench set/get rớt còn 4,1M ops/s (FAIL ngưỡng 10M); A/B cùng máy chứng minh do code mới (stash code → 43,6M PASS). Đã sửa: chỉ tính `kind` bằng biến cục bộ, object lỗi chỉ tạo ở đường lỗi — bench sau sửa 50,6M ops/s PASS. Bài học: "không cấp phát ở đường thành công" phải hiểu cả closure, không chỉ object trả về. (2) Plan không liệt kê nhưng bắt buộc theo type mới: 2 fixture test cũ dựng `ProjectConfig` với `files: { tags }` phải thêm `comms`/`hmi` (`builder.test.ts:71`, `sim.test.ts:42`) — hệ quả trực tiếp của thay đổi schema, không đổi hành vi; và `EMPTY_PROJECT_CONFIG` ở `load.ts` tương tự. (3) Regression script cảnh báo 1 mục `flushChangesMs` +285,7% so baseline (0,063 → 0,243 ms) — giá trị tuyệt đối vẫn trong ngưỡng ≤ 1 ms, là nhiễu đo dưới mili-giây đã biết từ P0.7; script chỉ warn, exit 0.
+
+## 16. Kế hoạch P1.1 — runtime-iec: types/memory/layout + vendor-siemens: address (plan-first, 2026-11-25)
+
+**Điểm xuất phát:** M0 đã ký + lên `main` (`31c7200`); P0.8 đã merge PR #19 (merge commit `aecb372`, develop head `aecb372` — parent xác minh qua MCP read, `merged_at` 2026-11-24T17:30:56Z; nhánh local `m0/p0.8-interfaces` HEAD `fd3578e` = nội dung develop sau merge, chỉ STATE.md §1/§2 còn ghi P0.8 "chưa mở PR" — đã cập nhật trong commit plan này). Tổng test hiện tại **507/507** (36 file); CI 8 successful + 2 skipped. PROMPTS P1.1: "runtime-iec: types.ts, memory.ts (big-endian, DataView), layout.ts (DB/struct); vendor-siemens: address.ts. Test chồng lấn %MW/%MB/bit, layout struct theo M1 §3.4. Không làm: parser/interpreter. Gate: test bộ nhớ/địa chỉ/layout xanh; property test ghi-đọc nhiều độ rộng so với mô hình tham chiếu byte-array."
+
+**Hiểu biết (tóm tắt):** (1) P1.1 là nền móng số học/bộ nhớ cho toàn bộ M1: mọi prompt P1.2–P1.7 đều đứng trên `types`/`memory`/`layout`/`address` — sai ở đây thì golden P1.4–P1.7 sai theo, nên bảng tính tay phải tự tính trước, không sao chép số từ implementation. (2) Spec cho đủ thuật toán (§3.2 chồng lấn + ví dụ, §3.3 bảng địa chỉ, §3.4 layout 6 quy tắc) — chỉ 2 điểm gắn `VERIFY` (LReal căn chẵn không căn 8; Array of Bool gói bit) + vài khoảng trống parser (chữ thường, DB0, lỗi ngoài vùng) → mặc định tier B + OQ, không hỏi trước. (3) Hạ tầng đã sẵn, không cần sửa config ngoài 1 dòng ngưỡng coverage: `pnpm-workspace.yaml` bao `packages/*`; root `tsconfig.json` include `packages/*/src/**`; `vitest.config.ts` include `packages/*/src/**/*.test.ts`; `.dependency-cruiser.cjs` đã có rule `runtime-iec-deps` (được import schemas, kernel) + `vendor-siemens-deps` (schemas, runtime-iec); `eslint.config.js` `CORE_FILES` đã gồm `runtime-iec` + `vendor-*` (cấm `Date.now`/`Math.random` — P1.1 không dùng thời gian/ngẫu nhiên, trừ fast-check có seed cố định trong test); `fast-check@4.10.2` đã là root devDep và đã dùng trong test hiện có. (4) `DataType` đã có đủ 13 kiểu M1 §3.1 trong `@vcs/schemas` (`common.ts`: Bool/Byte/Word/DWord/SInt/USInt/UInt/UDInt/Int/DInt/Real/LReal/Time + String dành sẵn); `validateTagValue` + `TagValueError` đã có ở kernel từ P0.8 — P1.1 tái dùng, không viết lại bảng khoảng kiểu. (5) `String` ngoài phạm vi M1 (§1.3: STRING/WSTRING không hỗ trợ) — `types.ts` không định nghĩa kích thước cho nó (OQ-087). (6) 8 "golden" của M1 §12.2 hàng "Bộ nhớ & địa chỉ" ở P1.1 là **bảng tính tay assert bằng unit test** — chưa có golden runner YAML (P1.7) và các case này không cần SCL/SoftPlc (OQ-082).
+
+**Phạm vi (PROMPTS P1.1; M1 §2–3; AMENDMENTS A3, A8, A12, E5):**
+
+| File | Nội dung |
+|---|---|
+| `packages/runtime-iec/package.json` | Mới: `@vcs/runtime-iec` 0.1.0, `exports` → `./src/index.ts`, deps `@vcs/schemas: workspace:*` (kernel **chưa** khai — thêm ở P1.4 khi `SoftPlc` cần `ControllerAdapter`), scripts `lint`/`typecheck`/`test` theo mẫu kernel |
+| `packages/runtime-iec/tsconfig.json` | Mới: extends `../../tsconfig.base.json`, include `src/**/*.ts` (mẫu kernel) |
+| `packages/runtime-iec/src/types.ts` | `TypeInfo` + `TYPE_INFO` + `sizeOf` + phân loại kiểu (M1 §3.1) |
+| `packages/runtime-iec/src/memory.ts` | `MemoryArea` + `DbStore` + accessor big-endian qua `DataView` (M1 §3.2) |
+| `packages/runtime-iec/src/layout.ts` | `layoutStruct` + `FieldDecl`/`FieldType`/`FieldInfo` (M1 §3.4) |
+| `packages/runtime-iec/src/index.ts` | Export 3 module trên |
+| `packages/runtime-iec/src/{types,memory,layout}.test.ts` | Test types/memory/layout (bảng tính tay dưới + property) |
+| `packages/vendor-siemens/package.json` | Mới: `@vcs/vendor-siemens` 0.1.0, deps `@vcs/schemas` + `@vcs/runtime-iec` (`workspace:*`), scripts theo mẫu kernel |
+| `packages/vendor-siemens/tsconfig.json` | Mới: như trên |
+| `packages/vendor-siemens/src/address.ts` | `parseAddress` + `formatAddress` + `AbsAddress` (M1 §3.3) |
+| `packages/vendor-siemens/src/index.ts` | Export `address.ts` |
+| `packages/vendor-siemens/src/address.test.ts` | Test parser địa chỉ (bảng tính tay dưới + property) |
+| `vitest.config.ts` | Thêm ngưỡng dòng 85 cho `packages/runtime-iec/src/**` + `packages/vendor-siemens/src/**` (OQ-088) |
+| `docs/semantics.md` | Thêm mục §12: bộ nhớ Siemens M1 §3.2–§3.4, mỗi quy tắc gắn `VERIFIED`/`UNVERIFIED` |
+| `docs/STATE.md`, `docs/open-questions.md` | Plan này (§16) + OQ-082…091 |
+
+**Thiết kế nhỏ nhất (từng mục — signature chính xác, chỗ KHÔNG làm):**
+
+1. **`types.ts` (M1 §3.1) — bảng kích thước + phân loại, không logic.** `DataType` lấy từ `@vcs/schemas` (không định nghĩa lại):
+```ts
+export interface TypeInfo {
+  readonly name: DataType;
+  readonly sizeBytes: number; // Bool = 1 (1 bit trong 1 byte); LReal = 8
+  readonly kind: 'bool' | 'signed' | 'unsigned' | 'float' | 'time';
+}
+export const TYPE_INFO: Readonly<Record<Exclude<DataType, 'String'>, TypeInfo>>;
+export function sizeOf(type: DataType): number | undefined; // undefined cho 'String' (OQ-087)
+export function isIntegerType(type: DataType): boolean; // SInt/USInt/UInt/UDInt/Int/DInt/Time
+export function isFloatType(type: DataType): boolean;   // Real/LReal
+export function isBitStringType(type: DataType): boolean; // Byte/Word/DWord
+```
+Kích thước: Bool 1 (bit, tính theo byte chứa), Byte/SInt/USInt 1, Word/Int/UInt 2, DWord/DInt/UDInt/Real/Time 4, LReal 8. Không hàm chuyển đổi số học ở đây (quy tắc §7.2 là P1.4).
+2. **`memory.ts` (M1 §3.2) — một vùng byte + DataView big-endian, không biết tag/kiểu khai báo.** `MemoryArea` là nguyên thủy duy nhất; `DbStore` = `MemoryArea` + số DB (dùng cho diagnostic sau này):
+```ts
+export class MemoryArea {
+  constructor(sizeBytes: number);
+  readonly sizeBytes: number;
+  getBit(byte: number, bit: number): boolean;          // bit 0 = LSB (§3.2)
+  setBit(byte: number, bit: number, value: boolean): void;
+  read(type: Exclude<DataType, 'Bool' | 'String'>, byteOffset: number): TagValue;
+  write(type: Exclude<DataType, 'Bool' | 'String'>, byteOffset: number, value: TagValue): void;
+  snapshot(): Uint8Array;                              // bản sao (không lộ buffer nội bộ)
+  restore(data: Uint8Array): void;                     // data.length phải = sizeBytes, sai → RangeError
+}
+export class DbStore extends MemoryArea {
+  constructor(readonly dbNumber: number, sizeBytes: number);
+}
+```
+Quy tắc ghim: **big-endian mọi độ rộng** (`DataView.getUint16(offset, false)`…); `read`/`write` dùng `DataView` trên cùng `Uint8Array` (không sao chép); `write('Real', …)` ép `Math.fround`, `write('DWord'|'UDInt', …)` ép `>>> 0` (AGENTS §4); `write` **validate bằng `validateTagValue` (kernel, P0.8)**, sai → ném `TagError('TAG-E001')` (OQ-091 — wrap/chuẩn hóa là việc của interpreter trước khi ghi, §7.2); `read('Bool', …)` → ném `Error('dùng getBit cho Bool')` (tránh ngữ nghĩa bit mơ hồ — bit nào của byte?); truy cập ngoài vùng (`byteOffset < 0`, `byteOffset + size > sizeBytes`, `bit` ngoài 0..7) → ném `RangeError` nêu rõ vùng/offset/kích thước (OQ-086 — P1.4 map thành `RuntimeFault ARRAY_RANGE` khi phù hợp); `restore` sai độ dài → `RangeError`. **Không** có: container I/Q/M + DB (đó là `SoftPlc`, P1.4); đọc/ghi theo tên symbolic (đó là `TagAddressMap`, P1.4); `Time` đọc như DInt ms (cùng encoding, khác kiểu khai báo).
+3. **`layout.ts` (M1 §3.4) — hàm thuần, input là khai báo trung lập (AST sẽ map sang ở P1.3):**
+```ts
+export type FieldType =
+  | { kind: 'elem'; type: DataType }
+  | { kind: 'array'; elem: FieldType; lo: number; hi: number }   // 1 chiều, lo..hi bao hàm
+  | { kind: 'struct'; name?: string; fields: FieldDecl[] };
+export interface FieldDecl { name: string; type: FieldType; }
+export interface FieldInfo {
+  name: string; byteOffset: number; bitOffset?: number; size: number;
+  type: FieldType; fields?: FieldInfo[]; elem?: FieldInfo; count?: number;
+}
+export interface StructLayout { size: number; fields: FieldInfo[]; }
+export function layoutStruct(fields: readonly FieldDecl[]): StructLayout;
+```
+Thuật toán = đúng 6 quy tắc §3.4 (Bool gói bit trong byte; Byte/SInt/USInt 1 byte không căn; ≥ 2 byte bắt đầu chẵn; LReal chẵn — OQ-084; Struct/UDT/Array bắt đầu chẵn + kết thúc chẵn; tổng làm tròn chẵn). `byteOffset`/`bitOffset` trong `FieldInfo` là **tuyệt đối** trong struct gốc (dùng trực tiếp cho `memory.ts`); với array, `elem` là layout của **một** phần tử tính từ đầu phần tử đầu tiên (`byteOffset` = đầu mảng), `count = hi - lo + 1`, phần tử i ở `byteOffset + i * elem.size`. DB dùng thẳng `layoutStruct` (DB = struct; không có `layoutDb` riêng). Lỗi → ném `Error` nêu tên field + lý do: tên field trùng trong cùng struct; `lo > hi`; array lồng array (nhiều chiều ngoài M1, §3.1); struct chứa `String` (OQ-087); kiểu không rõ. Struct rỗng → `size 0` (hợp lệ).
+4. **`address.ts` (M1 §3.3) — parser tuyệt đối, chỉ vị trí, không mang kiểu (OQ-089):**
+```ts
+export type AbsAddress =
+  | { kind: 'area'; area: 'I' | 'Q' | 'M'; byte: number; bit?: number; width: 1 | 8 | 16 | 32 }
+  | { kind: 'db'; db: number; byte: number; bit?: number; width: 1 | 8 | 16 | 32 };
+export function parseAddress(text: string): AbsAddress;   // sai → throw Error (OQ-090)
+export function formatAddress(addr: AbsAddress): string;  // chuẩn '%I0.0' / 'DB1.DBW4'
+```
+Dạng nhận: `%I0.0`/`%IB10`/`%IW64`/`%ID20` (tương tự Q/M); không `%` cũng parse được (`I0.0`, `IW64` — chuẩn hóa nội bộ thành dạng `%`); `DB<n>.DBX<b>.<bit>`/`DBB`/`DBW`/`DBD`. Width theo chữ cái: (bit) → 1, `B` → 8, `W` → 16, `D` → 32 — **không có dạng 64-bit tuyệt đối** (`%ML` không tồn tại trong §3.3; LReal đọc qua layout/field, không qua chuỗi địa chỉ). Kiểu diễn giải (Int vs Word vs Real với cùng `%IW`) lấy từ **khai báo**, không từ chuỗi địa chỉ (§3.3 "đọc như Int/Word tùy kiểu khai báo"). `%IW65` (word ở byte lẻ) parse được — §3.4 chỉ là quy tắc layout struct, không ràng buộc địa chỉ tuyệt đối. `sym:…` → throw (không phải địa chỉ tuyệt đối; symbolic do `TagAddressMap` P1.4/P5.7 phân giải). Chữ thường (`%i0.0`, `db1.dbw4`) chấp nhận + chuẩn hóa hoa; `DB0` từ chối; bit phải 0..7; không kiểm giới hạn vùng ở parse (byte 1023+ vẫn parse — giới hạn vùng kiểm ở lúc truy cập bộ nhớ) (OQ-085). `formatAddress(parseAddress(s))` là dạng chuẩn (dùng cho test round-trip property).
+
+**Đã loại:** (1) Container PlcMemory (I/Q/M + DBs) — P1.4 `SoftPlc`. (2) `layoutDb` riêng — DB = `layoutStruct`. (3) Đọc/ghi theo tên symbolic, `TagAddressMap` — P1.4/P5.7. (4) Kiểu mới (`Char`, `WChar`, `String` có kích thước) — ngoài M1 §1.3. (5) Lexer/parser SCL, AST, IR — P1.2/P1.3 (PROMPTS "Không làm: parser/interpreter"). (6) S7 codec/Snap7/PUT-GET — M5. (7) Bench mới cho runtime-iec — bench M1 §12.4 (200 FB_Motor, ≥ 1000 scan/s) là P1.7; P1.1 chỉ chạy bench guard hiện có để bắt hồi quy. (8) ADR mới — cấu trúc package theo M1 §2 (spec), không quyết định kiến trúc ngoài spec. (9) Mã diagnostic mới — mã SCL ở P1.2/P1.3 (A8/D6); `docs/diagnostics.md` giữ 24 mã. (10) File `docs/facts/` — nguồn sự thật ở đây là spec M1 (AGENTS §1), không phải manual/API hãng; các mục `VERIFY` theo dõi qua `semantics.md` + OQ + M1 §14 (E11).
+
+**Bảng tính tay A — chồng lấn %MW/%MB/bit/Real (M1 §3.2; bộ nhớ khởi tạo toàn 0; mỗi dòng tính độc lập trừ khi ghi "trên nền trên"):**
+
+| Thao tác | %MB0 | %MB1 | %MB2 | %MB3 | %MW0 | %MW2 | %MD0 | Kiểm thêm |
+|---|---|---|---|---|---|---|---|---|
+| ghi `%MW0 := 0x1234` (vd §3.2) | 0x12 | 0x34 | 0x00 | 0x00 | 0x1234 | 0x0000 | 0x12340000 | M0.1=1, M0.4=1, M1.2=1, M1.4=1, M1.5=1; M0.0=0, M1.0=0 |
+| trên nền trên, ghi `%MB1 := 0xFF` | 0x12 | 0xFF | 0x00 | 0x00 | 0x12FF | 0x0000 | 0x12FF0000 | M1.0..7 = 1 |
+| ghi `%MD0 := 0x12345678` | 0x12 | 0x34 | 0x56 | 0x78 | 0x1234 | 0x5678 | 0x12345678 | M2.1=1, M2.6=1, M3.3=1, M3.4=1, M3.5=1, M3.6=1; M3.7=0 |
+| set `%M0.3 := true` | 0x08 | 0x00 | 0x00 | 0x00 | 0x0800 | 0x0000 | 0x08000000 | M0.3=1, các bit khác 0 |
+| ghi Int `-1` tại `%MW0` | 0xFF | 0xFF | 0x00 | 0x00 | 0xFFFF | 0x0000 | 0xFFFF0000 | đọc Word = 65535, Int = -1 |
+| ghi DInt `-1` tại `%MD0` | 0xFF | 0xFF | 0xFF | 0xFF | 0xFFFF | 0xFFFF | 0xFFFFFFFF | DWord = 4294967295, Real = NaN |
+| ghi Real `1.5` tại `%MD0` | 0x3F | 0xC0 | 0x00 | 0x00 | 0x3FC0 | 0x0000 | 0x3FC00000 | DWord = 1069547520 |
+| ghi Real `0.1` tại `%MD0` | 0x3D | 0xCC | 0xCC | 0xCD | 0x3DCC | 0xCCCD | 0x3DCCCCCD | đọc Real = `fround(0.1)` = 0.10000000149011612 |
+| ghi Time `1500` tại `%MD0` | 0x00 | 0x00 | 0x05 | 0xDC | 0x0000 | 0x05DC | 0x000005DC | DInt = 1500 |
+
+Cách tính mẫu (0x12 = 0001 0010 → bit 1, 4; 0x34 = 0011 0100 → bit 2, 4, 5; 0x56 = 0101 0110 → bit 1, 2, 4, 6; 0x78 = 0111 1000 → bit 3, 4, 5, 6; float32 1.5 = 0x3FC00000, 0.1 = 0x3DCCCCCD).
+
+**Bảng tính tay B — layout struct `Motor_Data` (M1 §3.4, tự tính):**
+
+| # | Field | Kiểu | byteOffset | bitOffset | size | Vì sao |
+|---|---|---|---|---|---|---|
+| 1 | running | Bool | 0 | 0 | 1 bit | |
+| 2 | fault | Bool | 0 | 1 | | gói chung byte 0 |
+| 3 | ready | Bool | 0 | 2 | | gói chung byte 0 |
+| 4 | mode | Byte | 1 | – | 1 | không-Bool → đóng byte 0 |
+| 5 | speed | Int | 2 | – | 2 | ≥ 2 byte → chẵn |
+| 6 | current | Real | 4 | – | 4 | |
+| 7 | temp | LReal | 8 | – | 8 | chẵn (VERIFY, OQ-084) |
+| 8 | count | DInt | 16 | – | 4 | |
+| 9 | enabled | Bool | 20 | 0 | | |
+| 10 | alarm | Bool | 20 | 1 | | gói chung byte 20 |
+| 11 | name_len | USInt | 21 | – | 1 | đóng byte 20 |
+| 12 | pressure | Word | 22 | – | 2 | chẵn |
+| 13 | nested | Struct {a: Bool, b: Bool, c: Word} | 24 | – | 4 | bắt đầu chẵn; a byte 24 bit 0, b byte 24 bit 1, c Word 26..27; kết thúc chẵn 28 |
+| 14 | values | Array[1..3] of Int | 28 | – | 6 | 3×2, 28..33 |
+
+Tổng size = **34** (chẵn). Kiểm: các field ≥ 2 byte đều ở offset chẵn; không field nào chồng lấn; byte 24–27 thuộc `nested`, 28–33 thuộc `values`.
+
+**Bảng tính tay C — layout trường hợp biên (§3.4):**
+
+| Struct | Kết quả tính tay |
+|---|---|
+| `{x: Word, b1..b9: Bool×9, y: Byte}` | x 0..1; b1..b8 byte 2 bit 0..7; b9 byte 3 bit 0; y byte 4; size 5 → **6** |
+| `{a: Word, b1, b2: Bool}` | a 0..1; b1 byte 2 bit 0; b2 byte 2 bit 1; size 3 → **4** |
+| `{m: Byte, s: Struct{a: Word}}` | m byte 0; s bắt đầu chẵn → 2; a 2..3; size **4** |
+| `{m: Byte, arr: Array[0..1] of Word}` | m byte 0; arr bắt đầu chẵn → 2..5; size **6** |
+| `{w: Word, flags: Array[0..9] of Bool}` | w 0..1; flags bắt đầu chẵn → byte 2..3 (10 bit); size **4** |
+| `{flags: Array[0..6] of Bool}` | flags byte 0 (7 bit = 1 byte) → kết thúc chẵn → size **2** (VERIFY, OQ-083) |
+| `{b: Bool}` (DB 1 field) | b byte 0 bit 0; size 1 → **2** |
+| `{}` (struct rỗng) | size **0** |
+| `{v: Array[1..3] of LReal}` | bắt đầu chẵn → 0..23 (3×8); size **24** |
+| `{a: Array[0..2] of Struct{x: Byte, y: Word}}` | elem size 4 (x byte 0, y 2..3); mảng 0..11; size **12** |
+
+**Bảng tính tay D — `parseAddress` (M1 §3.3):**
+
+| Text | Kết quả | Text | Kết quả |
+|---|---|---|---|
+| `%I0.0` | `{area I, byte 0, bit 0, w 1}` | `%QW0` | `{area Q, byte 0, w 16}` |
+| `%I0.7` | `{area I, byte 0, bit 7, w 1}` | `%MB10` | `{area M, byte 10, w 8}` |
+| `%I1023.7` | `{area I, byte 1023, bit 7, w 1}` (không kiểm giới hạn vùng) | `%MW0` | `{area M, byte 0, w 16}` |
+| `%IB10` | `{area I, byte 10, w 8}` | `%MD20` | `{area M, byte 20, w 32}` |
+| `%IW64` | `{area I, byte 64, w 16}` | `I0.0` / `IW64` / `MB10` | như có `%` |
+| `%ID20` | `{area I, byte 20, w 32}` | `%IW65` | `{area I, byte 65, w 16}` (byte lẻ vẫn parse) |
+| `%Q0.0` / `%QB0` / `%QD0` | area Q, w 1/8/32 | `DB1.DBX0.0` | `{db 1, byte 0, bit 0, w 1}` |
+| `%i0.0` / `%mw0` / `db1.dbw4` | chấp nhận, chuẩn hóa hoa (OQ-085) | `DB1.DBB0` / `DB1.DBW4` / `DB1.DBD8` | w 8/16/32 |
+| `''`, `%X0.0`, `%I0.8`, `%I`, `%IW`, `%M0.0.0` | throw | `DB0.DBW0`, `DB1.DBZ0`, `DB1.DBW`, `%DB1.DBW0`, `sym:Motor.Start` | throw |
+
+**Test (mục tiêu: ≥ 45 test mới; tổng ≥ 552 = 507 + 45):**
+
+| Nhóm | File | Test mới (tên + kỳ vọng) |
+|---|---|---|
+| types (~8) | `packages/runtime-iec/src/types.test.ts` | `sizeOf` 13 kiểu M1 (Bool 1, Byte/SInt/USInt 1, Word/Int/UInt 2, DWord/DInt/UDInt/Real/Time 4, LReal 8); `sizeOf('String')` → `undefined` (OQ-087); phân loại `isIntegerType`/`isFloatType`/`isBitStringType` (mỗi loại ≥ 2 case đúng + 2 case sai) |
+| memory (~16, gồm bảng A 9 dòng) | `packages/runtime-iec/src/memory.test.ts` | Bảng A: mỗi dòng 1 case (ghi rồi đọc lại đủ độ rộng + bit); `getBit`/`setBit` ranh giới (byte 0 bit 0/7, byte cuối); LReal 64-bit ghi-đọc; `snapshot`/`restore` (đổi rồi restore → đúng byte cũ; `snapshot()` trả bản sao — sửa bản sao không đổi vùng nhớ); OOB: `read`/`write`/`getBit`/`setBit` ngoài vùng → `RangeError`; `write` sai khoảng → `TagError('TAG-E001')` (OQ-091); `read('Bool', …)` → throw (dùng `getBit`); `restore` sai độ dài → `RangeError` |
+| layout (~14, gồm bảng B + C) | `packages/runtime-iec/src/layout.test.ts` | Bảng B: assert toàn bộ `FieldInfo` + `size 34` (mỗi field 1 case hoặc 1 case assert deep-equal cả bảng); bảng C: 10 case; lỗi: tên trùng → throw; `lo > hi` → throw; array lồng array → throw; struct chứa `String` → throw (OQ-087); struct rỗng → size 0 |
+| address (~20) | `packages/vendor-siemens/src/address.test.ts` | Bảng D: valid ~16 case (gồm không-`%`, DB, chữ thường chuẩn hóa, `%IW65`); invalid ~12 case (throw, message chứa text gốc); `formatAddress(parseAddress(s))` = dạng chuẩn; `parseAddress` không nhận `sym:` |
+| property (~3, fast-check, seed cố định) | `memory.test.ts` / `layout.test.ts` / `address.test.ts` | (1) Bộ nhớ: sinh dãy thao tác ghi ngẫu nhiên nhiều độ rộng (8/16/32/bit) tại offset ngẫu nhiên, đọc lại bằng độ rộng khác → bằng **mô hình tham chiếu byte-array viết độc lập** (mảng `number[]` + phép toán big-endian bằng tay, **không** dùng `DataView`); (2) Layout: sinh struct ngẫu nhiên → layout 2 lần giống hệt, mọi offset < size, size chẵn, field không-Bool không chồng lấn; (3) Địa chỉ: sinh địa chỉ hợp lệ → `format` → `parse` → deep-equal dạng chuẩn hóa |
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** vị trí file + tên hàm/API như mục thiết kế; test dùng `it.each` với bảng case dùng chung cho bảng A/D; trùng tên field trong cùng struct → throw; `parseAddress` trim khoảng trắng đầu/cuối; thứ tự triển khai (types → memory → layout → address); `DbStore extends MemoryArea` + `dbNumber`. **Tier B (mặc định + ghi OQ):** OQ-082 (8 "golden" §12.2 = bảng tính tay bằng unit test, không chuyển YAML ở P1.7), OQ-083 (Array of Bool gói bit + kết thúc chẵn), OQ-084 (LReal căn chẵn, không căn 8), OQ-085 (parser: chữ thường, DB0, sym:, bit 0..7, không kiểm giới hạn vùng, trim), OQ-086 (ngoài vùng → `RangeError`, P1.4 map thành `ARRAY_RANGE`), OQ-087 (`String`: `sizeOf` → `undefined`, struct chứa String → throw), OQ-088 (ngưỡng coverage 85 dòng cho 2 package mới), OQ-089 (`AbsAddress` chỉ mang width, kiểu theo khai báo), OQ-090 (`parseAddress` throw `Error`, P1.2 chuyển thành Diagnostic), OQ-091 (`write` validate + throw `TAG-E001`, wrap là việc interpreter). **Tier C: không có mục chặn dự kiến** — không cần dữ liệu thật, không cần quyết định chủ sản phẩm trước khi triển khai; nếu khi triển khai phát hiện M1 §3 ghi khác thuật toán đã tính tay (vd quy tắc Bool packing) thì dừng mục đó, ghi OQ/SCR, **không tự sửa spec**.
+
+**Rủi ro + cách kiểm:** (1) Layout `VERIFY` (LReal, Array of Bool) lệch PLC thật — giảm thiểu: golden P1.7 gắn `expectedFrom: spec` cho các case này; xác minh bằng PLCSIM thí nghiệm E11 (M1 §14 mục 11) rồi sửa layout + test (ghi SCR nếu spec đổi). (2) Mặc định parser (chữ thường, DB0) lệch TIA — P1.2 đối chiếu hành vi editor TIA khi có mẫu thật; sửa parser + test, không sửa ngữ nghĩa khác. (3) `AbsAddress` không mang type → P1.3 `lower` phải mang type từ khai báo khi tạo `IrLValue.abs`; nếu quên thì đọc sai (Int vs Word) — giảm thiểu: test P1.3 cho mỗi kiểu đọc qua địa chỉ tuyệt đối. (4) `MemoryArea.write` throw `TAG-E001` ở đường lỗi có thể làm P1.4 phải bọc try/catch — thiết kế P1.4: interpreter chuẩn hóa/wrap trước khi ghi (§7.2) nên scan bình thường không chạm đường lỗi; đo bench P1.7 (≥ 1000 scan/s, 200 FB_Motor). (5) Property test flaky/chậm — seed cố định (fast-check `seed`), giới hạn số mẫu vừa đủ (mặc định 100/case như test hiện có).
+
+**Ngoài phạm vi:** parser/lexer SCL, AST, typecheck, IR/lower, interpreter, scheduler, `SoftPlc`, force, snapshot/restore PLC (P1.2–P1.5); `TagAddressMap` (P1.4/P5.7); `ControllerIntrospection` (P1.4, D3/B8); std blocks TON/CTU/R_TRIG (P1.5); LAD (P1.6); golden runner YAML + demo `motor-interlock` + UI + bench M1 §12.4 (P1.7); container PlcMemory; S7 codec/Snap7/PLCSIM (M5); đổi `.dependency-cruiser.cjs` / `eslint.config.js` / root `tsconfig.json` (đã bao sẵn 2 package mới — `depcheck` + lint phải xanh như cũ); ADR mới; mã diagnostic mới; `docs/facts/` mới; P0.9 PWA.
+
+**Gate P1.1 (triển khai):** `lint && typecheck && depcheck && test && test:e2e && review:cheats && docs:diagnostics --check` + `build` + bench guard (`pnpm bench`: TagDB 4/4 PASS + orchestrator ≥ 100 000 bước/s — P1.1 không chạm đường nóng bench; rớt > 20% so với baseline thì dừng điều tra, không hạ ngưỡng) + CI (check + test ubuntu/windows + e2e ubuntu) xanh. Tổng test sau P1.1: **≥ 552**. `pnpm-lock.yaml` **không đổi** (không dependency mới; diff lockfile xuất hiện là cờ đỏ, dừng kiểm tra). `pnpm install` trong VM vẫn EPERM (OQ-007) — triển khai làm ở bản sao `/tmp` như các prompt trước, cài thật `--frozen-lockfile`.
+
+**Kết quả triển khai (2026-11-25, nhánh `m1/p1.1-runtime-iec`):** làm đủ phạm vi plan §16; không đổi hành vi hiện có (chỉ thêm 2 package mới + ngưỡng coverage + `semantics.md` §12; hash CLI `21096ab2…1d53` giống hệt 2 lần chạy). **Test mới 144, tổng 651/651 (40 file)** — vượt mục tiêu ≥ 45/≥ 552: types 48, memory 23, layout 19, address 54 (gồm 3 property test fast-check seed cố định). Gate xanh ở bản sao sạch `/tmp/vcs-p11` (install `--frozen-lockfile` thật, exit 0): lint 0, typecheck sạch, depcheck "no violations" (88 modules, 141 deps), test 651/651 + coverage dòng runtime-iec types 100% (6/6), memory 93,84% (61/65), layout 100% (68/68), vendor-siemens address 100% (47/47) — đều trên ngưỡng 85, e2e 5/5 (13,7 s), review:cheats SẠCH, diagnostics --check khớp (24 mã), build 3/3, bench TagDB 4/4 PASS (set/get 50,3M ops/s) + orchestrator 440.445 bước/s, regression exit 0 (2 warning nhiễu đo dưới mili-giây: flushNoChangeUs 0,15 → 0,23 µs, flushChangesMs 0,063 → 0,088 ms — giá trị tuyệt đối vẫn trong ngưỡng ≤ 50 µs / ≤ 1 ms). OQ-082…091 đóng (đã áp dụng). `docs/semantics.md` thêm §12 (bộ nhớ M1 §3.2–§3.4; 2 mục `VERIFY` OQ-083/084 ghi `UNVERIFIED`, chờ PLCSIM E11).
+
+**Chỗ lệch plan (ghi rõ):** (1) `packages/runtime-iec/package.json` khai thêm dep `@vcs/kernel: workspace:*` — plan ghi kernel "chưa khai, thêm ở P1.4", nhưng `memory.ts` phải import `validateTagValue`/`TagError` từ kernel ngay ở P1.1 (thiết kế §16 mục 2 + OQ-091); rule dep-cruiser `runtime-iec-deps` đã cho phép kernel từ trước nên không đổi config. (2) `pnpm-lock.yaml` **đổi +18 dòng** — plan ghi "không đổi" là sai ở nghĩa hẹp: lockfile bắt buộc thêm 2 importer mới (`packages/runtime-iec`, `packages/vendor-siemens`, chỉ link `workspace:*`, không đổi version, không dependency ngoài mới); `pnpm install --frozen-lockfile` lần đầu FAIL (`ERR_PNPM_OUTDATED_LOCKFILE`), đã sinh lại lockfile bằng `pnpm install` thật ở `/tmp/vcs-p11`, kiểm diff chỉ có 2 importer mới rồi chép về — sau đó frozen install exit 0. (3) Lỗi regex trong `address.ts` bản đầu: lớp ký tự DB viết `[XBD]` thiếu `W` nên `DB1.DBW4` parse lỗi — property test round-trip bắt được ngay (5/121 đỏ), đã sửa thành `[XBWD]`, sau đó 144/144 xanh. (4) `FieldInfo.size`: byte với mọi kiểu, riêng Bool = 1 (bit) — plan không ghim đơn vị cho Bool; đã ghi rõ trong comment `layout.ts` + `semantics.md` §12.
