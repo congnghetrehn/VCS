@@ -10,6 +10,7 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 - Đang bị chặn bởi: D-001, D-004 (trước G0); T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép)
 - Việc cần anh trong tuần này: quyết D-001…D-005; chạy T-001 (S6, môi trường Windows); chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA
 - Cập nhật lần cuối: 2026-11-24
+- Nhãn/milestone GitHub (II.7): CHƯA CHẠY — GitHub MCP không có tool tạo nhãn/milestone (46 tool đã kiểm, không có); cần làm qua giao diện GitHub hoặc chủ sản phẩm. Không tự đổi branch protection (D-001).
 
 ---
 
