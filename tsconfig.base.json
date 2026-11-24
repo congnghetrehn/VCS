@@ -9,7 +9,10 @@
     "moduleResolution": "bundler",
     "noImplicitOverride": true,
     "noUncheckedIndexedAccess": true,
-    "paths": { "@vcs/*": ["packages/*/src/index.ts"] },
+    "paths": {
+      "@vcs/*": ["packages/*/src/index.ts"],
+      "@vcs/kernel/demo": ["packages/kernel/src/demo/index.ts"]
+    },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,

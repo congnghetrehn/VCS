@@ -7,6 +7,7 @@ coverage/
 fixtures-real/
 *.log
 bench/results.json
+bench/project-5000/
 bin/
 obj/
 .env*

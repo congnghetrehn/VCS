@@ -11,6 +11,9 @@ importers:
       '@vcs/kernel':
         specifier: workspace:*
         version: link:packages/kernel
+      '@vcs/project':
+        specifier: workspace:*
+        version: link:packages/project
       '@vcs/schemas':
         specifier: workspace:*
         version: link:packages/schemas
@@ -55,7 +58,20 @@ importers:
         specifier: 4.1.12
         version: 4.1.12(@types/node@24.19.2)(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
-  apps/cli: {}
+  apps/cli:
+    dependencies:
+      '@vcs/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
+      '@vcs/project':
+        specifier: workspace:*
+        version: link:../../packages/project
+      '@vcs/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
+      commander:
+        specifier: 15.1.0
+        version: 15.1.0
 
   apps/server: {}
 
@@ -646,6 +662,10 @@ packages:
 
   commander@15.0.0:
     resolution: {integrity: sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==}
+    engines: {node: '>=22.12.0'}
+
+  commander@15.1.0:
+    resolution: {integrity: sha512-cgnQ88TRrWcC7pVq46RzJVRMktu3W2RcbnoidnfBsl1bmDCBwJS/udcIZpKoCrbAYYaCqsz1yZCVIgbIaU3ddQ==}
     engines: {node: '>=22.12.0'}
 
   convert-source-map@2.0.0:
@@ -1769,6 +1789,8 @@ snapshots:
   color-name@1.1.4: {}
 
   commander@15.0.0: {}
+
+  commander@15.1.0: {}
 
   convert-source-map@2.0.0: {}
 

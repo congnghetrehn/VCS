@@ -160,6 +160,13 @@ export class TagDB {
   readonly #writes: number[];
   readonly #dirty: boolean[];
   #dirtyCount = 0;
+  /**
+   * Danh sách handle dirty không trùng (M0 §6.4 quy tắc 3: `flush()` duyệt
+   * danh sách dirty theo thứ tự handle tăng dần). `flush()` chỉ duyệt danh
+   * sách này thay vì quét toàn bộ tag — O(số tag đổi) thay vì O(tổng số tag)
+   * mỗi bước. Mảng tái dùng, xếp tại chỗ (không cấp phát).
+   */
+  readonly #dirtyList: TagHandle[] = [];
   readonly #subs: Array<{
     sel: '*' | readonly TagHandle[];
     selSet: ReadonlySet<TagHandle> | null;
@@ -335,10 +342,10 @@ export class TagDB {
 
   /**
    * Phát thay đổi theo lô (gọi cuối mỗi bước).
-   * Duyệt tag dirty theo thứ tự handle tăng dần; chỉ phát tag khác giá trị
-   * đã flush lần trước (giá trị quay về như cũ → không phát). Baseline được
-   * cập nhật TRƯỚC khi gọi subscriber, nên subscriber ném lỗi (lan truyền,
-   * OQ-015) cũng không làm thay đổi bị phát lại ở lần flush sau.
+   * Duyệt danh sách dirty không trùng theo thứ tự handle tăng dần; chỉ phát
+   * tag khác giá trị đã flush lần trước (giá trị quay về như cũ → không phát).
+   * Baseline được cập nhật TRƯỚC khi gọi subscriber, nên subscriber ném lỗi
+   * (lan truyền, OQ-015) cũng không làm thay đổi bị phát lại ở lần flush sau.
    * Không có subscriber → không cấp phát mảng.
    */
   flush(): void {
@@ -346,30 +353,31 @@ export class TagDB {
     const hasSubs = this.#subs.length > 0;
     let changes: TagChange[] | undefined;
     if (hasSubs) changes = [];
-    const n = this.#metas.length;
-    for (let i = 0; i < n; i++) {
-      if (!this.#dirty[i]) continue;
-      this.#dirty[i] = false;
-      const h = i as TagHandle;
-      const oldValue = this.#lastFlushed[i] as TagValue;
-      const newValue = this.#values[i] as TagValue;
-      const writes = this.#writes[i] as number;
-      this.#writes[i] = 0;
+    // Danh sách dirty xếp theo handle tăng dần (M0 §6.4 quy tắc 3); sort tại
+    // chỗ trên mảng tái dùng — không cấp phát.
+    this.#dirtyList.sort(compareHandle);
+    for (const h of this.#dirtyList) {
+      this.#dirty[h] = false;
+      const oldValue = this.#lastFlushed[h] as TagValue;
+      const newValue = this.#values[h] as TagValue;
+      const writes = this.#writes[h] as number;
+      this.#writes[h] = 0;
       if (oldValue !== newValue) {
-        this.#lastFlushed[i] = newValue;
+        this.#lastFlushed[h] = newValue;
         if (changes !== undefined) {
           changes.push({
             handle: h,
-            name: this.#names[i] as string,
+            name: this.#names[h] as string,
             oldValue,
             newValue,
-            source: this.#source[i] as TagSource,
-            ts: this.#ts[i] as number,
+            source: this.#source[h] as TagSource,
+            ts: this.#ts[h] as number,
             writes,
           });
         }
       }
     }
+    this.#dirtyList.length = 0;
     this.#dirtyCount = 0;
     if (changes !== undefined && changes.length > 0) {
       for (const sub of this.#subs) {
@@ -439,10 +447,15 @@ export class TagDB {
 
   #refreshDirty(): void {
     let count = 0;
+    this.#dirtyList.length = 0;
     for (let i = 0; i < this.#metas.length; i++) {
       const dirty = this.#values[i] !== this.#lastFlushed[i];
       this.#dirty[i] = dirty;
-      if (dirty) count += 1;
+      if (dirty) {
+        count += 1;
+        // Duyệt theo handle tăng dần nên danh sách đã có thứ tự.
+        this.#dirtyList.push(i as TagHandle);
+      }
     }
     this.#dirtyCount = count;
   }
@@ -476,6 +489,13 @@ export class TagDB {
     if (!this.#dirty[h]) {
       this.#dirty[h] = true;
       this.#dirtyCount += 1;
+      // Mỗi handle chỉ vào danh sách một lần (cờ dirty chặn trùng).
+      this.#dirtyList.push(h);
     }
   }
+}
+
+/** So sánh handle tăng dần — dùng cho sort tại chỗ của danh sách dirty. */
+function compareHandle(a: TagHandle, b: TagHandle): number {
+  return a - b;
 }
