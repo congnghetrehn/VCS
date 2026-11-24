@@ -11,9 +11,9 @@
 ## 1. Vị trí hiện tại
 
 - Milestone: **M0** (P0.1 đã merge vào `develop` qua PR #8, merge commit `e8707f2`, CI 6/6 xanh; P0.2 đã merge vào `develop` qua PR #9, merge commit `f3d769a`, CI 6/6 xanh sau sửa lỗi khai báo `workspace:*`)
-- Prompt đang làm / vừa xong: P1.1 — **✔ đã merge PR #20 `8b3dbb6` vào `develop` 2026-11-25 01:13 +07** (CI xanh; STATE §16; OQ-082…091 đóng). Tiếp theo: P1.2 plan-first (STATE §17; X-002/S1 vẫn mở nhưng không chặn P1.2 — làm theo EBNF, xem §17 OQ-105).
-- Nhánh: `m1/p1.2-scl-parser` (từ `b843912` = nội dung `develop` sau merge PR #20, develop head `8b3dbb6`)
-- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.1 đã merge PR #20; P1.2 plan-first)
+- Prompt đang làm / vừa xong: P1.2 — **✔ đã merge PR #21 `278e3af` vào `develop` 2026-11-25 05:13 +07** (CI xanh; STATE §17; OQ-092…104 đóng, OQ-105 mở). Tiếp theo: P1.3 plan-first (STATE §18; X-002/S1 vẫn mở nhưng không chặn P1.3 — làm theo §4.4/§6, xem §18 OQ-121).
+- Nhánh: `m1/p1.3-typecheck-lower` (từ `aa072ce` = nội dung `develop` sau merge PR #21, develop head `278e3af`)
+- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.2 đã merge PR #21; P1.3 plan-first)
 
 ## 2. Tiến độ prompt
 
@@ -30,8 +30,8 @@
 | P0.9   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | tùy chọn, chờ D-005                                               |
 | G0     | ✔ đã ký 2026-11-24 (gói bằng chứng `docs/acceptance/M0.md`, 12/12 §15 ĐẠT; probe bổ sung 3/3 PASS; Windows 439/439 sau fix OQ-074) | nhánh `m0/g0-acceptance` (đã merge PR #15) | gate xanh 2026-11-24 ở bản sao sạch (439 test + coverage PASS, e2e 5/5, bench PASS, hash ghim khớp 2 lần chạy) | gói nghiệm thu M0 |
 | P1.1   | ✔ xong (gate xanh local; đã merge PR #20 `8b3dbb6` vào `develop` 2026-11-25 01:13 +07, CI xanh) | PR #20, nhánh `m1/p1.1-runtime-iec` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (651 test, 40 file; 144 test mới) + build xanh + bench guard PASS | xem §16; OQ-082…091 đóng |
-| P1.2   | ◐ plan-first (STATE §17, nhánh `m1/p1.2-scl-parser`)                                                                                                                                                         |                                                   |                                                                                                                                                                           | X-002/S1 vẫn mở nhưng không chặn (làm theo EBNF, OQ-105) |
-| P1.3   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
+| P1.2   | ✔ xong (gate xanh local; đã merge PR #21 `278e3af` vào `develop` 2026-11-25 05:13 +07, CI 8 successful + 2 skipped) | PR #21, nhánh `m1/p1.2-scl-parser` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (746 test, 42 file; 95 test mới) + build xanh + bench guard PASS | xem §17; OQ-092…104 đóng, OQ-105 mở |
+| P1.3   | ◐ plan-first (STATE §18, nhánh `m1/p1.3-typecheck-lower`)                                                                                                                                                         |                                                   |                                                                                                                                                                           | X-002/S1 vẫn mở nhưng không chặn (làm theo §4.4/§6, OQ-121) |
 | P1.4   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P1.5   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P1.6   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
@@ -83,7 +83,7 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 - File/hàm đang sửa: — (G0 xong file nghiệm thu, CHƯA mở PR — xem `docs/acceptance/M0.md`)
 - Test đang hỏng (nguyên văn): — (G0: gate xanh ở bản sao sạch `/tmp/vcs-g0` install thật — vitest 439/439 + coverage §13 PASS (kernel 97,66%, schemas 95,92%, project 97,83%), e2e 5/5, review:cheats SẠCH, diagnostics khớp, build 3/3; bench TagDB 4/4 (set/get 44,8M ops/s), orchestrator 442 432 bước/s; `check-bench-regression` exit 0, không có hồi quy > 20%; hash ghim khớp 2 lần chạy. P0.7 trước đó: TagDB set/get 51,7M ops/s, orchestrator 508 058 bước/s bản chính.)
 - Lệnh tái hiện nhanh: `npx -y pnpm@10.15.0 run lint && npx -y pnpm@10.15.0 run typecheck && npx -y pnpm@10.15.0 run depcheck && npx -y pnpm@10.15.0 run test && npx -y pnpm@10.15.0 run test:e2e && npx -y pnpm@10.15.0 run review:cheats && npx -y pnpm@10.15.0 run docs:diagnostics --check` (ĐÃ CHẠY 2026-11-24 ở P0.6: cả 7 xanh ở cả bản sao `/tmp/vcs-p06` (`pnpm install --frozen-lockfile` exit 0 — OQ-007) lẫn bản sao chính; vitest 438 passed / 35 file (17 test unit mới); e2e 5/5 local (E1–E5, Chromium cài được ở VM — xem §6); depcheck "no violations, 82 modules, 134 dependencies" ở `/tmp` (86 modules, 148 dependencies ở bản chính — lệch do cruise cả `apps/*/dist/` + `test-results/`, không có violation); review:cheats SẠCH, quét 108 file; diagnostics --check khớp, 24 mã). `pnpm bench` ĐÃ CHẠY: set/get 45,4M ops/s (≥10M), flush 5000/0 đổi 0,14 µs (≤50), flush 1000 đổi + 1 sub 0,062 ms (≤1), heap −0,05 MB (<1) — TagDB 4/4 PASS; orchestrator 513 310 bước/s — PASS. `pnpm build` ĐÃ CHẠY: turbo xanh 3 app (server/cli tsup + web vite, `apps/web/dist` có `index.html` + assets); smoke: `vcs serve examples/hello-tags` → `GET /` trả `index.html`, `/api/health` `{"ok":true}`, asset JS 200.
-- Bước tiếp theo cụ thể: **P1.2 triển khai** theo plan §17 (nhánh `m1/p1.2-scl-parser`), rồi mở PR P1.2 (plan + triển khai chung một PR), chờ CI xanh, merge; rồi P1.3 plan-first. X-002/S1 vẫn mở (chủ sản phẩm đưa mã SCL thật khi có) — không chặn P1.2. OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
+- Bước tiếp theo cụ thể: **P1.3 triển khai** theo plan §18 (nhánh `m1/p1.3-typecheck-lower`), rồi mở PR P1.3 (plan + triển khai chung một PR), chờ CI xanh, merge; rồi P1.4 plan-first. X-002/S1 vẫn mở (chủ sản phẩm đưa mã SCL thật khi có) — không chặn P1.3. OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
 - Đẩy qua UI — danh sách file P0.7 (so với `develop` @ `471a2ec`, nhánh `m0/p0.7-docs`, CHƯA mở PR): `package.json` (script `test` thêm `--coverage`, devDep `@vitest/coverage-v8@4.1.12`), `pnpm-lock.yaml`, `vitest.config.ts` (coverage v8, ngưỡng dòng theo glob §13), `apps/cli/src/commands/run.test.ts` (+1 test ghim hash §15.6), `packages/kernel/src/tags.test.ts` (timeout 60 s cho test heap 10M ops khi đo coverage — xem §14), `.github/workflows/ci.yml` (comment coverage + job bench gọi `check-bench-regression.mjs`), `scripts/check-bench-regression.mjs` (mới), `bench/baseline.json` (mới, trung vị 5 mẫu), `docs/architecture.md` (mới), `docs/semantics.md` (mới, phần M0), `docs/adr/0001-package-jit-monorepo.md` … `0007-main-guard-tsup-split.md` (mới), `README.md` (viết lại), `docs/STATE.md`, `docs/open-questions.md` (OQ-071…073 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `coverage/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.6 (so với `develop` @ `65cd373`, nhánh `m0/p0.6-web`, đã merge PR #13 `471a2ec` 2026-11-24): `package.json` (script `test:e2e`, `typecheck` thêm web tsconfig, devDep `@playwright/test@1.65.0`), `pnpm-lock.yaml` (react 19.3.1, react-dom 19.3.1, zustand 5.1.0, @tanstack/react-virtual 3.14.26, vite 8.3.7, @vitejs/plugin-react 6.3.0, tailwindcss 4.3.5, @tailwindcss/vite 4.3.5, @types/react 19.3.0, @types/react-dom 19.3.0, @playwright/test 1.65.0 + link workspace; lưu ý: `vite@8.3.8` trong lockfile là transitive của vitest 4.1.12, đã có từ trước P0.6 — không phải vite của web (8.3.7); `immer`/`use-sync-external-store` là peer optional của zustand, pnpm KHÔNG cài), `tsconfig.json` (exclude `apps/web/**`, include `playwright.config.ts`), `playwright.config.ts`, `.gitignore` (`apps/web/e2e/fixtures/big-project/`, `test-results/`), `.github/workflows/ci.yml` (job `e2e` mới, ubuntu), `scripts/ensure-web-dist.mjs`, `apps/web/package.json` (deps + script `dev`/`build`) + `tsconfig.json` (riêng: lib DOM, jsx react-jsx — root tsconfig lib ES2022 không typecheck được `.tsx`, xem §13) + `vite.config.ts` + `index.html` + `src/{main.tsx,App.tsx,format.ts,format.test.ts,store.ts,store.test.ts,ws-client.ts,ws-client.test.ts,vite-env.d.ts,index.css}` + `src/i18n/{index,vi,en}.ts` + `index.test.ts` + `src/components/{SimBar,TagTable,DiagnosticsPanel}.tsx` + `e2e/{helpers,e1,e2,e3,e4,e5,perf-scroll}.spec.ts` + `e2e/fixtures/gen-big-project.ts`, `apps/server/src/ws.test.ts` (fix OQ-044: test trỏ `webDistDir` vào thư mục tạm trống — kiểm chứng gate của parent), `docs/STATE.md`, `docs/open-questions.md` (OQ-057…OQ-070 đã ghi từ plan; OQ-062 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `apps/web/e2e/fixtures/big-project/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.4 (so với `develop` @ `4a1181a`): `package.json` (script `vcs` + dep `@vcs/project`), `pnpm-lock.yaml` (commander 15.1.0 + link workspace), `tsconfig.base.json` (path `@vcs/kernel/demo`), `.gitignore` (`bench/project-5000/`), `packages/kernel/package.json` (export `./demo`), `packages/kernel/src/{component,errors,orchestrator,builder,pacer,index}.ts` + `demo/{loopback,extension,index}.ts` + test (`orchestrator`, `builder`, `pacer`, `demo/loopback` test), `packages/test-utils/src/sim.ts` + `index.ts` + `sim.test.ts`, `apps/cli/package.json` (commander 15.1.0), `apps/cli/tsconfig.json`, `apps/cli/src/{index,extensions}.ts`, `apps/cli/src/commands/{index,version,validate,run}.ts` + test, `examples/hello-tags/{vcs.project.yaml,tags/tags.yaml}`, `scripts/gen-bench-project.ts`, `bench/orchestrator.bench.ts`, `docs/STATE.md`, `docs/open-questions.md` (OQ-030/031/032). KHÔNG đẩy `node_modules/`, `bench/results.json`, `bench/project-5000/`, file profile tạm (đã xóa).
@@ -1291,3 +1291,569 @@ cảnh báo nhiễu trên metric sub-ms (flushChangesMs) — thêm ngưỡng tuy
 như đã ghi ở P0.7 §14. (ii) `#fb(...)` ở vị trí biểu thức cho SCL-P001 —
 hành vi đúng theo OQ-100, nhưng thông điệp có thể rõ hơn ở P1.3 (ghi "FB
 call không phải expression").
+
+## 18. Kế hoạch P1.3 — Typecheck + lower AST→IR + `vcs ir dump` (plan-first, 2026-11-25)
+
+**Điểm xuất phát:** P1.2 **đã merge PR #21** (merge commit `278e3af`, develop head `278e3af` — parent xác minh qua MCP read, `merged_at` 2026-11-24T22:12:54Z tức 2026-11-25 05:12 +07; CI 8 successful + 2 skipped). Tổng test hiện tại **746/746** (42 file). Diagnostic: **29 mã**. PROMPTS P1.3 nguyên văn: "Làm P1.3 theo AGENTS.md §9 (plan-first). Đọc: … → AMENDMENTS (A8) → M1 §4.4, 6. Nhiệm vụ: typecheck.ts (widening ngầm định; thu hẹp phải tường minh), lower.ts (AST → IR cây có kiểu, serializable JSON), CLI vcs ir dump. Diagnostic dùng bản chuẩn ở @vcs/schemas. Gate: ≥ 20 test kiểu; IR dump JSON ổn định (golden)."
+
+**Hiểu biết (tóm tắt):** (1) P1.3 là tầng ngữ nghĩa đầu tiên đứng trên AST của P1.2: typecheck sai thì IR sai, interpreter P1.4 chạy sai mà "trông có vẻ đúng" — nên bảng tính tay (lattice widening, kết quả nhị phân, IR JSON, vị trí lỗi) phải tự tính trước, không sao chép từ implementation. (2) Spec cho đủ quy tắc: §4.4 (widening ngầm định, thu hẹp phải tường minh, kiểu kết quả, kiểm tra phải làm) + §6 (hình IR) + §10 (`compileScl`) + §7.1/§7.2/§7.3 (quy tắc runtime mà typecheck/lower phải chuẩn bị: TEMP warning, đệ quy SCL-S020, intrinsic) — các khoảng trống là: IR dùng `Map` nhưng phải serializable JSON; `SrcMap`/`SrcRef`/`IrDb`/`IrUdt`/`IrObBinding`/`IrInterface`/`PrimitiveType`/`BinFn` không được định nghĩa; chỉ có 1 mã lỗi được nêu tên (SCL-T010); diễn giải kiểu của địa chỉ tuyệt đối trần; FC trả giá trị bằng cách nào; OB ánh xạ sang số OB ra sao; system FB (TON…) ở P1.3 chưa có layout — tất cả mặc định tier B + OQ, không hỏi trước. (3) Ràng buộc đồ thị phụ thuộc (`.dependency-cruiser.cjs`) quyết định vị trí file: `runtime-iec` chỉ được import schemas/kernel/runtime-iec; `vendor-siemens` được import schemas/runtime-iec/vendor-siemens; interpreter P1.4 nằm ở `runtime-iec` nên **không thể import vendor-siemens** → kiểu IR phải nằm ở `runtime-iec/src/ir.ts`, còn typecheck/lower/compile nằm ở `vendor-siemens/src/scl/` và import IR từ runtime-iec. (4) `apps/cli` chưa phụ thuộc `@vcs/vendor-siemens`/`@vcs/runtime-iec` — `vcs ir dump` cần thêm `@vcs/vendor-siemens: workspace:*` vào `apps/cli/package.json` + sinh lại lockfile bằng `pnpm install` thật ở `/tmp` (link workspace, không đổi version khác). (5) X-002/S1 vẫn mở — P1.3 **không chờ** (xem OQ-121): typecheck/lower theo spec §4.4/§6, không theo mã thật; strict là mặc định của spec, S1/PLCSIM sau này chỉ có thể nới lỏng qua SCR. (6) Hạ tầng đã sẵn: `parseScl` trả `{ ast, diagnostics }` (OQ-099 — P1.3 từ chối lower khi diagnostics chứa lỗi); `layoutStruct` (P1.1) nhận `FieldType` trung lập — P1.3 map `SclType` → `FieldType`; `TYPE_INFO`/`isIntegerType`/`isFloatType`/`isBitStringType` (P1.1); `DIAGNOSTIC_CODE_RE` hiện `-[ELPWU]` — phải mở rộng thêm `T`/`S` nếu không scan mã mới sẽ bỏ qua lặng lẽ (bài học P1.2 #3); ngưỡng coverage 85 dòng đã có cho cả runtime-iec và vendor-siemens (OQ-088); `formatDiagnostic` ở schemas.
+
+**Phạm vi (PROMPTS P1.3; M1 §4.4, §6, §7.1–§7.3, §10, §12.1–§12.2; AMENDMENTS A8, D6; M1 §17):**
+
+| File | Nội dung |
+|---|---|
+| `packages/runtime-iec/src/ir.ts` | Kiểu IR (mục 1 thiết kế): `IrProgram`, `IrBlock`, `IrStmt`, `IrExpr`, `IrLValue`, `IrType`, `PrimitiveType`, `BinFn`, `IrInterface`, `IrVar`, `IrField`, `IrDb`, `IrUdt`, `IrObBinding`, `SrcRef` |
+| `packages/runtime-iec/src/index.ts` | Export các kiểu IR |
+| `packages/vendor-siemens/src/scl/typecheck.ts` | Đại số kiểu (lattice widening, kiểu kết quả) + kiểm tra (scope, const eval, definite-assignment TEMP, call graph đệ quy) + `typecheckFile` |
+| `packages/vendor-siemens/src/scl/lower.ts` | `lowerFile`: AST đã typecheck → `IrProgram` (chèn `convert`, fold `VAR_CONSTANT`, ánh xạ call) |
+| `packages/vendor-siemens/src/scl/compile.ts` | `compileScl` (chữ ký M1 §10), `compileSclProgram`, `CompileContext`, `irToJson` (stable stringify) |
+| `packages/vendor-siemens/src/scl/typecheck.test.ts` | Test typecheck (bảng A + C + D) |
+| `packages/vendor-siemens/src/scl/lower.test.ts` | Test lower (bảng B + D) |
+| `packages/vendor-siemens/src/scl/compile.test.ts` | Test compile + golden `irToJson` (bảng E) |
+| `packages/vendor-siemens/src/scl/golden/*.json` | 3 golden IR dump: `fb-motor.json`, `fc-scale.json`, `db-motor.json` (bảng B + E) |
+| `packages/vendor-siemens/src/index.ts` | Export `compileScl`, `compileSclProgram`, `typecheckFile`, `lowerFile`, kiểu IR (re-export từ runtime-iec) |
+| `packages/schemas/src/diagnostics-catalog.ts` | Thêm 13 mã: SCL-T001…T011, SCL-S020, SCL-W001 (OQ-107); `DIAGNOSTIC_CODE_RE` mở rộng `-[ELPWU]` → `-[ELPSTWU]` |
+| `docs/diagnostics.md` | Sinh lại bằng script (29 → 42 mã) — không sửa tay |
+| `apps/cli/package.json` + `pnpm-lock.yaml` | Thêm dep `@vcs/vendor-siemens: workspace:*` cho CLI (lockfile sinh lại bằng `pnpm install` thật ở `/tmp` — chỉ thêm link workspace) |
+| `apps/cli/src/commands/ir.ts` | Lệnh `vcs ir dump <file.scl> [--out <file>]` (mục 6 thiết kế) |
+| `apps/cli/src/commands/index.ts` | Đăng ký lệnh `ir` |
+| `apps/cli/src/commands/ir.test.ts` | Test CLI (exit code + stdout JSON) |
+| `docs/semantics.md` | Thêm §14: quyết định typecheck/lower/IR, mỗi điểm gắn `VERIFIED`/`UNVERIFIED` |
+| `docs/STATE.md`, `docs/open-questions.md` | Plan này (§18) + OQ-106…126 |
+
+**Thiết kế nhỏ nhất (từng mục — signature chính xác, chỗ KHÔNG làm):**
+
+1. **`ir.ts` (M1 §6) — kiểu IR thuần (plain object, serializable JSON), mọi `IrStmt`/`IrBlock` có `src`.** Quyết định nền (OQ-106): `IrProgram` dùng **mảng** (`blocks: IrBlock[]`, `dbs: IrDb[]`, `udts: IrUdt[]`, `organization: IrObBinding[]`), sắp xếp theo `id`/`name`/`ob` để dump tất định — spec §6 phác `Map` nhưng đồng thời yêu cầu serializable JSON (`Map` stringify thành `{}`); interpreter P1.4 tự build index `Map` một lần lúc nạp. Struct type inline field (không tham chiếu tên UDT) để interpreter không cần tra cứu; `IrProgram.udts` giữ định nghĩa chuẩn.
+```ts
+export type PrimitiveType = Exclude<DataType, 'String'>; // String không hỗ trợ ở M1
+export type IrType =
+  | PrimitiveType
+  | { kind: 'array'; elem: IrType; lo: number; hi: number }
+  | { kind: 'struct'; name?: string; fields: IrField[] };
+export interface IrField {
+  name: string; type: IrType;
+  byteOffset: number; bitOffset?: number;
+  size: number; // byte, trừ Bool = 1 (bit) — cùng quy ước layout.ts FieldInfo (P1.1)
+  init?: number | boolean; // chỉ dùng cho field DB có giá trị khởi tạo (bảng D-c)
+}
+export interface IrVar { name: string; type: IrType; init?: number | boolean; }
+export interface IrInterface {
+  input: IrVar[]; output: IrVar[]; inout: IrVar[]; static: IrVar[]; temp: IrVar[];
+  returnType?: IrType; // chỉ FC
+}
+export interface SrcRef { file: string; line: number; col: number; endLine: number; endCol: number; }
+// SrcMap trong spec §6 = SrcRef (cùng hình: vị trí block/statement); không định nghĩa riêng.
+export interface IrBlock {
+  id: string; kind: 'OB' | 'FC' | 'FB'; name: string; number?: number; // number: số OB (OQ-113); FC/FB không có số trong nguồn → undefined
+  interface: IrInterface; body: IrStmt[]; src?: SrcRef;
+}
+export interface IrDb { id: string; name: string; fbName?: string; fields: IrField[]; size: number; }
+export interface IrUdt { id: string; name: string; fields: IrField[]; size: number; }
+export interface IrObBinding { ob: number; block: string; cycleMs?: number; }
+export interface IrProgram { blocks: IrBlock[]; dbs: IrDb[]; udts: IrUdt[]; organization: IrObBinding[]; }
+export type BinFn = 'add' | 'sub' | 'mul' | 'div' | 'mod'
+  | 'eq' | 'ne' | 'lt' | 'le' | 'gt' | 'ge' | 'and' | 'or' | 'xor';
+export type IrExpr =
+  | { op: 'const'; type: IrType; value: number | boolean }
+  | { op: 'load'; type: IrType; ref: IrLValue }
+  | { op: 'unary'; fn: 'neg' | 'not' | 'bnot'; type: IrType; a: IrExpr }
+  | { op: 'binary'; fn: BinFn; type: IrType; a: IrExpr; b: IrExpr }
+  | { op: 'convert'; from: IrType; to: IrType; a: IrExpr; mode?: 'round' | 'trunc' }
+  | { op: 'intrinsic'; fn: string; type: IrType; args: IrExpr[] }
+  | { op: 'callFcExpr'; block: string; args: [string, IrExpr][]; type: IrType };
+export type IrLValue =
+  | { k: 'local'; name: string }
+  | { k: 'static'; path: string[] }
+  | { k: 'dbField'; db: string; path: string[] }
+  | { k: 'abs'; area: 'I' | 'Q' | 'M'; byte: number; bit?: number; width: 8 | 16 | 32 | 64; type: PrimitiveType }
+  | { k: 'absDb'; db: number; byte: number; bit?: number; width: 8 | 16 | 32 | 64; type: PrimitiveType }
+  | { k: 'index'; base: IrLValue; index: IrExpr };
+export type IrStmt =
+  | { op: 'assign'; target: IrLValue; value: IrExpr; src?: SrcRef }
+  | { op: 'if'; cond: IrExpr; then: IrStmt[]; elsif: { cond: IrExpr; body: IrStmt[] }[]; else: IrStmt[]; src?: SrcRef }
+  | { op: 'case'; sel: IrExpr; arms: { labels: (number | [number, number])[]; body: IrStmt[] }[]; else: IrStmt[]; src?: SrcRef }
+  | { op: 'for'; var: string; from: IrExpr; to: IrExpr; by?: IrExpr; body: IrStmt[]; src?: SrcRef }
+  | { op: 'while'; cond: IrExpr; body: IrStmt[]; src?: SrcRef }
+  | { op: 'repeat'; body: IrStmt[]; until: IrExpr; src?: SrcRef }
+  | { op: 'exit'; src?: SrcRef }
+  | { op: 'continue'; src?: SrcRef }
+  | { op: 'return'; src?: SrcRef }
+  | { op: 'callFb'; instance: IrLValue; block: string; inArgs: [string, IrExpr][]; outArgs: [string, IrLValue][]; inoutArgs: [string, IrLValue][]; src?: SrcRef }
+  | { op: 'callFc'; block: string; args: [string, IrExpr][]; ret?: IrLValue; src?: SrcRef }
+  | { op: 'callSys'; fn: string; instance?: IrLValue; inArgs: [string, IrExpr][]; outArgs: [string, IrLValue][]; src?: SrcRef };
+```
+Quy tắc ghim: `IrExpr` **không** có `src` (spec §6 chỉ yêu cầu `src` trên `IrStmt` — lỗi ở biểu thức lấy vị trí từ AST lúc typecheck, không cần src trong IR); `**` không có trong `BinFn` — lower thành `intrinsic 'POWER'` (OQ-114); `elsif` là danh sách, không phải `if` lồng nhau (đọc "ELSIF lồng nhau" ở §6 theo nghĩa danh sách nhánh); `for.var` là tên string (lấy từ `ForStmt.var` là `SclLValue` — phải là local trần, không path, xem mục 2); `callFc.args` luôn là cặp `[tên, expr]` — arg positional của FC được lower đặt tên theo thứ tự khai báo (OQ-123).
+
+2. **`typecheck.ts` — kiểm tra, không sửa AST.** `typecheckFile` trả bảng tra cứu kiểu (key là node AST, không mutate AST P1.2) để `lower` dùng lại — tránh nhân đôi logic suy luận kiểu:
+```ts
+export type Section = 'input' | 'output' | 'inout' | 'static' | 'temp' | 'const';
+export interface SymbolInfo { name: string; section: Section; type: IrType; init?: number | boolean; fbType?: string; }
+export interface BlockSymbols { blockId: string; vars: Map<string, SymbolInfo>; } // key = tên local lowercased (OQ-098)
+export interface TypecheckResult {
+  diagnostics: Diagnostic[];
+  types: Map<SclExpr | SclLValue, IrType>; // kiểu đã phân giải của mọi expr/lvalue
+  blocks: Map<string, BlockSymbols>;       // key = block id lowercased
+  udts: Map<string, IrUdt>;                // key = tên UDT lowercased (OQ-119)
+  dbs: Map<string, IrDb>;                  // key = tên DB lowercased
+}
+export function typecheckFile(file: SclFile, fileName: string, ctx: CompileContext): TypecheckResult;
+// Hàm đại số kiểu thuần, export để lower dùng chung (không nhân đôi):
+export function widen(from: PrimitiveType, to: PrimitiveType): boolean; // có cạnh widening trực tiếp/gián tiếp
+export function commonType(a: IrType, b: IrType): IrType | undefined;    // LUB trong lattice, undefined = không có
+export function binaryResultType(op: string, lt: IrType, rt: IrType): IrType | undefined;
+export function unaryResultType(op: '+' | '-' | 'NOT', t: IrType): IrType | undefined;
+export function evalConst(expr: SclExpr, scope: BlockSymbols): { value: number | boolean } | { error: string };
+```
+**Lattice widening (§4.4, chỉ đúng các cạnh liệt kê — không thêm):** `SInt→Int→DInt→Real→LReal`; `USInt→UInt→UDInt`; `Byte→Word→DWord`; `Real→LReal`. `Bool` không widening đi đâu; `Time` không widening sang `DInt`/`Real` (OQ-124). **Kiểu kết quả nhị phân:** `Int ∘ Int → Int` (không tự nâng lên DInt); hai vế widening về `commonType` rồi tính; `**` luôn `Real`/`LReal` (`Int ** Int → Real`); `/` và `DIV` trên số nguyên đều cắt về 0 (cùng `BinFn 'div'`); `MOD` chỉ số nguyên, dấu theo số bị chia; so sánh (`=`,`<>`,`<`,`>`,`<=`,`>=`) trả `Bool`; `AND`/`OR`/`XOR` trên `Bool` = logic, trên `Byte`/`Word`/`DWord` = bitwise (hai vế phải cùng họ sau widening); phép số học (`+`,`-`,`*`,`/`,`MOD`,`DIV`,`**`) chỉ trên số nguyên/số thực/`Time` — trên bit-string → SCL-T003 (spec không nói; mặc định an toàn, ghi ở OQ-107/T003); `=`/`<>` được trên mọi kiểu cùng họ (kể cả `Bool`, bit-string); `<`/`>`/`<=`/`>=` không được trên `Bool`/bit-string → SCL-T003. **Gán:** widening được → OK (lower chèn `convert`); thu hẹp trong họ hoặc chéo họ số/bit-string (`DInt→Int`, `Real→Int`, `Word→Int`, `Int→Word`, `DWord→DInt`…) → **SCL-T010** + hint hàm chuyển đổi; không liên quan (`Bool↔Int`, `Time↔Int`, struct/array sai) → **SCL-T002**. **Kiểm tra (§4.4, mỗi kiểm tra có mã + test bảng C):** tên chưa khai báo → T001; gán vào `VAR_INPUT` (FB/FC) hoặc `VAR_CONSTANT` → T006; gọi FB thiếu instance → T004; tham số không tồn tại / thừa / thiếu bắt buộc (FC) / sai kiểu → T004 (tham số FC có `init` là tùy chọn, không bắt buộc); truy cập member/index sai, chỉ số hằng ngoài khoảng → T005; `EXIT`/`CONTINUE` ngoài vòng lặp → T007; `RETURN` ở đâu cũng hợp lệ (thoát block hiện tại); FC không trả giá trị mà dùng trong biểu thức → T004; OB dùng làm callee → T004; khai báo trùng tên trong cùng scope → T009; `const_expr` không hằng (init `VAR`/`VAR_CONSTANT`, label CASE, init DB) → T008; UDT đệ quy → T011; tên kiểu không biết → T001. **Địa chỉ tuyệt đối (OQ-110):** load/store trần diễn giải mặc định theo width — bit→`Bool`, 8→`Byte`, 16→`Int`, 32→`DInt` (64 → `LReal` — `%MD` 64-bit không có trong P1.1, `width` 64 chỉ dành cho `LReal` qua DBD kép? Không — ghi rõ: width 64 chỉ xuất hiện khi type là `LReal` qua khai báo; load abs trần tối đa 32 bit → `DInt`); muốn diễn giải khác phải dùng hàm chuyển đổi tường minh (vd `DINT_TO_REAL(%MD0)`). **Hằng:** `evalConst` chỉ tính literal + unary/binary trên hằng + ref tới `VAR_CONSTANT` (đã tính trước); ref khác → lỗi T008. **`VAR_CONSTANT` ref được lower fold thành literal** (không có vùng nhớ runtime); không fold phép tính hằng (`5 * 2` giữ nguyên trong IR — IR trung thực với nguồn, P1.4 tính). **TEMP (OQ-120, M1 §7.1):** phân tích definite-assignment đơn giản — đọc `VAR_TEMP` trước khi gán trong cùng block → cảnh báo **SCL-W001** (severity `warning`, không làm fail compile); luật join: sau `IF`, biến chỉ "đã gán" nếu gán ở cả hai nhánh (hoặc trước đó); trong vòng lặp chỉ tính gán trước vòng lặp. **Đệ quy (OQ-122, M1 §7.1):** build call graph từ các call trong unit biên dịch + `ctx.blocks`; chu trình → **SCL-S020** tại callee gây chu trình (trực tiếp + gián tiếp); chỉ phát hiện trong phạm vi đã nạp, không quét toàn project. **System FB (OQ-111):** kiểu `TON`/`CTU`/`R_TRIG`/… trong `VAR` và call tới chúng → **SCL-U001** "system block chưa hỗ trợ (P1.5)" — chưa có layout std nên không thể kiểm tra arg; ồn ào, không im lặng. **FOR (OQ-117):** biến vòng lặp phải là local integer đã khai báo (`SInt`/`Int`/`DInt`/`USInt`/`UInt`/`UDInt`, không path); `from`/`to`/`by` widening về kiểu biến vòng lặp; `by` mặc định 1, được âm; **không** kiểm việc sửa biến vòng lặp trong thân (spec không nói — ghi rõ là không kiểm). **CASE (OQ-118):** selector phải integer (widening được); label phải hằng (không → T008), giá trị label trùng (kể cả trùng trong khoảng) → T005.
+3. **`lower.ts` — AST + `TypecheckResult` → `IrProgram`, không kiểm tra lại kiểu (chỉ tra cứu).**
+```ts
+export function lowerFile(file: SclFile, checked: TypecheckResult, fileName: string): IrProgram;
+```
+Quy tắc: mỗi `SclType` → `IrType` qua `resolveType` (elementary chuẩn hóa case-insensitive về `DataType` — tên kiểu không biết đã bị T001 chặn ở typecheck; `named` → struct inline từ `checked.udts`; `array` → `{kind:'array', elem, lo, hi}`; `struct` nội tuyến → `{kind:'struct', fields}` qua `layoutStruct`); interface block lấy từ 6 `VarSection` (thứ tự khai báo giữ nguyên); `init` của `VarDecl` → `IrVar.init` (đã `evalConst` ở typecheck); `SclLValue` → `IrLValue`: local `#x` → `local` (tra `BlockSymbols`: nếu là instance FB → `static` với path; nếu là member của instance → `static` path `[fb, ...]`); `"DB".field` → `dbField`; `%I0.0`/`DB1.DBW4` → `abs`/`absDb` với `type` theo OQ-110; `base[index]` → `index` (chỉ số không hằng thì kiểm runtime ở P1.4, hằng ngoài khoảng đã bị T005 chặn). Biểu thức: literal → `const` (int literal mặc định `Int`; typed literal lấy `type` — `WORD#16#FFFF` → `Word`; time literal → `Time`, giá trị ms); ref → `load`; unary `+` bỏ (identity), `-` → `neg`, `NOT` trên `Bool` → `not`, trên bit-string → `bnot`; binary → `binary` với `fn` theo bảng (`+`→add, `-`→sub, `*`→mul, `/`/`DIV`→div, `MOD`→mod, `=`→eq, `<>`→ne, `<`→lt, `<=`→le, `>`→gt, `>=`→ge, `AND`/`&`→and, `OR`→or, `XOR`→xor) + chèn `convert` widening hai vế về `commonType`; `**` → `intrinsic 'POWER'` (OQ-114); call FC trong biểu thức → `callFcExpr`; call FC dạng statement → `callFc` (`ret` = target của `Q =>` nếu có, ngược lại undefined — FC có return type mà gọi dạng statement thì giá trị trả bị bỏ); call FB → `callFb` (instance từ callee: `#fb` → `local`, `"DB"` → `dbField` path `[]`; arg `:=` → `inArgs` nếu tham số là INPUT, `inoutArgs` nếu IN_OUT (giá trị phải là lvalue — không phải lvalue → T004); arg `=>` → `outArgs`; arg positional cho FB → đã bị T004 chặn ở typecheck; arg positional cho FC → đặt tên theo thứ tự khai báo, IN_OUT positional phải là lvalue); call system FB → không tới được lower (đã bị SCL-U001 chặn); intrinsic call (`ABS`/`SQRT`/…/`X_TO_Y`, OQ-115) → `convert` cho `REAL_TO_INT`/`ROUND` (mode `round`), `TRUNC` (mode `trunc`), `INT_TO_REAL`… (không mode, widening tường minh); `CEIL`/`FLOOR`/`ABS`/`SQRT`/`MIN`/`MAX`/`LIMIT`/`SHL`/`SHR`/`ROL`/`ROR`/`NORM_X`/`SCALE_X` → `intrinsic` với `fn` = tên gốc; `BOOL_TO_*` chỉ chấp nhận `BOOL_TO_INT`/`BOOL_TO_DINT`/`BOOL_TO_BYTE`/`BOOL_TO_WORD`/`BOOL_TO_DWORD` (theo "bảng VERIFY" §7.3 — bảng không tồn tại trong spec, mặc định hẹp, ghi OQ-115); tên intrinsic không biết → T004 ở typecheck. **FC trả giá trị (OQ-112):** gán vào tên FC của chính block đó (`"FC_Scale" := …` hoặc `#FC_Scale := …`, so sánh không phân biệt hoa/thường) → lower thành assign tới local tổng hợp tên = tên FC; lower tự thêm `IrVar { name: <tên FC>, type: returnType }` vào `interface.temp` (P1.4 đọc local này sau khi `callFcExpr` chạy); khai báo biến trùng tên FC → T009 ở typecheck; `RETURN` trong FC chỉ điều khiển luồng (giá trị trả = local FC-name hiện tại, mặc định 0/false). **DB/UDT:** UDT block → `IrUdt` (field qua `layoutStruct`, `size` làm tròn chẵn theo §3.4); DB dạng STRUCT → `IrDb` + `init` từ `DbBlock.init` (lvalue base global phải là chính tên DB — khác → T005; field không tồn tại → T005; giá trị không hằng → T008; gán trùng field → T009; giá trị vào `IrField.init`); DB dạng `"fbname"` → `IrDb` với `fbName`, layout = `VAR_INPUT + VAR_OUTPUT + VAR_IN_OUT` (4 byte nội bộ, không lộ — lower vẫn tính 4 byte vào layout nhưng không tạo field) + `VAR(static)` theo thứ tự khai báo (§3.5, OQ-125), fbName không biết → T001; FB khai báo trong `VAR` (static) của FB cha → field struct lồng (multi-instance, layout lồng trong DB cha). **OB (OQ-113):** `IrBlock.number` + `organization`: tên `"Main"` (không phân biệt hoa/thường) → OB 1; tên khớp `/^OB(\d+)$/i` → số đó; tên khác → không có binding (block vẫn biên dịch, không vào `organization` — binding là việc mức project, `compileProject` P1.7). **Vị trí:** `IrStmt.src`/`IrBlock.src` lấy từ `SclStmt.loc`/`SclBlock.loc` (đổi `offset`/`length` bỏ đi — `SrcRef` chỉ giữ file/line/col/endLine/endCol); `endCol` exclusive (quy ước repo, P1.2).
+4. **`compile.ts` — pipeline + điểm vào CLI (OQ-108, OQ-109).**
+```ts
+export interface CompileContext {
+  udts: Map<string, IrUdt>; dbs: Map<string, IrDb>; blocks: Map<string, IrBlock>; // key = id/name lowercased
+}
+export function createCompileContext(): CompileContext;
+export function compileScl(source: string, fileName: string, ctx?: CompileContext)
+  : { blocks: IrBlock[]; diagnostics: Diagnostic[] }; // đúng chữ ký M1 §10
+export function compileSclProgram(source: string, fileName: string, ctx?: CompileContext)
+  : { program: IrProgram; diagnostics: Diagnostic[] }; // toàn bộ IR (kể cả UDT/DB) cho `vcs ir dump`
+export function irToJson(program: IrProgram): string; // stable stringify: sort key đệ quy + indent 2 (OQ-126)
+```
+Pipeline `compileScl`: `parseScl` → nếu `diagnostics` chứa lỗi (OQ-099) → trả `{ blocks: [], diagnostics }` ngay, **không lower**; `typecheckFile` → nếu có lỗi → trả `{ blocks: [], diagnostics: parse + typecheck }` (warning W001 không chặn); `lowerFile` → cập nhật `ctx` (udts/dbs/blocks của file này) → trả `blocks` (chỉ OB/FC/FB của file này, theo §10). `compileSclProgram`: cùng pipeline, trả `program` = toàn bộ `ctx` sau khi lower (blocks/dbs/udts đã tích lũy + sắp xếp). Diagnostics sắp xếp theo vị trí (`sortDiagnostics` ở schemas). `irToJson` phải tất định theo từng byte (key sort đệ quy, không phụ thuộc thứ tự chèn của `Map`).
+5. **Mã chẩn đoán (A8/D6) — đăng ký trước khi dùng (OQ-107):**
+```ts
+// packages/schemas/src/diagnostics-catalog.ts — thêm vào SCL_CATALOG
+'SCL-T001': { severity: 'error', title: 'Tên chưa khai báo', hint: 'Khai báo biến/kiểu/block trước khi dùng, kiểm tra chính tả.' }
+'SCL-T002': { severity: 'error', title: 'Kiểu không khớp', hint: 'Đổi kiểu biến hoặc giá trị cho khớp; thu hẹp phải dùng hàm chuyển đổi tường minh.' }
+'SCL-T003': { severity: 'error', title: 'Toán tử không áp dụng cho kiểu', hint: 'Phép số học chỉ dùng cho số nguyên/số thực/Time; AND/OR/XOR/NOT dùng cho Bool hoặc Byte/Word/DWord.' }
+'SCL-T004': { severity: 'error', title: 'Lỗi gọi block/hàm', hint: 'Gọi FB cần instance (#fb hoặc "DB"); kiểm tra tên và kiểu tham số trong khai báo block.' }
+'SCL-T005': { severity: 'error', title: 'Truy cập member/index sai', hint: 'Kiểm tra tên field, kiểu index và khoảng chỉ số hằng của mảng.' }
+'SCL-T006': { severity: 'error', title: 'Gán không hợp lệ', hint: 'VAR_INPUT chỉ đọc trong FB/FC; VAR_CONSTANT không được gán.' }
+'SCL-T007': { severity: 'error', title: 'EXIT/CONTINUE ngoài vòng lặp', hint: 'EXIT/CONTINUE chỉ dùng trong FOR/WHILE/REPEAT.' }
+'SCL-T008': { severity: 'error', title: 'Biểu thức không hằng', hint: 'Giá trị khởi tạo, label CASE và init DB phải là hằng (literal, phép tính trên hằng, VAR_CONSTANT).' }
+'SCL-T009': { severity: 'error', title: 'Khai báo trùng tên', hint: 'Đổi tên một trong hai khai báo trong cùng scope.' }
+'SCL-T010': { severity: 'error', title: 'Thu hẹp ngầm định', hint: 'Dùng REAL_TO_INT(...)/TRUNC(...) hoặc hàm X_TO_Y tường minh.' }
+'SCL-T011': { severity: 'error', title: 'Định nghĩa kiểu đệ quy', hint: 'UDT không được chứa chính nó (trực tiếp hay gián tiếp).' }
+'SCL-S020': { severity: 'error', title: 'Đệ quy gọi block', hint: 'FC/FB không được gọi chính nó (trực tiếp hay gián tiếp) — tách thành block khác.' }
+'SCL-W001': { severity: 'warning', title: 'Đọc TEMP trước khi ghi', hint: 'TEMP không khởi tạo trên PLC thật; gán giá trị trước khi đọc.' }
+```
+`DIAGNOSTIC_CODE_RE`: `-[ELPWU]` → `-[ELPSTWU]` (nếu không, scan mã chưa đăng ký của `gen-diagnostics.ts` bỏ qua lặng lẽ mã T/S — bài học P1.2 #3); kèm test `scanCodes` tìm được `SCL-T002`/`SCL-S020`. Chạy `pnpm docs:diagnostics` sinh lại `docs/diagnostics.md` (29 → 42 mã); `docs:diagnostics --check` phải khớp ở gate.
+6. **CLI `vcs ir dump` (M1 §6, OQ-126):** `apps/cli/src/commands/ir.ts` export `registerIr(program: Command)` — tạo nhóm `ir` + subcommand `dump <file.scl> [--out <file>]`; đọc file (UTF-8, chuẩn hóa BOM/CRLF như `loadProject`); gọi `compileSclProgram`; nếu diagnostics có lỗi → in từng dòng qua `formatDiagnostic` (schemas) + exit **2**; thành công → in `irToJson(program)` ra stdout (hoặc ghi `--out`) + exit **0**; thiếu file/tham số sai → exit **3** với thông điệp usage (đúng quy ước `run.ts` P0.4: 0 ok, 2 lỗi nội dung, 3 lỗi tham số). `apps/cli/src/commands/index.ts` gọi `registerIr`. Thêm dep `@vcs/vendor-siemens: workspace:*` vào `apps/cli/package.json` (tsup build giữ nguyên pattern P0.5 — dep workspace khai báo trực tiếp để dist resolve được; `tsconfig.base.json` paths `@vcs/*` đã có sẵn nên typecheck không cần thêm gì).
+7. **Golden + semantics:** 3 golden JSON ở `packages/vendor-siemens/src/scl/golden/` (`fb-motor.json`, `fc-scale.json` từ bảng B; `db-motor.json` từ bảng D-c/E3); test `compile.test.ts` assert `irToJson(compileSclProgram(...))` bằng đúng file golden (so sánh string, không parse lại — để bắt cả thứ tự key); `ir.test.ts` assert exit code + stdout JSON parse được và bằng golden `fb-motor.json` (không golden riêng cho CLI). `docs/semantics.md` thêm §14 (typecheck/lower/IR) với nhãn `VERIFIED`/`UNVERIFIED` cho từng điểm (lattice, convert, FC return, abs mặc định, TEMP warning, đệ quy, OB binding).
+
+**Đã loại:** (1) IR dùng `Map` như phác §6 — mâu thuẫn yêu cầu serializable JSON (OQ-106). (2) Mutate AST để gắn kiểu (thêm field `type` vào node) — phá tính thuần/serializable của AST P1.2 và làm vỡ test deep-equal; dùng side-table `Map` keyed by node. (3) Lower tự suy luận lại kiểu — nhân đôi logic §4.4; lower chỉ tra `TypecheckResult` + hàm đại số dùng chung. (4) Typecheck dạng Hindley-Milner/suy luận kiểu đầy đủ — SCL là ngôn ngữ khai báo tường minh, không cần. (5) Fold phép tính hằng ở lower — IR giữ nguyên phép tính, P1.4 tính (chỉ fold ref `VAR_CONSTANT` vì không có vùng nhớ). (6) Phát hiện đọc TEMP trước khi ghi bằng dataflow đầy đủ (reaching definitions) — dùng definite-assignment đơn giản, đủ cho §7.1. (7) Chấp nhận system FB (`TON`…) ở P1.3 — chưa có layout std, chấp nhận sẽ kiểm tra arg sai im lặng; báo SCL-U001 tới P1.5 (OQ-111). (8) `compileProject` đọc nhiều file `plc/*.scl` — P1.7 (P1.3 chỉ một file + `CompileContext` tích lũy). (9) Interpreter/scheduler/`SoftPlc`/force/snapshot — P1.4. (10) Dependency mới — không cần (chỉ thêm link workspace). (11) ADR mới — quyết định IR/lattice là thực thi spec §6/§4.4, không phải quyết định kiến trúc mới; ghi vào plan + semantics §14.
+
+**Bảng tính tay A — widening + kiểu kết quả nhị phân (§4.4, tính tay):**
+
+Lattice (chỉ các cạnh này, bắc cầu): `SInt→Int→DInt→Real→LReal`; `USInt→UInt→UDInt`; `Byte→Word→DWord`; `Real→LReal`. `Bool`, `Time`: không widening.
+
+| # | Biểu thức | Kiểu kết quả | Convert chèn vào IR | Ghi chú |
+|---|---|---|---|---|
+| A1 | `Int + DInt` | `DInt` | trái `Int→DInt` | widening trái |
+| A2 | `Int + Real` | `Real` | trái `Int→Real` | |
+| A3 | `Real + LReal` | `LReal` | trái `Real→LReal` | |
+| A4 | `SInt + Int` | `Int` | trái `SInt→Int` | |
+| A5 | `SInt + DInt` | `DInt` | trái `SInt→DInt` (bắc cầu) | |
+| A6 | `USInt + UInt` | `UInt` | trái `USInt→UInt` | |
+| A7 | `Byte AND Word` | `Word` | trái `Byte→Word` (bitwise) | |
+| A8 | `Int + Word` | **lỗi SCL-T002** | — | khác họ, không có LUB |
+| A9 | `Bool AND Bool` | `Bool` | — | logic |
+| A10 | `Bool + Bool` | **lỗi SCL-T003** | — | `+` không áp dụng cho Bool |
+| A11 | `Time + Time` | `Time` | — | OQ-124 |
+| A12 | `Time + Int` | **lỗi SCL-T003** | — | |
+| A13 | `DInt / Int` | `DInt` | phải `Int→DInt`; `7 / 2 = 3`, `-7 / 2 = -3` (cắt về 0) | `/` = `DIV` trên số nguyên |
+| A14 | `Real / Int` | `Real` | phải `Int→Real` | chia thực |
+| A15 | `Int ** Int` | `Real` | — | `**` luôn Real/LReal → intrinsic `POWER` |
+| A16 | `LReal ** Int` | `LReal` | — | |
+| A17 | `Int = DInt` | `Bool` | trái `Int→DInt` | so sánh widening được |
+| A18 | `Bool = Bool` | `Bool` | — | |
+| A19 | `Bool < Bool` | **lỗi SCL-T003** | — | không có thứ tự trên Bool |
+| A20 | `Word = Word` | `Bool` | — | `=` được trên bit-string |
+| A21 | `Word < Word` | **lỗi SCL-T003** | — | không có thứ tự trên bit-string |
+| A22 | `NOT Byte` | `Byte` | — | bitwise → `bnot` |
+| A23 | `NOT Int` | **lỗi SCL-T003** | — | |
+| A24 | `-Int` | `Int` | — | `neg` |
+| A25 | `-Byte` | **lỗi SCL-T003** | — | |
+| A26 | gán `DInt := Int` | OK | giá trị `Int→DInt` | widening |
+| A27 | gán `Int := DInt` | **lỗi SCL-T010** | — | hint `DINT_TO_INT(...)` |
+| A28 | gán `Real := Int` | OK | giá trị `Int→Real` | |
+| A29 | gán `Int := Real` | **lỗi SCL-T010** | — | hint `REAL_TO_INT(...)/TRUNC(...)` |
+| A30 | gán `Word := Int` | **lỗi SCL-T010** | — | chéo họ số/bit-string → T010, hint `INT_TO_WORD(...)` |
+| A31 | gán `Bool := Int` | **lỗi SCL-T002** | — | không liên quan, không phải thu hẹp |
+| A32 | gán `Int := Bool` | **lỗi SCL-T002** | — | |
+
+**Bảng tính tay B — lower: IR JSON của một FB và một FC (tính tay, golden `fb-motor.json` / `fc-scale.json`):**
+
+Nguồn FB (file `FB_Motor.scl`, đúng 20 dòng):
+```
+1  FUNCTION_BLOCK "FB_Motor"
+2  VAR_INPUT
+3    iStart : Bool;
+4    iStop : Bool;
+5  END_VAR
+6  VAR_OUTPUT
+7    qRun : Bool;
+8  END_VAR
+9  VAR
+10   latched : Bool;
+11 END_VAR
+12 BEGIN
+13   IF #iStart THEN
+14     #latched := TRUE;
+15   END_IF;
+16   IF #iStop THEN
+17     #latched := FALSE;
+18   END_IF;
+19   #qRun := #latched;
+20 END_FUNCTION_BLOCK
+```
+Kiểm vị trí (cột 1-based, `endCol` exclusive): `FUNCTION_BLOCK` dài 14 → (1,1)–(1,15); `"FB_Motor"` dài 10 → (1,16)–(1,26); `END_FUNCTION_BLOCK` dài 19 → block `src` (1,1)–(20,20). L13: `IF` (13,3), `#iStart` (13,6)–(13,13), `THEN` (13,14)–(13,18); L15 `END_IF;` → if `src` (13,3)–(15,10). L14: `#latched` (14,5)–(14,13), `TRUE` (14,17)–(14,21), `;` → assign `src` (14,5)–(14,22). L16: `#iStop` (16,6)–(16,12), `THEN` (16,13)–(16,17); if `src` (16,3)–(18,10). L17: `FALSE` (17,17)–(17,22) → assign `src` (17,5)–(17,23). L19: `#qRun` (19,3)–(19,8), `#latched` (19,12)–(19,20) → assign `src` (19,3)–(19,21).
+
+```json
+{
+  "blocks": [
+    {
+      "id": "FB_Motor", "kind": "FB", "name": "FB_Motor",
+      "interface": {
+        "input": [{ "name": "iStart", "type": "Bool" }, { "name": "iStop", "type": "Bool" }],
+        "output": [{ "name": "qRun", "type": "Bool" }],
+        "inout": [], "static": [{ "name": "latched", "type": "Bool" }], "temp": []
+      },
+      "body": [
+        { "op": "if",
+          "cond": { "op": "load", "type": "Bool", "ref": { "k": "local", "name": "iStart" } },
+          "then": [{ "op": "assign", "target": { "k": "local", "name": "latched" },
+                     "value": { "op": "const", "type": "Bool", "value": true },
+                     "src": { "file": "FB_Motor.scl", "line": 14, "col": 5, "endLine": 14, "endCol": 22 } }],
+          "elsif": [], "else": [],
+          "src": { "file": "FB_Motor.scl", "line": 13, "col": 3, "endLine": 15, "endCol": 10 } },
+        { "op": "if",
+          "cond": { "op": "load", "type": "Bool", "ref": { "k": "local", "name": "iStop" } },
+          "then": [{ "op": "assign", "target": { "k": "local", "name": "latched" },
+                     "value": { "op": "const", "type": "Bool", "value": false },
+                     "src": { "file": "FB_Motor.scl", "line": 17, "col": 5, "endLine": 17, "endCol": 23 } }],
+          "elsif": [], "else": [],
+          "src": { "file": "FB_Motor.scl", "line": 16, "col": 3, "endLine": 18, "endCol": 10 } },
+        { "op": "assign", "target": { "k": "local", "name": "qRun" },
+          "value": { "op": "load", "type": "Bool", "ref": { "k": "local", "name": "latched" } },
+          "src": { "file": "FB_Motor.scl", "line": 19, "col": 3, "endLine": 19, "endCol": 21 } }
+      ],
+      "src": { "file": "FB_Motor.scl", "line": 1, "col": 1, "endLine": 20, "endCol": 20 }
+    }
+  ],
+  "dbs": [], "udts": [], "organization": []
+}
+```
+
+Nguồn FC (file `FC_Scale.scl`, đúng 10 dòng):
+```
+1  FUNCTION "FC_Scale"
+2  VAR_INPUT
+3    raw : Int;
+4  END_VAR
+5  VAR_OUTPUT
+6    scaled : Real;
+7  END_VAR
+8  BEGIN
+9    #scaled := #raw * 2;
+10 END_FUNCTION
+```
+Kiểm vị trí: `FUNCTION` (1,1)–(1,9); `"FC_Scale"` (1,10)–(1,20); `END_FUNCTION` dài 12 → block `src` (1,1)–(10,13). L9: `#scaled` (9,3)–(9,10), `#raw` (9,14)–(9,18), `*` (9,19), `2` (9,21)–(9,22) → assign `src` (9,3)–(9,23). Kiểu: `#raw * 2` → `Int` (`Int ∘ Int`); gán vào `Real` → chèn `convert Int→Real` **ngoài** phép nhân (không phải trong — convert áp cho kết quả, không cho toán hạng).
+
+```json
+{
+  "blocks": [
+    {
+      "id": "FC_Scale", "kind": "FC", "name": "FC_Scale",
+      "interface": {
+        "input": [{ "name": "raw", "type": "Int" }],
+        "output": [{ "name": "scaled", "type": "Real" }],
+        "inout": [], "static": [], "temp": []
+      },
+      "body": [
+        { "op": "assign", "target": { "k": "local", "name": "scaled" },
+          "value": { "op": "convert", "from": "Int", "to": "Real",
+                     "a": { "op": "binary", "fn": "mul", "type": "Int",
+                            "a": { "op": "load", "type": "Int", "ref": { "k": "local", "name": "raw" } },
+                            "b": { "op": "const", "type": "Int", "value": 2 } } },
+          "src": { "file": "FC_Scale.scl", "line": 9, "col": 3, "endLine": 9, "endCol": 23 } }
+      ],
+      "src": { "file": "FC_Scale.scl", "line": 1, "col": 1, "endLine": 10, "endCol": 13 }
+    }
+  ],
+  "dbs": [], "udts": [], "organization": []
+}
+```
+
+**Bảng tính tay C — lỗi typecheck + vị trí chính xác (tính tay; mỗi case là một file độc lập, wrapper OB/FC/FB như ghi):**
+
+| # | Nguồn lỗi (dòng gây lỗi) | Mã | Vị trí | Thông điệp / kỳ vọng |
+|---|---|---|---|---|
+| C1 | `#x := #y;` (`#y` chưa khai báo) — OB, L6 `  #x := #y;` | SCL-T001 | (6,9)–(6,11) — ref `#y` | "tên chưa khai báo: #y" |
+| C2 | `#a := #b + TRUE;` (`#b` Bool) — OB, L7 | SCL-T003 | (7,9)–(7,18) — toàn bộ `#b + TRUE` | "`+` không áp dụng cho Bool" |
+| C3 | `#i := #r;` (`#i` Int, `#r` Real) — OB, L7 | SCL-T010 | (7,9)–(7,11) — giá trị `#r` | hint "dùng REAL_TO_INT(...)/TRUNC(...)" |
+| C4 | `IF #n THEN` (`#n` Int) — OB, L6 | SCL-T002 | (6,6)–(6,8) — điều kiện `#n` | "điều kiện IF phải là Bool" |
+| C5 | `#i := TRUE;` trong FB (`#i` là VAR_INPUT) — FB, L6 | SCL-T006 | (6,3)–(6,5) — target `#i` | "VAR_INPUT chỉ đọc" |
+| C6 | `#fb(TRUE);` (gọi FB positional) — OB, L12 | SCL-T004 | (12,7)–(12,11) — arg positional `TRUE` | "FB phải dùng tham số đặt tên" |
+| C7 | `"FB_X"(i := TRUE);` (gọi FB bằng tên kiểu, không instance) — OB, L9 | SCL-T004 | (9,3)–(9,9) — callee `"FB_X"` | "gọi FB cần instance (#fb hoặc \"DB\")" |
+| C8 | label CASE `#m` (`#m` là biến, không hằng) — OB, L8 `    #m : #n := 1;` | SCL-T008 | (8,5)–(8,7) — label `#m` | "label CASE phải là hằng" |
+| C9 | `EXIT;` ngoài vòng lặp — OB, L3 | SCL-T007 | (3,3)–(3,7) | "EXIT chỉ dùng trong vòng lặp" |
+| C10 | `#n.field := 1;` (`#n` Int) — OB, L6 | SCL-T005 | (6,6)–(6,11) — member `field` | "Int không có field 'field'" |
+| C11 | `#a[5] := 1;` (`#a: Array[0..3] of Int`) — OB, L6 | SCL-T005 | (6,6)–(6,7) — index `5` | "chỉ số 5 ngoài [0..3]" |
+| C12 | khai báo trùng `x` lần 2 trong VAR_TEMP — OB, L4 `  x : Bool;` | SCL-T009 | (4,3)–(4,4) — tên `x` thứ hai | "tên đã khai báo: x" |
+| C13 | `"FC_A" := "FC_A"(i := #i);` trong FC_A (có returnType Int) — FC, L6 | SCL-S020 | (6,13)–(6,19) — callee `"FC_A"` | "đệ quy: FC_A gọi chính nó" |
+| C14 | `#x := #t;` (`#t` là VAR_TEMP, chưa gán trước đó) — OB, L7 | SCL-W001 (warning) | (7,9)–(7,11) — lần đọc `#t` | "đọc TEMP trước khi ghi"; compile vẫn thành công |
+| C15 | `u : Udt_NoSuch;` trong VAR_TEMP — OB, L3 | SCL-T001 | (3,7)–(3,17) — tên kiểu | "kiểu chưa biết: Udt_NoSuch" |
+| C16 | `#x := "FC_B"(i := 1);` (`FC_B` không có returnType) — OB, L12 | SCL-T004 | (12,9)–(12,15) — callee `"FC_B"` | "FC_B không trả giá trị" |
+
+Kiểm vị trí C6: L12 `  #fb(TRUE);` — `#fb` (12,3)–(12,6), `TRUE` (12,7)–(12,11). C7: L9 `  "FB_X"(i := TRUE);` — `"FB_X"` (9,3)–(9,9). C13: L6 `  "FC_A" := "FC_A"(i := #i);` — callee thứ hai (6,13)–(6,19). C16: L12 `  #x := "FC_B"(i := 1);` — `"FC_B"` (12,9)–(12,15).
+
+**Bảng tính tay D — const eval + CASE + DB init (tính tay):**
+
+- **D-a (VAR_CONSTANT fold):** `VAR_CONSTANT c : Int := 2 + 3;` → `evalConst` = 5 (phép tính trên hằng, không cần literal đơn). `#x := #c * 2;` (`#x` Int) → lower: ref `#c` fold thành `const 5`; phép `*` **không** fold → IR: `binary mul(Int, const 5, const 2)`. Kiểm: `2 + 3 = 5` (không phải 6); fold chỉ áp cho ref hằng, không áp cho phép tính.
+- **D-b (CASE label):** selector `#n` Int; arm `1..3, 5 : …` → labels `[1,3]` + `5`; arm thứ hai `2 : …` → trùng với khoảng `1..3` → **SCL-T005** tại label `2`. Label `1 + 1` (const expr = 2) → hợp lệ, giá trị 2 (evalConst tính được); label `#m` (biến) → SCL-T008 (bảng C8).
+- **D-c (DB init + layout, golden `db-motor.json`):** nguồn:
+```
+1  DATA_BLOCK "DB_Motor"
+2  STRUCT
+3    speed : Int;
+4    run : Bool;
+5  END_STRUCT;
+6  BEGIN
+7    "DB_Motor".speed := 1500;
+8  END_DATA_BLOCK
+```
+Layout (§3.4): `speed` Int → byteOffset 0, size 2; `run` Bool → byteOffset 2, bitOffset 0, size 1 (bit); tổng dùng 3 byte → làm tròn chẵn → **size 4**. `init`: `speed = 1500` (hằng Int trong khoảng); `run` không init → mặc định false/0. IR (cùng file còn có UDT `UDT_Motor` với đúng 2 field trên — xem bảng E3):
+```json
+{ "blocks": [], "organization": [],
+  "dbs": [{ "id": "DB_Motor", "name": "DB_Motor",
+    "fields": [
+      { "name": "speed", "type": "Int", "byteOffset": 0, "size": 2, "init": 1500 },
+      { "name": "run", "type": "Bool", "byteOffset": 2, "bitOffset": 0, "size": 1 } ],
+    "size": 4 }],
+  "udts": [{ "id": "UDT_Motor", "name": "UDT_Motor",
+    "fields": [
+      { "name": "speed", "type": "Int", "byteOffset": 0, "size": 2 },
+      { "name": "run", "type": "Bool", "byteOffset": 2, "bitOffset": 0, "size": 1 } ],
+    "size": 4 }] }
+```
+Kiểm: `1500` vừa Int 16-bit (−32768..32767); init `speed := 40000` → lỗi (vượt khoảng Int — mã nào? `validateTagValue` là runtime; ở typecheck, literal Int ngoài khoảng kiểu đích → **SCL-T002** với thông điệp nêu khoảng — ghi ở test D-c, không cần OQ riêng vì đã có T002); init vào field không tồn tại → T005; init không hằng → T008; init trùng field → T009.
+
+**Bảng tính tay E — golden IR dump (CLI `vcs ir dump`):**
+
+| # | File nguồn | Golden | Nội dung kỳ vọng (tóm tắt — JSON đầy đủ ở bảng B/D-c) |
+|---|---|---|---|
+| E1 | `FB_Motor.scl` (bảng B, 20 dòng) | `packages/vendor-siemens/src/scl/golden/fb-motor.json` | đúng JSON bảng B (1 block FB, 3 stmt, `src` đầy đủ, `dbs`/`udts`/`organization` rỗng) |
+| E2 | `FC_Scale.scl` (bảng B, 10 dòng) | `packages/vendor-siemens/src/scl/golden/fc-scale.json` | đúng JSON bảng B (1 block FC, `convert Int→Real` ngoài phép `mul`) |
+| E3 | file chứa `TYPE "UDT_Motor" … END_TYPE` + DB bảng D-c | `packages/vendor-siemens/src/scl/golden/db-motor.json` | đúng JSON bảng D-c (`blocks` rỗng, 1 DB + 1 UDT, layout size 4, `init` 1500) |
+| E4 | `FB_Motor.scl` qua CLI | — (không golden riêng) | `vcs ir dump` exit 0, stdout JSON parse được và bằng đúng `fb-motor.json` |
+
+**Test (mục tiêu: ≥ 70 test mới; tổng ≥ 816 = 746 + 70):**
+
+| Nhóm | File | Test mới (tên + kỳ vọng) |
+|---|---|---|
+| typecheck — lattice + kết quả (~18) | `packages/vendor-siemens/src/scl/typecheck.test.ts` | Bảng A: A1–A7/A9/A11/A13–A18/A20/A22/A24/A26/A28 (mỗi case 1 test: kiểu kết quả + convert chèn đúng vị trí — assert qua `types` map hoặc qua lower); A8/A10/A12/A19/A21/A23/A25/A27/A29–A32 (mỗi case 1 test: đúng mã + vị trí) |
+| typecheck — lỗi kiểm tra (~16) | `packages/vendor-siemens/src/scl/typecheck.test.ts` | Bảng C: C1–C16 (mỗi case 1 test: mã + line/col/endCol chính xác + severity; C14 là warning, compile vẫn thành công) |
+| typecheck — const + FOR/CASE + TEMP (~8) | `packages/vendor-siemens/src/scl/typecheck.test.ts` | Bảng D-a (fold `VAR_CONSTANT`, không fold phép tính); D-b (label trùng trong khoảng → T005; label `1+1` hợp lệ); FOR: biến vòng lặp không phải integer → T003, `by` âm hợp lệ, `from` widening về kiểu biến; TEMP: đọc sau gán thì hết warning, đọc trong nhánh IF chỉ gán một bên vẫn warning |
+| typecheck — đệ quy + system FB (~4) | `packages/vendor-siemens/src/scl/typecheck.test.ts` | C13 (trực tiếp); đệ quy gián tiếp A→B→A → SCL-S020; gọi `TON` trong VAR → SCL-U001; gọi `#sT(IN := …)` khi `sT : TON` → SCL-U001 |
+| lower (~20) | `packages/vendor-siemens/src/scl/lower.test.ts` | Bảng B: FB_Motor deep-equal IR (trừ `src` assert riêng); FC_Scale deep-equal (convert ngoài `mul`); call FB (`#fb(IN := #x, Q => #y)` → `callFb` với `inArgs`/`outArgs` đúng); call FC trong biểu thức → `callFcExpr`, dạng statement → `callFc` (`ret` khi có `Q =>`); `**` → intrinsic `POWER`; `REAL_TO_INT` → `convert` mode `round`, `TRUNC` → `trunc`, `CEIL` → intrinsic; FC return (`"FC_X" := …` → assign tới local tổng hợp + `interface.temp` có `<tên FC>`); `IF`/`ELSIF`/`ELSE` → `elsif` list; `CASE` (label đơn + khoảng); `FOR`/`WHILE`/`REPEAT`/`EXIT`/`CONTINUE`/`RETURN` đúng `op`; abs `%I0.0` → `abs` type `Bool`, `%MD0` → `abs` type `DInt` (OQ-110), `DB1.DBW4` → `absDb` type `Int`; index `#a[#i]` → `index`; `src` trên statement/block đúng bảng B |
+| compile + golden (~8) | `packages/vendor-siemens/src/scl/compile.test.ts` | E1–E3: `irToJson(compileSclProgram(...))` bằng đúng file golden (so sánh string); `compileScl` trả blocks theo §10 (UDT/DB không nằm trong `blocks`); có lỗi parse → blocks rỗng, không lower; có lỗi typecheck → blocks rỗng + diagnostics gộp (parse + typecheck, sort theo vị trí); warning W001 không chặn (blocks vẫn có); `compileScl` lần 2 cùng `ctx` thấy được UDT/DB của lần 1 |
+| CLI (~5) | `apps/cli/src/commands/ir.test.ts` | `dump` file FB_Motor → exit 0, stdout = `fb-motor.json`; file có lỗi typecheck → exit 2 + in `SCL-T010`; file không tồn tại → exit 3; `--out` ghi file thay vì stdout; `irToJson` tất định: dump 2 lần ra string giống hệt nhau theo từng byte |
+| diagnostics (~2) | `packages/schemas/src/diagnostics-catalog.test.ts` (nếu có) + `tests/gen-diagnostics.test.ts` | 13 mã mới đăng ký trong catalog; `scanCodes` tìm được `SCL-T002`/`SCL-S020` (regex mở rộng); `docs:diagnostics --check` khớp sau khi sinh lại (29 → 42 mã) |
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** vị trí file theo đồ thị phụ thuộc (ir.ts ở runtime-iec, typecheck/lower/compile ở vendor-siemens); side-table `Map` keyed by node thay vì mutate AST; `irToJson` sort key đệ quy + indent 2; thứ tự triển khai (ir.ts → catalog mã → typecheck → lower → compile → CLI → golden); test dùng `it.each` với bảng case dùng chung cho bảng A/C. **Tier B (mặc định + ghi OQ):** OQ-106 (IR mảng thay Map + struct inline + elsif list); OQ-107 (bộ 13 mã + regex + quy tắc T002/T003/T010 + phép số học trên bit-string → T003); OQ-108 (vị trí file theo dep graph); OQ-109 (`compileScl` đúng §10 + `compileSclProgram` cho dump); OQ-110 (abs mặc định theo width); OQ-111 (system FB → SCL-U001 tới P1.5); OQ-112 (FC return = gán tên FC → local tổng hợp trong `temp`); OQ-113 (OB → organization: `Main`→1, `OB<n>`→n, khác → không binding); OQ-114 (`**` → intrinsic POWER; `/`=`DIV` trên số nguyên); OQ-115 (X_TO_Y → convert/intrinsic + tập `BOOL_TO_*` hẹp); OQ-116 (gán `VAR_CONSTANT` → T006); OQ-117 (FOR: biến integer, `by` mặc định 1 được âm, không kiểm sửa biến vòng lặp); OQ-118 (CASE: selector integer, label trùng → T005); OQ-119 (tên kiểu không biết → T001; UDT đệ quy → T011; tra cứu block/UDT không phân biệt hoa/thường cho ident); OQ-120 (TEMP read-before-write → W001, definite-assignment đơn giản); OQ-121 (X-002 không chặn P1.3); OQ-122 (đệ quy → SCL-S020 trong phạm vi unit + ctx); OQ-123 (FB/FC call: instance LValue, IN_OUT bằng tham chiếu, FB positional → T004, FC positional theo thứ tự khai báo); OQ-124 (Time: chỉ `+`/`-` giữa Time, không widening); OQ-125 (DB instance layout §3.5 + init DB: base phải là chính DB, field không tồn tại → T005); OQ-126 (`vcs ir dump`: JSON ổn định, exit 0/2/3, golden ở `vendor-siemens/src/scl/golden/`). **Tier C (không chặn P1.3):** không có mục mới — OQ-105 (X-002/S1) vẫn mở từ P1.2, không chặn (OQ-121 ghi rõ lý do); nếu khi triển khai phát hiện §4.4/§6 thiếu quy tắc mà chỉ mã thật/PLCSIM mới quyết được → ghi OQ/SCR, không tự nới lỏng strict.
+
+**Rủi ro + cách kiểm:** (1) X-002/S1 chưa có: mã thật có thể dùng chuyển đổi ngầm định mà P1.3 từ chối (vd `Int := Real` trong code TIA cũ) — giảm thiểu: strict là mặc định của spec (§4.4), lỗi T010 nêu rõ hàm chuyển đổi (không chạy sai im lặng); khi S1 chạy xong, nếu TIA cho phép rộng hơn thì sinh SCR nới lỏng (không tự sửa typecheck). (2) Diễn giải abs mặc định (OQ-110) lệch code thật (vd `%MD0` chứa Real mà không qua convert) — giảm thiểu: test ghim mặc định; xác minh bằng đoạn SCL thật (S1) hoặc PLCSIM, sửa qua SCR nếu khác. (3) FC return bằng gán tên FC (OQ-112) lệch TIA (TIA còn cho `RETURN` với giá trị?) — giảm thiểu: test ghim mặc định; kiểm bằng mã thật khi có. (4) `**` kết hợp phải đã ghim ở P1.2 (OQ-092) — P1.3 chỉ lower theo AST, không kiểm lại. (5) `DIAGNOSTIC_CODE_RE` quên mở rộng → mã T/S bị scan bỏ qua lặng lẽ — giảm thiểu: test `scanCodes` tìm được `SCL-T002`/`SCL-S020` (bài học P1.2 #3). (6) `vcs ir dump` kéo `@vcs/vendor-siemens` vào CLI làm phình dist/break tsup — giảm thiểu: pattern P0.5 đã chứng minh với `@vcs/server`; nếu tsup không bundle được thì dừng, báo nguyên nhân (không tự đổi cấu hình build — quyết định kiến trúc, tầng C). (7) Golden JSON dài (bảng B) — rủi ro sai tay ở `src`/thứ tự key: giảm thiểu: `irToJson` sort key nên thứ tự không phụ thuộc code; test so sánh string bắt sai lệch ngay; bảng B tính tay độc lập với implementation.
+
+**Ngoài phạm vi:** interpreter/scheduler/`SoftPlc`/force/snapshot/`step()` (P1.4); std blocks `TON`/`CTU`/`R_TRIG` (P1.5 — P1.3 chỉ báo SCL-U001); LAD (P1.6); golden runner YAML + demo `motor-interlock` + UI + bench M1 §12.4 (P1.7); `compileProject` đọc nhiều file `plc/*.scl` (P1.7); sửa EBNF §4.2 / M1 §4.4/§6; đổi `.dependency-cruiser.cjs` / `eslint.config.js` / root `tsconfig.json` / `vitest.config.ts` (ngưỡng 85 đã có); ADR mới; mã diagnostic ngoài 13 mã; `docs/facts/` mới; P0.9 PWA; script spike S1 (chạy khi có mã thật).
+
+**Gate P1.3 (triển khai):** `lint && typecheck && depcheck && test && test:e2e && review:cheats && docs:diagnostics --check` + `build` + bench guard (`pnpm bench`: TagDB 4/4 PASS + orchestrator ≥ 100 000 bước/s — P1.3 không chạm đường nóng bench; rớt > 20% so với baseline thì dừng điều tra, không hạ ngưỡng) + CI (check + test ubuntu/windows + e2e ubuntu) xanh. Tổng test sau P1.3: **≥ 816** (≥ 70 mới; riêng typecheck ≥ 20 theo gate PROMPTS — plan đặt ≥ 46 test typecheck). `pnpm-lock.yaml` chỉ thêm link workspace `@vcs/vendor-siemens` cho CLI (không đổi version khác — diff khác là cờ đỏ, dừng kiểm tra). `pnpm install` trong VM vẫn EPERM (OQ-007) — triển khai làm ở bản sao `/tmp` như các prompt trước, cài thật `--frozen-lockfile` (dùng `git archive` để copy, không `cp -r` cả cây kèm `node_modules` — bài học ENOSPC ở P0.8). **Cần kiểm lại khi triển khai:** root `package.json` không bị ghi đè (bài học P1.2: từng bị ghi đè bằng nội dung vendor-siemens — kiểm `name: "vcs"` + diff vs HEAD trống trước khi commit).
+
+## Kết quả triển khai P1.3 (2026-11-25, xong local — CHƯA mở PR)
+
+**Kết quả:** 105 test mới đợt 1 (typecheck 64, lower 24, compile 9, CLI 6,
+diagnostics 2) + 347 test `algebra.test.ts` (hàm thuần + intrinsic) +
+83 test `typecheck-coverage.test.ts` (DB/UDT/cross-file/call-args/statement)
++ 29 test `lower-coverage.test.ts` (FC positional/ident, FB IN_OUT + DB
+instance, OB số, intrinsic convert, throw nội bộ) = **564 test mới, tổng
+1310** (746 trước P1.3). 13 mã mới SCL-T001…T011 + SCL-S020 + SCL-W001 (diagnostics
+29 → 42). Không dependency mới; chỉ thêm link workspace
+`@vcs/vendor-siemens` cho CLI (lockfile +3 dòng). OQ-106…126 đã đóng (đã áp
+dụng ở P1.3); thêm OQ-127 (FC OUT, tier B) và OQ-128 (FC IN_OUT, tier B),
+đã áp dụng + đóng. `docs/semantics.md` §14 đã viết (mỗi điểm gắn
+VERIFIED/UNVERIFIED).
+
+### Lệch so với plan
+
+1. **6 giá trị `src.endCol` trong bảng B tính tay bị sai** — bằng chứng là
+   test P1.2 (`parser.test.ts:170-181`): (a) `END_FUNCTION_BLOCK` dài **18**
+   ký tự, không phải 19 → block endCol 19, không phải 20; (b) loc của
+   statement/block trong parser **không gồm dấu `;` cuối** (endCol = ngay
+   sau token có nghĩa cuối), nên mọi endCol của stmt trong bảng B đều thừa
+   1 (L14 assign 21 không phải 22; L15 if 9 không phải 10; L17 assign 22
+   không phải 23; L19 assign 20 không phải 21; L16 if 9 không phải 10;
+   FC_Scale assign L9 endCol 22 không phải 23; block FC endCol 13 đúng).
+   Golden giữ theo parser (nguồn sự thật), không sửa lower để "khớp" bảng
+   B. Test `lower.test.ts` assert đúng giá trị đã sửa, ghi chú rõ trong test.
+2. **`CompileContext` (compile.ts) = `CrossFileTables` (typecheck.ts) về
+   mặt cấu trúc, định nghĩa riêng** để tránh import vòng type-only
+   typecheck ↔ compile.
+3. **`ROUND`/`TRUNC`: `IntrinsicInfo` có kind `roundConvert`
+   (`{kind:'roundConvert', mode:'round'|'trunc'}`)** thay vì hardcode
+   `from: Real, to: Int` — `from` thực là kiểu đối số (Real/LReal), `to`
+   là DInt.
+4. **Địa chỉ tuyệt đối bit (`%I0.0`, `DB1.DBX0.0`): IR
+   `IrLValue.abs/absDb.width` là `8|16|32|64` (không có 1)** nên width 1
+   map sang **8** (một byte) kèm `bit`.
+5. **Giá trị init DB do typecheck tính vào `IrField.init` trong
+   `checkDbInit`; lower chỉ copy `checked.dbs`** (plan ghi lower làm —
+   cùng kết quả quan sát được, tránh nhân đôi logic phân giải path ở lower).
+6. **Tham số OUT của FC (không phải `Q`) → SCL-T004 (OQ-127, tier B)** —
+   `IrStmt.callFc` không có slot `outArgs`, hạ im lặng sẽ mất ghi.
+7. **Tham số IN_OUT của FC → SCL-T004 (OQ-128, tier B)** — IR `callFc`/
+   `callFcExpr` không có slot inout; hạ thành load sẽ mất ghi lại. Áp dụng
+   cả dạng biểu thức lẫn statement, cả positional lẫn named.
+8. **Intrinsic thắng khi trùng tên FC do user; callee không biết → T001;
+   FB làm callee trong biểu thức → T004; OB làm callee → T004; system FB
+   làm callee → SCL-U001.** Intrinsic chỉ nhận tham số vị trí; named arg →
+   T004.
+9. **`SQRT` trên int → Real (LReal nếu arg LReal); `CEIL`/`FLOOR` → DInt;
+   `NORM_X`/`SCALE_X` chấp nhận số, widen về Real (LReal nếu có arg
+   LReal); `MIN`/`MAX`/`LIMIT` widen các arg về kiểu chung;
+   `SHL`/`SHR`/`ROL`/`ROR` cần giá trị int/bit-string + count int.**
+10. **`getBlockSymbols` lượt 2 viết lại:** fixpoint im lặng cho
+    `VAR_CONSTANT` (hằng tham chiếu hằng khai báo sau), rồi lượt có chẩn
+    đoán (checkExpr trước, evalConst với guard tránh báo T008 trùng khi tên
+    chưa khai báo, kiểm kiểu gán + khoảng); `suppressW001` khi kiểm init;
+    lưu/khôi phục `currentBlock`/`currentSymbols` để gọi đệ quy không lệch
+    ngữ cảnh.
+11. **Inline-struct field init dùng cơ chế pending
+    (`pendingStructInits`, flush sau khi tính xong const của block);
+    UDT/DB field init tính ngay với `EMPTY_SYMBOLS`.**
+12. **`TypecheckResult.blocks` có thể chứa entry tổng hợp cho block ctx**
+    (để `lowerFile` tra cứu interface callee chéo file không cần tham số
+    ctx); `lookupInterface` cache kiểu trả của FC từ ctx vào `fcReturnTypes`
+    để lower dùng qua `TypecheckResult.returnTypes` (đã thêm field này vào
+    `TypecheckResult`).
+13. **Member của struct local (`#udt.field`) → `static` path `[udt,
+    field, ...]`** — plan chỉ nêu member của instance FB; struct local dùng
+    cùng cơ chế vì `local` không có path.
+14. **Thêm variant `member` vào `IrLValue`** (`{k:'member', base, field}`)
+    cho member sau index (`#a[0].field`) — plan không quy định;
+    `static.path` chỉ chứa string nên không biểu diễn được index xen giữa.
+    Member trực tiếp trên root vẫn dùng `static.path` theo plan.
+15. **`lower` không kiểm tra lại kiểu: thiếu kiểu trong `types` map = lỗi
+    nội bộ → throw ồn ào. `convertIfNeeded` chỉ cho widening (khác kiểu mà
+    không widening → throw).**
+16. **FC gọi dạng statement không có `Q =>` thì giá trị trả bị bỏ (ret
+    undefined); FC trong biểu thức không nhận `Q =>` (T004).**
+17. **`irToJson` trả JSON + newline cuối; golden file kết thúc bằng
+    newline; CLI ghi đúng chuỗi đó.**
+18. **Trong `lowerCallStmt`, tên FB chuẩn lấy từ `blockId` của symbols
+    (không phải tên khai báo as-written).**
+19. **Đệ quy chéo file (OQ-122): `recordEdge` chỉ ghi cạnh tới block trong
+    file hiện tại — chu trình A→B→A với A, B ở hai file lọt im lặng.**
+    Plan nói call graph gồm "call trong unit biên dịch + `ctx.blocks`" nên
+    đây là thiếu sót so với plan, không phải mặc định: sửa `recordEdge`
+    (ghi cả cạnh tới block trong ctx) + `checkRecursion` seed thêm cạnh
+    trích từ IR của `ctx.blocks` (walker `ctxCallEdges`, bỏ qua block cũng
+    có trong file hiện tại để re-compile bỏ call không báo đệ quy giả;
+    diagnostic S020 mang đúng file của call site gây chu trình). Test
+    `typecheck-coverage.test.ts` (đệ quy qua ctx + re-compile bỏ call).
+20. **`MIN`/`MAX`/`LIMIT` với arg bit-string (vd `MIN(#i, #w)`) → SCL-T003,
+    không phải T002.** `commonNumeric` kiểm tra `isNumeric` trước và báo
+    T003 khi gặp Word/Byte/DWord, chưa tới bước LUB (nơi mới sinh T002).
+    Bit-string không phải họ số nên T003 nhất quán với OQ-107/T003 (phép
+    số học trên bit-string → T003); đường T002 vẫn tồn tại cho hai họ số
+    không có LUB (vd `MIN(#i, #u)` Int+UInt → T002). Test trong
+    `algebra.test.ts` ghim cả hai hành vi.
+21. **Gán trực tiếp vào member INPUT của instance FB (`#fb.IN := …`) →
+    cho phép (OQ-129, tier B).** Plan không quy định; `resolveLValue` trả
+    symbol của instance (section `var`), không phải của member, nên T006
+    không bật. Mặc định: member là field của DB instance, ghi trực tiếp
+    tương đương truyền ở lần gọi sau; chỉ cấm gán vào VAR_INPUT của chính
+    block đang kiểm (T006). Chờ S1/PLCSIM xác nhận.
+22. **Chỉ số mảng không phải số nguyên → SCL-T005 (không phải T003).**
+    Message: "chỉ số mảng phải là số nguyên". Test đã sửa kỳ vọng theo
+    implementation (implementation đúng với quy tắc T005 "truy cập
+    member/index sai" ở plan §18).
+
+### Sửa bug phát hiện khi viết test (nguyên nhân gốc, không sửa kỳ vọng)
+
+- **A8 (`Int + Word`): implementation trả T003, plan bảng A yêu cầu T002.**
+  Nguyên nhân: `binaryResult` chưa phân biệt "một vế số + một vế
+  bit-string" (khác họ, không có LUB → T002) với "cả hai vế bit-string /
+  Bool tham gia" (toán tử không áp dụng → T003). Sửa: thêm
+  `numericBitMismatch` → T002 cho các nhánh số học/`**`/`MOD` (test A8
+  pass; message T002 đã có sẵn ở `checkExpr`).
+- **`X_TO_Y` bị T001 ("tên chưa khai báo"):** `classifyIntrinsic` so sánh
+  tên đã upper-case (`'REAL'`) với `CONVERTIBLE_TYPES` chứa tên
+  mixed-case (`'Real'`). Sửa: set dùng chữ HOA (chỉ chỗ này dùng set).
+  (`BOOL_TO_*` không dính vì `BOOL_TO_TARGETS` đã là chữ HOA.)
+- **Lower crash "thiếu kiểu cho node" ở intrinsic call:** `checkCallExpr`
+  ghi `types` map cho nhánh FC nhưng **không** ghi cho nhánh intrinsic
+  (`checkIntrinsicCall` trả kiểu mà không `set`). Sửa: ghi `types` ở
+  nhánh intrinsic trong `checkCallExpr` (như nhánh FC).
+- **FC return dạng `"FC_A" := …` hạ thành `dbField` thay vì local tổng
+  hợp:** `lowerLValue` chỉ xử lý tên FC ở nhánh base `local` (`#FC_A`),
+  còn dạng quoted (`"FC_A"`) rơi vào nhánh `global` → `dbField`. Sửa:
+  nhánh `global` kiểm tra tên FC của chính block (không phân biệt
+  hoa/thường) → `{k:'local', name: block.name}` (đúng plan §18: cả hai
+  dạng đều → local tổng hợp).
+- **Arg bị từ chối (FB positional, FC IN_OUT) sinh thêm lỗi "thiếu tham
+  số bắt buộc" giả:** `checkCallArgs` `continue` mà không đánh dấu
+  `provided`, nên kiểm missing-param sau vòng lặp báo thêm một T004 tại
+  vị trí callee (sớm hơn vị trí arg thật). Sửa: đánh dấu `provided` khi
+  từ chối arg đã cung cấp giá trị (sai hình thức, không phải thiếu).
+- **Lower không phân giải được callee FC/FB ở file khác (throw "không tìm
+  được FC 'FC_A'"):** `lookupInterface` nhánh ctx chỉ cache kiểu trả vào
+  `fcReturnTypes` mà không ghi entry tổng hợp vào `this.blocks`, nên
+  `lower.fcTarget` (chỉ có `TypecheckResult`, không có ctx) không tìm
+  được callee. Sửa: nhánh ctx của `lookupInterface` gọi thêm
+  `lookupBlockSymbols` (qua `blockSymbolsFromIr`) để ghi entry tổng hợp
+  — đúng thiết kế đã ghi ở mục 12. Phát hiện nhờ test đệ quy qua ctx
+  (compile FC_B gọi FC_A từ ctx); test mới `typecheck-coverage.test.ts`
+  (gọi FB/FC từ ctx qua `compileScl`) ghim hành vi này.
+- **Test fixture:** helper `obWith` ban đầu thiếu `END_VAR` (mọi số dòng
+  bảng C tính tay lệch 1 — đã đếm lại); bảng A đổi fixture sang FB với
+  `VAR_INPUT` (toán hạng) + `VAR_TEMP` (kết quả) vì `VAR_TEMP` đọc trước
+  khi gán dính W001 hợp lệ; `TRUNC` trả DInt nên đích test phải là DInt
+  (không phải Int); lower sort blocks theo tên nên test tìm block theo
+  tên, không theo index.
+
+### Chưa làm / rủi ro còn lại
+
+- **Sự cố VM restart giữa phiên (2026-11-25 ~23:32 +07):** VM restart xóa
+  toàn bộ tmpfs `/tmp`, mất bản sao làm việc `/tmp/vcs-p13` (toàn bộ code
+  + test P1.3 chưa copy về `~/workspace/vcs`). Khôi phục từ session log
+  (`/home/hatch/agents/agent-0039e177…/sessions/*.jsonl` + log subagent
+  algebra): replay 150 op `muse.write`/`muse.edit` theo đúng thứ tự seq
+  (146/150 áp dụng; 4 edit fail là retry thừa trong phiên gốc, trạng thái
+  cuối đã đúng), sinh lại golden (`tsx gen-golden.mts`), diagnostics
+  (`pnpm docs:diagnostics`), lockfile (`pnpm install`, +3 dòng), OQ
+  (sed). Kiểm chứng: tsc 0, eslint 0, full test 1281/1281 ngay sau khôi
+  phục (trước khi viết thêm test coverage). Bài học: **không để bản duy
+  nhất của code chưa commit trong `/tmp`** — sau khôi phục đã rsync toàn
+  bộ cây làm việc về `~/workspace/vcs` ngay và sau mỗi bước lớn; `/tmp`
+  chỉ còn là nơi chạy install/test.
+- `X_TO_Y` với `SInt`/`USInt`/`UInt`/`UDInt`/`Time` hiện không nhận (tập
+  `CONVERTIBLE_TYPES` chỉ 8 kiểu) — chờ mã thật S1 xác nhận có cần mở
+  rộng không (ghi ở `semantics.md` §14 UNVERIFIED).
+- Tier-B OQ-106…129 đã đóng dạng "đã áp dụng" (OQ-129 mới: gán `#fb.IN`,
+  xem mục 21); chủ sản phẩm có quyền veto qua cơ chế R (OWNER-INBOX §6)
+  — plan P1.3 không tạo R-entry riêng cho các OQ này (cùng thực tế với
+  P1.2).
+- Coverage: `vendor-siemens/src` 90,7% lines (cần ≥85%), `runtime-iec/src`
+  97,1%. Các nhánh `throw` nội bộ trong lower còn lại (abs có path, gọi
+  abs/FB trong biểu thức, arg convert sai số lượng, FB positional, CASE
+  label không hằng, FOR var có path) **không tới được qua chương trình
+  hợp lệ** (typecheck đã chặn) nên không có test trực tiếp — chỉ 4 throw
+  tới được qua `TypecheckResult` crafted có test.
+- Flaky đã thấy 1 lần: `tests/gen-diagnostics.test.ts` fail ENOENT
+  (`apps/web/src/__probe-dep-bad.ts`) khi chạy full suite song song — file
+  probe do một test khác tạo/xóa trong lúc scan; chạy lại và chạy lẻ đều
+  pass (7/7). Không sửa (không phải lỗi P1.3); theo dõi ở gate cuối.
+- Tiếp theo: P1.4 plan-first (interpreter/SoftPlc).
