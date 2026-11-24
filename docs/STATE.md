@@ -3,19 +3,20 @@
 > **AI đọc file này đầu mỗi phiên và cập nhật cuối mỗi phiên.** Chủ sản phẩm kiểm tra và ký ở mục "Ký duyệt milestone". Giữ ngắn: tối đa ~150 dòng; lịch sử chi tiết nằm ở git và `docs/acceptance/`.
 
 ## 0. Năng lực công cụ (AI điền ở phiên đầu tiên)
-- Shell: bash (Linux VM) · git đọc/ghi/push: qua GitHub MCP (`/opt/hatch/bin/github`, đã kết nối congnghetrehn, đã tạo nhánh `develop` + `chore/docs-bootstrap`); `git clone` HTTPS trực tiếp bị chặn (repo private, không có credential trong VM) · `gh` CLI: 2.102.0, chưa login · Node 24.22.1, npm 10.9.4, pnpm: chưa có (lệnh `pnpm` không có; `npx -y pnpm@10` chưa xác nhận) · .NET SDK: thiếu · mạng: github.com 200, registry.npmjs.org 200 · mở được phiên reviewer độc lập: có (subagent)
+- Shell: bash (Linux VM) · git: bản sao làm việc local (nhánh `m0/p0.1-repo-tooling`, commit local, KHÔNG push — mọi thay đổi GitHub đi qua trình duyệt UI trên máy chủ sản phẩm theo chỉ đạo 2026-11-24; `git clone` HTTPS trực tiếp bị chặn, repo private, không có credential trong VM) · `gh` CLI: 2.102.0, chưa login · Node 24.22.1, npm 10.9.4, pnpm: **không có binary** (`pnpm: command not found`, `corepack` không có) nhưng **dùng được qua `npx -y pnpm@10.15.0`** (10.15.0, ĐÃ CHẠY) · .NET SDK: **thiếu** · mạng: github.com 200, registry.npmjs.org 200 · mở được phiên reviewer độc lập: có (subagent)
+- Quirk VM (2026-11-24, P0.1): `pnpm install`/`pnpm add` trong `~/workspace/vcs` (btrfs `/home/hatch`) luôn lỗi cuối `EPERM chown <file tạm>` (exit 255) — chown trực tiếp lúc được lúc không; `pnpm-lock.yaml` vì thế không ghi được tại chỗ. Cách xử lý: sinh lockfile trong bản sao ở `/tmp/vcs-lock` (ở đó pnpm ghi được, exit 0) rồi chép về; `node_modules` vẫn cài đủ (đã kiểm `tsc/eslint/vitest` chạy được) nhưng link workspace `@vcs/*` phải tạo tay (`ln -s`, đã tạo 7 link) vì install dừng trước bước link. **Hậu quả: `pnpm install --frozen-lockfile` CHƯA CHẠY ĐƯỢC trong VM này — phải kiểm lại trên CI và máy Windows (T-001).** Xem OQ-007.
 - Hệ điều hành/ môi trường chạy: Linux VM (Muse); máy Windows của chủ sản phẩm chưa kiểm (spike S6, T-001)
 
 ## 1. Vị trí hiện tại
-- Milestone: **M0** (chưa bắt đầu)
-- Prompt đang làm / vừa xong: Bootstrap I–II (docs-bootstrap) — xong, chờ merge PR vào `develop`; tiếp theo: P0.1
-- Nhánh: `chore/docs-bootstrap` (từ `develop` @ 0f60c2d)
-- Cập nhật lần cuối: 2026-11-24 bởi AI (bootstrap)
+- Milestone: **M0** (P0.1 xong trên bản sao local, chưa đẩy lên GitHub; bootstrap I–II đã merge vào `develop` qua PR #1, merge commit `6567556`)
+- Prompt đang làm / vừa xong: P0.1 — Repo + công cụ + CI + lint tất định + dependency-cruiser (xong, gate xanh local); tiếp theo: P0.2
+- Nhánh: `m0/p0.1-repo-tooling` (bản sao local, commit local, chưa push — đẩy qua trình duyệt UI ở bước sau)
+- Cập nhật lần cuối: 2026-11-24 bởi AI (P0.1)
 
 ## 2. Tiến độ prompt
 | Prompt | Trạng thái | Commit/PR | Gate (đã tự chạy lại bởi chủ sản phẩm?) | Ghi chú |
 |---|---|---|---|---|
-| P0.1 | ☐ chưa | | | |
+| P0.1 | ✔ xong (gate xanh local; CI chưa chạy — chưa có trên GitHub) | nhánh local `m0/p0.1-repo-tooling` | lint/typecheck/depcheck/test/review:cheats xanh 2026-11-24 (10 test) | Chưa push; `pnpm install --frozen-lockfile` chưa chạy được trong VM (OQ-007) |
 | P0.2 | ☐ chưa | | | |
 | P0.3 | ☐ chưa | | | ⚠ plan-first |
 | P0.4 | ☐ chưa | | | ⚠ plan-first |
@@ -77,8 +78,9 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 ## 3. Việc đang dở (cho phiên sau)
 - File/hàm đang sửa: —
 - Test đang hỏng (nguyên văn): —
-- Lệnh tái hiện nhanh: `node scripts/check-cheats.mjs` (ĐÃ CHẠY 2026-11-24: SẠCH — lúc này chỉ quét 1 file, chưa có apps/packages)
-- Bước tiếp theo cụ thể: P0.1 — Repo + công cụ + CI + lint tất định + dependency-cruiser + AGENTS.md (M0 §1–3, 11–13)
+- Lệnh tái hiện nhanh: `npx -y pnpm@10.15.0 run lint && npx -y pnpm@10.15.0 run typecheck && npx -y pnpm@10.15.0 run depcheck && npx -y pnpm@10.15.0 run test && npx -y pnpm@10.15.0 run review:cheats` (ĐÃ CHẠY 2026-11-24: cả 5 xanh; test 10 passed; depcheck "no violations, 4 modules, 0 dependencies"; review:cheats SẠCH, quét 6 file). `node scripts/doctor.mjs` thoát 1 — chỉ do thiếu binary pnpm trong VM (xem OQ-007).
+- Bước tiếp theo cụ thể: **đẩy commit sửa CI (bỏ Node 20, AMENDMENTS A16) lên nhánh `m0/p0.1-repo-tooling` qua trình duyệt UI**, chờ CI xanh (ubuntu + windows × Node 22) trên PR #8 rồi merge vào `develop`; sau đó P0.2 — @vcs/schemas + @vcs/project (M0 §4–5).
+- Đẩy qua UI — danh sách file P0.1 (so với baseline bootstrap): `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `turbo.json`, `tsconfig.base.json`, `tsconfig.json`, `.npmrc`, `.nvmrc`, `.editorconfig`, `.prettierrc`, `.prettierignore`, `eslint.config.js`, `.dependency-cruiser.cjs`, `vitest.config.ts`, `vitest.workspace.ts`, `CONTRIBUTING.md`, `.github/workflows/ci.yml`, `packages/{schemas,kernel,project,test-utils}/{package.json,tsconfig.json,src/index.ts}`, `apps/{cli,server,web}/package.json`, `scripts/doctor.mjs`, `tests/tooling-gates.test.ts`, `tests/doctor.test.ts`, `docs/spikes/S6-env.md`, `docs/STATE.md`, `docs/open-questions.md`, `docs/OWNER-INBOX.md`. KHÔNG đẩy `node_modules/` (đã .gitignore).
 
 ## 4. Quyết định và giả định gần đây
 | Ngày | Nội dung | Tham chiếu (ADR/OQ/spec §) |
@@ -87,16 +89,26 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 | 2026-11-24 | Sửa cơ học tầng A: `M0 §17.4` → `M0 §17 mục 4`; `AGENTS §9.7` → `§9 mục 7`; ví dụ `D-007` → `D-003` | docs-audit §5, A-01…A-03 |
 | 2026-11-24 | Tên sản phẩm đã thống nhất "Virtual Commissioning Studio" (6 lần, không biến thể) — đổi tên là no-op | docs-audit §5 A-05 |
 | 2026-11-24 | PR template do chủ sản phẩm cung cấp, đưa nguyên văn lên `.github/pull_request_template.md` | OWNER-INBOX §3 (ghi chú) |
+| 2026-11-24 | P0.1: ghim phiên bản devDeps đúng quy tắc ≥ 14 ngày (M0 §3.2): typescript 5.9.3, typescript-eslint 8.72.2, eslint 10.14.0, @eslint/js 9.39.5, prettier 3.9.10, vitest 4.1.12, dependency-cruiser 18.7.2, turbo 2.11.10, tsx 4.23.15, cross-env 10.1.0, @types/node 24.19.2. Bản `latest` lúc cài vi phạm quy tắc (typescript 7.0.2, typescript-eslint 8.74.0 mới 1 ngày, vitest 5.1.1 mới 6 ngày, eslint 10.15.0 mới 11 ngày, prettier 3.10.1 mới 12 ngày, dependency-cruiser 18.9.0 mới 2 ngày) | M0 §3.2; ngày phát hành kiểm bằng `npm view <pkg> time` |
+| 2026-11-24 | P0.1: dùng vitest 4.1.12 thay vì vitest 5 — vitest 5 yêu cầu Node ^22.12/24/26, mâu thuẫn M0 §13 (CI chạy Node 20 và 22); vitest 4.1.12 hỗ trợ Node ^20/22/24 | M0 §13; `npm view vitest@5.1.0 engines` |
+| 2026-11-24 | P0.1: ESLint 10 không còn bundle `@eslint/js` (dòng 10.x không tồn tại; mới nhất là 9.39.5, không có peerDependencies) — thêm `@eslint/js@9.39.5` làm devDependency trực tiếp | Kiểm bằng `npm view @eslint/js` + đọc `eslint@10.14.0/package.json` |
+| 2026-11-24 | P0.1: Vitest 4 bỏ `defineWorkspace` (trả `undefined`) — `vitest.workspace.ts` export trực tiếp mảng project | Kiểm bằng `node -e` trên `vitest/dist/config.js` |
+| 2026-11-24 | P0.1: Prettier mặc định tự chọn (spec không quy định style): singleQuote, trailingComma all, printWidth 100, semi, LF | `.prettierrc` |
+| 2026-11-24 | P0.1: package `schemas/kernel/project/test-utils` chỉ có khung (`package.json` + `tsconfig.json` + `src/index.ts` chứa `export {};` + chú thích prompt nào điền) — chưa có logic nghiệp vụ; `apps/*` chỉ có `package.json` (tsconfig/src đến ở prompt của app). `turbo.json` đã tạo nhưng root scripts chưa gọi turbo (tránh chạy trùng/lặp) — turbo dùng từ P0.2 khi có script theo package | P0.1 prompt ("Không làm: logic nghiệp vụ"); M0 §3.1 "chỉ tạo package có nội dung" |
+| 2026-11-24 | P0.1: CHƯA tạo script `dev/build/vcs/bench/test:e2e/docs:diagnostics` (chưa có code để chạy) — thêm ở prompt sở hữu: `vcs` P0.4, `bench` P0.3, `test:e2e` P0.6, `docs:diagnostics` P0.2, `dev/build` P0.5–P0.7. CI hiện chỉ có job `check` + `test` (ubuntu + windows × Node 22, bỏ Node 20 theo A16); job `e2e`/`bench`/`docs:diagnostics --check` thêm cùng prompt trên | M0 §3.3, §13; OQ-008 |
+| 2026-11-24 | P0.1: **bỏ Node 20 khỏi CI** (quyết B của chủ sản phẩm): PR #8 CI đỏ ở job test Node 20 (ubuntu + windows) vì `dependency-cruiser@18.7.2` yêu cầu Node `^22\|\|^24\|\|>=26` (`ERR_PNPM_UNSUPPORTED_ENGINE`); job `check` và test Node 22 xanh. Ghi AMENDMENTS **A16** (thắng M0 §13), sửa `.github/workflows/ci.yml` ma trận `node: [22]` | AMENDMENTS A16; PR #8; CI run #17/#18 |
+| 2026-11-24 | P0.1: làm theo mặc định D-002 (A: repo private, UNLICENSED, giữ `@vcs/*`) để viết `package.json` — chờ chủ sản phẩm quyết D-002 (ghi R-002, có quyền veto) | OWNER-INBOX D-002, R-002 |
+| 2026-11-24 | P0.1 không có phần ngữ nghĩa thời gian (chưa có SimClock/TagDB) nên không có bảng timeline tính tay — golden timeline bắt đầu từ P0.3/P0.4 theo SKILL-testing-and-verification §2 | SKILL-testing-and-verification §2 |
 
 ## 5. Đang chờ chủ sản phẩm
 Chỉ liệt kê **ID** (chi tiết ở `docs/OWNER-INBOX.md`; câu hỏi/ giả định ở `docs/open-questions.md`):
 - Chặn tiến độ: D-001, D-004 (trước G0); T-002, T-003 (nên làm sớm, quyết định khả thi M5)
-- Không chặn (duyệt sau): D-002, D-003, D-005, S-001, S-002, S-003, R-001
+- Không chặn (duyệt sau): D-002, D-003, D-005, S-001, S-002, S-003, R-001, R-002; OQ-006, OQ-007, OQ-008 (mở, xem `docs/open-questions.md`)
 
 ## 6. Dữ liệu/môi trường cần có (🔑) và tình trạng
 | Cần | Cho prompt | Tình trạng |
 |---|---|---|
-| Repo + CI | P0.1 | ◐ repo có (main @0f60c2d, develop đã tạo); CI chưa có (tạo ở P0.1) |
+| Repo + CI | P0.1 | ✔ khung xong; PR #8 mở (nhánh `m0/p0.1-repo-tooling`): CI `check` + test Node 22 xanh, test Node 20 đỏ (dependency-cruiser 18 yêu cầu Node 22+); đã sửa theo A16 (chỉ Node 22), đang chờ CI chạy lại — `pnpm install --frozen-lockfile` trong VM vẫn chưa chạy được (OQ-007) |
 | I/O list thật ẩn danh + quy ước tên | P2.7 | ☐ (X-003) |
 | C&E thật ẩn danh + biểu mẫu FAT | P3.4–P3.5 | ☐ (X-004) |
 | SCADA đích + node id | P4.4 | ☐ (X-005) |

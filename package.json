@@ -1,0 +1,35 @@
+{
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@types/node": "24.19.2",
+    "cross-env": "10.1.0",
+    "dependency-cruiser": "18.7.2",
+    "eslint": "10.14.0",
+    "eslint-config-prettier": "10.1.8",
+    "prettier": "3.9.10",
+    "tsx": "4.23.15",
+    "turbo": "2.11.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.2",
+    "vitest": "4.1.12"
+  },
+  "engines": {
+    "node": ">=20.11",
+    "pnpm": ">=10"
+  },
+  "license": "UNLICENSED",
+  "name": "vcs",
+  "packageManager": "pnpm@10.15.0",
+  "private": true,
+  "scripts": {
+    "depcheck": "depcruise --validate .dependency-cruiser.cjs packages apps",
+    "doctor": "node scripts/doctor.mjs",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "review:cheats": "node scripts/check-cheats.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}

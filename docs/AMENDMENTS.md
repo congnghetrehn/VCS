@@ -24,6 +24,7 @@
 | A13 | M3 §3.2: tự định nghĩa thời lượng | Dùng `parseDuration` của `@vcs/schemas` | P3.2 |
 | A14 | M1–M3: lệnh `vcs …` | Khung `apps/cli` (commander); mỗi lệnh một file `commands/*.ts` | mọi milestone |
 | A15 | PRD 7.2 | Thêm `@vcs/project`, `@vcs/test-utils` | P0.1–P0.2 |
+| A16 | M0 §13: CI ma trận Node 20, 22 (job `test` ubuntu/windows; gate xanh Node 20 và 22) | **CI chỉ chạy Node 22** (bỏ Node 20): `dependency-cruiser@18.7.2` yêu cầu Node `^22\|\|^24\|\|>=26`, `pnpm install` trên Node 20 lỗi `ERR_PNPM_UNSUPPORTED_ENGINE`. Quyết bởi chủ sản phẩm 2026-11-24 (chọn B, không hạ dependency-cruiser) | P0.1 |
 
 ## B. Điều chỉnh từ M4 §2 (áp dụng khi làm M4; một phần có thể làm trước ở **P0.8**)
 
