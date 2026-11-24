@@ -254,3 +254,33 @@ LWW giữ giá trị cuối — có test delta gom, nhưng chưa có test khẳn
 **UNVERIFIED.** Thứ tự đăng ký extension khi hai extension đăng ký cùng
 controller key: factory đăng ký sau ghi đè factory trước (hành vi của
 `Map.set` trong `BuildCtx`) — chưa có test; tránh dựa vào hành vi này.
+
+## 11. Vá giao diện P0.8 (M4/M5 áp trước)
+
+**VERIFIED (OQ-075).** `validateTagValue(type, v)` (`@vcs/kernel`, `tags.ts`)
+trả `undefined` khi hợp lệ, `{ kind: 'TYPE' | 'RANGE', message }` khi sai:
+TYPE = sai kiểu JS (Bool cần boolean, String cần string, kiểu số cần number);
+RANGE = number ngoài khoảng kiểu hoặc không nguyên với kiểu nguyên; Real/LReal
+chấp nhận mọi số kể cả NaN/±Infinity; Time: số nguyên ≥ 0. Hàm không chuẩn hóa
+(`Math.fround`, `>>> 0` chỉ trong `TagDB.write`). `validateValue` nội bộ dùng
+lại hàm này nên thông điệp `TAG-E001` giữ nguyên văn bản cũ.
+
+**VERIFIED (OQ-081).** Hai bảng `TYPE_RANGES` (kernel cho `TagDB`, schemas cho
+`initialMatchesType` → PRJ-E014) giữ đồng bộ bằng tay; test chéo
+(`tests/type-ranges-cross.test.ts`) so sánh verdict hai bảng trên cùng bộ case
+biên để bắt lệch.
+
+**VERIFIED.** `files.comms` (default `'comms/comms.yaml'`) và `files.hmi`
+(default `'hmi/'`) chỉ là schema + default — `loadProject` chưa đọc hai file
+này, hash project (chỉ gồm file đã đọc) không đổi.
+
+**VERIFIED (OQ-076/077/080).** Giao thức additive, `PROTOCOL_VERSION` giữ 1:
+`sim.state.locked?` (optional), message `comms.status` (envelope theo M4 §5.3)
+và `comms.log` (mục RingLog theo M4 §5.4, `level: string`). Server P0.8
+**không phát** message mới nào, web không đổi; quy tắc khi nào `locked = true`
+(M4 vs M5/C5) chưa quyết — do P4.1/P5.1 quyết.
+
+**VERIFIED (OQ-078).** `requiresAsync()` = true khi và chỉ khi có ≥ 1 component
+đã đăng ký là `ControllerAdapter` với `asyncStep === true`. Component trả
+Promise mà không đặt cờ vẫn bị `stepOnce()` ném `SIM-E002` như M0 — cờ là cách
+duy nhất để khai báo bất đồng bộ. Chuyển sang `stepOnceAsync` theo cờ là P5.1.
