@@ -80,6 +80,6 @@
 | E3 | **M4: hiệu năng pull-sampling của node-opcua** (2 000 monitored item) | Chạy bench trước; không đạt → push cho I/Q (M4 §7.4) + ADR | P4.4 |
 | E4 | **M5: độ chính xác import logic vs PLCSIM** | Importer `logic` chỉ để chạy Chế độ A; chuẩn vàng là PLCSIM; báo cáo "convertibility" rõ | P5.8 |
 | E5 | **`TagValue` Real = double nhưng PLC dùng float32** | `Math.fround` ở **ranh giới** (SoftPlc ghi Q, plant adapter ghi AI, S7/OPC UA encode); test property cho round-trip | P1.4, P2.1 |
-| E6 | **UI Worker vs server** (M1 §11) | Server là mặc định (A10); Worker chỉ nếu chủ sản phẩm yêu cầu (M0 §17.4) | P0.6/P1.7 |
+| E6 | **UI Worker vs server** (M1 §11) | Server là mặc định (A10); Worker chỉ nếu chủ sản phẩm yêu cầu (M0 §17 mục 4) | P0.6/P1.7 |
 | E7 | **Thư mục mẫu `examples/`**: `hello-tags` (M0), `motor-interlock` (M1), `crusher-sequence` (M3) | Giữ cùng tên; mỗi milestone chỉ **thêm**, không đổi hành vi ví dụ cũ (test hồi quy dùng chúng) | mọi milestone |
 | E8 | **Dữ liệu thật để tinh chỉnh** (I/O list, C&E, SimaticML, SCADA node id) | AI làm bằng fixture tổng hợp trước; **chủ sản phẩm đưa dữ liệu thật ẩn danh** → chạy lại + chỉnh `naming.yaml`/bindings/synonym | trước P2.7, P3.5, P4.4, P5.7 |

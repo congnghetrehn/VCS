@@ -1,7 +1,7 @@
 # OWNER-INBOX — Hộp thư của chủ sản phẩm
 
 > **Chủ sản phẩm chỉ cần đọc file này.** AI ghi vào đây mọi thứ cần anh: quyết định, kiểm thử thật, dữ liệu, thay đổi lớn, ký duyệt. Mỗi mục tự đủ ngữ cảnh để xử lý trong < 2 phút.
-> **Cách trả lời:** đánh dấu `[x]` vào lựa chọn (hoặc dán kết quả theo hướng dẫn) rồi commit, hoặc trả lời trong chat với ID mục (ví dụ "D-007: chọn B"). AI sẽ cập nhật trạng thái, ghi vào ADR/OQ nếu cần và gỡ chặn.
+> **Cách trả lời:** đánh dấu `[x]` vào lựa chọn (hoặc dán kết quả theo hướng dẫn) rồi commit, hoặc trả lời trong chat với ID mục (ví dụ "D-003: chọn B"). AI sẽ cập nhật trạng thái, ghi vào ADR/OQ nếu cần và gỡ chặn.
 > Mục đã xử lý chuyển xuống "Lịch sử" (không xóa). AI gom yêu cầu theo đợt, tối đa 1 lần/ngày làm việc, trừ khi bị chặn hoàn toàn.
 
 Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần cứng) · **X** DỮ LIỆU CẦN CÓ · **S** THAY ĐỔI SPEC/LỚN · **K** KÝ DUYỆT milestone · **R** DUYỆT SAU (tầng B)

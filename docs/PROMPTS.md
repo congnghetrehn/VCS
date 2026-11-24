@@ -18,7 +18,7 @@
 
 ## 2. Khung chuẩn (đã nằm trong mọi prompt ở mục 6)
 **Mở đầu:** `Làm P{ID} theo quy trình AGENTS.md §9 và chính sách docs/AUTONOMY.md. Đọc: AGENTS.md → docs/agent/SOUL.md → docs/STATE.md → docs/OWNER-INBOX.md → docs/AMENDMENTS.md (mục {X}) → docs/specs/{spec} {mục}. Nạp skill: {skill} (docs/skills/README.md).`
-**Kết thúc:** `Gate: {gate}. Báo cáo cuối đúng mẫu AGENTS.md §9.7; dán kết quả lệnh thật; cập nhật STATE.md và open-questions.md.`
+**Kết thúc:** `Gate: {gate}. Báo cáo cuối đúng mẫu AGENTS.md §9 mục 7; dán kết quả lệnh thật; cập nhật STATE.md và open-questions.md.`
 
 ## 3. Prompt phụ trợ (dán khi cần)
 
