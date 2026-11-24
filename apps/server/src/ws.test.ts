@@ -29,7 +29,11 @@ afterEach(async () => {
   for (const s of servers.splice(0)) await s.stop();
 });
 
-async function startServer(opts?: { now?: () => number; dir?: string }): Promise<{
+async function startServer(opts?: {
+  now?: () => number;
+  dir?: string;
+  webDistDir?: string;
+}): Promise<{
   server: RunningServer;
   wsUrl: string;
   httpUrl: string;
@@ -38,6 +42,7 @@ async function startServer(opts?: { now?: () => number; dir?: string }): Promise
     config: { port: 0 },
     silent: true,
     ...(opts?.now !== undefined ? { now: opts.now } : {}),
+    ...(opts?.webDistDir !== undefined ? { webDistDir: opts.webDistDir } : {}),
   });
   servers.push(server);
   await server.start();
@@ -658,7 +663,11 @@ describe('REST', () => {
   });
 
   it('GET / → 404 JSON khi chưa có web build (OQ-044)', async () => {
-    const { httpUrl } = await startServer();
+    // Trỏ webDistDir vào thư mục tạm trống để test không phụ thuộc vào
+    // việc apps/web/dist có tồn tại trong cây làm việc hay không (sau khi
+    // build web ở P0.6, dist có thật và GET / trả index.html).
+    const emptyDir = await mkdtemp(join(tmpdir(), 'vcs-no-web-'));
+    const { httpUrl } = await startServer({ webDistDir: emptyDir });
     const res = await fetch(httpUrl);
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: 'web build chưa có (P0.6)' });
