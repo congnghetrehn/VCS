@@ -136,6 +136,34 @@ describe('dependency-cruiser (M0 §3.5 + B7)', () => {
     });
   }, 180_000);
 
+  it('cho phép schemas import nội bộ (schemas-standalone chỉ cấm package khác)', async () => {
+    const probe = 'packages/schemas/src/__probe-dep-ok.ts';
+    await withProbe(probe, "import './common.js';\nexport {};\n", async () => {
+      const r = await runNode('node_modules/dependency-cruiser/bin/dependency-cruiser.mjs', [
+        '--validate',
+        '.dependency-cruiser.cjs',
+        probe,
+      ]);
+      expect(
+        r.code,
+        `depcruise không được chặn ${probe}, stdout=${r.stdout} stderr=${r.stderr}`,
+      ).toBe(0);
+    });
+  }, 180_000);
+
+  it('chặn schemas import @vcs/project (schemas không import package khác)', async () => {
+    const probe = 'packages/schemas/src/__probe-dep-bad.ts';
+    await withProbe(probe, "import '@vcs/project';\nexport {};\n", async () => {
+      const r = await runNode('node_modules/dependency-cruiser/bin/dependency-cruiser.mjs', [
+        '--validate',
+        '.dependency-cruiser.cjs',
+        probe,
+      ]);
+      expect(r.code, `depcruise phải thất bại trên ${probe}, stdout=${r.stdout}`).not.toBe(0);
+      expect(r.stdout + r.stderr).toMatch(/schemas-standalone/);
+    });
+  }, 180_000);
+
   it('chặn apps/web import @vcs/kernel (web chỉ được schemas, expr, hmi)', async () => {
     const probe = 'apps/web/src/__probe-dep-bad.ts';
     await withProbe(probe, "import '@vcs/kernel';\nexport {};\n", async () => {
