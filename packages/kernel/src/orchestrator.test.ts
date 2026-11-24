@@ -142,7 +142,7 @@ function makeGoldenSim(errorPolicy?: 'throw' | 'isolate'): GoldenSim {
     events.push('plant');
     if (T === 0) tags.write('SW_AUTO', true, 'plant');
   });
-  const plc = new LoopbackController('PLC1');
+  const plc = new LoopbackController('PLC1', tags);
   const gw = new ScriptedComponent('gw', () => {
     events.push('gw');
     const lamp = tags.get(3 as TagHandle);
