@@ -29,7 +29,7 @@ async function makeLoopback(
     model: 'loopback',
     config,
   };
-  const ctrl = new LoopbackController('PLC1');
+  const ctrl = new LoopbackController('PLC1', tags);
   await ctrl.init({ id: 'PLC1', def, stepMs: 10, scanPeriodMs, tags: defs() }, io);
   return { ctrl, tags };
 }
@@ -52,6 +52,22 @@ describe('LoopbackController — loopback/blink/counter', () => {
     expect(ctrl.getDiagnostics().scanCount).toBe(2);
     expect(ctrl.getDiagnostics().lastScanSimMs).toBe(10);
     expect(ctrl.getDiagnostics().state).toBe('RUN');
+  });
+
+  it('output không có rule không bị ghi đè mỗi scan (I/O thưa, OQ-032)', async () => {
+    const { ctrl, tags } = await makeLoopback({
+      loopback: [{ in: 'IN_A', out: 'OUT_A' }],
+    });
+    // LAMP không có rule nào: ghi ngoài bằng source 'system' rồi chạy scan.
+    tags.write('LAMP', true, 'system');
+    ctrl.step(0, 10);
+    ctrl.step(10, 10);
+    expect(tags.get(3 as TagHandle)).toBe(true);
+    // Rule loopback vẫn chạy bình thường; LAMP vẫn giữ nguyên.
+    tags.write('IN_A', true, 'test');
+    ctrl.step(20, 10);
+    expect(tags.get(2 as TagHandle)).toBe(true);
+    expect(tags.get(3 as TagHandle)).toBe(true);
   });
 
   it('blink đảo mỗi periodMs theo sim time', async () => {
@@ -79,7 +95,7 @@ describe('LoopbackController — loopback/blink/counter', () => {
       model: 'loopback',
       config: { counter: [{ out: 'CNT', step: 1 }] },
     };
-    const ctrl = new LoopbackController('PLC1');
+    const ctrl = new LoopbackController('PLC1', tags);
     await ctrl.init({ id: 'PLC1', def, stepMs: 10, scanPeriodMs: 10, tags: list }, io);
     ctrl.step(0, 10);
     expect(tags.get(4 as TagHandle)).toBe(-32768);
@@ -101,7 +117,7 @@ describe('LoopbackController — loopback/blink/counter', () => {
       model: 'loopback',
       config: { counter: [{ out: 'CNT', step: 5 }] },
     };
-    const ctrl = new LoopbackController('PLC1');
+    const ctrl = new LoopbackController('PLC1', tags);
     await ctrl.init({ id: 'PLC1', def, stepMs: 10, scanPeriodMs: 10, tags: list }, io);
     ctrl.step(0, 10);
     expect(tags.get(4 as TagHandle)).toBe(105);
@@ -121,7 +137,7 @@ describe('LoopbackController — loopback/blink/counter', () => {
   });
 
   it('step trước init → ném lỗi', () => {
-    const ctrl = new LoopbackController('PLC1');
+    const ctrl = new LoopbackController('PLC1', new TagDB(defs(), new ManualClock()));
     expect(() => { ctrl.step(0, 10); }).toThrow(/chưa init/);
   });
 
@@ -196,7 +212,7 @@ describe('LoopbackController — loopback/blink/counter', () => {
   });
 
   it('kind là builtin; id từ constructor', () => {
-    const ctrl = new LoopbackController('PLC9');
+    const ctrl = new LoopbackController('PLC9', new TagDB(defs(), new ManualClock()));
     expect(ctrl.id).toBe('PLC9');
     expect(ctrl.kind).toBe('builtin');
   });
