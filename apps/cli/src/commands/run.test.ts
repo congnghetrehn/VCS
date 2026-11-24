@@ -172,7 +172,7 @@ describe('vcs run — golden T8', () => {
 
 describe('vcs run — spawn pnpm vcs thật', () => {
   it('pnpm vcs validate examples/hello-tags → exit 0', async () => {
-    const { stdout } = await execFileAsync('pnpm', ['vcs', 'validate', EXAMPLES], {
+    const { stdout } = await execFileAsync('pnpm', ['vcs', 'validate', `"${EXAMPLES}"`], {
       cwd: ROOT,
       shell: true,
     });
@@ -183,7 +183,7 @@ describe('vcs run — spawn pnpm vcs thật', () => {
     const direct = await runCaptured(EXAMPLES, { until: '5s', hash: true });
     const { stdout } = await execFileAsync(
       'pnpm',
-      ['vcs', 'run', EXAMPLES, '--until', '5s', '--hash'],
+      ['vcs', 'run', `"${EXAMPLES}"`, '--until', '5s', '--hash'],
       { cwd: ROOT, shell: true },
     );
     expect(stdout).toContain('SCAN_CNT = 500');
