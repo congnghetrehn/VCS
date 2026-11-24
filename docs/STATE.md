@@ -11,8 +11,8 @@
 ## 1. Vị trí hiện tại
 
 - Milestone: **M0** (P0.1 đã merge vào `develop` qua PR #8, merge commit `e8707f2`, CI 6/6 xanh; P0.2 đã merge vào `develop` qua PR #9, merge commit `f3d769a`, CI 6/6 xanh sau sửa lỗi khai báo `workspace:*`)
-- Prompt đang làm / vừa xong: M0 — **ĐÃ KÝ 2026-11-24** (G0 gói nghiệm thu PR #15 `b7e764e`, 12/12 §15 ĐẠT; probe bổ sung 3/3 PASS; Windows 439/439 sau fix OQ-074 PR #16 `cda44d3`; D-001/D-004 đã quyết). Tiếp theo: đẩy `main` (PR develop → main) rồi P0.8 plan-first.
-- Nhánh: `m0/g0-acceptance` (từ `33f7a04` = nội dung `develop` sau merge P0.7 PR #14 `0188cf8`)
+- Prompt đang làm / vừa xong: P0.8 — **XONG LOCAL 2026-11-24** (triển khai theo STATE §15, nhánh `m0/p0.8-interfaces`; test mới 68, tổng 507/507; gate + bench guard xanh ở bản sao sạch `/tmp/vcs-p08`; chưa mở PR). Tiếp theo: **mở PR P0.8, merge, rồi P1.1 plan-first**.
+- Nhánh: `m0/p0.8-interfaces` (từ `9ca4964` = nội dung `develop` sau merge PR #17, develop head `17790f1`)
 - Cập nhật lần cuối: 2026-11-24 bởi AI (M0 đã ký)
 
 ## 2. Tiến độ prompt
@@ -26,7 +26,7 @@
 | P0.5   | ✔ xong (gate xanh cả bản sao `/tmp` install thật lẫn bản sao chính; test 420/420, 51 test mới; bench guard PASS; đã merge PR #12 `65cd373` vào `develop` 2026-11-24, CI 6/6 xanh sau sửa OQ-056)                                                                                                                                                       | PR #12, nhánh `m0/p0.5-server` (đã merge) | lint/typecheck/depcheck/test/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (420 test, 31 file; 51 test mới) + build tsup xanh + smoke dist | xem §12                                                           |
 | P0.6   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p06` install thật lẫn bản sao chính; vitest 438/438, e2e 5/5 local; bench guard PASS; kiểm cuộn 20 000 dòng: probe PASS 1 lần, đo tay 45,7–60,0 FPS — xem §13; OQ-062 đã quyết (a), A19)                                                                                         | PR #13, nhánh `m0/p0.6-web` (đã merge `471a2ec` 2026-11-24 16:48 +07, CI 8/8 xanh) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (438 test vitest, 35 file; 17 test unit mới + 5 e2e) + build xanh + smoke `GET /` | xem §13 |
 | P0.7   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p07` install thật lẫn bản sao chính; test 439/439 + coverage §13 PASS + e2e 5/5; bench baseline + hồi quy; đã merge PR #14 `0188cf8` vào `develop` 2026-11-24 17:24 +07, CI 8 successful + 2 skipped) | PR #14, nhánh `m0/p0.7-docs` (đã merge) | lint/typecheck/depcheck/test (+coverage)/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (439 test vitest, 35 file; 1 test ghim hash mới) + build xanh + bench PASS | xem §14 |
-| P0.8   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | khuyến nghị                                                       |
+| P0.8   | ◐ xong local (gate + bench guard xanh ở bản sao sạch `/tmp/vcs-p08` install thật; test 507/507, 68 test mới; chưa mở PR) | nhánh `m0/p0.8-interfaces` | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` + build xanh 2026-11-24; bench TagDB 4/4 PASS (50,6M ops/s) + orchestrator 447.228 bước/s | xem §15; OQ-075…081 đóng |
 | P0.9   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | tùy chọn, chờ D-005                                               |
 | G0     | ✔ đã ký 2026-11-24 (gói bằng chứng `docs/acceptance/M0.md`, 12/12 §15 ĐẠT; probe bổ sung 3/3 PASS; Windows 439/439 sau fix OQ-074) | nhánh `m0/g0-acceptance` (đã merge PR #15) | gate xanh 2026-11-24 ở bản sao sạch (439 test + coverage PASS, e2e 5/5, bench PASS, hash ghim khớp 2 lần chạy) | gói nghiệm thu M0 |
 | P1.1   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
@@ -83,7 +83,7 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 - File/hàm đang sửa: — (G0 xong file nghiệm thu, CHƯA mở PR — xem `docs/acceptance/M0.md`)
 - Test đang hỏng (nguyên văn): — (G0: gate xanh ở bản sao sạch `/tmp/vcs-g0` install thật — vitest 439/439 + coverage §13 PASS (kernel 97,66%, schemas 95,92%, project 97,83%), e2e 5/5, review:cheats SẠCH, diagnostics khớp, build 3/3; bench TagDB 4/4 (set/get 44,8M ops/s), orchestrator 442 432 bước/s; `check-bench-regression` exit 0, không có hồi quy > 20%; hash ghim khớp 2 lần chạy. P0.7 trước đó: TagDB set/get 51,7M ops/s, orchestrator 508 058 bước/s bản chính.)
 - Lệnh tái hiện nhanh: `npx -y pnpm@10.15.0 run lint && npx -y pnpm@10.15.0 run typecheck && npx -y pnpm@10.15.0 run depcheck && npx -y pnpm@10.15.0 run test && npx -y pnpm@10.15.0 run test:e2e && npx -y pnpm@10.15.0 run review:cheats && npx -y pnpm@10.15.0 run docs:diagnostics --check` (ĐÃ CHẠY 2026-11-24 ở P0.6: cả 7 xanh ở cả bản sao `/tmp/vcs-p06` (`pnpm install --frozen-lockfile` exit 0 — OQ-007) lẫn bản sao chính; vitest 438 passed / 35 file (17 test unit mới); e2e 5/5 local (E1–E5, Chromium cài được ở VM — xem §6); depcheck "no violations, 82 modules, 134 dependencies" ở `/tmp` (86 modules, 148 dependencies ở bản chính — lệch do cruise cả `apps/*/dist/` + `test-results/`, không có violation); review:cheats SẠCH, quét 108 file; diagnostics --check khớp, 24 mã). `pnpm bench` ĐÃ CHẠY: set/get 45,4M ops/s (≥10M), flush 5000/0 đổi 0,14 µs (≤50), flush 1000 đổi + 1 sub 0,062 ms (≤1), heap −0,05 MB (<1) — TagDB 4/4 PASS; orchestrator 513 310 bước/s — PASS. `pnpm build` ĐÃ CHẠY: turbo xanh 3 app (server/cli tsup + web vite, `apps/web/dist` có `index.html` + assets); smoke: `vcs serve examples/hello-tags` → `GET /` trả `index.html`, `/api/health` `{"ok":true}`, asset JS 200.
-- Bước tiếp theo cụ thể: **M0 đã ký 2026-11-24.** Đẩy `main` (mở PR develop → main qua trình duyệt, chờ CI xanh, merge). Sau đó P0.8 plan-first (khuyến nghị). OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
+- Bước tiếp theo cụ thể: **P0.8 xong local 2026-11-24 (STATE §15).** Mở PR P0.8 → `develop`, chờ CI xanh, merge, rồi P1.1 plan-first. OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
 - Đẩy qua UI — danh sách file P0.7 (so với `develop` @ `471a2ec`, nhánh `m0/p0.7-docs`, CHƯA mở PR): `package.json` (script `test` thêm `--coverage`, devDep `@vitest/coverage-v8@4.1.12`), `pnpm-lock.yaml`, `vitest.config.ts` (coverage v8, ngưỡng dòng theo glob §13), `apps/cli/src/commands/run.test.ts` (+1 test ghim hash §15.6), `packages/kernel/src/tags.test.ts` (timeout 60 s cho test heap 10M ops khi đo coverage — xem §14), `.github/workflows/ci.yml` (comment coverage + job bench gọi `check-bench-regression.mjs`), `scripts/check-bench-regression.mjs` (mới), `bench/baseline.json` (mới, trung vị 5 mẫu), `docs/architecture.md` (mới), `docs/semantics.md` (mới, phần M0), `docs/adr/0001-package-jit-monorepo.md` … `0007-main-guard-tsup-split.md` (mới), `README.md` (viết lại), `docs/STATE.md`, `docs/open-questions.md` (OQ-071…073 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `coverage/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.6 (so với `develop` @ `65cd373`, nhánh `m0/p0.6-web`, đã merge PR #13 `471a2ec` 2026-11-24): `package.json` (script `test:e2e`, `typecheck` thêm web tsconfig, devDep `@playwright/test@1.65.0`), `pnpm-lock.yaml` (react 19.3.1, react-dom 19.3.1, zustand 5.1.0, @tanstack/react-virtual 3.14.26, vite 8.3.7, @vitejs/plugin-react 6.3.0, tailwindcss 4.3.5, @tailwindcss/vite 4.3.5, @types/react 19.3.0, @types/react-dom 19.3.0, @playwright/test 1.65.0 + link workspace; lưu ý: `vite@8.3.8` trong lockfile là transitive của vitest 4.1.12, đã có từ trước P0.6 — không phải vite của web (8.3.7); `immer`/`use-sync-external-store` là peer optional của zustand, pnpm KHÔNG cài), `tsconfig.json` (exclude `apps/web/**`, include `playwright.config.ts`), `playwright.config.ts`, `.gitignore` (`apps/web/e2e/fixtures/big-project/`, `test-results/`), `.github/workflows/ci.yml` (job `e2e` mới, ubuntu), `scripts/ensure-web-dist.mjs`, `apps/web/package.json` (deps + script `dev`/`build`) + `tsconfig.json` (riêng: lib DOM, jsx react-jsx — root tsconfig lib ES2022 không typecheck được `.tsx`, xem §13) + `vite.config.ts` + `index.html` + `src/{main.tsx,App.tsx,format.ts,format.test.ts,store.ts,store.test.ts,ws-client.ts,ws-client.test.ts,vite-env.d.ts,index.css}` + `src/i18n/{index,vi,en}.ts` + `index.test.ts` + `src/components/{SimBar,TagTable,DiagnosticsPanel}.tsx` + `e2e/{helpers,e1,e2,e3,e4,e5,perf-scroll}.spec.ts` + `e2e/fixtures/gen-big-project.ts`, `apps/server/src/ws.test.ts` (fix OQ-044: test trỏ `webDistDir` vào thư mục tạm trống — kiểm chứng gate của parent), `docs/STATE.md`, `docs/open-questions.md` (OQ-057…OQ-070 đã ghi từ plan; OQ-062 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `apps/web/e2e/fixtures/big-project/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.4 (so với `develop` @ `4a1181a`): `package.json` (script `vcs` + dep `@vcs/project`), `pnpm-lock.yaml` (commander 15.1.0 + link workspace), `tsconfig.base.json` (path `@vcs/kernel/demo`), `.gitignore` (`bench/project-5000/`), `packages/kernel/package.json` (export `./demo`), `packages/kernel/src/{component,errors,orchestrator,builder,pacer,index}.ts` + `demo/{loopback,extension,index}.ts` + test (`orchestrator`, `builder`, `pacer`, `demo/loopback` test), `packages/test-utils/src/sim.ts` + `index.ts` + `sim.test.ts`, `apps/cli/package.json` (commander 15.1.0), `apps/cli/tsconfig.json`, `apps/cli/src/{index,extensions}.ts`, `apps/cli/src/commands/{index,version,validate,run}.ts` + test, `examples/hello-tags/{vcs.project.yaml,tags/tags.yaml}`, `scripts/gen-bench-project.ts`, `bench/orchestrator.bench.ts`, `docs/STATE.md`, `docs/open-questions.md` (OQ-030/031/032). KHÔNG đẩy `node_modules/`, `bench/results.json`, `bench/project-5000/`, file profile tạm (đã xóa).
@@ -706,3 +706,131 @@ PR P0.7 merge + CI xanh.
 **OQ-071…073 đóng ở P0.7** (tier B, đã áp dụng): OQ-071 — viết 7 ADR;
 OQ-072 — bằng chứng §15.1 theo A16, không sửa chữ spec; OQ-073 —
 `bench/baseline.json` + script so sánh, warning không fail.
+
+## 15. Kế hoạch P0.8 — Vá trước giao diện M4/M5: applyInbox, validateTagValue, files.comms/hmi, protocol additive, asyncStep/requiresAsync, sym: (plan-first, 2026-11-24)
+
+**Điểm xuất phát:** M0 đã ký 2026-11-24 (G0 PR #15 `b7e764e`, 12/12 §15 ĐẠT; Windows 439/439 sau fix OQ-074 PR #16 `cda44d3`; D-001/D-004 đã quyết; `main` đã có M0 ở `31c7200`; develop head `17790f1` sau PR #17). Nhánh plan `m0/p0.8-interfaces` từ `9ca4964` (= nội dung develop sau merge PR #17). Tổng test hiện tại **439/439** (35 file); CI 8 successful + 2 skipped. PROMPTS P0.8: "áp TRƯỚC các điều chỉnh giao diện rẻ... Mỗi thứ có test; KHÔNG thêm chức năng ngoài danh sách. Gate: toàn bộ test M0 vẫn xanh + test mới; không đổi hành vi hiện có."
+
+**Phát hiện quan trọng khi đọc code (2/7 mục đã có sẵn — KHÔNG code lại):**
+- `orchestrator.applyInbox()` **đã có** (`packages/kernel/src/orchestrator.ts:146`, từ P0.4 theo D4): drain inbox tại `clock.nowMs()`; `SimulationService` gọi nó khi PAUSED/IDLE rồi `tags.flush()` (`apps/server/src/sim-service.ts:392-393`); test đã có (`orchestrator.test.ts:585`). P0.8 chỉ chạy lại test hiện có, không sửa hàm này.
+- Địa chỉ `sym:` **đã chấp nhận ở schema** (`isValidAddressLight`, `packages/schemas/src/tags.ts:20`, C2 từ P0.2; test `tags.test.ts:29-35`: `sym:Motor.Start`, `sym:DB1.MyVar` hợp lệ, `sym:` rỗng không hợp lệ). `TagAddressMap` hiểu `sym:` (phân giải symbolic → offset) là P1.4/P5.7, không phải P0.8. P0.8 chỉ thêm test mức `loadProject` (xem dưới).
+
+**Hiểu biết (tóm tắt):** (1) P0.8 là "vá giao diện", không phải tính năng: 7 mục, 2 đã có sẵn, 5 cần code mới — tất cả đều **cộng thêm** (trường optional, hàm export mới, key schema có default, message mới trong union) và **không đổi hành vi** của bất kỳ đường chạy hiện có nào. (2) Server **không phát** message mới nào ở P0.8; web không đổi; `SimulationService` không đổi hành vi — validate trước khi ghi là P4.1 (broker), chuyển sang `stepOnceAsync` theo cờ là P5.1, đặt `locked = true` là P4.1/P5.1. (3) Hai hình dạng chưa được spec ghim (`TagValueError`, envelope `comms.*`) → đề xuất mặc định + OQ tier B (OQ-075/076/077), không hỏi trước. (4) Không dependency mới, không mã diagnostic mới, không đổi `.dependency-cruiser.cjs` (không thêm package, không thêm hướng import mới), không ADR mới (quyết định đã có ở AMENDMENTS B/C). (5) `PROTOCOL_VERSION` giữ 1 — test hiện có assert (`protocol.test.ts:5-7`). (6) `pnpm install` trong VM vẫn EPERM (OQ-007) — triển khai làm ở bản sao `/tmp` như các prompt trước; vì không có dependency mới nên `pnpm-lock.yaml` phải **không đổi** (diff lockfile xuất hiện là cờ đỏ, dừng kiểm tra).
+
+**Phạm vi (PROMPTS P0.8; AMENDMENTS B2, B3, B4-schema, B5, C1, C2; M4 §2–§5, §10.1; M5 §2 hàng 1–2, 5):**
+
+| File | Nội dung |
+|---|---|
+| `packages/kernel/src/tags.ts` | `validateTagValue(type, v)` + `TagValueError` (OQ-075); refactor `validateValue` nội bộ dùng nó (giữ nguyên thông điệp `TAG-E001`) |
+| `packages/kernel/src/index.ts` | Export `validateTagValue` + `TagValueError` |
+| `packages/kernel/src/component.ts` | `ControllerAdapter.asyncStep?: boolean` (C1) |
+| `packages/kernel/src/orchestrator.ts` | `requiresAsync(): boolean` (C1) |
+| `packages/schemas/src/project.ts` | `files.comms` (default `'comms/comms.yaml'`), `files.hmi` (default `'hmi/'`) + `PROJECT_SHAPE` |
+| `packages/schemas/src/protocol.ts` | `sim.state.locked?` + schema `comms.status`/`comms.log` + thêm vào `serverMessageSchema` (OQ-076/077) |
+| `packages/kernel/src/tags.test.ts` | Test `validateTagValue` (bảng tính tay dưới) + tương đương với `TagDB.write` |
+| `packages/kernel/src/orchestrator.test.ts` | Test `requiresAsync` + `stepOnce`/`stepOnceAsync` với adapter async |
+| `packages/schemas/src/project.test.ts` | Test `files` defaults/explicit + không `PRJ-W001` |
+| `packages/schemas/src/protocol.test.ts` | Test message mới + `locked` optional + `PROTOCOL_VERSION` 1 |
+| `packages/project/src/load.test.ts` | Test load project có địa chỉ `sym:` + hash hello-tags không đổi |
+| `docs/semantics.md` | Thêm mục §11 ngắn: `validateTagValue` TYPE/RANGE + `requiresAsync` + `locked?` chưa phát (nhãn VERIFIED) |
+| `docs/STATE.md`, `docs/open-questions.md` | Plan này (§15) + OQ-075…081 |
+
+**Thiết kế nhỏ nhất (từng mục — signature chính xác, file chạm tới, chỗ KHÔNG làm):**
+
+1. **`orchestrator.applyInbox()` (B2) — ĐÃ CÓ, không code.** Chỉ chạy lại test hiện có (`orchestrator.test.ts:585`). Lưu ý đã kiểm: định nghĩa M4 §2 hàng 2 nói "chạy lệnh chờ rồi `tags.flush()`" — code hiện tại chỉ drain, service tự `flush()` sau (`sim-service.ts:393`); **giữ nguyên cách tách này**, không gộp `flush()` vào `applyInbox()` (đổi hành vi + test hiện có). Chốt "cấm gọi trong bước" chưa có → OQ-079 (để P4.1).
+2. **`validateTagValue` (B3, M4 §3 hàng 3 + §4.2) — hàm mới ở kernel, không đổi hành vi ghi.** Đặt trong `packages/kernel/src/tags.ts` (cạnh `TYPE_RANGES` + `validateValue` nội bộ đã có), export từ `@vcs/kernel`:
+```ts
+export interface TagValueError { kind: 'TYPE' | 'RANGE'; message: string }
+export function validateTagValue(type: DataType, v: TagValue): TagValueError | undefined
+```
+Quy tắc tách (OQ-075): TYPE = sai kiểu JS (Bool cần boolean, String cần string, kiểu số cần number); RANGE = number ngoài khoảng kiểu hoặc không nguyên với kiểu nguyên; Real/LReal chấp nhận mọi số kể cả NaN/±Infinity; Time: số nguyên ≥ 0. `validateValue` nội bộ refactor thành `const e = validateTagValue(type, v, ...); if (e) throw new TagError('TAG-E001', message)` — **thông điệp lỗi giữ nguyên văn bản hiện tại** (`${where}: giá trị ... không hợp lệ cho kiểu '...'`), nên mọi test `TAG-E001` cũ vẫn xanh. `validateTagValue` **không normalize** (fround `Real`, `>>> 0` cho DWord/UDInt vẫn chỉ trong `TagDB.write` — test ghim ranh giới này, xem dưới). Đường nóng: trả `undefined` khi hợp lệ → **không cấp phát** ở đường thành công; chỉ cấp phát object lỗi ở đường lỗi (giống `validateValue` hiện tại chỉ throw khi lỗi). `SimulationService.tagWrite` **không** dùng hàm mới ở P0.8 (validate trước ghi + trả `TAG-E001` đồng bộ là việc của broker P4.1; hành vi hiện tại — lỗi kiểu/khoảng phát thành diagnostic `SIM-E001` trong drain theo OQ-021 — giữ nguyên).
+3. **`files.comms` / `files.hmi` (B5, M4 §2 hàng 5) — chỉ schema + default, loader không đổi.** `projectSchema.files` thêm `comms: z.string().default('comms/comms.yaml')`, `hmi: z.string().default('hmi/')`; `PROJECT_SHAPE.files.keys` thêm `'comms', 'hmi'` (không thêm thì `files.comms` bị `PRJ-W001` khóa lạ). `loadProject` **không đọc** hai file này ở P0.8 (chỉ đọc `files.tags` — `load.ts:91`); hash project chỉ gồm file đã đọc nên hash hello-tags **không đổi** (test ghim, xem dưới). Nạp file `comms.yaml`/`hmi/` là P4.1.
+4. **Protocol additive (B4, M4 §2 hàng 4 + §5.3/§5.4/§10.1) — chỉ schema, không phát message.** `PROTOCOL_VERSION` giữ 1. `simStateSchema` thêm `locked: z.boolean().optional()` (`exactOptionalPropertyTypes`: service `simState()` **không** đặt trường này ở P0.8 → không xuất hiện trên dây, hành vi cũ giữ nguyên). Hai schema mới vào `serverMessageSchema` (discriminated union theo `type`, cộng thêm — message cũ parse như cũ):
+```ts
+// M4 §5.3 GatewayStats, nguyên văn:
+const gatewayStatsSchema = z.object({
+  state: z.enum(['stopped', 'starting', 'running', 'error']),
+  startedAtWallMs: z.number().int().optional(),
+  lastError: z.string().optional(),
+  clients: z.number().int().min(0), reads: z.number().int().min(0),
+  writes: z.number().int().min(0), errors: z.number().int().min(0),
+  monitoredItems: z.number().int().min(0).optional(),
+  subscriptions: z.number().int().min(0).optional(),
+});
+const commsStatusSchema = z.object({ type: z.literal('comms.status'),
+  gateways: z.array(z.object({ id: z.string(),
+    kind: z.enum(['opcua-server', 'modbus-server']),
+    stats: gatewayStatsSchema, endpoints: z.array(z.string()) })) });
+// M4 §5.4 RingLog entry, nguyên văn (level xem OQ-077):
+const commsLogEntrySchema = z.object({ tWallMs: z.number().int(),
+  gateway: z.string(), level: z.string(),
+  kind: z.enum(['session', 'request', 'write', 'error', 'info']),
+  summary: z.string(), detail: z.string().optional() });
+const commsLogSchema = z.object({ type: z.literal('comms.log'),
+  entries: z.array(commsLogEntrySchema) });
+```
+(OQ-076: envelope này do M4 không ghim; danh sách adapter ngoài chưa đưa vào `comms.status` — thêm ở P4.1; kind `'s7-server'` là M5/C7, không có ở P0.8.) Server **không gửi** `comms.*` ở P0.8 (chưa có `GatewayManager`/`RingLog` — P4.1/P4.6); web **không đổi** (không xử lý message mới; union thêm variant không phá parse message cũ).
+5. **`ControllerAdapter.asyncStep?` + `orchestrator.requiresAsync()` (C1, M5 §2 hàng 1) — cờ + hàm hỏi, không đổi đường chạy.** `component.ts`: `readonly asyncStep?: boolean` trên `ControllerAdapter` (vắng = `false`, đồng bộ). `orchestrator.ts`:
+```ts
+/** true khi và chỉ khi có ≥ 1 component đã đăng ký là ControllerAdapter với asyncStep === true (OQ-078). */
+requiresAsync(): boolean {
+  for (const { component } of this.#byId.values()) {
+    if ('asyncStep' in component && (component as ControllerAdapter).asyncStep === true) return true;
+  }
+  return false;
+}
+```
+`LoopbackController`/`FakeController` **không** đặt cờ (đồng bộ như cũ). `stepOnce()` gặp component trả Promise vẫn ném `SIM-E002` như M0 — kể cả khi `requiresAsync()` là true cho adapter khác (caller phải tự chọn `stepOnceAsync`; xem bảng dưới). `SimulationService`/CLI/M3 chuyển sang `stepOnceAsync` theo cờ là **P5.1, không làm ở P0.8**.
+6. **Địa chỉ `sym:` (C2, M5 §2 hàng 2) — ĐÃ CÓ ở schema, chỉ thêm test mức load.** `isValidAddressLight` đã chấp nhận `sym:<đường dẫn>` (bất kỳ chuỗi nào sau `sym:`, dài > 4). P0.8 không sửa regex, không sửa `TagDB` (constructor không kiểm địa chỉ — chỉ kiểm `initial`), không sửa `IoBus` (làm việc theo handle/tên, không theo địa chỉ). Test load-level chứng minh project có `sym:` nạp được end-to-end (xem Test).
+
+**Đã loại:** (1) `validateTagValue` đặt ở `@vcs/schemas` — B3 ghi rõ kernel export; schemas đã có `initialMatchesType` cho PRJ-E014, thêm hàm thứ hai vào schemas sẽ nhân bản logic validate sang package thứ ba. (2) Hợp nhất hai bảng `TYPE_RANGES` (kernel vs schemas) — đổi vị trí nguồn sự thật của khoảng kiểu, ngoài phạm vi "chỉ thêm giao diện" (OQ-081; test chéo hai bảng để bắt lệch). (3) Service dùng `validateTagValue` trong `tagWrite` ngay — P4.1 broker (đổi hành vi trả lỗi: `TAG-E001` đồng bộ thay vì `SIM-E001` trong drain). (4) Service/CLI chuyển sang `stepOnceAsync` khi `requiresAsync()` — P5.1. (5) `TagBroker`, tách `@vcs/expr`, `GatewayManager`/`RingLog`, REST `/api/comms/*`, CLI `--no-comms`/`--hmi-readonly`, `vcs comms export` — tất cả P4.1/P4.6. (6) Thu hẹp `comms.log` `level` thành enum — spec không ghim giá trị (OQ-077).
+
+**Bảng tính tay (golden cho test — tính từ M0 §6.2 quy tắc 5 + `TYPE_RANGES`, chưa chạy code):**
+
+`validateTagValue(type, v)` — `—` = `undefined` (hợp lệ):
+
+| type | v | Kết quả | type | v | Kết quả |
+|---|---|---|---|---|---|
+| Bool | `true` / `false` | — | Int | `32767` | — |
+| Bool | `1` / `'true'` | TYPE | Int | `32768` / `1.5` / `'5'` | RANGE / RANGE / TYPE |
+| Word | `0` / `65535` | — | DWord | `4294967295` | — |
+| Word | `-1` / `65536` | RANGE | DWord | `4294967296` / `-1` | RANGE |
+| Real | `NaN` / `+Infinity` | — | SInt | `-128` | — |
+| Real | `'x'` | TYPE | SInt | `-129` | RANGE |
+| Time | `0` | — | String | `''` | — |
+| Time | `-1` / `1.5` | RANGE | String | `5` | TYPE |
+
+Ranh giới validate ≠ normalize (test ghim): `validateTagValue('Real', 0.30000000000000004)` → `—` (không fround ở đây); `tags.write(h, 0.30000000000000004, 'system')` rồi `get` → `Math.fround(...)` (chuẩn hóa chỉ trong `TagDB.write`, như cũ). `validateTagValue('DWord', 4294967295)` → `—`; giá trị ghi vẫn qua `>>> 0` ở `write` như cũ.
+
+`requiresAsync()` (tính từ định nghĩa cờ, không cần chạy bước):
+
+| Component đã đăng ký | `requiresAsync()` | `stepOnce()` với adapter async |
+|---|---|---|
+| (không có controller) | `false` | n/a |
+| chỉ `LoopbackController` | `false` | n/a (đồng bộ) |
+| adapter stub `asyncStep: true` | `true` | ném `SIM-E002` (giữ M0) |
+| loopback + stub async | `true` | ném `SIM-E002` ở adapter async |
+| adapter `asyncStep: false` tường minh | `false` | n/a |
+
+**Test (mục tiêu: ≥ 31 test mới; tổng ≥ 470 = 439 + 31):**
+
+| Nhóm | File | Test mới (tên + kỳ vọng) |
+|---|---|---|
+| `validateTagValue` (~14) | `packages/kernel/src/tags.test.ts` | Bảng tính tay trên, mỗi ô một case (dùng `it.each` với bảng case dùng chung); tương đương với `TagDB.write`: case lỗi → `write` (validate: true) ném `TagError('TAG-E001')` cùng message; case hợp lệ → `write` thành công; ranh giới validate ≠ normalize (Real fround / DWord `>>> 0` chỉ ở `write`); import từ `@vcs/kernel` (index) để ghim export |
+| `files.comms/hmi` (~5) | `packages/schemas/src/project.test.ts` + `packages/project/src/load.test.ts` | `files` vắng → defaults `{ tags: 'tags/tags.yaml', comms: 'comms/comms.yaml', hmi: 'hmi/' }`; `files.comms`/`files.hmi` tường minh được giữ; `files.comms`/`files.hmi` không báo `PRJ-W001`; `loadProject` hello-tags: hash **không đổi** so với giá trị trước P0.8 (ghim ở triển khai: chạy load trên cây trước thay đổi, ghi giá trị, assert sau thay đổi bằng đúng giá trị đó) |
+| Protocol additive (~8) | `packages/schemas/src/protocol.test.ts` (+ 1 ở `apps/server/src/ws.test.ts` hoặc `sim-service.test.ts`) | `sim.state` thiếu `locked` → parse ok; `locked: true/false` → parse ok; `locked: 'yes'` → fail; `comms.status` hợp lệ → parse ok; thiếu `stats` / `state` lạ / `kind` lạ → fail; `comms.log` 0 entry + 1 entry đủ trường → parse ok; `kind` lạ / thiếu `summary` → fail; `PROTOCOL_VERSION` vẫn 1 (test đã có, chạy lại); `service.simState()` **không** chứa key `locked` (ghim hành vi P0.8 — P4.1 sẽ sửa test này khi bắt đầu gửi `locked`) |
+| `asyncStep`/`requiresAsync` (~6) | `packages/kernel/src/orchestrator.test.ts` | Bảng `requiresAsync` trên (5 case, adapter async là stub local trong file test, không sửa `FakeController`/`LoopbackController`); `stepOnce` với adapter async → ném `SIM-E002`; `stepOnceAsync` với adapter async → chạy đủ pha, `flush()` chạy, `stepCount` tăng |
+| `sym:` (~2) | `packages/project/src/load.test.ts` | Project có tag address `sym:"DB_Motor"."M01"."Start"` → `validate` exit 0 + `loadProject` ok, tag có mặt trong catalog với address nguyên văn; (regex `sym:` rỗng đã có test ở schemas — không lặp) |
+| `applyInbox` (0 mới) | — | Chạy lại test hiện có `orchestrator.test.ts:585` |
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** vị trí `validateTagValue` trong `tags.ts` (cạnh `validateValue`) thay vì file mới; test dùng bảng case dùng chung (`it.each`) cho cả `validateTagValue` và `TagDB.write`; mục §11 mới trong `docs/semantics.md`; thứ tự triển khai các mục (làm theo thứ tự mục 2→6 ở trên, mục 1 chỉ chạy lại test). **Tier B (mặc định + ghi OQ):** OQ-075 (`TagValueError` `{ kind: 'TYPE'|'RANGE', message }`), OQ-076 (envelope `comms.status`/`comms.log` theo M4 §5.3/§5.4, chưa gồm adapter), OQ-077 (`level: string`, không enum), OQ-078 (`requiresAsync` chỉ theo cờ), OQ-079 (chưa thêm chốt "cấm gọi trong bước" cho `applyInbox`), OQ-080 (chưa quyết quy tắc `locked = true` — M4 vs M5/C5), OQ-081 (giữ hai bảng `TYPE_RANGES`, test chéo bắt lệch). **Tier C: không có mục chặn dự kiến** — nếu khi triển khai phát hiện M4/M5 ghi khác về hình dạng đã đề xuất (vd `GatewayStats` có thêm trường bắt buộc) thì dừng mục đó, ghi OQ/SCR, **không tự sửa spec**; nếu test nào đỏ vì hành vi hiện có đổi (không phải do code mới) thì dừng, báo nguyên nhân gốc.
+
+**Rủi ro + cách kiểm:** (1) Hình dạng `comms.*` đề xuất lệch nhu cầu P4.1 thật — giảm thiểu: chỉ thêm trường optional khi mở rộng (additive); server P0.8 không phát nên không client nào phụ thuộc; P4.1 được phép sửa schema kèm test của chính nó. (2) `requiresAsync` theo cờ bỏ sót component trả Promise không đặt cờ — theo thiết kế (OQ-078); `stepOnce` vẫn ném `SIM-E002` nên lỗi ồn ào, không im lặng. (3) Quy tắc `locked` M4 vs M5/C5 chưa quyết — không ảnh hưởng P0.8 vì trường chỉ thêm vào schema, không phát; quyết ở P4.1/P5.1 (OQ-080). (4) Refactor `validateValue` làm lệch thông điệp `TAG-E001` — test tương đương (cùng message) bắt ngay; chạy `pnpm test` sau mỗi bước refactor nhỏ, không refactor lớn một lần. (5) `files` defaults làm đổi hash project — test ghim hash hello-tags bắt ngay; nếu hash đổi thì dừng (loader đã chạm nhầm `files.comms/hmi`).
+
+**Ngoài phạm vi:** `TagBroker` (P4.1); tách `@vcs/expr` (P4.1); `SimulationService` dùng `validateTagValue` trong `tagWrite` (P4.1); service chuyển `stepOnceAsync` theo `requiresAsync` (P5.1); phát `locked = true` (P4.1/P5.1); gửi/nhận `comms.*` ở server/web, REST `/api/comms/*`, `GatewayManager`/`RingLog` runtime (P4.1/P4.6); CLI `--no-comms`/`--hmi-readonly`, `vcs comms export` (P4.6); `TagAddressMap` hiểu `sym:` (P1.4/P5.7); `ControllerIntrospection.readMany`/`listSymbols` (P1.4); Worker transport (A10/E6); P0.9 PWA; đổi `.dependency-cruiser.cjs` (không cần — không thêm package/hướng import; `depcheck` phải xanh như cũ); ADR mới; mã diagnostic mới (`docs/diagnostics.md` giữ 24 mã, `--check` khớp).
+
+**Gate P0.8 (triển khai):** `lint && typecheck && depcheck && test && test:e2e && review:cheats && docs:diagnostics --check` + `build` + bench guard (`pnpm bench`: TagDB 4/4 PASS + orchestrator ≥ 100 000 bước/s — `requiresAsync` không nằm trên đường nóng, `validateTagValue` không cấp phát ở đường thành công; nếu bench rớt > 20% so với baseline thì dừng điều tra, không hạ ngưỡng) + CI (check + test ubuntu/windows + e2e ubuntu) xanh. Tổng test sau P0.8: **≥ 470**.
+
+**Kết quả triển khai (2026-11-24, nhánh `m0/p0.8-interfaces`):** làm đủ 5 mục code mới + 2 mục đã có sẵn chỉ thêm test; không đổi hành vi (server không phát message mới, web không đổi, hash CLI `21096ab2…1d53` giống hệt 2 lần chạy). **Test mới 68, tổng 507/507 (36 file)** — vượt mục tiêu ≥ 31/≥ 470: validateTagValue 28, requiresAsync 7, files 4, protocol 6, sym: 2, hash pin 1, simState locked 1, test chéo TYPE_RANGES 19. Gate xanh ở bản sao sạch `/tmp/vcs-p08` (install `--frozen-lockfile` thật): lint 0, typecheck sạch, depcheck 82 modules/134 deps, test 507/507 + coverage kernel 97,84%/schemas 95,97%/project 97,83%, e2e 5/5, review:cheats SẠCH, diagnostics --check khớp (24 mã), build 3/3, bench TagDB 4/4 PASS (set/get 50,6M ops/s) + orchestrator 447.228 bước/s, regression exit 0. `pnpm-lock.yaml` không đổi. OQ-075…081 đóng (đã áp dụng). Hình dạng M4/M5 khớp đề xuất trong plan — không mục nào phải dừng ghi SCR.
+
+**Chỗ lệch plan (ghi rõ):** (1) `validateTagValue` bản đầu dùng closure `bad` tạo ở mỗi lần gọi → bench set/get rớt còn 4,1M ops/s (FAIL ngưỡng 10M); A/B cùng máy chứng minh do code mới (stash code → 43,6M PASS). Đã sửa: chỉ tính `kind` bằng biến cục bộ, object lỗi chỉ tạo ở đường lỗi — bench sau sửa 50,6M ops/s PASS. Bài học: "không cấp phát ở đường thành công" phải hiểu cả closure, không chỉ object trả về. (2) Plan không liệt kê nhưng bắt buộc theo type mới: 2 fixture test cũ dựng `ProjectConfig` với `files: { tags }` phải thêm `comms`/`hmi` (`builder.test.ts:71`, `sim.test.ts:42`) — hệ quả trực tiếp của thay đổi schema, không đổi hành vi; và `EMPTY_PROJECT_CONFIG` ở `load.ts` tương tự. (3) Regression script cảnh báo 1 mục `flushChangesMs` +285,7% so baseline (0,063 → 0,243 ms) — giá trị tuyệt đối vẫn trong ngưỡng ≤ 1 ms, là nhiễu đo dưới mili-giây đã biết từ P0.7; script chỉ warn, exit 0.
