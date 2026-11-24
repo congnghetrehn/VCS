@@ -1,6 +1,6 @@
 # CI — VCS (M0 §13, sửa bởi AMENDMENTS A16: chỉ Node 22). Chạy trên push + PR.
 # Job e2e (Playwright) và bench được thêm ở P0.6 / P0.3 khi apps/web và bench
-# tồn tại; job `docs:diagnostics --check` được thêm ở P0.2 khi DiagnosticCatalog có.
+# tồn tại; `docs:diagnostics --check` thêm ở P0.2 (M0 §4.1, §13).
 name: CI
 
 on:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   check:
-    name: check (lint, typecheck, depcheck, cheats)
+    name: check (lint, typecheck, depcheck, diagnostics, cheats)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,6 +24,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm depcheck
+      - run: pnpm docs:diagnostics --check
       - run: pnpm review:cheats
 
   test:
