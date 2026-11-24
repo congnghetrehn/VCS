@@ -5,6 +5,7 @@
     "vitest.config.ts",
     "vitest.workspace.ts",
     "scripts/**/*.ts",
+    "bench/**/*.ts",
     "packages/*/src/**/*.ts",
     "apps/*/src/**/*.ts",
     "tests/**/*.ts"

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@vcs/kernel':
+        specifier: workspace:*
+        version: link:packages/kernel
       '@vcs/schemas':
         specifier: workspace:*
         version: link:packages/schemas
@@ -58,7 +61,11 @@ importers:
 
   apps/web: {}
 
-  packages/kernel: {}
+  packages/kernel:
+    dependencies:
+      '@vcs/schemas':
+        specifier: workspace:*
+        version: link:../schemas
 
   packages/project:
     dependencies:
@@ -75,7 +82,14 @@ importers:
         specifier: 4.6.7
         version: 4.6.7
 
-  packages/test-utils: {}
+  packages/test-utils:
+    dependencies:
+      '@vcs/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@vcs/schemas':
+        specifier: workspace:*
+        version: link:../schemas
 
 packages:
 
