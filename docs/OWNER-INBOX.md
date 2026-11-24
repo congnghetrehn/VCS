@@ -1,52 +1,108 @@
 # OWNER-INBOX — Hộp thư của chủ sản phẩm
 
 > **Chủ sản phẩm chỉ cần đọc file này.** AI ghi vào đây mọi thứ cần anh: quyết định, kiểm thử thật, dữ liệu, thay đổi lớn, ký duyệt. Mỗi mục tự đủ ngữ cảnh để xử lý trong < 2 phút.
-> **Cách trả lời:** đánh dấu `[x]` vào lựa chọn (hoặc dán kết quả theo hướng dẫn) rồi commit, hoặc trả lời trong chat với ID mục (ví dụ "D-007: chọn B"). AI sẽ cập nhật trạng thái, ghi vào ADR/OQ nếu cần và gỡ chặn.
+> **Cách trả lời:** đánh dấu `[x]` vào lựa chọn (hoặc dán kết quả theo hướng dẫn) rồi commit, hoặc trả lời trong chat với ID mục (ví dụ "D-003: chọn B"). AI sẽ cập nhật trạng thái, ghi vào ADR/OQ nếu cần và gỡ chặn.
 > Mục đã xử lý chuyển xuống "Lịch sử" (không xóa). AI gom yêu cầu theo đợt, tối đa 1 lần/ngày làm việc, trừ khi bị chặn hoàn toàn.
 
 Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần cứng) · **X** DỮ LIỆU CẦN CÓ · **S** THAY ĐỔI SPEC/LỚN · **K** KÝ DUYỆT milestone · **R** DUYỆT SAU (tầng B)
 
 ## 0. Tóm tắt (AI cập nhật mỗi lần ghi)
-- Đang bị chặn bởi: — (liệt kê ID)
-- Việc cần anh trong tuần này: — 
-- Cập nhật lần cuối: YYYY-MM-DD
+- Đang bị chặn bởi: D-001, D-004 (trước G0); T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép)
+- Việc cần anh trong tuần này: quyết D-001…D-005; chạy T-001 (S6, môi trường Windows); chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA
+- Cập nhật lần cuối: 2026-11-24
+- Nhãn/milestone GitHub (II.7): CHƯA CHẠY — GitHub MCP không có tool tạo nhãn/milestone (46 tool đã kiểm, không có); cần làm qua giao diện GitHub hoặc chủ sản phẩm. Không tự đổi branch protection (D-001).
 
 ---
 
 ## 1. QUYẾT ĐỊNH (D) — đang mở
-<!-- Mẫu:
-### D-001 · <tiêu đề ngắn> · Chặn: P?.? · Hạn mong muốn: <ngày/ "trước P2.7"> · Issue: #
-**Bối cảnh:** 2–3 dòng.
+
+### D-001 · Bật branch protection cho `main` · Chặn: G0 · Hạn mong muốn: trước P0.1
+**Bối cảnh:** Repo hiện chưa có branch protection. `main` chỉ nhận từ `develop` sau khi anh ký milestone; AI chỉ merge vào `develop`.
 **Lựa chọn:**
-- [ ] A — … (ưu/nhược)
-- [ ] B — …
-- [ ] C — …
-**Đề xuất của AI:** A, vì …
-**Hệ quả nếu chọn khác:** …
-**Việc đang chờ:** …  ·  **Liên quan:** spec §…, OQ-…, ADR-…
--->
-(chưa có)
+- [ ] A — Bật: `main` yêu cầu PR + CI xanh, cho phép AI push nhánh / tạo PR
+- [ ] B — Không bật lúc này, chỉ quy ước bằng miệng
+**Đề xuất của AI:** A, vì đây là hàng rào duy nhất ngăn merge nhầm vào `main` trước khi có CI.
+**Hệ quả nếu chọn khác:** B thì `main` có thể bị ghi đè trực tiếp; AI vẫn tự giữ quy tắc không push `main`.
+**Việc đang chờ:** P0.1 (CI) và G0 · **Liên quan:** AUTONOMY §5, BOOTSTRAP bước 7
+
+### D-002 · Giấy phép / tên gói (`@vcs/*`) · Chặn: P0.1 · Hạn mong muốn: trước P0.1
+**Bối cảnh:** Repo đang private, chưa có file LICENSE, chưa có package.json. Tên gói theo spec là `@vcs/*`, lệnh `vcs`.
+**Lựa chọn:**
+- [ ] A — Repo private, proprietary/UNLICENSED, tên gói giữ nguyên `@vcs/*`
+- [ ] B — Chọn giấy phép khác: …
+**Đề xuất của AI:** A, vì sản phẩm dùng nội bộ + có tích hợp Siemens có bản quyền.
+**Hệ quả nếu chọn khác:** B thì cần ghi LICENSE tương ứng trước P0.1.
+**Việc đang chờ:** P0.1 · **Liên quan:** BOOTSTRAP bước 7
+
+### D-003 · Chính sách dữ liệu khách hàng · Chặn: P2.7 · Hạn mong muốn: trước P2.7
+**Bối cảnh:** Các prompt P2.7, P3.5, P4.4, P5.7 cần dữ liệu thật (I/O list, C&E, SimaticML, SCADA). Dữ liệu thật không được vào repo hay công cụ AI nếu chưa ẩn danh.
+**Lựa chọn:**
+- [ ] A — KHÔNG đưa dữ liệu thật vào công cụ AI / repo; chỉ dữ liệu ẩn danh đặt ở `fixtures-real/` (đã .gitignore) hoặc kho riêng
+- [ ] B — Cho phép dùng dữ liệu thật có giới hạn: …
+**Đề xuất của AI:** A, vì đây là dữ liệu khách hàng + dự án TIA.
+**Hệ quả nếu chọn khác:** B thì cần quy tắc ẩn danh + kho lưu trữ cụ thể trước khi đưa.
+**Việc đang chờ:** X-003…X-008 · **Liên quan:** AGENTS §8, BOOTSTRAP bước 7
+
+### D-004 · Nơi chạy mô phỏng (server hay Worker) · Chặn: G0 · Hạn mong muốn: trước P0.6/P1.7
+**Bối cảnh:** M1 §11 từng nói SoftPlc chạy trong Web Worker; AMENDMENTS A10/E6 đã đổi mặc định thành server Node, Worker chỉ là tùy chọn sau (M0 §17 mục 4).
+**Lựa chọn:**
+- [ ] A — Server Node (mặc định), Worker không cần
+- [ ] B — Worker (cần nêu lý do: …)
+**Đề xuất của AI:** A, theo A10/E6 và vì UI đã qua WebSocket.
+**Hệ quả nếu chọn khác:** B thì P0.6/P1.7 phải làm thêm transport Worker.
+**Việc đang chờ:** P0.6, P1.7 · **Liên quan:** AMENDMENTS A10/E6, OQ-004
+
+### D-005 · PWA (P0.9) · Chặn: không chặn M0 · Hạn mong muốn: sau M0
+**Bối cảnh:** P0.9 là prompt tùy chọn (PWA shell), ngoài spec; nếu làm cần quyết HTTPS cho LAN.
+**Lựa chọn:**
+- [ ] A — Hoãn tới sau M0 (mặc định)
+- [ ] B — Làm ở P0.9, cần quyết HTTPS cho LAN trước
+**Đề xuất của AI:** A, để M0 không bị kéo dài.
+**Hệ quả nếu chọn khác:** B thì cần anh quyết cách cấp chứng chỉ HTTPS cho LAN.
+**Việc đang chờ:** P0.9 · **Liên quan:** BOOTSTRAP bước 7, SKILL-ui-pwa-hmi §9
 
 ## 2. KIỂM THẬT (T) — cần anh chạy trên môi trường thật
-<!-- Mẫu:
-### T-001 · <tiêu đề> · Chặn: P?.? · Ước tính: 30 phút · Cần: TIA V21 + PLCSIM Advanced V8
-**Mục đích:** …
+
+### T-001 · Spike S6 — kiểm môi trường Windows · Chặn: P0.1 · Ước tính: 30 phút · Cần: máy Windows của anh
+**Mục đích:** Biết máy anh dựng được repo không (Node, pnpm, Playwright, cổng, .NET SDK).
 **Các bước (làm đúng thứ tự):**
-1. …
-2. …
-**Kết quả mong đợi:** …
-**Dán kết quả vào:** `docs/spikes/Sx-….md` (mẫu) hoặc `fixtures-real/…` (KHÔNG commit dữ liệu nhạy cảm)
+1. Chạy `node scripts/doctor.mjs` (AI viết ở P0.1; trước đó chạy tay: `node --version`, `pnpm --version`, `git --version`, `dotnet --info`).
+2. Kiểm cổng 4170/4840/1502 còn rảnh; kiểm `git config core.autocrlf`.
+3. Chạy `pnpm install` + một test mẫu + một e2e mẫu (khi có ở P0.1).
+**Kết quả mong đợi:** `pnpm install` + test mẫu + e2e mẫu chạy được trên máy anh.
+**Dán kết quả vào:** `docs/spikes/S6-env.md` (theo mẫu cuối `docs/SPIKES.md`) hoặc dán nguyên văn log vào chat với ID "T-001".
 **Nếu lỗi:** dán nguyên văn thông báo + ảnh chụp; AI sẽ chẩn đoán.
--->
-(chưa có)
+
+### T-002 · Spike S2 — PLCSIM Advanced "hello" · Chặn: M5 (P5.4/P5.6) · Ước tính: 1 ngày · Cần: PLCSIM Advanced + giấy phép, nhóm `PlcSimUsers`
+**Mục đích:** Biết PLCSIM Advanced có làm được lockstep, tên API bulk-I/O, tốc độ và giấy phép không. **Nên làm sớm — quyết định khả thi M5 và giấy phép.**
+**Các bước (làm đúng thứ tự):**
+1. Cài PLCSIM Advanced, vào nhóm `PlcSimUsers`, tạo 1 instance, tải chương trình mẫu rất nhỏ (OB1 sao chép `%I0.0 → %Q0.0`, một bộ đếm trong DB).
+2. AI viết console C# (net48, API bản anh đang cài; đọc manual/header đi kèm): liệt kê instance, `PowerOn/Run`, `UpdateTagList`, đọc/ghi bit & byte vùng, đọc tag symbolic, đặt SingleStep + `RunToNextSyncPoint()` 1000 lần.
+3. Đo: RTT một lần trao đổi; số chu kỳ/giây ở lockstep; thời gian `reset`; hành vi khi ghi input (có được lấy ở đầu chu kỳ?).
+**Kết quả mong đợi:** Đọc/ghi bit & byte vùng được; `RunToNextSyncPoint()` chạy 1000 lần; có số RTT và chu kỳ/giây.
+**Dán kết quả vào:** `docs/spikes/S2-plcsim.md` + `docs/facts/plcsim-api-*.md` (F-xxx `VERIFIED`); hoặc dán nguyên văn log vào chat với ID "T-002".
+**Nếu lỗi:** dán nguyên văn thông báo + ảnh chụp; AI sẽ chẩn đoán.
+
+### T-003 · Spike S3 — TIA Openness export · Chặn: P5.7 · Ước tính: 1 ngày · Cần: TIA (Offline), nhóm `Siemens TIA Openness`
+**Mục đích:** Biết SimaticML ở bản TIA của anh trông thế nào, để viết parser. **Nên làm sớm — quyết định khả thi M5 và giấy phép.**
+**Các bước (làm đúng thứ tự):**
+1. Mở TIA ở chế độ Offline, chuẩn bị một dự án nhỏ (SCL + LAD + DB standard + DB optimized + UDT + bảng tag).
+2. AI viết exporter tối thiểu (net48, tham chiếu `Siemens.Engineering.dll` của bản anh đang cài) xuất block/UDT/bảng tag + manifest; **không sửa dự án**.
+3. Xuất ≥ 10 file SimaticML, đưa vào kho fixture riêng (không commit dữ liệu nhạy cảm).
+**Kết quả mong đợi:** ≥ 10 file SimaticML + phát hiện khác biệt phiên bản, ghi vào `docs/facts/simaticml-*.md`.
+**Dán kết quả vào:** `docs/spikes/S3-*.md` (theo mẫu cuối `docs/SPIKES.md`) hoặc dán nguyên văn log vào chat với ID "T-003".
+**Nếu lỗi:** dán nguyên văn thông báo + ảnh chụp; AI sẽ chẩn đoán.
+
+### T-004 · Spike S5 — SCADA smoke test · Chặn: P4.4 · Ước tính: 0.5 ngày · Cần: SCADA đích
+**Mục đích:** Biết SCADA đích nối được server OPC UA mẫu không, chính sách bảo mật nào được chấp nhận.
+**Các bước (làm đúng thứ tự):**
+1. AI dựng server node-opcua mẫu có vài node `ns=3;s="Tag"` + `"DB"."Member"`, security None và Basic256Sha256.
+2. Anh thử kết nối từ SCADA đích, ghi lỗi gặp (chứng chỉ, URI, hostname, policy).
+**Kết quả mong đợi:** Kết nối được với ít nhất một policy; danh sách chính sách được chấp nhận.
+**Dán kết quả vào:** `docs/spikes/S5-scada.md` hoặc dán nguyên văn lỗi vào chat với ID "T-004".
+**Nếu lỗi:** dán nguyên văn thông báo + ảnh chụp; AI sẽ chẩn đoán.
 
 ## 3. DỮ LIỆU CẦN CÓ (X)
-<!-- Mẫu:
-### X-001 · I/O list thật (ẩn danh) · Cần trước: P2.7 · Tình trạng: ☐ chưa có
-**Cần:** file Excel/CSV … · **Ẩn danh:** thay tên dự án/khách hàng/ tag nhạy cảm theo quy tắc … · **Đặt ở:** `fixtures-real/` (đã .gitignore) hoặc kho riêng
-**Dùng để:** tinh chỉnh `naming.yaml`, synonym, kiểm precision auto-suggest
-**Phương án tạm AI đang dùng:** fixture tổng hợp (giới hạn: …)
--->
 - [ ] X-001 · Môi trường Windows + công cụ (kết quả spike S6) · cần trước P0.1
 - [ ] X-002 · Mã SCL/LAD thật ẩn danh (≥ 10 khối) cho spike S1 · cần trước P1.2
 - [ ] X-003 · I/O list thật + quy ước tên tag · cần trước P2.7
@@ -56,13 +112,27 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 - [ ] X-007 · ≥ 10 file SimaticML thật + XSD Openness · cần trước P5.7
 - [ ] X-008 · Dự án TIA `VCS_Conformance` · cần trước P5.9
 
+> Ghi chú: file `.github/pull_request_template.md` KHÔNG có mục X mới — chủ sản phẩm đã cung cấp file gốc, AI đã đưa nguyên văn lên nhánh `chore/docs-bootstrap` (commit "docs: add PR template", 1.421 byte, byte-identical).
+
 ## 4. THAY ĐỔI SPEC / LỚN (S)
-<!-- Mẫu:
-### S-001 · <tiêu đề> (Spec Change Request) · Nguồn: P?.?, spec §…
-**Vấn đề + bằng chứng:** …  **Đề xuất sửa:** …  **Tác động (milestone/prompt/test):** …
+
+### S-001 · PRD §9 dùng M1–M8 cho lĩnh vực chức năng, trùng số milestone M0–M5 (Spec Change Request) · Nguồn: docs-audit §4 SCR-001, PRD §9 vs §13
+**Vấn đề + bằng chứng:** PRD §9 đặt tên lĩnh vực chức năng là M1 (Project & Import), M2 (Controller Runtime), M3 (Coding), M4 (Plant Model), M5 (Test Automation), M6 (Communication Gateway), M7 (HMI), M8 (Điều khiển mô phỏng) — trong khi PRD §13 và toàn bộ spec dùng M0–M5 cho milestone, với M1 = Soft-PLC, M2 = Plant, M3 = Test, M4 = Comms/HMI, M5 = Siemens. Cùng ký hiệu M2 vừa là "Controller Runtime" (§9) vừa là "Plant Engine" (milestone).
+**Đề xuất sửa:** Đổi tên các lĩnh vực ở PRD §9 thành F1–F8 (hoặc "FR nhóm 1–8"), giữ nguyên số FR-1xx…FR-8xx; thêm dòng chú thích "M1–M8 ở §9 không phải milestone M0–M5 ở §13".
+**Tác động (milestone/prompt/test):** PRD §9 + §14 + mọi chỗ nhắc "M1–M3" theo nghĩa §9; không đổi mã FR, không đổi milestone/spec. Tầng C.
 **Quyết định:** [ ] Chấp nhận  [ ] Chấp nhận sửa đổi: …  [ ] Từ chối
--->
-(chưa có)
+
+### S-002 · Số golden test M1: PRD §13 nói ≥ 60, M1 §16 nói ≥ 80 · Nguồn: docs-audit §4 SCR-002
+**Vấn đề + bằng chứng:** PRD §13 (M1): "≥ 60 golden test ngữ nghĩa (mục 16) pass"; M1 §12.2 và §16 mục 2: "≥ 80 golden test + unit test theo bảng 12.2". Cả hai đều là tiêu chí nghiệm thu, không thể cùng đúng.
+**Đề xuất sửa:** Lấy M1 spec làm chuẩn (≥ 80 golden + unit test riêng, mỗi test có `expectedFrom`), sửa PRD §13 thành ≥ 80 cho khớp; hoặc nếu anh muốn giữ 60 thì sửa M1 §12.2/§16 xuống 60 và giảm bảng 12.2 tương ứng.
+**Tác động (milestone/prompt/test):** M1 §16, §12.2, REVIEW-CHECKLISTS §2 (M1 đã ghi ≥ 80 — khớp M1 spec), PROMPTS G1. Tầng C.
+**Quyết định:** [ ] Chấp nhận  [ ] Chấp nhận sửa đổi: …  [ ] Từ chối
+
+### S-003 · Thời lượng M0: PRD §13 nói 1–2 tuần, M0 spec nói 4–6 ngày công · Nguồn: docs-audit §4 SCR-003
+**Vấn đề + bằng chứng:** PRD §13: "M0 — Skeleton (1–2 tuần công)"; M0 §1: "Thời lượng dự kiến: 4–6 ngày công". Chênh lệch ~2 lần, ảnh hưởng kế hoạch và cổng G0.
+**Đề xuất sửa:** Lấy M0 spec làm chuẩn (4–6 ngày công, là ước lượng chi tiết sau), sửa PRD §13 thành "4–6 ngày công"; hoặc giữ 1–2 tuần nếu tính cả thời gian chờ chủ sản phẩm (S6, quyết định D-001…D-005).
+**Tác động (milestone/prompt/test):** PRD §13, STATE.md, kế hoạch P0.1–P0.7. Tầng C (đổi PRD), nhưng có thể quyết nhanh theo mặc định đề xuất.
+**Quyết định:** [ ] Chấp nhận  [ ] Chấp nhận sửa đổi: …  [ ] Từ chối
 
 ## 5. KÝ DUYỆT MILESTONE (K)
 | Milestone | Gói bằng chứng | Mục KIỂM THẬT liên quan | Trạng thái | Ký (ngày/người) |
@@ -77,7 +147,7 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 ## 6. DUYỆT SAU (R) — AI đã chọn mặc định, anh có quyền veto
 | ID | Prompt | Điều AI đã quyết | Lý do/ OQ | Veto? |
 |---|---|---|---|---|
-| | | | | ☐ chấp nhận · ☐ đổi thành: |
+| R-001 | Bootstrap | Merge PR `chore/docs-bootstrap` → `develop` khi tự rà soát sạch, dù chưa có CI — ngoại lệ duy nhất theo BOOTSTRAP bước 9 | Chưa có CI ở bước bootstrap; PR chỉ chứa tài liệu | ☐ chấp nhận · ☐ đổi thành: |
 
 ## 7. Lịch sử (đã xử lý)
 | ID | Ngày | Kết quả | Ghi chú |
