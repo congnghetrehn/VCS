@@ -18,6 +18,11 @@
 | `PRJ-E014` | error | Giá trị khởi tạo không đúng kiểu/khoảng | Bool nhận boolean; kiểu số nhận number trong khoảng của kiểu đó. |
 | `PRJ-W001` | warning | Khóa lạ trong YAML | Kiểm tra chính tả khóa; khóa lạ bị bỏ qua. |
 | `PRJ-W002` | warning | Không có tags.yaml | Tạo file tags (mặc định tags/tags.yaml) hoặc chấp nhận dự án không có tag. |
+| `SCL-L001` | error | Lỗi từ vựng SCL | Kiểm tra ký tự tại vị trí đã báo; đóng comment (* *) và dấu nháy "...". |
+| `SCL-P001` | error | Thiếu ';' cuối statement | Thêm ';' cuối statement tại vị trí đã báo. |
+| `SCL-P002` | error | Lỗi cú pháp SCL | Sửa theo "expected ..." tại vị trí đã báo. |
+| `SCL-P003` | error | Quá nhiều lỗi cú pháp (tối đa 100) | Sửa 100 lỗi đầu đã báo rồi biên dịch lại. |
+| `SCL-U001` | error | Cấu trúc SCL chưa hỗ trợ | Dùng cấu trúc trong phạm vi M1 (xem M1 §4.2 và Phụ lục A); String không hỗ trợ. |
 | `SIM-E001` | error | Component lỗi khi chạy | Xem diagnostics của component và sửa logic của nó. |
 | `SIM-E002` | error | Component bất đồng bộ trong đường đồng bộ | Chuyển component sang đường async (asyncStep), hoặc viết lại thành đồng bộ. |
 | `SIM-E003` | error | Snapshot không tương thích | Snapshot được tạo bởi phiên bản khác; chạy lại từ đầu hoặc migrate snapshot. |

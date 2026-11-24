@@ -338,3 +338,97 @@ hoa, trim khoảng trắng, không `%` cũng parse được; `DB0` → throw;
 (byte lớn vẫn parse, lỗi chỉ phát khi truy cập bộ nhớ); `%IW65` (word ở
 byte lẻ) parse được. Sai → throw `Error('địa chỉ không hợp lệ: ...')`
 nêu text gốc + lý do; P1.2 chuyển thành Diagnostic.
+
+## 13. Lexer + parser SCL (M1 §4.2–4.4, P1.2)
+
+**VERIFIED.** Lexer Chevrotain 13 là **first-match theo thứ tự khai báo,
+không phải longest-match** (đọc `tokenizeInternal` trong `lexer_public.ts`:
+vòng pattern dừng ở match đầu tiên; chỉ `longer_alt` mới thay token đã khớp
+bằng token dài hơn). Hệ quả: `LineComment` đứng trước `Slash` (nếu không
+`// abc` thành `/`, `/`, `abc`); `RealLiteral` đứng trước `IntLiteral` (nếu
+không `1.5` thành `1`, `.`, `5`); mọi từ khóa + `BoolLiteral` có
+`longer_alt: Identifier` (nếu không `IFX` thành `IF` + `X`). Thứ tự còn lại:
+token dài/cụ thể trước token ngắn (`**` trước `*`, `..` trước `.`, `:=`
+trước `:`, `<=`/`>=`/`<>` trước `<`/`>`/`=`), `TimeLiteral` trước
+`BadTimeLiteral`, `AbsAddress` trước `Identifier`, `BlockComment` đầu tiên.
+Thứ tự từ khóa dài-trước-ngắn còn để qua check tĩnh "unreachable pattern"
+của Chevrotain (regex trước `exec` được lên source token sau).
+
+**VERIFIED.** Chevrotain 13 không có `ignoreCase` trong `ITokenConfig`
+(kiểm từ `.d.ts` đã cài): từ khóa dùng regex flag `i` trên image (chỉ chữ
+cái + `_` nên không cần escape). `TRUE`/`FALSE` là `BoolLiteral`, không phải
+từ khóa.
+
+**VERIFIED (OQ-096).** Comment khối `(* *)` **không lồng**: pattern khớp tới
+`*)` đầu tiên; `*)` thừa thành token `StrayCommentEnd` → SCL-L001 tại vị trí
+của nó và bị bỏ. Comment dòng `//` và khối đều bị bỏ khỏi token stream.
+Comment không đóng (`(*` tới EOF) → SCL-L001 tại vị trí mở, nuốt tới EOF.
+
+**VERIFIED (OQ-097).** `T#`/`TIME#` với đơn vị lạ hoặc thiếu đơn vị (vd
+`T#5x`, `T#5`) khớp token `BadTimeLiteral` → SCL-L001 tại vị trí bắt đầu
+literal, token bị bỏ (không vào AST).
+
+**VERIFIED (OQ-098).** `#name` và `"Name"` giữ nguyên chữ viết trong AST;
+so sánh không phân biệt hoa/thường là việc của P1.3 (typecheck/lower), không
+phải parser.
+
+**VERIFIED.** `endCol` là **exclusive** (`endCol = startColumn + length`),
+khớp quy ước sẵn của repo (`packages/schemas/src/yaml.ts` dùng `range[1]`).
+Token nhiều dòng (comment) tính đúng `endLine`.
+
+**VERIFIED (OQ-101).** Parser là `EmbeddedActionsParser` — build AST trực
+tiếp, không qua CST→AST. Mọi rule trả `T | undefined`; rule trả `undefined`
+nếu một phần không-phải-list bị `undefined`; list rule lọc `undefined`.
+Với `recoveryEnabled`, `SUBRULE` lỗi trả `undefined` thay vì throw; lỗi
+tích trong `parser.errors`; parse cấp cao không throw. Code trong rule chỉ
+được chạm `.loc`/`.image` để build AST bên trong `this.ACTION(...)` (giai
+đoạn ghi GAST: `LA()` trả EOF, `SUBRULE` trả object đóng băng không có
+`loc`); vòng lặp/if JS thuần quanh DSL không được ghi vào GAST nên grammar
+dùng `MANY`/`OPTION`/`MANY_SEP` của DSL, không dùng vòng lặp JS.
+
+**VERIFIED (OQ-095).** Mã lỗi: SCL-L001 lexer (ký tự lạ, comment không
+đóng, time unit sai, `*)` thừa); SCL-P001 thiếu `;` — ghi tại token trước
+đó (`LA(0)`), không tiêu thụ token, do `expectSemi()` tự viết (Chevrotain
+không bao giờ báo lỗi `;`); SCL-P002 mọi lỗi cú pháp khác của Chevrotain
+(mismatch/no-viable-alt/early-exit tại `error.token`,
+`NotAllInputParsedException` tại token thừa đầu tiên); SCL-P003 quá 100 lỗi;
+SCL-U001 chưa hỗ trợ. `parseScl` trả AST từng phần + diagnostics đã sort
+theo vị trí; P1.3 từ chối lower khi có lỗi (OQ-099).
+
+**VERIFIED.** Phục hồi mức statement: Chevrotain resync + `syncAfterFailedStmt`
+tự viết — sau statement lỗi, bỏ token bằng `SKIP_TOKEN()` tới `;` (tiêu thụ
+nó) hoặc đầu statement / cuối block / EOF. Nhờ đó 2 statement lỗi quanh 1
+statement đúng cho đúng 2× SCL-P002 và statement đúng vẫn trong AST (D8);
+statement rỗng `;` sau phục hồi không thành `EmptyStmt` thừa.
+
+**VERIFIED.** Giới hạn 100 diagnostics **cắt sau khi parse xong**
+(`capDiagnostics`: giữ 100 đầu + thêm SCL-P003 tại cuối file), không dừng
+sớm giữa chừng — dừng sớm làm block không đóng được và `file()` trả
+`undefined` (đã gặp khi thử, D10).
+
+**VERIFIED (OQ-100).** Phân biệt assign/call bằng `OR` với **BACKTRACK GATE**
+trên nhánh assign (thử lvalue + `:=`, rớt thì sang call). Diagnostic ghi
+trong gate bị chặn bởi cờ `suppressDiagnostics` (embedded action chạy cả khi
+backtrack nên không chặn sẽ ghi trùng). Statement call chấp nhận ref hoặc
+ident; expression call chỉ chấp nhận ident hoặc `"..."`. Hệ quả: `#fb(...)`
+ở vị trí biểu thức **không** phải expression call — parser parse `#fb` thành
+ref rồi `(` cho SCL-P001.
+
+**VERIFIED (OQ-093/094).** DB init là `lvalue ":=" const_expr ";"`;
+`const_expr` parse như expr thường, tính const kiểm ở P1.3. DB dạng STRUCT
+kết `END_STRUCT;` (có `;`, như UDT); DB dạng `"fbname"` không có body.
+
+**VERIFIED (OQ-102).** `String`/`WString` trong khai báo → SCL-U001 tại
+token kiểu, node vẫn là `named` để parse tiếp tục.
+
+**VERIFIED (OQ-103/104).** Tên block chấp nhận ident trần hoặc `"..."`.
+Struct nội tuyến trong `type` có body `{ var_decl }` như UDT (không có
+`END_STRUCT;` ở cuối type — `;` thuộc về `varDecl`).
+
+**UNVERIFIED (OQ-092).** `**` kết hợp phải (`2 ** 3 ** 2` = 512) và unary
+chặt hơn mũ (`-2 ** 2` = −4) là mặc định theo EBNF §4.3; chưa đối chiếu TIA/
+PLCSIM — chờ mã thật S1 hoặc thí nghiệm PLCSIM (X-002/S1).
+
+**UNVERIFIED.** Thứ tự ưu tiên còn lại (§4.3: `*`/`/`/`MOD`/`DIV` >
+`+`/`-` > quan hệ > `=`/`<>` > `AND` > `XOR` > `OR`, `&` là alias `AND`,
+`NOT` chặt hơn `AND`) theo EBNF; chưa đối chiếu TIA/PLCSIM — chờ S1.
