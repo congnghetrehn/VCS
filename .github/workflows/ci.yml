@@ -1,4 +1,4 @@
-# CI — VCS (M0 §13). Chạy trên push + PR.
+# CI — VCS (M0 §13, sửa bởi AMENDMENTS A16: chỉ Node 22). Chạy trên push + PR.
 # Job e2e (Playwright) và bench được thêm ở P0.6 / P0.3 khi apps/web và bench
 # tồn tại; job `docs:diagnostics --check` được thêm ở P0.2 khi DiagnosticCatalog có.
 name: CI
@@ -33,7 +33,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node: [20, 22]
+        node: [22]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
