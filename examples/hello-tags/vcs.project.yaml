@@ -1,0 +1,15 @@
+# vcs.project.yaml — examples/hello-tags (M0 §10 nguyên văn).
+schemaVersion: 1
+name: Hello Tags
+language: vi
+seed: 1
+simulation: { stepMs: 10, plcScanMs: 10 }
+controllers:
+  - id: PLC1
+    mode: builtin
+    vendor: demo
+    model: loopback
+    config:
+      loopback: [ { in: BTN_START, out: LAMP_RUN }, { in: SW_AUTO, out: LAMP_AUTO, invert: true } ]
+      blink: [ { out: LAMP_HEARTBEAT, periodMs: 500 } ]
+      counter: [ { out: SCAN_CNT, step: 1 } ]
