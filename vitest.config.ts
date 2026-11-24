@@ -17,6 +17,9 @@ export default defineConfig({
         'packages/kernel/src/**': { lines: 85 },
         'packages/schemas/src/**': { lines: 85 },
         'packages/project/src/**': { lines: 80 },
+        // P1.1, OQ-088: 2 package mới, bằng kernel/schemas.
+        'packages/runtime-iec/src/**': { lines: 85 },
+        'packages/vendor-siemens/src/**': { lines: 85 },
       },
     },
   },
