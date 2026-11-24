@@ -6,6 +6,7 @@
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
+    "@playwright/test": "1.65.0",
     "@types/node": "24.19.2",
     "@types/ws": "8.18.2",
     "cross-env": "10.1.0",
@@ -40,8 +41,9 @@
     "lint": "eslint .",
     "review:cheats": "node scripts/check-cheats.mjs",
     "test": "cross-env NODE_OPTIONS=--expose-gc vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "vcs": "tsx apps/cli/src/index.ts"
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json",
+    "vcs": "tsx apps/cli/src/index.ts",
+    "test:e2e": "node scripts/ensure-web-dist.mjs && playwright test"
   },
   "type": "module",
   "version": "0.1.0"

@@ -8,6 +8,8 @@ fixtures-real/
 *.log
 bench/results.json
 bench/project-5000/
+apps/web/e2e/fixtures/big-project/
+test-results/
 bin/
 obj/
 .env*
