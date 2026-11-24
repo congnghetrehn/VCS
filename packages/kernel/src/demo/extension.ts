@@ -10,7 +10,7 @@ export const demoExtension: SimulationExtension = {
   id: 'demo',
   apply(ctx: BuildCtx): void {
     ctx.registerController('builtin:demo', (def: ControllerDef): ControllerAdapter => {
-      return new LoopbackController(def.id);
+      return new LoopbackController(def.id, ctx.tags);
     });
   },
 };

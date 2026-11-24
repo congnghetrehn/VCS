@@ -1,17 +1,22 @@
 // LoopbackController — @vcs/kernel/demo (M0 §6.10).
 // Controller demo `builtin:demo`: loopback (out = in, hoặc đảo) mỗi scan,
 // blink (đảo mỗi periodMs theo sim time), counter (tăng mỗi scan, wrap Int).
-// Đọc/ghi qua IoBus/IoPort; trạng thái tối thiểu trong snapshot. Dùng cho ví dụ
-// hello-tags, e2e web, test orchestrator/server — KHÔNG phải runtime thật
-// (M1 thay bằng SoftPlc). Ngữ nghĩa chi tiết: OQ-026.
+// I/O thưa (OQ-032, quyết bởi chủ sản phẩm 2026-11-24): chỉ đọc input và ghi
+// output của các tag CÓ rule, qua TagDB handle trực tiếp (factory truyền TagDB
+// qua constructor) — không đọc/ghi toàn bộ ảnh I/O qua IoPort mỗi scan.
+// Hệ quả: output không có rule không còn bị ghi đè về giá trị khởi tạo mỗi
+// scan mà giữ nguyên giá trị hiện tại (giống PLC thật hơn). `init` vẫn dùng
+// IoPort để đối chiếu tên → handle của controller này (một lần, không phải
+// mỗi scan). Dùng cho ví dụ hello-tags, e2e web, test orchestrator/server —
+// KHÔNG phải runtime thật (M1 thay bằng SoftPlc). Ngữ nghĩa chi tiết: OQ-026.
 
-import type { TagValue } from '@vcs/schemas';
 import type {
   ControllerAdapter,
   ControllerConfig,
   ControllerDiagnostics,
 } from '../component.js';
-import type { IoBus, IoPort } from '../iobus.js';
+import type { IoBus } from '../iobus.js';
+import type { TagDB, TagHandle } from '../tags.js';
 
 interface LoopbackRule {
   in: string;
@@ -41,22 +46,18 @@ function wrapInt(v: number): number {
 export class LoopbackController implements ControllerAdapter {
   readonly kind = 'builtin' as const;
   readonly id: string;
-  #io: IoBus | undefined;
-  #port: IoPort | undefined;
+  readonly #tags: TagDB;
+  #inited = false;
   #scanPeriodMs = 10;
   #loopback: LoopbackRule[] = [];
   #blink: BlinkRule[] = [];
   #counter: CounterRule[] = [];
-  #inputs: TagValue[] = [];
-  // Vị trí đã tính trước ở init (không lookup tên/Map trong scan):
-  // mỗi rule loopback: vị trí input trong #inputs + vị trí output trong #outValues.
-  #loopbackInIdx: number[] = [];
-  #loopbackOutIdx: number[] = [];
-  #blinkOutIdx: number[] = [];
-  #counterOutIdx: number[] = [];
-  // Ảnh output đầy đủ (theo thứ tự outputHandles) — buffer tái dùng, ghi bằng
-  // IoPort.writeOutputsFrom (không cấp phát, không lookup tên mỗi scan).
-  #outValues: TagValue[] = [];
+  // Handle TagDB đã tính trước ở init (không lookup tên/Map trong scan):
+  // mỗi rule loopback: handle input + handle output; blink/counter: handle output.
+  #loopbackInH: TagHandle[] = [];
+  #loopbackOutH: TagHandle[] = [];
+  #blinkOutH: TagHandle[] = [];
+  #counterOutH: TagHandle[] = [];
   #scanCount = 0;
   #lastScanSimMs = 0;
   #accMs = 0;
@@ -66,8 +67,9 @@ export class LoopbackController implements ControllerAdapter {
   #blinkInitial: boolean[] = [];
   #counterInitial: number[] = [];
 
-  constructor(id: string) {
+  constructor(id: string, tags: TagDB) {
     this.id = id;
+    this.#tags = tags;
   }
 
   init(cfg: ControllerConfig, io: IoBus): Promise<void> {
@@ -105,32 +107,29 @@ export class LoopbackController implements ControllerAdapter {
     }
     for (const r of this.#blink) checkTag(r.out, 'Q', 'Bool', 'blink.out');
     for (const r of this.#counter) checkTag(r.out, 'Q', 'Int', 'counter.out');
-    this.#io = io;
+    // Tính trước handle TagDB của từng tag có rule (lookup tên chỉ ở init).
+    // Port chỉ dùng để đối chiếu tên → handle của controller này.
     const port = io.port(cfg.id);
-    this.#port = port;
-    this.#inputs = new Array<TagValue>(port.inputNames.length).fill(false);
-    // Tính trước vị trí input/output của từng rule (lookup tên chỉ ở init).
     const inputIndex = new Map(port.inputNames.map((n, i) => [n, i]));
     const outputIndex = new Map(port.outputNames.map((n, i) => [n, i]));
-    const outPos = (name: string): number => {
-      const p = outputIndex.get(name);
-      if (p === undefined) throw new Error(`LoopbackController.init: output '${name}' không có trong port`);
-      return p;
+    const inHandle = (name: string): TagHandle => {
+      const p = inputIndex.get(name);
+      if (p === undefined) {
+        throw new Error(`LoopbackController.init: input '${name}' không có trong port`);
+      }
+      return port.inputHandles[p] as TagHandle;
     };
-    this.#loopbackInIdx = this.#loopback.map((r) => {
-      const p = inputIndex.get(r.in);
-      if (p === undefined) throw new Error(`LoopbackController.init: input '${r.in}' không có trong port`);
-      return p;
-    });
-    this.#loopbackOutIdx = this.#loopback.map((r) => outPos(r.out));
-    this.#blinkOutIdx = this.#blink.map((r) => outPos(r.out));
-    this.#counterOutIdx = this.#counter.map((r) => outPos(r.out));
-    // Ảnh output khởi tạo từ TagDef.initial (vị trí không có rule giữ nguyên giá trị này).
-    this.#outValues = port.outputNames.map((n) => {
-      const v = byName.get(n)?.initial;
-      if (typeof v === 'boolean' || typeof v === 'number') return v;
-      return byName.get(n)?.type === 'Int' ? 0 : false;
-    });
+    const outHandle = (name: string): TagHandle => {
+      const p = outputIndex.get(name);
+      if (p === undefined) {
+        throw new Error(`LoopbackController.init: output '${name}' không có trong port`);
+      }
+      return port.outputHandles[p] as TagHandle;
+    };
+    this.#loopbackInH = this.#loopback.map((r) => inHandle(r.in));
+    this.#loopbackOutH = this.#loopback.map((r) => outHandle(r.out));
+    this.#blinkOutH = this.#blink.map((r) => outHandle(r.out));
+    this.#counterOutH = this.#counter.map((r) => outHandle(r.out));
     // Giá trị khởi tạo từ TagDef.initial (mặc định false/0).
     this.#blinkNext = this.#blink.map((r) => r.periodMs);
     this.#blinkInitial = this.#blink.map((r) => {
@@ -146,19 +145,18 @@ export class LoopbackController implements ControllerAdapter {
     this.#scanCount = 0;
     this.#lastScanSimMs = 0;
     this.#accMs = 0;
+    this.#inited = true;
     return Promise.resolve();
   }
 
   step(simTimeMs: number, dtMs: number): void {
-    const port = this.#port;
-    const io = this.#io;
-    if (port === undefined || io === undefined) {
+    if (!this.#inited) {
       throw new Error(`LoopbackController.step: chưa init (controller '${this.id}')`);
     }
     this.#accMs += dtMs;
     while (this.#accMs >= this.#scanPeriodMs) {
       this.#accMs -= this.#scanPeriodMs;
-      this.#scan(simTimeMs, port);
+      this.#scan(simTimeMs);
     }
   }
 
@@ -219,23 +217,21 @@ export class LoopbackController implements ControllerAdapter {
     };
   }
 
-  #scan(T: number, port: IoPort): void {
+  #scan(T: number): void {
     this.#scanCount += 1;
     this.#lastScanSimMs = T;
     // Không có rule nào → không đọc/ghi gì (controller rỗng, chỉ đếm scan).
     if (this.#loopback.length === 0 && this.#blink.length === 0 && this.#counter.length === 0) {
       return;
     }
-    if (this.#loopback.length > 0) {
-      port.readInputsInto(this.#inputs);
-      for (let i = 0; i < this.#loopback.length; i++) {
-        const rule = this.#loopback[i] as LoopbackRule;
-        const v = this.#inputs[this.#loopbackInIdx[i] as number];
-        if (typeof v !== 'boolean') {
-          throw new Error(`LoopbackController: input '${rule.in}' phải là Bool, nhận ${typeof v}`);
-        }
-        this.#outValues[this.#loopbackOutIdx[i] as number] = rule.invert ? !v : v;
+    const tags = this.#tags;
+    for (let i = 0; i < this.#loopback.length; i++) {
+      const rule = this.#loopback[i] as LoopbackRule;
+      const v = tags.get(this.#loopbackInH[i] as TagHandle);
+      if (typeof v !== 'boolean') {
+        throw new Error(`LoopbackController: input '${rule.in}' phải là Bool, nhận ${typeof v}`);
       }
+      tags.set(this.#loopbackOutH[i] as TagHandle, rule.invert ? !v : v, 'plc');
     }
     for (let i = 0; i < this.#blink.length; i++) {
       const rule = this.#blink[i] as BlinkRule;
@@ -243,18 +239,16 @@ export class LoopbackController implements ControllerAdapter {
         this.#blinkValues[i] = !(this.#blinkValues[i] as boolean);
         this.#blinkNext[i] = (this.#blinkNext[i] as number) + rule.periodMs;
       }
-      this.#outValues[this.#blinkOutIdx[i] as number] = this.#blinkValues[i] as boolean;
+      tags.set(this.#blinkOutH[i] as TagHandle, this.#blinkValues[i] as boolean, 'plc');
     }
     for (let i = 0; i < this.#counter.length; i++) {
       const rule = this.#counter[i] as CounterRule;
       const next = wrapInt((this.#counterValues[i] as number) + rule.step);
       this.#counterValues[i] = next;
-      this.#outValues[this.#counterOutIdx[i] as number] = next;
+      tags.set(this.#counterOutH[i] as TagHandle, next, 'plc');
     }
-    // Ghi toàn bộ ảnh output bằng fast path (không Record, không lookup tên).
-    // Vị trí không có rule giữ giá trị khởi tạo → set() ghi lại cùng giá trị,
-    // flush không phát TagChange (giá trị bằng lần flush trước).
-    port.writeOutputsFrom(this.#outValues);
+    // I/O thưa: chỉ tag có rule được đọc/ghi. Output không có rule không bị
+    // chạm tới — giữ nguyên giá trị hiện tại (OQ-032).
   }
 }
 
