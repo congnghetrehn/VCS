@@ -110,6 +110,7 @@ export default tseslint.config(
       'apps/cli/src/**/*.tsx',
       'scripts/**/*.mjs',
       'scripts/**/*.cjs',
+      'bench/**/*.ts',
       'tests/**/*.ts',
     ],
     rules: { 'no-console': 'off' },

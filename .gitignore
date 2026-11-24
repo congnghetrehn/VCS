@@ -6,6 +6,7 @@ coverage/
 .vcs/
 fixtures-real/
 *.log
+bench/results.json
 bin/
 obj/
 .env*
