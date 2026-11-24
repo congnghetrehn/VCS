@@ -79,7 +79,7 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 - File/hàm đang sửa: —
 - Test đang hỏng (nguyên văn): —
 - Lệnh tái hiện nhanh: `npx -y pnpm@10.15.0 run lint && npx -y pnpm@10.15.0 run typecheck && npx -y pnpm@10.15.0 run depcheck && npx -y pnpm@10.15.0 run test && npx -y pnpm@10.15.0 run review:cheats` (ĐÃ CHẠY 2026-11-24: cả 5 xanh; test 10 passed; depcheck "no violations, 4 modules, 0 dependencies"; review:cheats SẠCH, quét 6 file). `node scripts/doctor.mjs` thoát 1 — chỉ do thiếu binary pnpm trong VM (xem OQ-007).
-- Bước tiếp theo cụ thể: **đẩy nhánh `m0/p0.1-repo-tooling` lên GitHub qua trình duyệt UI** (file đã sẵn sàng, xem §3 cuối mục này), mở PR → `develop`, chờ CI xanh (ubuntu + windows × Node 20/22) rồi merge; sau đó P0.2 — @vcs/schemas + @vcs/project (M0 §4–5).
+- Bước tiếp theo cụ thể: **đẩy commit sửa CI (bỏ Node 20, AMENDMENTS A16) lên nhánh `m0/p0.1-repo-tooling` qua trình duyệt UI**, chờ CI xanh (ubuntu + windows × Node 22) trên PR #8 rồi merge vào `develop`; sau đó P0.2 — @vcs/schemas + @vcs/project (M0 §4–5).
 - Đẩy qua UI — danh sách file P0.1 (so với baseline bootstrap): `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `turbo.json`, `tsconfig.base.json`, `tsconfig.json`, `.npmrc`, `.nvmrc`, `.editorconfig`, `.prettierrc`, `.prettierignore`, `eslint.config.js`, `.dependency-cruiser.cjs`, `vitest.config.ts`, `vitest.workspace.ts`, `CONTRIBUTING.md`, `.github/workflows/ci.yml`, `packages/{schemas,kernel,project,test-utils}/{package.json,tsconfig.json,src/index.ts}`, `apps/{cli,server,web}/package.json`, `scripts/doctor.mjs`, `tests/tooling-gates.test.ts`, `tests/doctor.test.ts`, `docs/spikes/S6-env.md`, `docs/STATE.md`, `docs/open-questions.md`, `docs/OWNER-INBOX.md`. KHÔNG đẩy `node_modules/` (đã .gitignore).
 
 ## 4. Quyết định và giả định gần đây
@@ -95,7 +95,8 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 | 2026-11-24 | P0.1: Vitest 4 bỏ `defineWorkspace` (trả `undefined`) — `vitest.workspace.ts` export trực tiếp mảng project | Kiểm bằng `node -e` trên `vitest/dist/config.js` |
 | 2026-11-24 | P0.1: Prettier mặc định tự chọn (spec không quy định style): singleQuote, trailingComma all, printWidth 100, semi, LF | `.prettierrc` |
 | 2026-11-24 | P0.1: package `schemas/kernel/project/test-utils` chỉ có khung (`package.json` + `tsconfig.json` + `src/index.ts` chứa `export {};` + chú thích prompt nào điền) — chưa có logic nghiệp vụ; `apps/*` chỉ có `package.json` (tsconfig/src đến ở prompt của app). `turbo.json` đã tạo nhưng root scripts chưa gọi turbo (tránh chạy trùng/lặp) — turbo dùng từ P0.2 khi có script theo package | P0.1 prompt ("Không làm: logic nghiệp vụ"); M0 §3.1 "chỉ tạo package có nội dung" |
-| 2026-11-24 | P0.1: CHƯA tạo script `dev/build/vcs/bench/test:e2e/docs:diagnostics` (chưa có code để chạy) — thêm ở prompt sở hữu: `vcs` P0.4, `bench` P0.3, `test:e2e` P0.6, `docs:diagnostics` P0.2, `dev/build` P0.5–P0.7. CI hiện chỉ có job `check` + `test` (ubuntu + windows × Node 20/22); job `e2e`/`bench`/`docs:diagnostics --check` thêm cùng prompt trên | M0 §3.3, §13; OQ-008 |
+| 2026-11-24 | P0.1: CHƯA tạo script `dev/build/vcs/bench/test:e2e/docs:diagnostics` (chưa có code để chạy) — thêm ở prompt sở hữu: `vcs` P0.4, `bench` P0.3, `test:e2e` P0.6, `docs:diagnostics` P0.2, `dev/build` P0.5–P0.7. CI hiện chỉ có job `check` + `test` (ubuntu + windows × Node 22, bỏ Node 20 theo A16); job `e2e`/`bench`/`docs:diagnostics --check` thêm cùng prompt trên | M0 §3.3, §13; OQ-008 |
+| 2026-11-24 | P0.1: **bỏ Node 20 khỏi CI** (quyết B của chủ sản phẩm): PR #8 CI đỏ ở job test Node 20 (ubuntu + windows) vì `dependency-cruiser@18.7.2` yêu cầu Node `^22\|\|^24\|\|>=26` (`ERR_PNPM_UNSUPPORTED_ENGINE`); job `check` và test Node 22 xanh. Ghi AMENDMENTS **A16** (thắng M0 §13), sửa `.github/workflows/ci.yml` ma trận `node: [22]` | AMENDMENTS A16; PR #8; CI run #17/#18 |
 | 2026-11-24 | P0.1: làm theo mặc định D-002 (A: repo private, UNLICENSED, giữ `@vcs/*`) để viết `package.json` — chờ chủ sản phẩm quyết D-002 (ghi R-002, có quyền veto) | OWNER-INBOX D-002, R-002 |
 | 2026-11-24 | P0.1 không có phần ngữ nghĩa thời gian (chưa có SimClock/TagDB) nên không có bảng timeline tính tay — golden timeline bắt đầu từ P0.3/P0.4 theo SKILL-testing-and-verification §2 | SKILL-testing-and-verification §2 |
 
@@ -107,7 +108,7 @@ Chỉ liệt kê **ID** (chi tiết ở `docs/OWNER-INBOX.md`; câu hỏi/ giả
 ## 6. Dữ liệu/môi trường cần có (🔑) và tình trạng
 | Cần | Cho prompt | Tình trạng |
 |---|---|---|
-| Repo + CI | P0.1 | ✔ khung xong trên bản sao local (CI file `.github/workflows/ci.yml`: job `check` ubuntu + job `test` ubuntu/windows × Node 20/22); CI CHƯA CHẠY — chưa đẩy lên GitHub, cần kiểm lại trên CI thật (OQ-007) |
+| Repo + CI | P0.1 | ✔ khung xong; PR #8 mở (nhánh `m0/p0.1-repo-tooling`): CI `check` + test Node 22 xanh, test Node 20 đỏ (dependency-cruiser 18 yêu cầu Node 22+); đã sửa theo A16 (chỉ Node 22), đang chờ CI chạy lại — `pnpm install --frozen-lockfile` trong VM vẫn chưa chạy được (OQ-007) |
 | I/O list thật ẩn danh + quy ước tên | P2.7 | ☐ (X-003) |
 | C&E thật ẩn danh + biểu mẫu FAT | P3.4–P3.5 | ☐ (X-004) |
 | SCADA đích + node id | P4.4 | ☐ (X-005) |
