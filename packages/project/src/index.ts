@@ -1,4 +1,6 @@
-// P0.1: khung package. Nội dung do P0.2 điền (ProjectFS, memoryFS, nodeFS,
-// loadProject, hashText). Không có logic nghiệp vụ ở đây — file tồn tại để
-// `exports` JIT và tooling có đích.
-export {};
+// @vcs/project — P0.2 (M0 §5).
+export { nodeFS, memoryFS, globToRegExp } from './fs.js';
+export type { ProjectFS } from './fs.js';
+export { normalizeTextForHash, hashText } from './hash.js';
+export { loadProject, EMPTY_PROJECT_CONFIG } from './load.js';
+export type { ProjectModel } from './load.js';
