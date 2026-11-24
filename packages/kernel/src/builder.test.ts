@@ -189,10 +189,10 @@ describe('createSimulation — factory / extension', () => {
         {
           id: 'async-factory',
           apply: (ctx) => {
-            ctx.registerController('builtin:demo', async (def) => {
+            ctx.registerController('builtin:demo', async (def, fctx) => {
               await Promise.resolve();
               const { LoopbackController } = await import('./demo/loopback.js');
-              return new LoopbackController(def.id);
+              return new LoopbackController(def.id, fctx.tags);
             });
           },
         },
@@ -248,7 +248,7 @@ describe('createSimulation — factory / extension', () => {
           apply: (ctx) => {
             ctx.registerController('builtin:demo', (def, c2) => {
               seen = c2.project.catalog.byController(def.id);
-              return new LoopbackController(def.id);
+              return new LoopbackController(def.id, c2.tags);
             });
           },
         },
