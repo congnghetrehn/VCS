@@ -1,6 +1,17 @@
 {
+  "dependencies": {
+    "@vcs/kernel": "workspace:*",
+    "@vcs/project": "workspace:*",
+    "@vcs/schemas": "workspace:*",
+    "commander": "15.1.0"
+  },
   "name": "@vcs/cli",
-  "version": "0.1.0",
   "private": true,
-  "type": "module"
+  "scripts": {
+    "lint": "eslint src",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "type": "module",
+  "version": "0.1.0"
 }
