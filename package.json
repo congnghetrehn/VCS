@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@vcs/kernel": "workspace:*",
+    "@vcs/project": "workspace:*",
     "@vcs/schemas": "workspace:*"
   },
   "devDependencies": {
@@ -27,7 +28,7 @@
   "packageManager": "pnpm@10.15.0",
   "private": true,
   "scripts": {
-    "bench": "cross-env NODE_OPTIONS=--expose-gc tsx bench/tagdb.bench.ts",
+    "bench": "cross-env NODE_OPTIONS=--expose-gc tsx bench/tagdb.bench.ts && cross-env NODE_OPTIONS=--expose-gc tsx bench/orchestrator.bench.ts",
     "depcheck": "depcruise --validate .dependency-cruiser.cjs packages apps",
     "docs:diagnostics": "tsx scripts/gen-diagnostics.ts",
     "doctor": "node scripts/doctor.mjs",
@@ -35,7 +36,8 @@
     "lint": "eslint .",
     "review:cheats": "node scripts/check-cheats.mjs",
     "test": "cross-env NODE_OPTIONS=--expose-gc vitest run",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "vcs": "tsx apps/cli/src/index.ts"
   },
   "type": "module",
   "version": "0.1.0"
