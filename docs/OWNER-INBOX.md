@@ -148,6 +148,7 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 | ID | Prompt | Điều AI đã quyết | Lý do/ OQ | Veto? |
 |---|---|---|---|---|
 | R-001 | Bootstrap | Merge PR `chore/docs-bootstrap` → `develop` khi tự rà soát sạch, dù chưa có CI — ngoại lệ duy nhất theo BOOTSTRAP bước 9 | Chưa có CI ở bước bootstrap; PR chỉ chứa tài liệu | ☐ chấp nhận · ☐ đổi thành: |
+| R-002 | P0.1 | Viết `package.json` theo mặc định D-002 (A): repo private, `license: UNLICENSED`, tên gói giữ `@vcs/*`, chưa tạo file LICENSE | D-002 đang mở; P0.1 cần `package.json` để cài tooling | ☐ chấp nhận · ☐ đổi thành: |
 
 ## 7. Lịch sử (đã xử lý)
 | ID | Ngày | Kết quả | Ghi chú |
