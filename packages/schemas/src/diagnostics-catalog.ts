@@ -153,5 +153,36 @@ export const PRJ_CATALOG: DiagnosticCatalog = defineDiagnostics({
   },
 });
 
-/** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E hoặc -W, rồi 3 chữ số. */
-export const DIAGNOSTIC_CODE_RE = /\b[A-Z]{2,4}-[EW]\d{3}\b/g;
+/** Danh mục mã SCL (M1 §4.4, OQ-095). */
+export const SCL_CATALOG: DiagnosticCatalog = defineDiagnostics({
+  'SCL-L001': {
+    severity: 'error',
+    title: 'Lỗi từ vựng SCL',
+    hint: 'Kiểm tra ký tự tại vị trí đã báo; đóng comment (* *) và dấu nháy "...".',
+  },
+  'SCL-P001': {
+    severity: 'error',
+    title: "Thiếu ';' cuối statement",
+    hint: "Thêm ';' cuối statement tại vị trí đã báo.",
+  },
+  'SCL-P002': {
+    severity: 'error',
+    title: 'Lỗi cú pháp SCL',
+    hint: 'Sửa theo "expected ..." tại vị trí đã báo.',
+  },
+  'SCL-P003': {
+    severity: 'error',
+    title: 'Quá nhiều lỗi cú pháp (tối đa 100)',
+    hint: 'Sửa 100 lỗi đầu đã báo rồi biên dịch lại.',
+  },
+  'SCL-U001': {
+    severity: 'error',
+    title: 'Cấu trúc SCL chưa hỗ trợ',
+    hint: 'Dùng cấu trúc trong phạm vi M1 (xem M1 §4.2 và Phụ lục A); String không hỗ trợ.',
+  },
+});
+
+/** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E/-W/-L/-P/-U, rồi 3 chữ số.
+ * Mở rộng cho SCL (L/P/U) để `gen-diagnostics --check` kiểm được mã SCL dùng
+ * trong parser (không thì mã lạ lọt qua im lặng). */
+export const DIAGNOSTIC_CODE_RE = /\b[A-Z]{2,4}-[ELPWU]\d{3}\b/g;

@@ -28,7 +28,7 @@ export {
   formatDuration,
   durationSchema,
 } from './duration.js';
-export { defineDiagnostics, PRJ_CATALOG, DIAGNOSTIC_CODE_RE } from './diagnostics-catalog.js';
+export { defineDiagnostics, PRJ_CATALOG, SCL_CATALOG, DIAGNOSTIC_CODE_RE } from './diagnostics-catalog.js';
 export type { DiagnosticInfo, DiagnosticCatalog } from './diagnostics-catalog.js';
 export { parseYamlWithSchema, levenshtein, zodIssueParams } from './yaml.js';
 export type { YamlShape, ParseYamlResult } from './yaml.js';
