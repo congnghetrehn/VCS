@@ -1,6 +1,8 @@
 // Bench orchestrator — M0 §12.4. Chạy: `pnpm bench` (chạy sau bench TagDB).
-// Ngưỡng (không hạ): orchestrator (5 000 tag, LoopbackController) ≥ 100 000
-// bước/giây. Đo có warm-up, lấy trung vị. Kết quả hợp nhất vào
+// Ngưỡng (không hạ): orchestrator "rỗng" ≥ 100 000 bước/giây. Project bench
+// theo AMENDMENTS A17: 5 000 tag trong TagDB, 4 controller demo, mỗi
+// controller 2 rule loopback (tổng 8) + 1 counter + 1 blink; các tag còn
+// lại không có rule. Đo có warm-up, lấy trung vị. Kết quả hợp nhất vào
 // `bench/results.json` (file sinh tự động, không commit — baseline ở P0.7).
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
