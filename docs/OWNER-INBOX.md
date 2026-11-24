@@ -7,7 +7,7 @@
 Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần cứng) · **X** DỮ LIỆU CẦN CÓ · **S** THAY ĐỔI SPEC/LỚN · **K** KÝ DUYỆT milestone · **R** DUYỆT SAU (tầng B)
 
 ## 0. Tóm tắt (AI cập nhật mỗi lần ghi)
-- Đang bị chặn bởi: D-001, D-004 (trước G0); T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép)
+- Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). D-001/D-004 ĐÃ XONG (xem mục D-001/D-004); M0 ĐÃ KÝ 2026-11-24.
 - Việc cần anh trong tuần này: quyết D-001…D-005; chạy T-001 (S6, môi trường Windows); chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA
 - Cập nhật lần cuối: 2026-11-24
 - Nhãn/milestone GitHub (II.7): CHƯA CHẠY — GitHub MCP không có tool tạo nhãn/milestone (46 tool đã kiểm, không có); cần làm qua giao diện GitHub hoặc chủ sản phẩm. Không tự đổi branch protection (D-001).
@@ -19,8 +19,9 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 ### D-001 · Bật branch protection cho `main` · Chặn: G0 · Hạn mong muốn: trước P0.1
 **Bối cảnh:** Repo hiện chưa có branch protection. `main` chỉ nhận từ `develop` sau khi anh ký milestone; AI chỉ merge vào `develop`.
 **Lựa chọn:**
-- [ ] A — Bật: `main` yêu cầu PR + CI xanh, cho phép AI push nhánh / tạo PR
+- [x] A — Bật: `main` yêu cầu PR + CI xanh, cho phép AI push nhánh / tạo PR
 - [ ] B — Không bật lúc này, chỉ quy ước bằng miệng
+**Đã quyết 2026-11-24: chọn A.** Rule đã tạo 2026-11-24 17:53 +07 (classic branch protection, branch `main`, rule ID 86808264): yêu cầu PR (0 approval), bắt buộc 4 check xanh — check (lint, typecheck, depcheck, diagnostics, cheats), test ubuntu-latest Node 22, test windows-latest Node 22, e2e ubuntu Node 22 — + require up to date, chặn force-push, admin bypass vẫn được. **CẢNH BÁO: GitHub báo rule "Not enforced" vì repo private trên gói free — rule chỉ có hiệu lực khi nâng cấp Team/Enterprise hoặc repo public.** **Chủ sản phẩm quyết 2026-11-24 17:58 +07: chấp nhận hiện trạng (không nâng cấp, không public) — AI tự push `main` khi đã hoàn tất kiểm tra các đánh giá nghiệm thu G0–G5.** Nghĩa thực tế: sau khi gói nghiệm thu của một milestone đã merge vào `develop` VÀ chủ sản phẩm đã ký milestone ở STATE.md §8, AI mở PR `develop` → `main` qua trình duyệt, chờ CI xanh rồi merge (đó là cách duy nhất đẩy `main` qua UI, vì VM không có credential git). AI không push `main` ngoài thời điểm đó.
 **Đề xuất của AI:** A, vì đây là hàng rào duy nhất ngăn merge nhầm vào `main` trước khi có CI.
 **Hệ quả nếu chọn khác:** B thì `main` có thể bị ghi đè trực tiếp; AI vẫn tự giữ quy tắc không push `main`.
 **Việc đang chờ:** P0.1 (CI) và G0 · **Liên quan:** AUTONOMY §5, BOOTSTRAP bước 7
@@ -46,8 +47,9 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 ### D-004 · Nơi chạy mô phỏng (server hay Worker) · Chặn: G0 · Hạn mong muốn: trước P0.6/P1.7
 **Bối cảnh:** M1 §11 từng nói SoftPlc chạy trong Web Worker; AMENDMENTS A10/E6 đã đổi mặc định thành server Node, Worker chỉ là tùy chọn sau (M0 §17 mục 4).
 **Lựa chọn:**
-- [ ] A — Server Node (mặc định), Worker không cần
+- [x] A — Server Node (mặc định), Worker không cần
 - [ ] B — Worker (cần nêu lý do: …)
+**Đã quyết 2026-11-24: chọn A (server Node).** Khớp mặc định A10/E6 đã triển khai khắp P0.5/P0.6.
 **Đề xuất của AI:** A, theo A10/E6 và vì UI đã qua WebSocket.
 **Hệ quả nếu chọn khác:** B thì P0.6/P1.7 phải làm thêm transport Worker.
 **Việc đang chờ:** P0.6, P1.7 · **Liên quan:** AMENDMENTS A10/E6, OQ-004
