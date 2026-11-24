@@ -284,3 +284,57 @@ và `comms.log` (mục RingLog theo M4 §5.4, `level: string`). Server P0.8
 đã đăng ký là `ControllerAdapter` với `asyncStep === true`. Component trả
 Promise mà không đặt cờ vẫn bị `stepOnce()` ném `SIM-E002` như M0 — cờ là cách
 duy nhất để khai báo bất đồng bộ. Chuyển sang `stepOnceAsync` theo cờ là P5.1.
+
+## 12. Bộ nhớ Siemens (M1 §3.1–§3.4, P1.1)
+
+**VERIFIED.** Bộ nhớ là `Uint8Array` + `DataView`, **big-endian mọi độ rộng**
+(`getUint16(offset, false)`…). Truy cập chồng lấn đúng: ghi `%MW0 := 0x1234`
+thì `%MB0 = 0x12`, `%MB1 = 0x34`, `%MD0 = 0x12340000`; ghi Real `0.1` thì
+đọc lại `fround(0.1)` = 0.10000000149011612; DInt `-1` đọc như DWord =
+4294967295 và như Real = NaN (bảng tính tay A, 9 dòng, assert bằng unit test).
+
+**VERIFIED.** Bit addressing: `%M<byte>.<bit>`, bit 0 = LSB. `Time` đọc/ghi
+như DInt ms (cùng encoding, khác kiểu khai báo). `Real` luôn ép `Math.fround`,
+`DWord`/`UDInt` ép `>>> 0` khi ghi (AGENTS §4).
+
+**VERIFIED.** Layout DB/struct đúng 6 quy tắc §3.4: Bool gói bit trong byte,
+chuỗi Bool liên tiếp dùng chung byte, gặp phần tử không-Bool thì đóng byte;
+Byte/SInt/USInt 1 byte không căn; kiểu ≥ 2 byte bắt đầu chẵn; Struct/UDT/Array
+bắt đầu chẵn + kết thúc chẵn; tổng kích thước làm tròn chẵn. DB dùng thẳng
+`layoutStruct` (DB = struct). `FieldInfo.byteOffset`/`bitOffset` là tuyệt đối
+trong struct gốc; với array, `elem` là layout của **một** phần tử (phần tử i
+ở `byteOffset + i * elem.size`, riêng array Bool thì phần tử i ở bit i).
+`size` của FieldInfo tính bằng byte, riêng Bool = 1 (bit).
+
+**UNVERIFIED (OQ-084, `VERIFY` §3.4 quy tắc 4).** LReal căn theo offset chẵn,
+không căn 8 ("S7 không yêu cầu căn 8"). Chờ xác minh PLCSIM thí nghiệm E11
+(M1 §14 mục 11); nếu PLC thật căn 8 thì struct có LReal sau field lẻ lệch
+4 byte — sửa layout + test, ghi SCR nếu spec đổi.
+
+**UNVERIFIED (OQ-083, `VERIFY` §3.4 quy tắc 5).** Array of Bool gói bit
+(10 Bool = 2 byte); array bắt đầu chẵn, kết thúc chẵn (pad — 7 bit = 1 byte
+nội dung → size 2). Chờ xác minh PLCSIM E11 như trên.
+
+**VERIFIED (OQ-087).** M1 không hỗ trợ STRING: `sizeOf('String')` →
+`undefined`; `layoutStruct` gặp field String (kể cả trong array) → throw
+`Error` nêu tên field. Không bịa kích thước.
+
+**VERIFIED (OQ-086).** Truy cập ngoài vùng (`read`/`write`/`getBit`/`setBit`
+vượt `sizeBytes`, `restore` sai độ dài) → ném `RangeError` nêu rõ
+vùng/offset/kích thước (lỗi ồn ào, không im lặng). P1.4 map thành
+`RuntimeFault ARRAY_RANGE` khi ngữ cảnh là chỉ số mảng.
+
+**VERIFIED (OQ-091).** `MemoryArea.write` validate bằng `validateTagValue`
+(kernel, P0.8), sai → ném `TagError('TAG-E001')`. Bộ nhớ không tự wrap/kẹp;
+wrap/chuẩn hóa là việc của interpreter trước khi ghi (§7.2).
+
+**VERIFIED (OQ-089).** `AbsAddress` chỉ mang width (1/8/16/32), không mang
+`DataType`: cùng `%IW64` có thể là Int, Word hoặc Real tùy khai báo ở lúc
+đọc. Không có dạng 64-bit tuyệt đối (`%ML` không tồn tại trong §3.3).
+
+**VERIFIED (OQ-085/090).** `parseAddress`: chấp nhận chữ thường + chuẩn hóa
+hoa, trim khoảng trắng, không `%` cũng parse được; `DB0` → throw;
+`sym:…` → throw; bit phải 0..7; không kiểm giới hạn vùng ở parse
+(byte lớn vẫn parse, lỗi chỉ phát khi truy cập bộ nhớ); `%IW65` (word ở
+byte lẻ) parse được. Sai → throw `Error('địa chỉ không hợp lệ: ...')`
+nêu text gốc + lý do; P1.2 chuyển thành Diagnostic.
