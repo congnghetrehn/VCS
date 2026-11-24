@@ -25,6 +25,7 @@
 | A14 | M1–M3: lệnh `vcs …` | Khung `apps/cli` (commander); mỗi lệnh một file `commands/*.ts` | mọi milestone |
 | A15 | PRD 7.2 | Thêm `@vcs/project`, `@vcs/test-utils` | P0.1–P0.2 |
 | A16 | M0 §13: CI ma trận Node 20, 22 (job `test` ubuntu/windows; gate xanh Node 20 và 22) | **CI chỉ chạy Node 22** (bỏ Node 20): `dependency-cruiser@18.7.2` yêu cầu Node `^22\|\|^24\|\|>=26`, `pnpm install` trên Node 20 lỗi `ERR_PNPM_UNSUPPORTED_ENGINE`. Quyết bởi chủ sản phẩm 2026-11-24 (chọn B, không hạ dependency-cruiser) | P0.1 |
+| A17 | M0 §12.4: bench orchestrator "rỗng" (5 000 tag, LoopbackController), ngưỡng ≥ 100 000 bước/s — spec không định nghĩa thành phần project bench | **Project bench "rỗng" được định nghĩa: 5 000 tag trong TagDB, 4 controller demo, mỗi controller 2 rule loopback (tổng 8) + 1 counter + 1 blink; các tag còn lại không có rule. `LoopbackController` I/O thưa: chỉ đọc input và ghi output của tag có rule (qua TagDB handle; factory truyền `ctx.tags`); output không có rule giữ nguyên giá trị hiện tại, không bị ghi đè về initial mỗi scan. `TagDB.flush()` chỉ duyệt danh sách dirty (O(số tag đổi), theo M0 §6.4 quy tắc 3). Ngưỡng KHÔNG đổi (≥ 100 000 bước/s).** Quyết bởi chủ sản phẩm 2026-11-24 (chọn (b) định nghĩa lại project "rỗng", rồi (ii) I/O thưa) | P0.4 |
 
 ## B. Điều chỉnh từ M4 §2 (áp dụng khi làm M4; một phần có thể làm trước ở **P0.8**)
 
