@@ -1,11 +1,15 @@
 # CI — VCS (M0 §13, sửa bởi AMENDMENTS A16: chỉ Node 22). Chạy trên push + PR.
-# Job e2e (Playwright) và bench được thêm ở P0.6 / P0.3 khi apps/web và bench
-# tồn tại; `docs:diagnostics --check` thêm ở P0.2 (M0 §4.1, §13).
+# Job bench (P0.3, M0 §13 + OQ-008): chạy tay/nightly, upload artifact
+# `bench/results.json`; so sánh hồi quy > 20% → cảnh báo CI dời sang P0.7
+# (chưa có baseline). Job e2e (Playwright) được thêm ở P0.6 khi apps/web tồn tại.
 name: CI
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * *'
 
 jobs:
   check:
@@ -46,3 +50,24 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
+
+  bench:
+    name: bench (manual/nightly)
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm bench
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bench-results
+          path: bench/results.json
