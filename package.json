@@ -1,4 +1,7 @@
 {
+  "dependencies": {
+    "@vcs/schemas": "workspace:*"
+  },
   "devDependencies": {
     "@eslint/js": "9.39.5",
     "@types/node": "24.19.2",

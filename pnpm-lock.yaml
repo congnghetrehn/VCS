@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@vcs/schemas':
+        specifier: workspace:*
+        version: link:packages/schemas
     devDependencies:
       '@eslint/js':
         specifier: 9.39.5
@@ -56,7 +60,11 @@ importers:
 
   packages/kernel: {}
 
-  packages/project: {}
+  packages/project:
+    dependencies:
+      '@vcs/schemas':
+        specifier: workspace:*
+        version: link:../schemas
 
   packages/schemas:
     dependencies:
