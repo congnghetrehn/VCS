@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+/* Dark mode theo class .dark trên <html> (OQ-064); Tailwind v4 mặc định
+   dark: theo prefers-color-scheme nên cần variant riêng cho toggle tay. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Ô giá trị vừa đổi nháy nhẹ (OQ-060: flash chỉ từ delta gần nhất). */
+@keyframes vcs-flash {
+  from {
+    background-color: rgb(250 204 21 / 0.45);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.flash {
+  animation: vcs-flash 0.8s ease-out;
+}

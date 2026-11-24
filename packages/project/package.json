@@ -1,0 +1,17 @@
+{
+  "name": "@vcs/project",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@vcs/schemas": "workspace:*"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  }
+}

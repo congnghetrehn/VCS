@@ -43,7 +43,7 @@ MANIFEST (tên gốc → vị trí đích):
    D-001 GitHub: bật branch protection cho `main` (yêu cầu PR + CI), cho phép AI push nhánh/ tạo PR. Mặc định đề xuất: bật; AI chỉ merge vào `develop`.
    D-002 Giấy phép/ tên gói (`@vcs/*`) — mặc định: repo private, proprietary/UNLICENSED, tên gói giữ nguyên.
    D-003 Chính sách dữ liệu khách hàng — mặc định: KHÔNG đưa dữ liệu thật vào công cụ AI/ repo; chỉ dữ liệu ẩn danh đặt ở `fixtures-real/` (đã ignore), repo/kho riêng.
-   D-004 Nơi chạy mô phỏng — mặc định: server Node, Worker không cần (M0 §17.4).
+   D-004 Nơi chạy mô phỏng — mặc định: server Node, Worker không cần (M0 §17 mục 4).
    D-005 PWA (P0.9) — mặc định: hoãn tới sau M0; nếu làm, cần quyết HTTPS cho LAN.
    T-001 Spike S6 (kiểm môi trường Windows) · T-002 Spike S2 (PLCSIM Advanced "hello") · T-003 Spike S3 (TIA Openness export) · T-004 Spike S5 (SCADA smoke test): mỗi mục có HƯỚNG DẪN TỪNG BƯỚC bạn tự viết dựa trên docs/SPIKES.md, kèm cách dán kết quả. Đánh dấu T-002/T-003 "nên làm sớm — quyết định khả thi M5 và giấy phép".
    Rồi tạo docs/open-questions.md từ các điểm mơ hồ ở bước 5.
@@ -63,7 +63,7 @@ MANIFEST (tên gốc → vị trí đích):
 - Gom yêu cầu gửi chủ sản phẩm theo đợt (tối đa 1 lần/ngày làm việc) trừ khi bị chặn hoàn toàn; mỗi mục phải tự đủ ngữ cảnh để quyết trong < 2 phút.
 
 == KẾT THÚC PHIÊN (mọi phiên) ==
-Cập nhật docs/STATE.md (tiến độ, việc dở, lệnh tái hiện, bước tiếp theo cụ thể), docs/OWNER-INBOX.md, docs/open-questions.md, ADR nếu có. Không để cây làm việc bẩn. Báo cáo ngắn đúng mẫu AGENTS.md §9.7, đầu báo cáo liệt kê ID cần chủ sản phẩm xử lý (D/T/X/S/K/R) hoặc "Không có". Nếu sắp hết ngữ cảnh: dừng ở điểm ổn định và làm bàn giao (prompt H3) — đừng cố nhồi thêm.
+Cập nhật docs/STATE.md (tiến độ, việc dở, lệnh tái hiện, bước tiếp theo cụ thể), docs/OWNER-INBOX.md, docs/open-questions.md, ADR nếu có. Không để cây làm việc bẩn. Báo cáo ngắn đúng mẫu AGENTS.md §9 mục 7, đầu báo cáo liệt kê ID cần chủ sản phẩm xử lý (D/T/X/S/K/R) hoặc "Không có". Nếu sắp hết ngữ cảnh: dừng ở điểm ổn định và làm bàn giao (prompt H3) — đừng cố nhồi thêm.
 
 == BẮT ĐẦU NGAY ==
 Thực hiện 0 → I → II → III. Đầu ra chat của lượt đầu tiên chỉ gồm: kết quả kiểm tra năng lực, bản tóm tắt docs-audit (thiếu/lỗi), danh sách quyết định/ dữ liệu bạn đã đưa vào OWNER-INBOX, và prompt bạn sẽ làm tiếp theo.
@@ -80,7 +80,7 @@ Việc đầu tiên: xử lý các mục chủ sản phẩm đã trả lời tro
 ## C. Mẫu trả lời nhanh của chủ sản phẩm
 | Loại | Cách trả lời |
 |---|---|
-| Quyết định (D) | `D-007: B` hoặc đánh dấu `[x]` trong inbox |
+| Quyết định (D) | `D-003: B` hoặc đánh dấu `[x]` trong inbox |
 | Kiểm thật (T) | `T-002: xong` + dán kết quả/ đường dẫn file; hoặc dán nguyên văn lỗi |
 | Dữ liệu (X) | `X-003: đã đặt ở <đường dẫn>` (không commit dữ liệu nhạy cảm) |
 | Thay đổi spec (S) | `S-001: chấp nhận` / `chấp nhận sửa đổi: …` / `từ chối` |

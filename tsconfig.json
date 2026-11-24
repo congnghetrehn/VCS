@@ -1,0 +1,14 @@
+{
+  "exclude": ["node_modules", "**/dist", "apps/web/**"],
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "vitest.config.ts",
+    "vitest.workspace.ts",
+    "playwright.config.ts",
+    "scripts/**/*.ts",
+    "bench/**/*.ts",
+    "packages/*/src/**/*.ts",
+    "apps/*/src/**/*.ts",
+    "tests/**/*.ts"
+  ]
+}

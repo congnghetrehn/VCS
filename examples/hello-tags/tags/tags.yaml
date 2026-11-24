@@ -1,0 +1,78 @@
+# tags/tags.yaml — examples/hello-tags (M0 §10).
+# 7 tag I/Q vào TagDB; 5 tag M/DB chỉ ở TagCatalog (không vào TagDB).
+tags:
+  - name: BTN_START
+    type: Bool
+    area: I
+    address: "%I0.0"
+    controller: PLC1
+    signal:
+      kind: DI
+  - name: SW_AUTO
+    type: Bool
+    area: I
+    address: "%I0.1"
+    controller: PLC1
+    signal:
+      kind: DI
+  - name: PT01
+    type: Int
+    area: I
+    address: "%IW64"
+    controller: PLC1
+    signal:
+      kind: AI
+      scaling: { rawMin: 0, rawMax: 27648, engMin: 0, engMax: 10, unit: bar }
+  - name: LAMP_RUN
+    type: Bool
+    area: Q
+    address: "%Q0.0"
+    controller: PLC1
+    signal:
+      kind: DO
+  - name: LAMP_AUTO
+    type: Bool
+    area: Q
+    address: "%Q0.1"
+    controller: PLC1
+    signal:
+      kind: DO
+  - name: LAMP_HEARTBEAT
+    type: Bool
+    area: Q
+    address: "%Q0.2"
+    controller: PLC1
+    signal:
+      kind: DO
+  - name: SCAN_CNT
+    type: Int
+    area: Q
+    address: "%QW64"
+    controller: PLC1
+    signal:
+      kind: AO
+  - name: M_FLAG
+    type: Bool
+    area: M
+    address: "%M0.0"
+    controller: PLC1
+  - name: M_CNT
+    type: Int
+    area: M
+    address: "%MW2"
+    controller: PLC1
+  - name: M_ALARM
+    type: Bool
+    area: M
+    address: "%M0.1"
+    controller: PLC1
+  - name: DB1_VAL
+    type: Int
+    area: DB
+    address: "DB1.DBW0"
+    controller: PLC1
+  - name: DB1_FLAG
+    type: Bool
+    area: DB
+    address: "DB1.DBX0.0"
+    controller: PLC1

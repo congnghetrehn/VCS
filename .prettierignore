@@ -1,0 +1,10 @@
+node_modules
+dist
+build
+coverage
+.turbo
+pnpm-lock.yaml
+
+# File sinh tự động bởi scripts/gen-diagnostics.ts — không format tay
+# (định dạng do generator quyết định; CI kiểm bằng docs:diagnostics --check).
+docs/diagnostics.md
