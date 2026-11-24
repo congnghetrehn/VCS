@@ -4,6 +4,7 @@
   "include": [
     "vitest.config.ts",
     "vitest.workspace.ts",
+    "scripts/**/*.ts",
     "packages/*/src/**/*.ts",
     "apps/*/src/**/*.ts",
     "tests/**/*.ts"

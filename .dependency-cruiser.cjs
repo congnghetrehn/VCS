@@ -17,10 +17,12 @@ module.exports = {
     },
     // Đồ thị M0 §3.5 + B7 (mỗi rule: package này chỉ được import các package liệt kê).
     {
+      // schemas không import package khác; import nội bộ trong schemas được phép
+      // (P0.2: rule cũ cấm cả import nội bộ nên mọi file schemas đều vi phạm).
       name: 'schemas-standalone',
       severity: 'error',
       from: { path: PKG('schemas') },
-      to: { path: '^packages/' },
+      to: { path: '^packages/', pathNot: PKG('schemas') },
     },
     {
       name: 'kernel-deps',
