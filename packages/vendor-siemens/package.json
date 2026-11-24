@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "@vcs/runtime-iec": "workspace:*",
-    "@vcs/schemas": "workspace:*"
+    "@vcs/schemas": "workspace:*",
+    "chevrotain": "13.2.0"
   },
   "exports": {
     ".": "./src/index.ts"

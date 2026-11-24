@@ -14,6 +14,13 @@ describe('generateDiagnosticsMarkdown', () => {
       expect(md).toContain(`\`${code}\``);
     }
   });
+
+  it('chứa đủ 5 mã SCL (P1.2)', () => {
+    const md = generateDiagnosticsMarkdown();
+    for (const code of ['SCL-L001', 'SCL-P001', 'SCL-P002', 'SCL-P003', 'SCL-U001']) {
+      expect(md).toContain(`\`${code}\``);
+    }
+  });
 });
 
 describe('scanCodes', () => {
@@ -22,6 +29,10 @@ describe('scanCodes', () => {
       new Set(['PRJ-E003', 'PRJ-W001']),
     );
     expect(scanCodes('không có mã nào')).toEqual(new Set());
+  });
+
+  it('tìm được mã SCL (regex bao L/P/U, không chỉ E/W)', () => {
+    expect(scanCodes('lỗi SCL-P002 và SCL-L001')).toEqual(new Set(['SCL-P002', 'SCL-L001']));
   });
 });
 

@@ -9,10 +9,21 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DIAGNOSTIC_CODE_RE, PRJ_CATALOG } from '@vcs/schemas';
+import { DIAGNOSTIC_CODE_RE, PRJ_CATALOG, SCL_CATALOG } from '@vcs/schemas';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'docs', 'diagnostics.md');
+
+/** Toàn bộ catalog (M0 + SCL) — gộp để sinh và kiểm mã chưa đăng ký. */
+const CATALOGS = [PRJ_CATALOG, SCL_CATALOG];
+
+function hasCode(code: string): boolean {
+  return CATALOGS.some((c) => c.has(code));
+}
+
+function allEntries(): [string, { severity: string; title: string; hint?: string }][] {
+  return CATALOGS.flatMap((c) => c.entries()).sort((a, b) => (a[0] < b[0] ? -1 : 1));
+}
 
 export function generateDiagnosticsMarkdown(): string {
   const lines: string[] = [
@@ -23,7 +34,7 @@ export function generateDiagnosticsMarkdown(): string {
     '| Mã | Mức | Tiêu đề | Gợi ý |',
     '| --- | --- | --- | --- |',
   ];
-  for (const [code, info] of PRJ_CATALOG.entries()) {
+  for (const [code, info] of allEntries()) {
     lines.push(`| \`${code}\` | ${info.severity} | ${info.title} | ${info.hint ?? ''} |`);
   }
   lines.push('');
@@ -67,7 +78,7 @@ export async function findUnregisteredCodes(): Promise<string[]> {
     const text = await readFile(f, 'utf8');
     for (const code of scanCodes(text)) found.add(code);
   }
-  return [...found].filter((c) => !PRJ_CATALOG.has(c)).sort();
+  return [...found].filter((c) => !hasCode(c)).sort();
 }
 
 async function main(): Promise<number> {
@@ -98,7 +109,9 @@ async function main(): Promise<number> {
   }
   await writeFile(OUT, generated, 'utf8');
   const rel = OUT.split(sep).slice(-2).join('/');
-  process.stdout.write(`Đã sinh ${rel} (${String(PRJ_CATALOG.codes().length)} mã).\n`);
+  process.stdout.write(
+    `Đã sinh ${rel} (${String(CATALOGS.reduce((n, c) => n + c.codes().length, 0))} mã).\n`,
+  );
   return 0;
 }
 

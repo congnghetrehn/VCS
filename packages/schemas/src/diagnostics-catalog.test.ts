@@ -1,6 +1,6 @@
 // Test DiagnosticCatalog (M0 §4.1).
 import { describe, expect, it } from 'vitest';
-import { PRJ_CATALOG, defineDiagnostics } from './diagnostics-catalog.js';
+import { PRJ_CATALOG, SCL_CATALOG, defineDiagnostics } from './diagnostics-catalog.js';
 
 describe('PRJ_CATALOG', () => {
   it('chứa đủ mã M0 §4.5', () => {
@@ -47,6 +47,35 @@ describe('PRJ_CATALOG', () => {
 
   it('mã chưa đăng ký → undefined', () => {
     expect(PRJ_CATALOG.get('PRJ-E999')).toBeUndefined();
+  });
+});
+
+describe('SCL_CATALOG (P1.2, M1 §4.4)', () => {
+  it('chứa đủ 5 mã SCL', () => {
+    expect(SCL_CATALOG.codes()).toEqual([
+      'SCL-L001',
+      'SCL-P001',
+      'SCL-P002',
+      'SCL-P003',
+      'SCL-U001',
+    ]);
+  });
+
+  it('mỗi mã có severity + title', () => {
+    for (const [code, info] of SCL_CATALOG.entries()) {
+      expect(['error', 'warning', 'info']).toContain(info.severity);
+      expect(info.title.length, code).toBeGreaterThan(0);
+    }
+  });
+
+  it('SCL-L001/P001/P002/P003/U001 đều là error', () => {
+    for (const code of ['SCL-L001', 'SCL-P001', 'SCL-P002', 'SCL-P003', 'SCL-U001']) {
+      expect(SCL_CATALOG.get(code)?.severity, code).toBe('error');
+    }
+  });
+
+  it('mã chưa đăng ký → undefined', () => {
+    expect(SCL_CATALOG.get('SCL-X001')).toBeUndefined();
   });
 });
 

@@ -11,9 +11,9 @@
 ## 1. Vị trí hiện tại
 
 - Milestone: **M0** (P0.1 đã merge vào `develop` qua PR #8, merge commit `e8707f2`, CI 6/6 xanh; P0.2 đã merge vào `develop` qua PR #9, merge commit `f3d769a`, CI 6/6 xanh sau sửa lỗi khai báo `workspace:*`)
-- Prompt đang làm / vừa xong: P1.1 — **✔ triển khai xong 2026-11-25** (STATE §16, nhánh `m1/p1.1-runtime-iec`; OQ-082…091 đóng). Tiếp theo: mở PR P1.1, rồi P1.2 plan-first (cần X-002/S1).
-- Nhánh: `m1/p1.1-runtime-iec` (từ `fd3578e` = nội dung `develop` sau merge PR #19, develop head `aecb372`)
-- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.1 triển khai xong, chờ mở PR)
+- Prompt đang làm / vừa xong: P1.1 — **✔ đã merge PR #20 `8b3dbb6` vào `develop` 2026-11-25 01:13 +07** (CI xanh; STATE §16; OQ-082…091 đóng). Tiếp theo: P1.2 plan-first (STATE §17; X-002/S1 vẫn mở nhưng không chặn P1.2 — làm theo EBNF, xem §17 OQ-105).
+- Nhánh: `m1/p1.2-scl-parser` (từ `b843912` = nội dung `develop` sau merge PR #20, develop head `8b3dbb6`)
+- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.1 đã merge PR #20; P1.2 plan-first)
 
 ## 2. Tiến độ prompt
 
@@ -29,8 +29,8 @@
 | P0.8   | ✔ xong (gate xanh local; đã merge PR #19 `aecb372` vào `develop` 2026-11-25 00:31 +07, CI 8 successful + 2 skipped) | PR #19, nhánh `m0/p0.8-interfaces` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` + build xanh 2026-11-24 (507 test, 36 file; 68 test mới) + bench TagDB 4/4 + orchestrator 443.627 bước/s | xem §15; OQ-075…081 đóng |
 | P0.9   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | tùy chọn, chờ D-005                                               |
 | G0     | ✔ đã ký 2026-11-24 (gói bằng chứng `docs/acceptance/M0.md`, 12/12 §15 ĐẠT; probe bổ sung 3/3 PASS; Windows 439/439 sau fix OQ-074) | nhánh `m0/g0-acceptance` (đã merge PR #15) | gate xanh 2026-11-24 ở bản sao sạch (439 test + coverage PASS, e2e 5/5, bench PASS, hash ghim khớp 2 lần chạy) | gói nghiệm thu M0 |
-| P1.1   | ✔ xong (gate xanh local; xem §16) | nhánh `m1/p1.1-runtime-iec` | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (651 test, 40 file; 144 test mới) + build xanh + bench guard PASS | xem §16; OQ-082…091 đóng |
-| P1.2   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | cần X-002 (S1)                                                    |
+| P1.1   | ✔ xong (gate xanh local; đã merge PR #20 `8b3dbb6` vào `develop` 2026-11-25 01:13 +07, CI xanh) | PR #20, nhánh `m1/p1.1-runtime-iec` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (651 test, 40 file; 144 test mới) + build xanh + bench guard PASS | xem §16; OQ-082…091 đóng |
+| P1.2   | ◐ plan-first (STATE §17, nhánh `m1/p1.2-scl-parser`)                                                                                                                                                         |                                                   |                                                                                                                                                                           | X-002/S1 vẫn mở nhưng không chặn (làm theo EBNF, OQ-105) |
 | P1.3   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P1.4   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P1.5   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
@@ -83,7 +83,7 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 - File/hàm đang sửa: — (G0 xong file nghiệm thu, CHƯA mở PR — xem `docs/acceptance/M0.md`)
 - Test đang hỏng (nguyên văn): — (G0: gate xanh ở bản sao sạch `/tmp/vcs-g0` install thật — vitest 439/439 + coverage §13 PASS (kernel 97,66%, schemas 95,92%, project 97,83%), e2e 5/5, review:cheats SẠCH, diagnostics khớp, build 3/3; bench TagDB 4/4 (set/get 44,8M ops/s), orchestrator 442 432 bước/s; `check-bench-regression` exit 0, không có hồi quy > 20%; hash ghim khớp 2 lần chạy. P0.7 trước đó: TagDB set/get 51,7M ops/s, orchestrator 508 058 bước/s bản chính.)
 - Lệnh tái hiện nhanh: `npx -y pnpm@10.15.0 run lint && npx -y pnpm@10.15.0 run typecheck && npx -y pnpm@10.15.0 run depcheck && npx -y pnpm@10.15.0 run test && npx -y pnpm@10.15.0 run test:e2e && npx -y pnpm@10.15.0 run review:cheats && npx -y pnpm@10.15.0 run docs:diagnostics --check` (ĐÃ CHẠY 2026-11-24 ở P0.6: cả 7 xanh ở cả bản sao `/tmp/vcs-p06` (`pnpm install --frozen-lockfile` exit 0 — OQ-007) lẫn bản sao chính; vitest 438 passed / 35 file (17 test unit mới); e2e 5/5 local (E1–E5, Chromium cài được ở VM — xem §6); depcheck "no violations, 82 modules, 134 dependencies" ở `/tmp` (86 modules, 148 dependencies ở bản chính — lệch do cruise cả `apps/*/dist/` + `test-results/`, không có violation); review:cheats SẠCH, quét 108 file; diagnostics --check khớp, 24 mã). `pnpm bench` ĐÃ CHẠY: set/get 45,4M ops/s (≥10M), flush 5000/0 đổi 0,14 µs (≤50), flush 1000 đổi + 1 sub 0,062 ms (≤1), heap −0,05 MB (<1) — TagDB 4/4 PASS; orchestrator 513 310 bước/s — PASS. `pnpm build` ĐÃ CHẠY: turbo xanh 3 app (server/cli tsup + web vite, `apps/web/dist` có `index.html` + assets); smoke: `vcs serve examples/hello-tags` → `GET /` trả `index.html`, `/api/health` `{"ok":true}`, asset JS 200.
-- Bước tiếp theo cụ thể: **mở PR P1.1** (nhánh `m1/p1.1-runtime-iec` → `develop`, plan + triển khai chung một PR), chờ CI xanh, merge; rồi P1.2 plan-first (cần X-002/S1). OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
+- Bước tiếp theo cụ thể: **P1.2 triển khai** theo plan §17 (nhánh `m1/p1.2-scl-parser`), rồi mở PR P1.2 (plan + triển khai chung một PR), chờ CI xanh, merge; rồi P1.3 plan-first. X-002/S1 vẫn mở (chủ sản phẩm đưa mã SCL thật khi có) — không chặn P1.2. OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
 - Đẩy qua UI — danh sách file P0.7 (so với `develop` @ `471a2ec`, nhánh `m0/p0.7-docs`, CHƯA mở PR): `package.json` (script `test` thêm `--coverage`, devDep `@vitest/coverage-v8@4.1.12`), `pnpm-lock.yaml`, `vitest.config.ts` (coverage v8, ngưỡng dòng theo glob §13), `apps/cli/src/commands/run.test.ts` (+1 test ghim hash §15.6), `packages/kernel/src/tags.test.ts` (timeout 60 s cho test heap 10M ops khi đo coverage — xem §14), `.github/workflows/ci.yml` (comment coverage + job bench gọi `check-bench-regression.mjs`), `scripts/check-bench-regression.mjs` (mới), `bench/baseline.json` (mới, trung vị 5 mẫu), `docs/architecture.md` (mới), `docs/semantics.md` (mới, phần M0), `docs/adr/0001-package-jit-monorepo.md` … `0007-main-guard-tsup-split.md` (mới), `README.md` (viết lại), `docs/STATE.md`, `docs/open-questions.md` (OQ-071…073 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `coverage/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.6 (so với `develop` @ `65cd373`, nhánh `m0/p0.6-web`, đã merge PR #13 `471a2ec` 2026-11-24): `package.json` (script `test:e2e`, `typecheck` thêm web tsconfig, devDep `@playwright/test@1.65.0`), `pnpm-lock.yaml` (react 19.3.1, react-dom 19.3.1, zustand 5.1.0, @tanstack/react-virtual 3.14.26, vite 8.3.7, @vitejs/plugin-react 6.3.0, tailwindcss 4.3.5, @tailwindcss/vite 4.3.5, @types/react 19.3.0, @types/react-dom 19.3.0, @playwright/test 1.65.0 + link workspace; lưu ý: `vite@8.3.8` trong lockfile là transitive của vitest 4.1.12, đã có từ trước P0.6 — không phải vite của web (8.3.7); `immer`/`use-sync-external-store` là peer optional của zustand, pnpm KHÔNG cài), `tsconfig.json` (exclude `apps/web/**`, include `playwright.config.ts`), `playwright.config.ts`, `.gitignore` (`apps/web/e2e/fixtures/big-project/`, `test-results/`), `.github/workflows/ci.yml` (job `e2e` mới, ubuntu), `scripts/ensure-web-dist.mjs`, `apps/web/package.json` (deps + script `dev`/`build`) + `tsconfig.json` (riêng: lib DOM, jsx react-jsx — root tsconfig lib ES2022 không typecheck được `.tsx`, xem §13) + `vite.config.ts` + `index.html` + `src/{main.tsx,App.tsx,format.ts,format.test.ts,store.ts,store.test.ts,ws-client.ts,ws-client.test.ts,vite-env.d.ts,index.css}` + `src/i18n/{index,vi,en}.ts` + `index.test.ts` + `src/components/{SimBar,TagTable,DiagnosticsPanel}.tsx` + `e2e/{helpers,e1,e2,e3,e4,e5,perf-scroll}.spec.ts` + `e2e/fixtures/gen-big-project.ts`, `apps/server/src/ws.test.ts` (fix OQ-044: test trỏ `webDistDir` vào thư mục tạm trống — kiểm chứng gate của parent), `docs/STATE.md`, `docs/open-questions.md` (OQ-057…OQ-070 đã ghi từ plan; OQ-062 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `apps/web/e2e/fixtures/big-project/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.4 (so với `develop` @ `4a1181a`): `package.json` (script `vcs` + dep `@vcs/project`), `pnpm-lock.yaml` (commander 15.1.0 + link workspace), `tsconfig.base.json` (path `@vcs/kernel/demo`), `.gitignore` (`bench/project-5000/`), `packages/kernel/package.json` (export `./demo`), `packages/kernel/src/{component,errors,orchestrator,builder,pacer,index}.ts` + `demo/{loopback,extension,index}.ts` + test (`orchestrator`, `builder`, `pacer`, `demo/loopback` test), `packages/test-utils/src/sim.ts` + `index.ts` + `sim.test.ts`, `apps/cli/package.json` (commander 15.1.0), `apps/cli/tsconfig.json`, `apps/cli/src/{index,extensions}.ts`, `apps/cli/src/commands/{index,version,validate,run}.ts` + test, `examples/hello-tags/{vcs.project.yaml,tags/tags.yaml}`, `scripts/gen-bench-project.ts`, `bench/orchestrator.bench.ts`, `docs/STATE.md`, `docs/open-questions.md` (OQ-030/031/032). KHÔNG đẩy `node_modules/`, `bench/results.json`, `bench/project-5000/`, file profile tạm (đã xóa).
@@ -166,7 +166,7 @@ Chỉ liệt kê **ID** (chi tiết ở `docs/OWNER-INBOX.md`; câu hỏi/ giả
 | Windows + TIA + PLCSIM Advanced + giấy phép | P5.4, P5.6 | ☐ (X-006, T-002/T-003)                                                                                                                                                                                                                       |
 | ≥ 10 file SimaticML thật + XSD              | P5.7       | ☐ (X-007)                                                                                                                                                                                                                                    |
 | Dự án VCS_Conformance                       | P5.9       | ☐ (X-008)                                                                                                                                                                                                                                    |
-| Khảo sát độ phủ SCL thật (Spike S1)         | trước P1.2 | ☐ (X-002)                                                                                                                                                                                                                                    |
+| Khảo sát độ phủ SCL thật (Spike S1)         | trước P1.2 | ☐ (X-002) — P1.2 KHÔNG chờ (làm theo EBNF §4.2; S1 chạy khi có mã thật, xem §17 OQ-105) |
 
 ## 7. Rủi ro đang theo dõi
 
@@ -1008,3 +1008,286 @@ Tổng size = **34** (chẵn). Kiểm: các field ≥ 2 byte đều ở offset c
 **Kết quả triển khai (2026-11-25, nhánh `m1/p1.1-runtime-iec`):** làm đủ phạm vi plan §16; không đổi hành vi hiện có (chỉ thêm 2 package mới + ngưỡng coverage + `semantics.md` §12; hash CLI `21096ab2…1d53` giống hệt 2 lần chạy). **Test mới 144, tổng 651/651 (40 file)** — vượt mục tiêu ≥ 45/≥ 552: types 48, memory 23, layout 19, address 54 (gồm 3 property test fast-check seed cố định). Gate xanh ở bản sao sạch `/tmp/vcs-p11` (install `--frozen-lockfile` thật, exit 0): lint 0, typecheck sạch, depcheck "no violations" (88 modules, 141 deps), test 651/651 + coverage dòng runtime-iec types 100% (6/6), memory 93,84% (61/65), layout 100% (68/68), vendor-siemens address 100% (47/47) — đều trên ngưỡng 85, e2e 5/5 (13,7 s), review:cheats SẠCH, diagnostics --check khớp (24 mã), build 3/3, bench TagDB 4/4 PASS (set/get 50,3M ops/s) + orchestrator 440.445 bước/s, regression exit 0 (2 warning nhiễu đo dưới mili-giây: flushNoChangeUs 0,15 → 0,23 µs, flushChangesMs 0,063 → 0,088 ms — giá trị tuyệt đối vẫn trong ngưỡng ≤ 50 µs / ≤ 1 ms). OQ-082…091 đóng (đã áp dụng). `docs/semantics.md` thêm §12 (bộ nhớ M1 §3.2–§3.4; 2 mục `VERIFY` OQ-083/084 ghi `UNVERIFIED`, chờ PLCSIM E11).
 
 **Chỗ lệch plan (ghi rõ):** (1) `packages/runtime-iec/package.json` khai thêm dep `@vcs/kernel: workspace:*` — plan ghi kernel "chưa khai, thêm ở P1.4", nhưng `memory.ts` phải import `validateTagValue`/`TagError` từ kernel ngay ở P1.1 (thiết kế §16 mục 2 + OQ-091); rule dep-cruiser `runtime-iec-deps` đã cho phép kernel từ trước nên không đổi config. (2) `pnpm-lock.yaml` **đổi +18 dòng** — plan ghi "không đổi" là sai ở nghĩa hẹp: lockfile bắt buộc thêm 2 importer mới (`packages/runtime-iec`, `packages/vendor-siemens`, chỉ link `workspace:*`, không đổi version, không dependency ngoài mới); `pnpm install --frozen-lockfile` lần đầu FAIL (`ERR_PNPM_OUTDATED_LOCKFILE`), đã sinh lại lockfile bằng `pnpm install` thật ở `/tmp/vcs-p11`, kiểm diff chỉ có 2 importer mới rồi chép về — sau đó frozen install exit 0. (3) Lỗi regex trong `address.ts` bản đầu: lớp ký tự DB viết `[XBD]` thiếu `W` nên `DB1.DBW4` parse lỗi — property test round-trip bắt được ngay (5/121 đỏ), đã sửa thành `[XBWD]`, sau đó 144/144 xanh. (4) `FieldInfo.size`: byte với mọi kiểu, riêng Bool = 1 (bit) — plan không ghim đơn vị cho Bool; đã ghi rõ trong comment `layout.ts` + `semantics.md` §12.
+
+## 17. Kế hoạch P1.2 — Lexer + parser SCL (Chevrotain) (plan-first, 2026-11-25)
+
+**Điểm xuất phát:** M0 đã ký + lên `main`; P0.8 merge PR #19; P1.1 **đã merge PR #20** (merge commit `8b3dbb6`, develop head `8b3dbb6` — parent xác minh qua MCP read, `merged_at` 2026-11-24T18:13:20Z tức 2026-11-25 01:13 +07; CI xanh, job `check` có 1 warning annotation nhưng succeeded — nội dung warning chưa đọc được qua API, xem khi duyệt PR #20). Tổng test hiện tại **651/651** (40 file). PROMPTS P1.2: "lexer + parser SCL (Chevrotain) theo EBNF M1 §4.2, bảng ưu tiên 4.3, phục hồi lỗi mức statement. AST có type + vị trí. Gate: ≥ 15 test lexer, ≥ 40 parse hợp lệ, ≥ 12 test lỗi (line/col chính xác). Không type check ở bước này."
+
+**Hiểu biết (tóm tắt):** (1) P1.2 là front-end đầu tiên của M1: P1.3–P1.7 (typecheck, lower→IR, interpreter, golden) đều đứng trên AST của P1.2 — AST sai hình thì lower sai theo, nên bảng tính tay (token, ưu tiên, AST, vị trí lỗi) phải tự tính trước, không sao chép từ implementation. (2) Spec cho đủ ngữ pháp: EBNF §4.2 (bắt buộc bám sát), bảng ưu tiên §4.3 (10 mức), lexer §4.1 (từ khóa không phân biệt hoa/thường, `"..."` phân biệt, comment `//` + `(* *)` không lồng, literal đầy đủ) — các khoảng trống là: `init` (DB) và `const_expr` không định nghĩa; kết hợp `**` không nói; mã lỗi parser chỉ nêu tên SCL-P001; comment lồng chỉ ghi VERIFY — tất cả mặc định tier B + OQ, không hỏi trước. (3) `compileScl` ở M1 §10 trả `IrBlock[]` — đó là việc P1.3 (cần typecheck + lower); P1.2 chỉ cung cấp `parseScl` (AST + diagnostics) làm nền, và `tokenizeScl` cho test lexer. (4) Chevrotain là lựa chọn bắt buộc theo M1 §17 (không ANTLR); bản mới nhất 13.2.0 phát hành 2026-08-01 (thỏa quy tắc ≥ 14 ngày), engines Node >= 22.0.0 (khớp CI Node 22), ESM-only (khớp `moduleResolution: bundler` của repo). (5) X-002/S1 (mã SCL thật ≥ 10 khối) vẫn mở — nhưng PROMPTS §4 ghi mã thật cho M1 là "(tùy chọn)", và EBNF §4.2 đã đủ để cài parser + test bằng fixture tự viết; P1.2 **không chờ X-002** (xem OQ-105). (6) Hạ tầng đã sẵn: rule `vendor-siemens-deps` cho phép import schemas/runtime-iec/vendor-siemens (chevrotain là dep ngoài, không chạm rule); `vitest.config.ts` đã có ngưỡng 85 dòng cho vendor-siemens (OQ-088); `parseAddress` (P1.1) tái dùng cho token địa chỉ tuyệt đối; `Diagnostic` chuẩn ở schemas (A8). (7) Mã chẩn đoán SCL chưa có trong `DiagnosticCatalog` — `scripts/gen-diagnostics.ts` hiện chỉ biết `PRJ_CATALOG`, nên P1.2 phải thêm `SCL_CATALOG` + cập nhật script gộp catalog rồi sinh lại `docs/diagnostics.md` (24 → 29 mã).
+
+**Phạm vi (PROMPTS P1.2; M1 §4.1–4.3, §12.2 nhóm lexer/parser; AMENDMENTS A8, D6; M1 §17):**
+
+| File | Nội dung |
+|---|---|
+| `packages/vendor-siemens/package.json` | Thêm dep `chevrotain@13.2.0` (exact; phát hành 2026-08-01, ≥ 14 ngày; engines Node >= 22) |
+| `pnpm-lock.yaml` | Sinh lại bằng `pnpm install` thật ở `/tmp` — chỉ thêm `chevrotain` + 5 gói `@chevrotain/*` 13.2.0, không đổi version khác |
+| `packages/vendor-siemens/src/scl/lexer.ts` | Token Chevrotain + `tokenizeScl` + `parseLiteralValue` (chuyển text literal → giá trị) |
+| `packages/vendor-siemens/src/scl/ast.ts` | Kiểu AST + `SrcLoc` (mọi node có vị trí) |
+| `packages/vendor-siemens/src/scl/parser.ts` | `SclParser extends EmbeddedActionsParser` + `parseScl` + phục hồi lỗi mức statement |
+| `packages/vendor-siemens/src/scl/lexer.test.ts` | Test lexer (bảng A + literal + property round-trip token) |
+| `packages/vendor-siemens/src/scl/parser.test.ts` | Test parse hợp lệ (bảng B + C) + test lỗi (bảng D + phục hồi) |
+| `packages/vendor-siemens/src/index.ts` | Export `parseScl`, `tokenizeScl`, kiểu AST/token (dùng cho P1.3) |
+| `packages/schemas/src/diagnostics-catalog.ts` | Thêm `SCL_CATALOG`: SCL-L001, SCL-P001, SCL-P002, SCL-P003, SCL-U001 (OQ-095) |
+| `scripts/gen-diagnostics.ts` | Gộp `PRJ_CATALOG` + `SCL_CATALOG` (hiện chỉ biết PRJ) khi quét/sinh |
+| `docs/diagnostics.md` | Sinh lại bằng script (24 → 29 mã) — không sửa tay |
+| `docs/semantics.md` | Thêm §13: quyết định lexer/parser SCL, mỗi điểm gắn `VERIFIED`/`UNVERIFIED` |
+| `docs/STATE.md`, `docs/open-questions.md` | Plan này (§17) + OQ-092…105 |
+
+**Thiết kế nhỏ nhất (từng mục — signature chính xác, chỗ KHÔNG làm):**
+
+1. **`lexer.ts` (M1 §4.1) — token + chuyển literal, không biết grammar.** Dùng `createToken` + `Lexer` của Chevrotain; token không phân biệt hoa/thường với từ khóa (`ignoreCase: true`), `"..."` và `#name` giữ nguyên dạng viết:
+```ts
+export interface SclToken {
+  readonly type: string;   // tên token type (vd 'If', 'Semicolon', 'IntLiteral')
+  readonly image: string;  // text gốc
+  readonly line: number; readonly col: number;
+  readonly endLine: number; readonly endCol: number;
+  readonly offset: number; readonly length: number;
+}
+export interface TokenizeResult { tokens: SclToken[]; diagnostics: Diagnostic[]; }
+export function tokenizeScl(source: string, fileName: string): TokenizeResult;
+export function parseLiteralValue(raw: string, kind: 'int' | 'real' | 'bool' | 'time' | 'typed')
+  : { value: number | boolean; type?: DataType };
+```
+Token: từ khóa (ORGANIZATION_BLOCK, FUNCTION, FUNCTION_BLOCK, TYPE, STRUCT, END_STRUCT, END_TYPE, DATA_BLOCK, END_DATA_BLOCK, VAR_INPUT, VAR_OUTPUT, VAR_IN_OUT, VAR, VAR_TEMP, VAR_CONSTANT, END_VAR, BEGIN, END_ORGANIZATION_BLOCK, END_FUNCTION, END_FUNCTION_BLOCK, IF, THEN, ELSIF, ELSE, END_IF, CASE, OF, END_CASE, FOR, TO, BY, DO, END_FOR, WHILE, END_WHILE, REPEAT, UNTIL, END_REPEAT, EXIT, CONTINUE, RETURN, AND, OR, XOR, NOT, MOD, DIV, TRUE, FALSE, ARRAY); `Ident` (`[A-Za-z_][A-Za-z0-9_]*` — tên biến/kiểu/hàm không có `#`/`"`); `LocalVar` (`#[A-Za-z_][A-Za-z0-9_]*`); `GlobalVar` (`"[^"\n]*"` — không khớp qua dòng); `AbsAddress` (`%(I|Q|M)[A-Za-z]*\d+(\.\d+)?` và `DB\d+\.DB[XBWD]\d+(\.\d+)?`, không phân biệt hoa/thường — **trước** `Ident` trong thứ tự token, nếu không `DB1` sẽ bị cắt thành Ident); literal `IntLiteral` (thập phân có `_`, `16#FF`, `2#1010_0101`, `8#17`), `RealLiteral` (`1.5`, `3.0E-2`, `1e3`), `TimeLiteral` (`T#5s`, `T#1h30m`, `TIME#...`), `TypedLiteral` (`INT#5`, `WORD#16#FFFF` — một token duy nhất, vì `#` lẻ không phải token hợp lệ); toán tử/tách: `:=`, `=>`, `;`, `:`, `,`, `.`, `..` (**trước** `.` — nếu không `1..3` bị đọc thành Real `1.`), `(`, `)`, `[`, `]`, `=`, `<>`, `<`, `>`, `<=`, `>=`, `+`, `-`, `*`, `/`, `**` (**trước** `*`), `&`. Thứ tự token trong Chevrotain: khớp dài nhất thắng, cùng độ dài thì token khai trước thắng — từ khóa trước `Ident`, `..` trước `.`, `**` trước `*`, `:=` trước `:`, `=>` trước `=`, `<=`/`>=`/`<>` trước `<`/`>`/`=`. Khoảng trắng/comment bỏ qua (không thành token): `//` tới hết dòng; `(* ... *)` **không lồng** — pattern khớp tới `*)` đầu tiên, kiểm tra hậu kỳ: token comment không kết thúc bằng `*)` → SCL-L001 "comment không đóng" tại vị trí `(*` (OQ-096). Dấu `"` không đóng → lexer không khớp token nào → SCL-L001 tại `"`. `SclToken` là dữ liệu thuần (map từ `IToken` của Chevrotain, không lộ kiểu Chevrotain ra ngoài lexer). Giá trị literal (bảng A): `16#FF` → 255, `2#1010_0101` → 165, `8#17` → 15, `T#1h30m` → 5400000 ms, `T#-2s` → -2000, `INT#5` → `{value: 5, type: 'Int'}`, `WORD#16#FFFF` → `{value: 65535, type: 'Word'}`; chữ số sai cơ số (vd `2#2`) → SCL-L001; Real giữ double JS (ép `fround` là việc của interpreter P1.4, §7.2); Time = ms nguyên.
+2. **`ast.ts` — cây thuần (plain object, serializable JSON), mọi node có `loc`:**
+```ts
+export interface SrcLoc { line: number; col: number; endLine: number; endCol: number; offset: number; length: number; }
+export type SclFile = { kind: 'file'; blocks: SclBlock[]; loc: SrcLoc };
+export type SclBlock = ObBlock | FcBlock | FbBlock | UdtBlock | DbBlock;
+// ObBlock { kind: 'OB'; name: string; varSections: VarSection[]; body: SclStmt[]; loc }
+// FcBlock { kind: 'FC'; name: string; returnType?: SclType; varSections: VarSection[]; body: SclStmt[]; loc }
+// FbBlock { kind: 'FB'; ... }  UdtBlock { kind: 'UDT'; name: string; fields: VarDecl[]; loc }
+// DbBlock { kind: 'DB'; name: string; fbName?: string; fields?: VarDecl[]; init?: SclAssign[]; loc }
+export interface VarSection { kind: 'VAR_INPUT' | 'VAR_OUTPUT' | 'VAR_IN_OUT' | 'VAR' | 'VAR_TEMP' | 'VAR_CONSTANT'; decls: VarDecl[]; loc: SrcLoc; }
+export interface VarDecl { name: string; type: SclType; init?: SclExpr; loc: SrcLoc; }
+export type SclType =
+  | { kind: 'elementary'; name: string; loc: SrcLoc }   // tên kiểu viết trong code ('Int', 'Bool', ...)
+  | { kind: 'array'; lo: number; hi: number; elem: SclType; loc: SrcLoc }
+  | { kind: 'struct'; fields: VarDecl[]; loc: SrcLoc }  // struct nội tuyến (OQ-104)
+  | { kind: 'named'; name: string; loc: SrcLoc };       // tên UDT/kiểu chưa phân giải — P1.3 phân giải
+export type SclStmt = AssignStmt | IfStmt | CaseStmt | ForStmt | WhileStmt | RepeatStmt | ExitStmt | ContinueStmt | ReturnStmt | CallStmt | EmptyStmt;
+export type SclExpr = LiteralExpr | RefExpr | UnaryExpr | BinaryExpr | CallExpr;
+export type SclLValue = { base: SclRef; path: SclPathElem[]; loc: SrcLoc };
+export type SclRef =
+  | { kind: 'local'; name: string; loc: SrcLoc }                 // #name
+  | { kind: 'global'; name: string; loc: SrcLoc }                // "Name"
+  | { kind: 'abs'; address: AbsAddress; raw: string; loc: SrcLoc }; // %I0.0, DB1.DBW4 (parseAddress P1.1)
+export type SclPathElem = { kind: 'member'; name: string; loc: SrcLoc } | { kind: 'index'; index: SclExpr; loc: SrcLoc };
+export type SclCallArg =
+  | { kind: 'named'; name: string; value: SclExpr; loc: SrcLoc }
+  | { kind: 'namedOut'; name: string; target: SclLValue; loc: SrcLoc }  // Q => #y
+  | { kind: 'positional'; value: SclExpr; loc: SrcLoc };
+export type SclLiteral =
+  | { kind: 'int' | 'real' | 'bool' | 'time'; value: number | boolean; raw: string; type?: string; loc: SrcLoc };
+```
+Quy tắc ghim: tên kiểu trong `elementary` giữ nguyên text (`'Int'`, không chuẩn hóa — P1.3 chuẩn hóa/kiểm tra); tên UDT chưa biết giữ dạng `named` (parser **không** kiểm tra tên kiểu tồn tại — trừ `String`/`WString` → SCL-U001, OQ-102); `loc` tính từ token đầu tới token cuối của node (helper `locFrom(first, last)`); AST không chứa function/class instance (serializable JSON, phục vụ debug + P1.3).
+3. **`parser.ts` — `EmbeddedActionsParser`, AST trực tiếp (OQ-101):**
+```ts
+export interface ParseResult { ast: SclFile; diagnostics: Diagnostic[]; }
+export function parseScl(source: string, fileName: string): ParseResult;
+```
+Chọn `EmbeddedActionsParser` (action trả AST node ngay) thay vì `CstParser` + visitor (thêm một lượt CST→AST, phải map vị trí thủ công). `recoveryEnabled: true`. Rule theo đúng EBNF §4.2: `file { block }`; `block = ob | fc | fb | udt | db`; `var_section` 6 loại + `END_VAR`; `var_decl = ident ":" type [":=" const_expr] ";"` (const_expr parse như `expr` thường — tính hằng kiểm ở P1.3, OQ-094); `type` 4 dạng; `stmt` 11 dạng (kể cả `";"` rỗng); `if/case/for/while/repeat` đúng từ khóa kết thúc + `;` cuối; `call` = callee + `args` + `;` (callee là ref hoặc ident — OQ-100); `args` 3 dạng (`:=`, `=>`, positional). Ưu tiên theo bảng §4.3 bằng rule lồng nhau: `or → xor → and → eq → rel → add → mul → unary → power → primary`, trong đó `power = primary [ "**" unary ]` (kết hợp phải — OQ-092) và `unary = ("+"|"-"|"NOT")* power` (nên `-2 ** 2` = `-(2 ** 2)`, `2 ** -3` vẫn parse được). Phân biệt assign/call: sau `ref` có thể là `:=` (assign) hoặc `(` (call) — dùng `$.BACKTRACK` trên nhánh assign (thử parse lvalue + `:=`, thất bại thì backtrack sang nhánh call); không dùng lookahead 1 token vì lvalue có path dài (`#a.b[1] := ...` thì `:=` ở xa hơn token thứ 2). Địa chỉ tuyệt đối: token `AbsAddress` chuyển qua `parseAddress` (P1.1); `parseAddress` throw → Diagnostic SCL-P002 nêu text gốc (vd `DB0.DBW0`). `EXIT`/`CONTINUE` ngoài vòng lặp, `RETURN` ở đâu, positional cho FB, FC không trả giá trị gọi như statement — parser **chấp nhận hết** (kiểm ngữ nghĩa là P1.3, §4.4). **Phục hồi lỗi (§4.4):** lỗi ở một statement không dừng parse — ghi Diagnostic rồi đồng bộ (bỏ qua token) tới `;` hoặc từ khóa kết thúc block (`END_IF`/`END_FOR`/`END_WHILE`/`END_REPEAT`/`END_CASE`/`END_<BLOCK>`) rồi parse statement tiếp theo; tối đa **100** diagnostics, vượt thì dừng và thêm 1 diagnostic SCL-P003 (OQ-095). `parseScl` luôn trả AST **từng phần** + diagnostics khi có lỗi (OQ-099); P1.3 từ chối lower khi diagnostics chứa lỗi (ghi làm bàn giao, không cài ở P1.2). Map lỗi Chevrotain → Diagnostic: lỗi thiếu `;` (token kỳ vọng là `;`) → **SCL-P001 tại vị trí token trước đó** (đúng ghi chú §4.2 — dùng `previousToken` của lỗi Chevrotain); các lỗi khớp token khác → **SCL-P002 tại token lỗi** kèm "expected X"; lỗi lexer → **SCL-L001**; cấu trúc chưa hỗ trợ (`String`, ...) → **SCL-U001**. Chi tiết API đồng bộ token của Chevrotain xác nhận bằng spike nhỏ ở đầu triển khai (parse thử 1 file có 2 lỗi) trước khi viết grammar đầy đủ — nếu API không cho phép thì dùng chiến lược dự phòng: `recoveryEnabled` mặc định của Chevrotain + test phục hồi quyết định (OQ-101).
+4. **Mã chẩn đoán (A8/D6) — đăng ký trước khi dùng:**
+```ts
+// packages/schemas/src/diagnostics-catalog.ts — thêm SCL_CATALOG
+'SCL-L001': { severity: 'error', title: 'Lỗi từ vựng SCL', hint: 'Kiểm tra ký tự tại vị trí đã báo; đóng comment (* *) và dấu nháy "...".' }
+'SCL-P001': { severity: 'error', title: 'Thiếu \';\' cuối statement', hint: 'Thêm \';\' cuối statement tại vị trí đã báo.' }
+'SCL-P002': { severity: 'error', title: 'Lỗi cú pháp SCL', hint: 'Sửa theo "expected ..." tại vị trí đã báo.' }
+'SCL-P003': { severity: 'error', title: 'Quá nhiều lỗi cú pháp (tối đa 100)', hint: 'Sửa 100 lỗi đầu đã báo rồi biên dịch lại.' }
+'SCL-U001': { severity: 'error', title: 'Cấu trúc SCL chưa hỗ trợ', hint: 'Dùng cấu trúc trong phạm vi M1 (xem M1 §4.2 và Phụ lục A); String không hỗ trợ.' }
+```
+`scripts/gen-diagnostics.ts` gộp `PRJ_CATALOG` + `SCL_CATALOG` (hiện chỉ quét PRJ — sửa 2 chỗ: vòng sinh + hàm kiểm mã chưa đăng ký); chạy `pnpm docs:diagnostics` sinh lại `docs/diagnostics.md` (24 → 29 mã); `docs:diagnostics --check` phải khớp ở gate.
+
+**Đã loại:** (1) `CstParser` + visitor — thêm lượt chuyển đổi không cần thiết (OQ-101). (2) Viết lexer/parser tay (recursive descent) — spec §17 chỉ định Chevrotain. (3) ANTLR — spec §17 cấm rõ. (4) In lại AST (printer `print(ast)`) — không có trong PROMPTS P1.2; property test lexer không cần printer. (5) Typecheck/lower/IR/`compileScl`/`vcs ir dump` — P1.3. (6) `compileProject` đọc file `plc/*.scl` — P1.7 (P1.2 chỉ parse text đã nạp). (7) Script spike S1 — chạy khi có mã thật (X-002), không thuộc P1.2. (8) ADR mới — Chevrotain do M1 §17 chỉ định, không phải quyết định kiến trúc của P1.2; chỉ ghi version pin + lý do vào plan này. (9) Sửa EBNF §4.2 — các khoảng trống ghi OQ, không sửa spec.
+
+**Bảng tính tay A — lexer: token của một OB mẫu (tính tay, không chạy code):**
+
+Nguồn mẫu (dùng nguyên văn làm fixture test):
+```
+ORGANIZATION_BLOCK "Main"
+VAR_TEMP
+  x : Int := 5;
+END_VAR
+BEGIN
+  #x := #x + 16#FF;
+  IF #x > 10 THEN
+    %Q0.0 := TRUE;
+  END_IF;
+END_ORGANIZATION_BLOCK
+```
+
+| Dòng | Token (theo thứ tự) | Vị trí (dòng, cột, dài) |
+|---|---|---|
+| 1 | `ORGANIZATION_BLOCK`, `"Main"` | (1,1,18), (1,20,6) |
+| 2 | `VAR_TEMP` | (2,1,8) |
+| 3 | `x`, `:`, `Int`, `:=`, `5`, `;` | (3,3,1), (3,5,1), (3,7,3), (3,11,2), (3,14,1), (3,15,1) |
+| 4 | `END_VAR` | (4,1,7) |
+| 5 | `BEGIN` | (5,1,5) |
+| 6 | `#x`, `:=`, `#x`, `+`, `16#FF`, `;` | (6,3,2), (6,6,2), (6,9,2), (6,12,1), (6,14,5), (6,19,1) |
+| 7 | `IF`, `#x`, `>`, `10`, `THEN` | (7,3,2), (7,6,2), (7,9,1), (7,11,2), (7,14,4) |
+| 8 | `%Q0.0`, `:=`, `TRUE`, `;` | (8,5,5), (8,11,2), (8,14,4), (8,18,1) |
+| 9 | `END_IF`, `;` | (9,3,6), (9,9,1) |
+| 10 | `END_ORGANIZATION_BLOCK` | (10,1,22) |
+
+Kiểm: `ORGANIZATION_BLOCK` = 18 ký tự; `"Main"` bắt đầu cột 20 (sau 1 khoảng trắng ở cột 19); `16#FF` dài 5; `%Q0.0` dài 5. Comment/khoảng trắng không thành token: `// ...` tới hết dòng; `(* ... *)` tới `*)` đầu tiên.
+
+**Bảng tính tay A2 — giá trị literal (tính tay):** `123` → 123; `16#FF` → 255; `2#1010_0101` → 165 (128+32+4+1); `8#17` → 15 (8+7); `1.5` → 1.5; `3.0E-2` → 0.03; `1e3` → 1000; `TRUE`/`FALSE` → true/false; `T#5s` → 5000 ms; `T#1h30m` → 5400000 ms (3600000+1800000); `T#500ms` → 500; `T#-2s` → -2000; `TIME#2s` → 2000; `INT#5` → {5, Int}; `REAL#1.0` → {1, Real}; `DINT#-1` → {-1, DInt}; `WORD#16#FFFF` → {65535, Word}; `2#2` → SCL-L001 (chữ số 2 sai cơ số 2); `1..3` token hóa thành `1`, `..`, `3` (không phải Real `1.` — Real yêu cầu chữ số sau `.`).
+
+**Bảng tính tay B — ưu tiên toán tử (§4.3): cây AST, gốc là toán tử nào (tính tay):**
+
+| # | Biểu thức | Gốc AST | Cấu trúc |
+|---|---|---|---|
+| 1 | `a + b * c` | `+` | `+(a, *(b, c))` |
+| 2 | `a * b + c * d` | `+` | `+(*(a, b), *(c, d))` |
+| 3 | `NOT a AND b` | `AND` | `AND(NOT(a), b)` |
+| 4 | `a AND b OR c AND d` | `OR` | `OR(AND(a, b), AND(c, d))` |
+| 5 | `a OR b XOR c` | `OR` | `OR(a, XOR(b, c))` |
+| 6 | `a = b AND c <> d` | `AND` | `AND(=(a, b), <>(c, d))` |
+| 7 | `a < b = c` | `=` | `=(<(a, b), c)` |
+| 8 | `-a + b` | `+` | `+(-(a), b)` |
+| 9 | `-2 ** 2` | unary `-` | `-(2 ** 2)` = -4 (mũ chặt hơn unary) |
+| 10 | `2 ** 3 ** 2` | `**` | `2 ** (3 ** 2)` = 512 (kết hợp phải — OQ-092) |
+| 11 | `a + b - c` | `-` | `-(+(a, b), c)` (cùng mức, kết hợp trái) |
+| 12 | `a / b MOD c` | `MOD` | `MOD(/(a, b), c)` (cùng mức, kết hợp trái) |
+| 13 | `NOT NOT a` | `NOT` | `NOT(NOT(a))` |
+| 14 | `(a + b) * c` | `*` | `*(+(a, b), c)` |
+| 15 | `a AND b & c` | `AND` | `AND(AND(a, b), c)` (`&` = bí danh AND) |
+
+**Bảng tính tay C — AST của một FB mẫu (tính tay, dạng rút gọn — `loc` lược, chỉ ghi kind/name/cấu trúc):**
+
+Nguồn:
+```
+FUNCTION_BLOCK "FB_Motor"
+VAR_INPUT
+  iStart : Bool;
+END_VAR
+VAR_OUTPUT
+  qRun : Bool;
+END_VAR
+BEGIN
+  #qRun := #iStart;
+END_FUNCTION_BLOCK
+```
+
+```json
+{ "kind": "file", "blocks": [
+  { "kind": "FB", "name": "FB_Motor",
+    "varSections": [
+      { "kind": "VAR_INPUT", "decls": [
+        { "name": "iStart", "type": { "kind": "elementary", "name": "Bool" } } ] },
+      { "kind": "VAR_OUTPUT", "decls": [
+        { "name": "qRun", "type": { "kind": "elementary", "name": "Bool" } } ] } ],
+    "body": [
+      { "kind": "assign",
+        "target": { "base": { "kind": "local", "name": "qRun" }, "path": [] },
+        "value": { "kind": "ref",
+          "ref": { "base": { "kind": "local", "name": "iStart" }, "path": [] } } } ] } ] }
+```
+
+Kiểm: 2 var_section (INPUT rồi OUTPUT); body 1 assign; target là local `#qRun` (không có path); value là ref `#iStart` bọc trong expr `ref`; không có `returnType` (FB không trả giá trị).
+
+**Bảng tính tay D — lỗi + vị trí chính xác (tính tay):**
+
+| # | Nguồn lỗi | Mã | Vị trí | Thông điệp / kỳ vọng |
+|---|---|---|---|---|
+| D1 | `#x := 5` thiếu `;` (dòng sau là `#y := 6;`) | SCL-P001 | (3,9) — token `5` | `expected ';'` tại token trước đó (đúng ghi chú §4.2) |
+| D2 | `(* comment` không đóng (tới EOF) | SCL-L001 | (3,3) — vị trí `(*` | "comment không đóng" |
+| D3 | `#x := 5 $ 3;` | SCL-L001 | (2,11) — ký tự `$` | ký tự không hợp lệ |
+| D4 | `IF THEN` (thiếu điều kiện) | SCL-P002 | (2,6) — token `THEN` | `expected expression` |
+| D5 | `s : String;` trong VAR | SCL-U001 | (2,7) — token `String` | kiểu String chưa hỗ trợ |
+| D6 | `(* a (* b *) c *)` (comment lồng) | SCL-L001 | tại `*` của `*)` thừa | comment chỉ khớp tới `*)` đầu tiên (OQ-096) |
+| D7a | `%X0.0` trong biểu thức | SCL-L001 | tại `%` | không có token địa chỉ nào khớp |
+| D7b | `DB0.DBW0` trong biểu thức | SCL-P002 | tại token `DB0.DBW0` | `parseAddress` từ chối DB0 |
+| D8 | Phục hồi: 2 statement lỗi xen 1 statement đúng — `#x := ;` (lỗi), `#y := 2;` (đúng), `#z := ;` (lỗi) | SCL-P002 × 2 | tại `;` sau `:=` mỗi dòng lỗi | 2 diagnostics; AST vẫn chứa assign `#y := 2;`; parse tiếp tục sau mỗi lỗi |
+| D9 | `;` lẻ ở cấp file (sau `END_ORGANIZATION_BLOCK`) | SCL-P002 | tại `;` | file chỉ chứa block, không có statement lẻ |
+| D10 | Vượt 100 lỗi trong một file | SCL-P003 | cuối danh sách | đúng 100 diagnostics lỗi + 1 SCL-P003, parse dừng |
+
+**Test (mục tiêu: ≥ 70 test mới; tổng ≥ 721 = 651 + 70):**
+
+| Nhóm | File | Test mới (tên + kỳ vọng) |
+|---|---|---|
+| lexer (~21) | `packages/vendor-siemens/src/scl/lexer.test.ts` | Bảng A: toàn bộ token + vị trí của OB mẫu (1 test assert deep-equal cả stream, hoặc 1 test/dòng); bảng A2: mỗi literal 1 case (giá trị đúng + `2#2` → SCL-L001); `1..3` → `1`,`..`,`3`; comment `//` + `(* *)` bị bỏ qua (không thành token); comment không đóng → SCL-L001 (D2); ký tự lạ `$` → SCL-L001 (D3); từ khóa không phân biệt hoa/thường (`if`, `If`, `IF` cùng token type; `"Main"` giữ nguyên case); property (fast-check, seed cố định): nối `image` của token = nguồn đã bỏ khoảng trắng/comment |
+| parse hợp lệ (~45, gồm bảng B 15 + C) | `packages/vendor-siemens/src/scl/parser.test.ts` | Bảng B: 15 case ưu tiên (assert gốc AST + cấu trúc); bảng C: FB mẫu assert deep-equal AST (trừ `loc` — assert riêng `loc` của 2–3 node: block name, assign, literal); 5 loại block (OB/FC/FB/UDT/DB — mỗi loại ≥ 1 case, gồm FC có/không return type, DB dạng `"fbname"` và dạng STRUCT + BEGIN init); 6 var_section (mỗi loại ≥ 1); type: Array 1 chiều, struct nội tuyến, named; statement: assign (member `.` + index `[]`), IF/ELSIF/ELSE, CASE (label đơn + khoảng `..` + kết hợp `,`), FOR (có/không BY), WHILE, REPEAT, EXIT/CONTINUE/RETURN, call FB (`#sT(IN := #x, PT := T#3s)`), call FC trong biểu thức (`#r := "FC_Scale"(x := #a)`), `Q => #y`, positional arg, statement `;` rỗng, địa chỉ tuyệt đối `%I0.0`/`DB1.DBW4` trong lvalue |
+| lỗi (~15, gồm bảng D) | `packages/vendor-siemens/src/scl/parser.test.ts` | D1–D10 (mỗi dòng 1–2 test: mã + line/col chính xác); thiếu `END_IF` → SCL-P002 tại EOF; ngoặc không đóng → SCL-P002; `String` → SCL-U001 (D5); `DB0.DBW0` → SCL-P002 (D7b); phục hồi D8: 2 diagnostics + AST chứa statement đúng; vượt 100 lỗi → 100 + SCL-P003 (D10) |
+| diagnostics | `packages/schemas/src/diagnostics-catalog.test.ts` (nếu có) + `tests/gen-diagnostics.test.ts` | 5 mã SCL-* đăng ký trong catalog; `docs:diagnostics --check` khớp sau khi sinh lại (24 → 29 mã); mã SCL dùng trong parser đều có trong catalog (không mã lạ) |
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** chọn `EmbeddedActionsParser` (OQ-101 ghi lý do); tên hàm/API `parseScl`/`tokenizeScl`/`parseLiteralValue` + tên node AST như mục thiết kế; `SclToken` là dữ liệu thuần map từ `IToken`; thứ tự triển khai (lexer → ast → parser → diagnostics → test lỗi); test dùng `it.each` với bảng case dùng chung cho bảng A/B/D. **Tier B (mặc định + ghi OQ):** OQ-092 (`**` kết hợp phải), OQ-093 (`init` DB = `lvalue ":=" const_expr ";"`), OQ-094 (`const_expr` parse như `expr`, tính hằng kiểm ở P1.3), OQ-095 (bộ mã SCL-L001/P001/P002/P003/U001 + cách map từ lỗi Chevrotain), OQ-096 (comment lồng: khớp tới `*)` đầu tiên), OQ-097 (time literal đơn vị lạ → SCL-L001), OQ-098 (`#name` giữ dạng viết, so sánh không phân biệt hoa/thường ở P1.3), OQ-099 (`parseScl` trả AST từng phần + diagnostics; P1.3 từ chối lower khi có lỗi), OQ-100 (dạng callee của call statement/expression + positional chấp nhận ở parser), OQ-101 (recovery = `recoveryEnabled` + đồng bộ thủ công, spike-check API đầu triển khai), OQ-102 (`String`/`WString` → SCL-U001), OQ-103 (tên block chấp nhận ident trần hoặc `"..."`), OQ-104 (struct nội tuyến trong `type` có thân `{ var_decl }`). **Tier C (không chặn P1.2, đã ghi ở OWNER-INBOX):** OQ-105 (X-002/S1 — mã SCL thật chưa có; P1.2 làm theo EBNF, không chờ; khi có mã thật thì chạy S1, kết quả có thể sinh SCR điều chỉnh grammar — follow-up, không thuộc P1.2). Nếu khi triển khai phát hiện EBNF thiếu cấu trúc mà chỉ mã thật mới có → **không tự mở rộng grammar**, ghi OQ/SCR.
+
+**Rủi ro + cách kiểm:** (1) X-002/S1 chưa có: EBNF có thể thiếu cấu trúc mà mã thật dùng nhiều (vd `POINTER`, `ANY`, mảng nhiều chiều, `ENO`) — giảm thiểu: parser báo SCL-U001 rõ ràng cho cấu trúc chưa hỗ trợ (không chạy sai im lặng); khi S1 chạy xong, top-10 thiếu sẽ thành SCR điều chỉnh phạm vi (P1.7 hoặc milestone sau). (2) API recovery của Chevrotain không cho đồng bộ mức statement như thiết kế — giảm thiểu: spike-check ở đầu triển khai (OQ-101); nếu không được thì dùng `recoveryEnabled` mặc định + test phục hồi quyết định, ghi rõ giới hạn vào STATE §17. (3) Chevrotain 13 ESM không khớp `moduleResolution: bundler`/vitest — giảm thiểu: smoke test import Chevrotain ở đầu triển khai (trước khi viết grammar); nếu lỗi thì dừng, báo nguyên nhân (không tự đổi bundler/tsconfig — đó là quyết định kiến trúc, tầng C). (4) `**` kết hợp phải (OQ-092) lệch TIA — giảm thiểu: test ghim mặc định; xác minh bằng đoạn SCL thật khi có (S1) hoặc PLCSIM, sửa parser + test nếu khác (ghi SCR nếu spec đổi). (5) Lỗi `previousToken` của Chevrotain không trỏ đúng token cho SCL-P001 — giảm thiểu: test D1 ghim vị trí; nếu API khác thì tự tính token trước đó từ token stream (lexer trả đủ token + offset).
+
+**Ngoài phạm vi:** typecheck (`typecheck.ts`), lower AST→IR (`lower.ts`), `ir.ts`, `compileScl`/`compileProject`, `vcs ir dump` (P1.3); interpreter/scheduler/`SoftPlc`/force/snapshot (P1.4); std blocks (P1.5); LAD (P1.6); golden runner YAML + demo `motor-interlock` + UI + bench M1 §12.4 (P1.7); `project.ts` đọc file `plc/*.scl` (P1.7); script spike S1 (chạy khi có mã thật); sửa EBNF §4.2 / M1 §4.4; đổi `.dependency-cruiser.cjs` / `eslint.config.js` / root `tsconfig.json` / `vitest.config.ts` (ngưỡng vendor-siemens 85 đã có từ OQ-088); ADR mới; mã diagnostic ngoài 5 mã SCL; `docs/facts/` mới; P0.9 PWA.
+
+**Gate P1.2 (triển khai):** `lint && typecheck && depcheck && test && test:e2e && review:cheats && docs:diagnostics --check` + `build` + bench guard (`pnpm bench`: TagDB 4/4 PASS + orchestrator ≥ 100 000 bước/s — P1.2 không chạm đường nóng bench; rớt > 20% so với baseline thì dừng điều tra, không hạ ngưỡng) + CI (check + test ubuntu/windows + e2e ubuntu) xanh. Tổng test sau P1.2: **≥ 721**. `pnpm-lock.yaml` chỉ thêm `chevrotain` + 5 gói `@chevrotain/*` (không đổi version khác — diff khác là cờ đỏ, dừng kiểm tra). `pnpm install` trong VM vẫn EPERM (OQ-007) — triển khai làm ở bản sao `/tmp` như các prompt trước, cài thật `--frozen-lockfile` (dùng `git archive` để copy, không `cp -r` cả cây kèm `node_modules` — bài học ENOSPC ở P0.8).
+
+## Kết quả triển khai P1.2 (2026-11-25, xong local — CHƯA mở PR)
+
+**Triển khai ở bản sao `/tmp/vcs-p12`** (git archive từ HEAD `b17d4cc`, cài thật
+`pnpm install --frozen-lockfile` exit 0; chevrotain cài bằng
+`pnpm --filter @vcs/vendor-siemens add chevrotain@13.2.0 --save-exact`).
+**Gate xanh toàn bộ ở bản sao:** lint 0 lỗi/0 warning; typecheck 0; depcheck
+sạch (92 module, 151 dep); **test 746/746 (42 file) — mới +95** (lexer 32,
+parser 57, diagnostics 6: catalog 4 + gen-diagnostics 2); coverage dòng
+kernel 97.84 / schemas 95.98 / project 97.83 / runtime-iec 97.12 /
+vendor-siemens 97.01 (ngưỡng 85/85/80/85/85 — đều đạt; riêng `scl/` 91.55
+dòng); review:cheats SẠCH (124 file); `docs:diagnostics --check` khớp
+(29 mã); build 3/3; bench TagDB 4/4 PASS (set/get 46.6M ops/s) +
+orchestrator 480,893 bước/s PASS; test:e2e 5/5 (11.8 s); regression script
+exit 0 (1 warning nhiễu sub-ms: flushChangesMs 0.063→0.09 ms, ngưỡng 1 ms —
+hiện tượng đã ghi ở P0.7 §14, không fail). Lockfile chỉ thêm `chevrotain` +
+5 gói `@chevrotain/*` 13.2.0, không đổi version khác (đã diff). Tổng test
+**746 ≥ 721** (mục tiêu ≥ 70 mới: đạt 95).
+
+**Lệch so với plan (ghi rõ, không sửa plan ngược):**
+1. **Chevrotain 13 không có `ignoreCase`** trong `ITokenConfig` (kiểm từ
+   `.d.ts` đã cài) — từ khóa dùng regex flag `i`. (Plan §17 ghi "spike-check
+   `ignoreCase`" — API này không tồn tại.)
+2. **Lexer Chevrotain là first-match theo thứ tự khai báo, KHÔNG phải
+   longest-match** (đọc `tokenizeInternal` trong `lexer_public.ts`; chỉ
+   `longer_alt` mới thay token đã khớp bằng token dài hơn). Plan ghi
+   "longest-match" là sai. Hệ quả bắt buộc: `LineComment` trước `Slash`
+   (không thì `// abc` thành `/`,`/`,`abc`); `RealLiteral` trước `IntLiteral`
+   (không thì `1.5` thành `1`,`.`,`5` và `1e3` thành `1`,`e3`); mọi từ khóa +
+   `BoolLiteral` có `longer_alt: Identifier` (không thì `IFX` thành `IF`+`X`).
+   Đã probe xác nhận 3 bug rồi sửa; comment trong `lexer.ts` ghi rõ quy tắc
+   thứ tự. `docs/semantics.md` §13 ghi VERIFIED.
+3. **`DIAGNOSTIC_CODE_RE` mở rộng `-[EW]` → `-[ELPWU]`** — nếu không, scan
+   mã chưa đăng ký của `gen-diagnostics.ts` bỏ qua lặng lẽ mã SCL
+   (regex cũ không khớp `-L/-P/-U`). Kèm test `scanCodes` tìm được
+   `SCL-P002`/`SCL-L001`.
+4. **Giới hạn 100 diagnostics cắt sau khi parse xong** (`capDiagnostics`:
+   giữ 100 đầu + thêm SCL-P003), không dừng sớm giữa chừng — dừng sớm làm
+   block không đóng được và `file()` trả `undefined` (đã gặp khi thử, D10
+   crash). `addDiag` vẫn chặn diagnostic thủ công khi đủ 100.
+5. **D6 test dùng nguồn sạch** `(* outer (* inner *) *)` (1 SCL-L001 tại
+   (3,24)); bản plan `(* a (* b *) c *)` còn tạo thêm P002 từ ident `c` thừa
+   sau `*)` đầu tiên — hành vi đúng, không phải bug, ghi trong test.
+6. **Vị trí D3/D4/D5/D7a/D9 trong test parser lệch plan** vì nguồn test có
+   wrapper OB+BEGIN (+1 dòng) và khoảng trắng khác: D3 `$` (3,9) thay vì
+   (2,11); D4 `THEN` (3,6) thay vì (2,6); D5 `String` (3,7) thay vì (2,7);
+   D7a `%` (3,3); D9 `;` thừa ở (4,23) — ngay sau `END_ORGANIZATION_BLOCK`
+   cùng dòng, không phải (4,1). D2 sort theo vị trí nên P002 (2,6) đứng
+   trước L001 (3,3). Thiếu `END_IF`: P002 tại `END_ORGANIZATION_BLOCK`
+   (5,1) — token lỗi là token đó, không phải EOF (EOF chỉ khi OB cũng không
+   đóng; khi đó vị trí = cuối token thật cuối).
+7. **2 bug parser tìm ra khi viết test (đã sửa code, không sửa kỳ vọng):**
+   (a) `dbBlock` dạng STRUCT thiếu `;` sau `END_STRUCT` (UDT có, DB không)
+   → P002 tại `;`; đã thêm `CONSUME(Semicolon)` như UDT. (b) rule `type`
+   không chấp nhận kiểu named dạng `"UDT_Motor"` (chỉ Array/Struct/ident)
+   → P002; đã thêm alternative `GlobalVar` → `named` (bỏ ngoặc kép).
+8. **3 lỗi lint/typecheck khi chạy gate (đã sửa):** `toSclP002` check
+   `token === undefined` thừa (type `IToken` không undefined — bỏ);
+   `Object.values(SclTokens) as TokenType[]` assertion thừa (bỏ);
+   `endTok` trong `udtBlock` gán mà không dùng (bỏ biến); helper `exprShape`
+   trong test chạm `.name` trên `SclRef` abs (dùng `refShape` cho callee
+   dạng ref); sort test dùng `!` (đổi sang object `{line, col}` + `?? 0`).
+
+**OQ-092…104 đóng** (đã áp dụng ở P1.2, ghi ở open-questions.md).
+**OQ-105 vẫn mở** (tier C, X-002/S1 chờ mã thật — quyết định "không chờ"
+đã áp dụng; S1 chạy khi có mã thật, kết quả có thể sinh SCR).
+
+**Đề xuất follow-up (không làm trong P1.2):** (i) `check-bench-regression.mjs`
+cảnh báo nhiễu trên metric sub-ms (flushChangesMs) — thêm ngưỡng tuyệt đối
+như đã ghi ở P0.7 §14. (ii) `#fb(...)` ở vị trí biểu thức cho SCL-P001 —
+hành vi đúng theo OQ-100, nhưng thông điệp có thể rõ hơn ở P1.3 (ghi "FB
+call không phải expression").
