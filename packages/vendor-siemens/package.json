@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@vcs/runtime-iec": "workspace:*",
+    "@vcs/schemas": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "name": "@vcs/vendor-siemens",
+  "private": true,
+  "scripts": {
+    "lint": "eslint src",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}
