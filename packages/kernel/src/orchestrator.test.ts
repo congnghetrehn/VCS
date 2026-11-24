@@ -850,3 +850,99 @@ describe('Orchestrator — property tất định (§12.2, seed cố định)', 
     );
   });
 });
+
+/**
+ * Adapter stub cho test `requiresAsync` (P0.8, C1): cờ `asyncStep` và việc
+ * `step()` có trả Promise không là hai lựa chọn độc lập — `requiresAsync()`
+ * chỉ theo cờ (OQ-078).
+ */
+class StubAdapter implements SimComponent {
+  readonly id: string;
+  readonly asyncStep: boolean;
+  readonly returnPromise: boolean;
+  stepCalls = 0;
+  onStep: (() => void) | undefined;
+
+  constructor(id: string, asyncStep: boolean, returnPromise: boolean) {
+    this.id = id;
+    this.asyncStep = asyncStep;
+    this.returnPromise = returnPromise;
+  }
+
+  step(): StepResult {
+    this.stepCalls += 1;
+    this.onStep?.();
+    return this.returnPromise ? Promise.resolve() : undefined;
+  }
+
+  reset(): void {}
+  snapshot(): unknown {
+    return {};
+  }
+  restore(): void {}
+}
+
+function emptySim(): { sim: SimulationOrchestrator; tags: TagDB; clock: ManualClock } {
+  const clock = new ManualClock();
+  const tags = new TagDB(helloDefs(), clock);
+  const sim = new SimulationOrchestrator(tags, clock, new TagDbIoBus(tags), {
+    stepMs: 10,
+    seed: 1,
+  });
+  return { sim, tags, clock };
+}
+
+describe('Orchestrator — requiresAsync (P0.8, C1)', () => {
+  it('không có controller → false', () => {
+    const { sim } = emptySim();
+    expect(sim.requiresAsync()).toBe(false);
+  });
+
+  it('chỉ LoopbackController (đồng bộ, không đặt cờ) → false', () => {
+    const { sim } = makeGoldenSim();
+    expect(sim.requiresAsync()).toBe(false);
+  });
+
+  it('adapter asyncStep: true → true', () => {
+    const { sim } = emptySim();
+    sim.register('controllers', new StubAdapter('async1', true, true));
+    expect(sim.requiresAsync()).toBe(true);
+  });
+
+  it('loopback + adapter async → true', () => {
+    const { sim } = makeGoldenSim();
+    sim.register('controllers', new StubAdapter('async1', true, true));
+    expect(sim.requiresAsync()).toBe(true);
+  });
+
+  it('adapter asyncStep: false tường minh → false (dù step trả Promise)', () => {
+    const { sim } = emptySim();
+    sim.register('controllers', new StubAdapter('async1', false, true));
+    expect(sim.requiresAsync()).toBe(false);
+  });
+
+  it('stepOnce với adapter async → ném SIM-E002, stepCount không tăng', () => {
+    const { sim } = emptySim();
+    sim.register('controllers', new StubAdapter('async1', true, true));
+    expect(() => {
+      sim.stepOnce();
+    }).toThrow(/SIM-E002/);
+    expect(sim.stepCount).toBe(0);
+  });
+
+  it('stepOnceAsync với adapter async → chạy đủ pha, flush chạy, stepCount tăng', async () => {
+    const { sim, tags } = emptySim();
+    const stub = new StubAdapter('async1', true, true);
+    stub.onStep = () => {
+      tags.write('SW_AUTO', true, 'test');
+    };
+    sim.register('controllers', stub);
+    const seen: TagChange[] = [];
+    tags.subscribe('*', (batch) => seen.push(...batch));
+    await sim.stepOnceAsync();
+    expect(stub.stepCalls).toBe(1);
+    expect(sim.stepCount).toBe(1);
+    expect(sim.simTimeMs).toBe(10);
+    expect(seen.map((c) => c.name)).toContain('SW_AUTO');
+  });
+});

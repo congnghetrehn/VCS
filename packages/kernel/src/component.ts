@@ -43,6 +43,11 @@ export interface ControllerDiagnostics {
 
 export interface ControllerAdapter extends SimComponent {
   readonly kind: 'builtin' | 'external';
+  /**
+   * C1 (M5 §2 hàng 1): true = bước chạy bất đồng bộ (`step()` trả Promise),
+   * caller phải dùng `stepOnceAsync`; vắng hoặc false = đồng bộ.
+   */
+  readonly asyncStep?: boolean;
   init(cfg: ControllerConfig, io: IoBus): Promise<void>;
   getDiagnostics(): ControllerDiagnostics;
 }
