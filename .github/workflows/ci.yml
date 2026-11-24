@@ -1,7 +1,8 @@
 # CI — VCS (M0 §13, sửa bởi AMENDMENTS A16: chỉ Node 22). Chạy trên push + PR.
 # Job bench (P0.3, M0 §13 + OQ-008): chạy tay/nightly, upload artifact
 # `bench/results.json`; so sánh hồi quy > 20% → cảnh báo CI dời sang P0.7
-# (chưa có baseline). Job e2e (Playwright) được thêm ở P0.6 khi apps/web tồn tại.
+# (chưa có baseline). Job e2e (P0.6, M0 §13 + OQ-008 phần e2e): ubuntu,
+# build web + Playwright chromium, upload trace khi lỗi.
 name: CI
 
 on:
@@ -50,6 +51,28 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
+
+  e2e:
+    name: e2e (ubuntu, node 22)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-traces
+          path: test-results/
 
   bench:
     name: bench (manual/nightly)
