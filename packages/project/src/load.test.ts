@@ -1,6 +1,14 @@
 // Test loadProject (M0 §5, §12.1: nhóm loadProject ≥ 15).
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { loadProject, memoryFS } from './index.js';
+import { loadProject, memoryFS, nodeFS } from './index.js';
+
+const HELLO_TAGS_DIR = join(
+  fileURLToPath(new URL('../../..', import.meta.url)),
+  'examples',
+  'hello-tags',
+);
 
 const PROJECT = `schemaVersion: 1
 name: Hello Tags
@@ -149,5 +157,44 @@ describe('loadProject — lỗi', () => {
     const badTags = TAGS.replace('"%I0.0"', '"hello"');
     const model = await loadProject(fsWith(PROJECT, badTags));
     expect(model.diagnostics.some((d) => d.code === 'PRJ-E003')).toBe(true);
+  });
+});
+
+describe('loadProject — địa chỉ sym: (P0.8, C2)', () => {
+  const TAGS_SYM = `${TAGS}  - name: MOTOR_START
+    type: Bool
+    area: I
+    address: 'sym:"DB_Motor"."M01"."Start"'
+    controller: PLC1
+    signal:
+      kind: DI
+`;
+
+  it('project có tag address sym: → nạp ok, không diagnostic', async () => {
+    const model = await loadProject(fsWith(PROJECT, TAGS_SYM));
+    expect(model.valid).toBe(true);
+    expect(model.diagnostics).toEqual([]);
+    expect(model.tags).toHaveLength(4);
+  });
+
+  it('address sym: giữ nguyên văn trong tags và catalog', async () => {
+    const model = await loadProject(fsWith(PROJECT, TAGS_SYM));
+    expect(model.tags[3]?.address).toBe('sym:"DB_Motor"."M01"."Start"');
+    expect(model.catalog.get('MOTOR_START')?.address).toBe('sym:"DB_Motor"."M01"."Start"');
+  });
+});
+
+describe('loadProject — hash hello-tags không đổi sau P0.8 (B5)', () => {
+  it('hash ghim trước thay đổi; files có defaults comms/hmi', async () => {
+    const model = await loadProject(nodeFS(HELLO_TAGS_DIR));
+    expect(model.valid).toBe(true);
+    expect(model.hash).toBe(
+      'ac669d063454a5c749e8ee6783a11cfbd8b29d9b5e4247a136d4ba719a9daa05',
+    );
+    expect(model.config.files).toEqual({
+      tags: 'tags/tags.yaml',
+      comms: 'comms/comms.yaml',
+      hmi: 'hmi/',
+    });
   });
 });
