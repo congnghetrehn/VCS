@@ -1337,5 +1337,11 @@ sau mỗi 30p thì em đẩy file chat history lên thư mục tương ứng tr�
 
 (chỉ cập nhật nếu file có thay đổi)
 
+## 2026-11-25 06:20 +07 — TraMuse
+
+Xong cả hai việc, anh Tiến ạ. TraMuse đã đặt lịch đẩy chat log lên GitHub: **mỗi 30 phút, chỉ cập nhật khi file có thay đổi**, lên nhánh riêng `chat-logs` (thư mục `user-chat/`, qua cloud browser) để không lẫn vào `develop`/`main`. Lần chạy đầu khoảng 06:26. Khi không có gì đổi thì im lặng, chỉ báo anh nếu đẩy lỗi.
+
+Chép lại lịch sử cũng xong: **142 tin nhắn (35 của anh, 107 của TraMuse/em My), từ 20/11 09:51 đến nay**, file `vcs/user-chat/main.md` (~105 KB). TraMuse kiểm lại thì thấy reply cuối lúc 06:17 bị cắt dở trong file nên đã sửa đầy đủ và append luôn 2 tin 06:18 của anh. Từ giờ mỗi lượt xong TraMuse append tiếp vào file.
+
 ---
-Log tới thời điểm 2026-11-25 06:18 +07 (chưa gồm reply cron-setup đang viết tiếp sau đó).
+Log tới thời điểm 2026-11-25 06:20 +07.
