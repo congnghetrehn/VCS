@@ -33,6 +33,11 @@ export interface WsHubOptions {
   /** Nhịp tick, ms (1000 / uiRateHz). */
   tickMs: number;
   maxConnections: number;
+  /**
+   * Giới hạn giao thức cho một message, byte (OQ-037: 64 KB). WsHub kiểm tra
+   * trong #onMessage và đóng bằng close(1009) tường minh — xem OQ-056.
+   */
+  maxMessageBytes: number;
 }
 
 export class WsHub {
@@ -40,6 +45,7 @@ export class WsHub {
   readonly #service: SimulationService;
   readonly #tickMs: number;
   readonly #maxConnections: number;
+  readonly #maxMessageBytes: number;
   readonly #connections = new Set<Connection>();
   #interval: ReturnType<typeof setInterval> | undefined;
   #lastBroadcastState: string | undefined;
@@ -49,6 +55,7 @@ export class WsHub {
     this.#service = service;
     this.#tickMs = opts.tickMs;
     this.#maxConnections = opts.maxConnections;
+    this.#maxMessageBytes = opts.maxMessageBytes;
   }
 
   get connectionCount(): number {
@@ -174,6 +181,18 @@ export class WsHub {
   }
 
   #onMessage(conn: Connection, data: unknown): void {
+    const size = rawByteLength(data);
+    if (size !== undefined && size > this.#maxMessageBytes) {
+      // OQ-056: đóng 1009 bằng close() tường minh. Không dựa vào maxPayload
+      // của ws: khi receiver của ws lỗi quá tải, close() gọi socket.end()
+      // ngay (receiver đã lỗi — ws websocket.js, close() kiểm tra
+      // receiver.errorEmitted), frame 1009 đua với teardown và client
+      // Windows thấy 1006. Đóng tường minh ở đây thì receiver còn tốt nên
+      // close() đợi peer trả frame đóng — 1009 tới nơi chắc chắn.
+      this.#fastify.log.warn({ size }, 'ws: message vượt giới hạn — đóng 1009');
+      conn.socket.close(1009, 'message too big');
+      return;
+    }
     const text = rawToString(data);
     if (text === undefined) {
       this.#sendError(conn, 'WS-E003', 'thông điệp không phải văn bản UTF-8');
@@ -314,6 +333,17 @@ function rawToString(data: unknown): string | undefined {
   if (data instanceof ArrayBuffer) return Buffer.from(data).toString('utf8');
   if (Array.isArray(data) && data.every((b) => Buffer.isBuffer(b))) {
     return Buffer.concat(data).toString('utf8');
+  }
+  return undefined;
+}
+
+/** Số byte của RawData (undefined nếu không nhận dạng được — để rawToString xử lý). */
+function rawByteLength(data: unknown): number | undefined {
+  if (typeof data === 'string') return Buffer.byteLength(data, 'utf8');
+  if (Buffer.isBuffer(data)) return data.length;
+  if (data instanceof ArrayBuffer) return data.byteLength;
+  if (Array.isArray(data) && data.every((b) => Buffer.isBuffer(b))) {
+    return data.reduce((n, b) => n + b.length, 0);
   }
   return undefined;
 }

@@ -595,6 +595,16 @@ describe('WS /ws — giới hạn (OQ-037/038/036)', () => {
     expect(closed.code).toBe(1009);
   });
 
+  it('message đúng 64 KB không bị đóng (giới hạn là >)', async () => {
+    const { wsUrl } = await startServer();
+    const c = new TestClient(wsUrl);
+    await c.open();
+    c.sendRaw('x'.repeat(65_536));
+    const err = await c.waitFor((m) => m.type === 'error', 5000, 'error');
+    expect(err).toMatchObject({ type: 'error', code: 'WS-E003' });
+    expect(c.closed).toBeUndefined();
+  });
+
   it('Origin lạ → 403; Origin localhost → ok', async () => {
     const { wsUrl } = await startServer();
     const evil = new TestClient(wsUrl, { origin: 'http://evil.example' });

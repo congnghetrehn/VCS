@@ -20,6 +20,15 @@ import { registerRestRoutes, type ProjectInfo } from './routes.js';
 import { SimulationService } from './sim-service.js';
 import { WsHub } from './ws.js';
 
+/**
+ * Giới hạn cứng của ws cho một message (chỉ chống phình bộ nhớ; không phải
+ * giới hạn giao thức). Giới hạn giao thức 64 KB (OQ-037, config.maxPayloadBytes)
+ * do WsHub kiểm tra trong #onMessage và đóng bằng close(1009) tường minh —
+ * xem OQ-056: nếu để ws tự đóng khi quá maxPayload, frame 1009 đua với
+ * socket.end() và client Windows thấy 1006.
+ */
+const WS_HARD_MAX_PAYLOAD_BYTES = 1024 * 1024;
+
 export interface CreateServerOptions {
   config?: ServerConfigInput;
   /** Đồng hồ wall cho Pacer (mặc định Date.now); test tiêm đồng hồ giả. */
@@ -67,7 +76,7 @@ export async function createServer(
     cb(true);
   };
   await fastify.register(websocket, {
-    options: { maxPayload: config.maxPayloadBytes, verifyClient },
+    options: { maxPayload: WS_HARD_MAX_PAYLOAD_BYTES, verifyClient },
   });
   const service = new SimulationService(bundle, {
     ...(opts?.now !== undefined ? { now: opts.now } : {}),
@@ -84,6 +93,7 @@ export async function createServer(
   const hub = new WsHub(fastify, service, {
     tickMs: Math.max(1, Math.round(1000 / config.uiRateHz)),
     maxConnections: config.maxConnections,
+    maxMessageBytes: config.maxPayloadBytes,
   });
   hub.registerRoutes();
   const webDistDir =
