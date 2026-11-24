@@ -70,6 +70,15 @@ describe('vcs run — golden T8', () => {
     expect(hashOf(a.out)).toBe(hashOf(b.out));
   });
 
+  it('--until 5s ghim đúng giá trị hash (M0 §15.6; đã chạy kiểm chứng local 2 lần)', async () => {
+    const { code, out } = await runCaptured(EXAMPLES, { until: '5s', hash: true });
+    expect(code).toBe(0);
+    // Giá trị này phải giống hệt trên Windows và Linux (CI job test cả 2 OS).
+    // Đổi khi và chỉ khi golden T8 thay đổi có chủ đích (khi đó cập nhật cả
+    // STATE.md §14 + báo rõ trong PR — không sửa lặng lẽ để test xanh).
+    expect(hashOf(out)).toBe('21096ab25e36d6e3a31850ceccea482a3f58fffedcd67da625eb2cff7e8b1d53');
+  });
+
   it('--steps 500 cho cùng hash với --until 5s', async () => {
     const a = await runCaptured(EXAMPLES, { steps: '500', hash: true });
     const b = await runCaptured(EXAMPLES, { until: '5s', hash: true });

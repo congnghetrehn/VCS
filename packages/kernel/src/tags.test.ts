@@ -569,6 +569,9 @@ describe('TagDB — snapshot/restore/reset (quy tắc 7)', () => {
 });
 
 describe('TagDB — không cấp phát (M0 §12.4)', () => {
+  // Timeout 60 s (mặc định 5 s): đo coverage v8 chèn bộ đếm vào mọi hàm nên
+  // vòng 10M thao tác chạy chậm hơn nhiều — đây là chi phí đo, không phải
+  // hành vi đổi. Khẳng định heap < 1 MB không đổi.
   it('get/set không cấp phát: heap tăng < 1 MB sau 10 triệu thao tác', () => {
     const gc = (globalThis as { gc?: () => void }).gc;
     // Chạy với NODE_OPTIONS=--expose-gc (xem script "test" ở package.json gốc).
@@ -588,7 +591,7 @@ describe('TagDB — không cấp phát (M0 §12.4)', () => {
     gc?.();
     const after = process.memoryUsage().heapUsed;
     expect(after - before).toBeLessThan(1024 * 1024);
-  });
+  }, 60_000);
 });
 
 describe('TagDB — property (fast-check, seed cố định)', () => {
