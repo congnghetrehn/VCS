@@ -432,3 +432,140 @@ PLCSIM — chờ mã thật S1 hoặc thí nghiệm PLCSIM (X-002/S1).
 **UNVERIFIED.** Thứ tự ưu tiên còn lại (§4.3: `*`/`/`/`MOD`/`DIV` >
 `+`/`-` > quan hệ > `=`/`<>` > `AND` > `XOR` > `OR`, `&` là alias `AND`,
 `NOT` chặt hơn `AND`) theo EBNF; chưa đối chiếu TIA/PLCSIM — chờ S1.
+
+## 14. Typecheck + lower AST→IR (M1 §4.4, §6, §7.1–7.3, P1.3)
+
+**VERIFIED (bảng A, test `typecheck.test.ts`).** Lattice widening chỉ đúng
+các cạnh: `SInt→Int→DInt→Real→LReal`; `USInt→UInt→UDInt`;
+`Byte→Word→DWord`; `Real→LReal`. `Bool` không widening đi đâu; `Time`
+không widening sang `DInt`/`Real` (OQ-124). Kiểu kết quả nhị phân: hai vế
+widening về `commonType` (LUB) rồi tính; `Int ∘ Int → Int` (không tự nâng
+lên DInt); `**` luôn `Real`/`LReal`; `/` và `DIV` trên số nguyên đều cắt về
+0 (cùng `BinFn 'div'`); `MOD` chỉ số nguyên, dấu theo số bị chia. So sánh
+trả `Bool`. `AND`/`OR`/`XOR` trên `Bool` = logic, trên `Byte`/`Word`/`DWord`
+= bitwise (hai vế phải cùng họ sau widening). Một vế số + một vế bit-string
+(`Int + Word`) → **SCL-T002** "khác họ, không có LUB" (bảng A, A8); cả hai
+vế bit-string cho phép số học → **SCL-T003**; `Time` + không-`Time` → T003;
+`Bool` tham gia phép số học → T003. Gán: widening được → OK (lower chèn
+`convert`); thu hẹp trong họ hoặc chéo họ số/bit-string (`DInt→Int`,
+`Real→Int`, `Word→Int`, `Int→Word`, `DWord→DInt`…) → **SCL-T010** + hint
+hàm chuyển đổi; không liên quan (`Bool↔Int`, `Time↔Int`, struct/array sai)
+→ **SCL-T002**.
+
+**VERIFIED (bảng C).** Tên chưa khai báo → T001; gán vào `VAR_INPUT`
+(FB/FC) hoặc `VAR_CONSTANT` → T006; gọi FB thiếu instance, tham số không
+tồn tại/thừa/thiếu bắt buộc/sai kiểu, FC không trả giá trị mà dùng trong
+biểu thức, OB làm callee → T004; truy cập member/index sai, chỉ số hằng
+ngoài khoảng, label CASE trùng → T005; `EXIT`/`CONTINUE` ngoài vòng lặp →
+T007; `const_expr` không hằng → T008; khai báo trùng tên trong cùng scope →
+T009; UDT đệ quy → T011; tên kiểu không biết → T001. Vị trí diagnostic =
+vị trí node gây lỗi (ref, toàn bộ expr, giá trị, điều kiện, target, arg,
+callee, tên thứ hai — xem bảng C).
+
+**VERIFIED (bảng D).** `evalConst` chỉ tính literal + unary/binary trên
+hằng + ref tới `VAR_CONSTANT` (đã tính trước, fixpoint im lặng cho hằng
+tham chiếu hằng khai báo sau); ref khác → T008. `VAR_CONSTANT` ref được
+lower fold thành literal; **không** fold phép tính hằng (`5 * 2` giữ nguyên
+trong IR — IR trung thực với nguồn, P1.4 tính). Label CASE phải hằng
+(`1 + 1` hợp lệ = 2); label trùng kể cả trùng trong khoảng → T005. FOR:
+biến vòng lặp phải là local integer đã khai báo; `from`/`to`/`by` widening
+về kiểu biến vòng lặp; `by` mặc định 1, được âm; không kiểm việc sửa biến
+vòng lặp trong thân (spec không nói).
+
+**VERIFIED (OQ-120).** Đọc `VAR_TEMP` trước khi gán trong cùng block →
+cảnh báo **SCL-W001** (severity `warning`, không làm fail compile). Luật
+join: sau `IF`, biến chỉ "đã gán" nếu gán ở cả hai nhánh (hoặc trước đó);
+trong vòng lặp chỉ tính gán trước vòng lặp. Đọc TEMP sau khi gán thì hết
+warning; đọc trong nhánh IF chỉ gán một bên vẫn warning.
+
+**VERIFIED (OQ-122).** Đệ quy → **SCL-S020** tại callee gây chu trình
+(trực tiếp + gián tiếp, qua call graph của unit biên dịch + `ctx.blocks`);
+chỉ phát hiện trong phạm vi đã nạp, không quét toàn project.
+
+**VERIFIED (OQ-111).** Kiểu `TON`/`CTU`/`R_TRIG`/… trong `VAR` và call tới
+chúng → **SCL-U001** "system block chưa hỗ trợ (P1.5)" — chưa có layout
+std nên không thể kiểm tra arg; ồn ào, không im lặng.
+
+**VERIFIED (OQ-112).** FC trả giá trị bằng gán vào tên FC của chính block
+(`"FC_A" := …` hoặc `#FC_A := …`, không phân biệt hoa/thường) → lower
+thành assign tới local tổng hợp tên = tên FC; lower tự thêm
+`IrVar { name: <tên FC>, type: returnType }` vào `interface.temp` (P1.4
+đọc local này sau khi `callFcExpr` chạy). Khai báo biến trùng tên FC →
+T009. `RETURN` trong FC chỉ điều khiển luồng (giá trị trả = local FC-name
+hiện tại, mặc định 0/false).
+
+**VERIFIED (OQ-113).** OB → `IrBlock.number` + `organization`: tên
+`"Main"` (không phân biệt hoa/thường) → OB 1; tên khớp `/^OB(\d+)$/i` →
+số đó; tên khác → không có binding (block vẫn biên dịch, không vào
+`organization`).
+
+**VERIFIED (OQ-114/115).** `**` → intrinsic `POWER`; `/` = `DIV` trên số
+nguyên. `X_TO_Y` → node `convert` (`REAL_TO_INT`/`ROUND` mode `round`,
+`TRUNC` mode `trunc`, còn lại không mode); `CEIL`/`FLOOR`/`ABS`/`SQRT`/
+`MIN`/`MAX`/`LIMIT`/`SHL`/`SHR`/`ROL`/`ROR`/`NORM_X`/`SCALE_X` → intrinsic
+với `fn` = tên gốc. `ROUND`/`TRUNC`: `from` = kiểu đối số (Real/LReal),
+`to` = DInt. `BOOL_TO_*` chỉ chấp nhận `BOOL_TO_INT`/`BOOL_TO_DINT`/
+`BOOL_TO_BYTE`/`BOOL_TO_WORD`/`BOOL_TO_DWORD` (mặc định hẹp, OQ-115).
+`SQRT` trên int → Real (LReal nếu arg LReal); `CEIL`/`FLOOR` → DInt;
+`NORM_X`/`SCALE_X` chấp nhận số, widen về Real (LReal nếu có arg LReal);
+`MIN`/`MAX`/`LIMIT` widen các arg về kiểu chung; `SHL`/`SHR`/`ROL`/`ROR`
+cần giá trị int/bit-string + count int. Tên intrinsic không biết → T004.
+
+**VERIFIED (OQ-110).** Địa chỉ tuyệt đối load/store trần diễn giải mặc
+định theo width — bit→`Bool`, 8→`Byte`, 16→`Int`, 32→`DInt`; width 1
+(bit, `%I0.0`) map sang width 8 (một byte) kèm `bit`. Muốn diễn giải khác
+phải dùng hàm chuyển đổi tường minh (vd `DINT_TO_REAL(%MD0)`).
+
+**VERIFIED (OQ-123).** Gọi FB phải dùng tham số đặt tên (positional →
+T004); gọi FC positional theo thứ tự khai báo. Arg `:=` → `inArgs` nếu
+tham số là INPUT, `inoutArgs` nếu IN_OUT (giá trị phải là lvalue — không
+phải lvalue → T004); arg `=>` → `outArgs`. FC gọi dạng statement không có
+`Q =>` thì giá trị trả bị bỏ (`ret` undefined); FC trong biểu thức không
+nhận `Q =>` (T004). Intrinsic thắng khi trùng tên FC do user; callee
+không biết → T001; FB làm callee trong biểu thức → T004; OB làm callee →
+T004; system FB làm callee → SCL-U001. Intrinsic chỉ nhận tham số vị trí;
+named arg → T004.
+
+**VERIFIED (OQ-125/127/128).** DB dạng STRUCT → `IrDb` + `init` từ
+`DbBlock.init` (lvalue base global phải là chính tên DB — khác → T005;
+field không tồn tại → T005; giá trị không hằng → T008; gán trùng field →
+T009; giá trị vào `IrField.init` — do **typecheck** tính, lower chỉ copy).
+DB dạng `"fbname"` → `IrDb` với `fbName`, layout = `VAR_INPUT` +
+`VAR_OUTPUT` + `VAR_IN_OUT` (4 byte nội bộ, không lộ) + `VAR(static)` theo
+thứ tự khai báo. Tham số OUT của FC (không phải `Q`) → **SCL-T004**
+(OQ-127 — `IrStmt.callFc` không có slot `outArgs`); tham số IN_OUT của FC
+→ **SCL-T004** (OQ-128 — IR `callFc`/`callFcExpr` không có slot inout;
+hạ thành load sẽ mất ghi lại).
+
+**VERIFIED (OQ-106).** IR dùng mảng, không `Map` (spec §6 đồng thời yêu
+cầu JSON-serializable); `elsif` là list; `IrExpr` có `type` mọi node,
+không `src` trên expr. `IrLValue` thêm variant `member` (`{k:'member',
+base, field}`) cho member sau index (`#a[0].field`) — `static.path` chỉ
+chứa string nên không biểu diễn được index xen giữa; member trực tiếp
+trên root vẫn dùng `static.path`. Member của struct local (`#udt.field`)
+→ `static` path `[udt, field, ...]`.
+
+**VERIFIED (bảng B, golden).** `irToJson` sort key đệ quy + indent 2 +
+newline cuối; `vcs ir dump` ra JSON ổn định theo từng byte (dump 2 lần
+giống hệt). `IrStmt.src`/`IrBlock.src` lấy từ `SclStmt.loc`/`SclBlock.loc`;
+`endCol` exclusive (quy ước repo, P1.2): loc của statement/block **không
+gồm dấu `;` cuối** (bằng chứng: `parser.test.ts:170-181`). 6 giá trị
+`src.endCol` trong bảng B tính tay bị sai theo quy ước này
+(`END_FUNCTION_BLOCK` dài 18 ký tự → block endCol 19; mọi endCol stmt
+thừa 1) — golden giữ theo parser (nguồn sự thật), xem STATE §18 "Lệch so
+với plan".
+
+**VERIFIED.** `compileScl` đúng chữ ký M1 §10 (trả `{blocks,
+diagnostics}` — chỉ OB/FC/FB của file này; UDT/DB nằm trong ctx, lấy qua
+`compileSclProgram`); parse lỗi → dừng, không lower; typecheck lỗi →
+dừng; warning W001 không chặn; diagnostics gộp + sort theo vị trí.
+`lower` không kiểm tra lại kiểu: thiếu kiểu trong `types` map = lỗi nội
+bộ → throw ồn ào. `convertIfNeeded` chỉ cho widening (khác kiểu mà không
+widening → throw).
+
+**UNVERIFIED.** Các quyết định trên là mặc định theo spec §4.4/§6/§7 khi
+spec không nói rõ (OQ-106…128) — chờ mã SCL thật (S1) hoặc thí nghiệm
+PLCSIM để đối chiếu; nếu TIA cho phép rộng hơn (vd `Int := Real` trong
+code cũ) thì sinh SCR nới lỏng, không tự sửa typecheck. `X_TO_Y` với
+`SInt`/`USInt`/`UInt`/`UDInt`/`Time` hiện không nhận (tập `CONVERTIBLE_TYPES`
+chỉ 8 kiểu) — chờ S1 xác nhận có cần mở rộng không.
