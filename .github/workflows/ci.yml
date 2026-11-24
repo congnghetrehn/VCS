@@ -1,7 +1,10 @@
 # CI — VCS (M0 §13, sửa bởi AMENDMENTS A16: chỉ Node 22). Chạy trên push + PR.
-# Job bench (P0.3, M0 §13 + OQ-008): chạy tay/nightly, upload artifact
-# `bench/results.json`; so sánh hồi quy > 20% → cảnh báo CI dời sang P0.7
-# (chưa có baseline). Job e2e (P0.6, M0 §13 + OQ-008 phần e2e): ubuntu,
+# Job test (P0.7, M0 §13): `pnpm test` chạy kèm `--coverage` (provider v8),
+# ngưỡng dòng: kernel/schemas ≥ 85%, project ≥ 80% (vitest.config.ts).
+# Job bench (P0.3, M0 §13 + OQ-008, P0.7 + OQ-073): chạy tay/nightly, upload
+# artifact `bench/results.json`; so sánh hồi quy > 20% với `bench/baseline.json`
+# bằng scripts/check-bench-regression.mjs → chỉ cảnh báo (::warning::), không fail.
+# Job e2e (P0.6, M0 §13 + OQ-008 phần e2e): ubuntu,
 # build web + Playwright chromium, upload trace khi lỗi.
 name: CI
 
@@ -89,6 +92,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm bench
+      - run: node scripts/check-bench-regression.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
