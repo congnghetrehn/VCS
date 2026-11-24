@@ -27,3 +27,4 @@
 | `TAG-E003` | error | Tag không tồn tại | Kiểm tra tên tag trong TagCatalog. |
 | `WS-E001` | error | Phiên bản giao thức không khớp | Nâng cấp client/server lên cùng PROTOCOL_VERSION. |
 | `WS-E002` | error | Lệnh step bị bỏ qua khi đang RUNNING | Pause trước khi step, hoặc dùng run. |
+| `WS-E003` | error | Thông điệp WebSocket không hợp lệ | Gửi đúng schema giao thức (xem M0 §9.2): hello trước, rồi mới lệnh; timeScale phải là số > 0 hoặc 'max'. |
