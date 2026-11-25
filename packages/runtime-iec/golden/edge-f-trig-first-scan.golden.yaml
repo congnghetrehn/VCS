@@ -1,0 +1,22 @@
+id: edge-f-trig-first-scan
+description: "F_TRIG bảng J4: scan đầu sau load, CLK=true -> Q=false (không có cạnh xuống)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "T1"(CLK := %M0.0);
+        %Q0.0 := "T1".Q;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "T1" "F_TRIG"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%M0.0": true }, expect: { "%Q0.0": false } }
+  - { t: 10, expect: { "%Q0.0": false } }
+  - { t: 20, set: { "%M0.0": false }, expect: { "%Q0.0": true } }

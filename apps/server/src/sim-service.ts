@@ -17,7 +17,9 @@ import {
   type TagDef,
   type TagValue,
 } from '@vcs/schemas';
-import { Pacer, type SimulationBundle, type TagHandle } from '@vcs/kernel';
+import { Pacer, isIntrospectable, type SimulationBundle, type TagHandle } from '@vcs/kernel';
+import type { ControllerAdapter, ControllerIntrospection } from '@vcs/kernel';
+import { startPlcControllers } from './plc.js';
 
 export type ServiceState = 'IDLE' | 'RUNNING' | 'PAUSED';
 
@@ -186,7 +188,7 @@ export class SimulationService {
   }
 
   simState(): SimState {
-    return {
+    const base: SimState = {
       state: this.#state,
       simTimeMs: this.#bundle.sim.simTimeMs,
       stepCount: this.#bundle.sim.stepCount,
@@ -194,6 +196,27 @@ export class SimulationService {
       lagging: this.#lagging,
       achievedScale: this.#achievedScale,
     };
+    // P1.7 (OQ-207): thống kê PLC khi có controller introspectable.
+    const plc = this.plc();
+    if (plc !== undefined) {
+      const d = plc.getDiagnostics();
+      base.plc = {
+        scanCount: d.scanCount,
+        faultCount: d.faults.reduce((n, f) => n + f.count, 0),
+      };
+    }
+    return base;
+  }
+
+  /**
+   * Controller PLC introspectable đầu tiên (OQ-206/207) — undefined khi
+   * project không có plc/ (không có controller `builtin:siemens`).
+   */
+  plc(): (ControllerAdapter & ControllerIntrospection) | undefined {
+    for (const c of this.#bundle.controllers) {
+      if (isIntrospectable(c)) return c;
+    }
+    return undefined;
   }
 
   /** Snapshot đầy đủ (OQ-033/034): defs + giá trị hiện tại + simTimeMs. */
@@ -283,6 +306,8 @@ export class SimulationService {
   run(): void {
     if (this.#state === 'RUNNING') return; // no-op (OQ-040)
     this.#state = 'RUNNING';
+    // P1.7: PLC nạp ở STOP — start trước khi chạy (no-op nếu đã RUN).
+    startPlcControllers(this.#bundle);
     this.#pacer.start(this.#bundle.sim.simTimeMs);
     this.#emitState();
     this.#schedule();
@@ -313,6 +338,8 @@ export class SimulationService {
       };
     }
     try {
+      // P1.7: step khi dừng cũng phải scan PLC (start trước, no-op nếu đã RUN).
+      startPlcControllers(this.#bundle);
       this.#bundle.sim.runSteps(n);
     } catch (err) {
       this.#handleSliceError(err);

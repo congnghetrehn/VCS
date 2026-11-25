@@ -1,0 +1,23 @@
+id: flow-repeat-until
+description: "REPEAT cộng 2 UNTIL i>=6: thân chạy ít nhất 1 lần, dừng i=6"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      VAR_TEMP
+        i : Int;
+      END_VAR
+      BEGIN
+        #i := 0;
+        REPEAT
+          #i := #i + 2;
+        UNTIL #i >= 6
+        END_REPEAT;
+        %MW10 := #i;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 6 } }

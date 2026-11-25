@@ -1,0 +1,30 @@
+id: call-fc-early-return
+description: "FC_Clamp RETURN sớm: x>10 -> 10, còn lại giữ x"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := "FC_Clamp"(%MW20);
+      END_ORGANIZATION_BLOCK
+  - file: fc.scl
+    text: |
+      FUNCTION "FC_Clamp" : Int
+      VAR_INPUT
+        x : Int;
+      END_VAR
+      BEGIN
+        IF #x > 10 THEN
+          "FC_Clamp" := 10;
+          RETURN;
+        END_IF;
+        "FC_Clamp" := #x;
+      END_FUNCTION
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%MW20": 5 }, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 5 } }
+  - { t: 20, set: { "%MW20": 20 }, expect: { "%MW10": 10 } }
+  - { t: 30, set: { "%MW20": -3 }, expect: { "%MW10": -3 } }

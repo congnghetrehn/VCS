@@ -1,0 +1,33 @@
+id: memory-struct-nested
+description: "Struct lồng UDT: ghi/đọc DB_O.inner.v qua hai cấp member (TYPE + DB cùng file)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "DB_O".inner.v := 7;
+        %MW10 := "DB_O".inner.v;
+      END_ORGANIZATION_BLOCK
+  - file: fc.scl
+    text: |
+      TYPE "UDT_Inner" STRUCT
+        v : Int;
+      END_STRUCT;
+      END_TYPE
+      TYPE "UDT_Outer" STRUCT
+        inner : "UDT_Inner";
+        w : Real;
+      END_STRUCT;
+      END_TYPE
+      DATA_BLOCK "DB_O" STRUCT
+        inner : "UDT_Inner";
+        w : Real;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 7 } }

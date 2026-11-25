@@ -1,0 +1,19 @@
+id: force-wins-over-write
+description: "Force Q thắng ghi của OB: Q giữ false dù OB ghi true; unforce trả quyền cho OB"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %Q0.0 := %M0.0;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, set: { "%M0.0": true }, expect: { "%Q0.0": true } }
+  - { t: 20, force: { "%Q0.0": false }, expect: { "%Q0.0": false } }
+  - { t: 30, set: { "%M0.0": false }, expect: { "%Q0.0": false } }
+  - { t: 40, unforce: ["%Q0.0"], expect: { "%Q0.0": false } }
+  - { t: 50, set: { "%M0.0": true }, expect: { "%Q0.0": true } }

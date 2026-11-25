@@ -1,0 +1,43 @@
+id: lad-neg-edge
+description: "LAD neg: Q lên đúng 1 scan khi I0.0 có cạnh xuống (mem M0.0)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.lad.json
+    text: |
+      {
+        "kind": "OB",
+        "name": "Main",
+        "interface": {},
+        "networks": [
+          {
+            "id": "N1",
+            "rung": [
+              {
+                "t": "neg",
+                "operand": {
+                  "abs": "%I0.0"
+                },
+                "memBit": {
+                  "abs": "%M0.0"
+                }
+              },
+              {
+                "t": "coil",
+                "mode": "normal",
+                "operand": {
+                  "abs": "%Q0.0"
+                }
+              }
+            ]
+          }
+        ]
+      }
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, set: { "%I0.0": true }, expect: { "%Q0.0": false } }
+  - { t: 20, expect: { "%Q0.0": false } }
+  - { t: 30, set: { "%I0.0": false }, expect: { "%Q0.0": true } }
+  - { t: 40, set: { "%I0.0": true }, expect: { "%Q0.0": false } }
+  - { t: 50, set: { "%I0.0": false }, expect: { "%Q0.0": true } }

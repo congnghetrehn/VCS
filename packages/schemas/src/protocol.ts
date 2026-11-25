@@ -16,6 +16,14 @@ export const simStateSchema = z.object({
   /** B4 (M4 §2 hàng 4): khóa điều khiển khi có controller ngoài. Optional,
    * additive — server P0.8 không bao giờ gửi trường này (OQ-080). */
   locked: z.boolean().optional(),
+  /** P1.7 (OQ-207): thống kê SoftPlc khi project có plc/ — additive, chỉ
+   * có khi có controller introspectable `builtin:siemens`. */
+  plc: z
+    .object({
+      scanCount: z.number().int().min(0),
+      faultCount: z.number().int().min(0),
+    })
+    .optional(),
 });
 
 export type SimState = z.infer<typeof simStateSchema>;
@@ -49,6 +57,32 @@ const tagWriteSchema = z.object({
   value: tagValueSchema,
 });
 
+/** P1.7 (OQ-206): Watch PLC — đăng ký danh sách ref cần theo dõi. */
+const plcWatchSchema = z.object({
+  type: z.literal('plc.watch'),
+  refs: z.array(z.string().min(1)).min(1).max(200),
+});
+
+const plcUnwatchSchema = z.object({ type: z.literal('plc.unwatch') });
+
+/** P1.7 (OQ-206/216): ghi qua introspection; sai kiểu → lỗi TAG-E001. */
+const plcWriteSchema = z.object({
+  type: z.literal('plc.write'),
+  ref: z.string().min(1),
+  value: tagValueSchema,
+});
+
+const plcForceSchema = z.object({
+  type: z.literal('plc.force'),
+  ref: z.string().min(1),
+  value: tagValueSchema,
+});
+
+const plcUnforceSchema = z.object({
+  type: z.literal('plc.unforce'),
+  ref: z.string().min(1),
+});
+
 export const clientMessageSchema = z.discriminatedUnion('type', [
   helloSchema,
   simCommandSchema,
@@ -56,6 +90,11 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
   tagsSubscribeSchema,
   tagsUnsubscribeSchema,
   tagWriteSchema,
+  plcWatchSchema,
+  plcUnwatchSchema,
+  plcWriteSchema,
+  plcForceSchema,
+  plcUnforceSchema,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
@@ -107,6 +146,14 @@ const errorMessageSchema = z.object({
   code: z.string(),
   message: z.string(),
   ref: z.string().optional(),
+});
+
+/** P1.7 (OQ-206): giá trị Watch — [vị trí trong danh sách watch, giá trị],
+ * gửi ở nhịp 10 Hz, chỉ khi có ref đổi (LWW). */
+const plcValuesSchema = z.object({
+  type: z.literal('plc.values'),
+  simTimeMs: z.number().int().min(0),
+  values: z.array(z.tuple([z.number().int(), tagValueSchema])),
 });
 
 /** Thống kê gateway (M4 §5.3, nguyên văn). */
@@ -167,6 +214,7 @@ export const serverMessageSchema = z.discriminatedUnion('type', [
   tagsDeltaSchema,
   diagnosticsMessageSchema,
   errorMessageSchema,
+  plcValuesSchema,
   commsStatusSchema,
   commsLogSchema,
 ]);

@@ -1,0 +1,28 @@
+id: timer-ton-basic
+description: "TON 3s, IN lên tại t=200, Q lên tại t=3200 (M1 §12.1 ví dụ gốc, bảng A1)"
+expectedFrom: spec
+config: { scanPeriodMs: 100 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "T1"(IN := %M0.0, PT := T#3s);
+        %M1.0 := "T1".Q;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "T1" "TON"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%M0.0": false }, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 100, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 200, set: { "%M0.0": true }, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 300, expect: { "%M1.0": false, '"T1".ET': 100 } }
+  - { t: 1100, expect: { "%M1.0": false, '"T1".ET': 900 } }
+  - { t: 3100, expect: { "%M1.0": false, '"T1".ET': 2900 } }
+  - { t: 3200, expect: { "%M1.0": true, '"T1".ET': 3000 } }
+  - { t: 3300, expect: { "%M1.0": true, '"T1".ET': 3000 } }
+  - { t: 3400, set: { "%M0.0": false }, expect: { "%M1.0": false, '"T1".ET': 0 } }

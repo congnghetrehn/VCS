@@ -1,0 +1,25 @@
+id: memory-array-oob-fault
+description: "Đọc arr[5] ngoài [0..4] -> 0 + fault ARRAY_RANGE; scan sau không fault mới khi không đọc nữa"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        IF %M0.0 THEN
+          %MW10 := "DB_A".arr[%MW20];
+        END_IF;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_A" STRUCT
+        arr : ARRAY[0..4] OF Int;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%MW20": 5 }, expect: { "%MW10": 0 } }
+  - { t: 10, set: { "%M0.0": true }, expect: { "%MW10": 0 }, faults: ["ARRAY_RANGE"] }
+  - { t: 20, set: { "%M0.0": false }, expect: { "%MW10": 0 } }

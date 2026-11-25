@@ -1,0 +1,32 @@
+id: counter-ctd-basic
+description: "CTD PV=3 (bảng M1): LD nạp PV, đếm xuống theo cạnh CD, QD khi CV<=0, LD thắng đếm; mọi scan ghi rõ input"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "C1"(CD := %M0.0, LD := %M0.1, PV := 3);
+        %MW10 := "C1".CV;
+        %Q0.0 := "C1".QD;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "C1" "CTD"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 10, expect: { "%MW10": 0, "%Q0.0": true } }
+  - { t: 20, set: { "%M0.1": true }, expect: { "%MW10": 3, "%Q0.0": false } }
+  - { t: 30, set: { "%M0.1": false }, expect: { "%MW10": 3, "%Q0.0": false } }
+  - { t: 40, set: { "%M0.0": true }, expect: { "%MW10": 2, "%Q0.0": false } }
+  - { t: 50, set: { "%M0.0": false }, expect: { "%MW10": 2, "%Q0.0": false } }
+  - { t: 60, expect: { "%MW10": 2, "%Q0.0": false } }
+  - { t: 70, set: { "%M0.0": true }, expect: { "%MW10": 1, "%Q0.0": false } }
+  - { t: 80, set: { "%M0.0": false }, expect: { "%MW10": 1, "%Q0.0": false } }
+  - { t: 90, set: { "%M0.0": true }, expect: { "%MW10": 0, "%Q0.0": true } }
+  - { t: 100, set: { "%M0.1": true }, expect: { "%MW10": 3, "%Q0.0": false } }
+  - { t: 110, expect: { "%MW10": 3, "%Q0.0": false } }

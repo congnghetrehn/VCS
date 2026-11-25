@@ -39,6 +39,8 @@ export type {
 export { lowerFile, obNumber } from './scl/lower.js';
 export { compileScl, compileSclProgram, createCompileContext, irToJson, programFromCtx } from './scl/compile.js';
 export type { CompileContext } from './scl/compile.js';
+export { compileProject } from './scl/compile-project.js';
+export type { ProjectSourceFile, CompileProjectOptions, CompileProjectResult } from './scl/compile-project.js';
 export type {
   IrProgram,
   IrBlock,

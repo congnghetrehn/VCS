@@ -142,3 +142,32 @@ describe('vcs ir dump', () => {
     }
   });
 });
+
+describe('vcs ir dump <dir> (P1.7, OQ-204)', () => {
+  const ROOT = join(import.meta.dirname, '..', '..', '..', '..');
+  const MOTOR = join(ROOT, 'examples', 'motor-interlock');
+
+  it('thư mục project motor-interlock → exit 0, blocks FB_Motor + Main', async () => {
+    const { code, stdout } = await runCaptured(MOTOR);
+    expect(code).toBe(0);
+    const ir = JSON.parse(stdout) as { blocks: Array<{ name: string }>; dbs: Array<{ name: string }> };
+    expect(ir.blocks.map((b) => b.name)).toEqual(['FB_Motor', 'Main']);
+    expect(ir.dbs.map((d) => d.name)).toEqual(['FB_Motor_DB']);
+  });
+
+  it('thư mục plc trực tiếp (không tag) → exit 2 vì OB1 tra tag', async () => {
+    const { code, console: logged } = await runCaptured(join(MOTOR, 'plc'));
+    expect(code).toBe(2);
+    expect(logged).toContain('SCL-T001');
+  });
+
+  it('thư mục không có file .scl/.lad.json → exit 3', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'vcs-ir-dir-'));
+    try {
+      const { code } = await runCaptured(dir);
+      expect(code).toBe(3);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+});

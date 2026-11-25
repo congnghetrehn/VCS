@@ -1,0 +1,28 @@
+id: timer-tp-basic
+description: "TP PT=1000 (bảng G1): xung hết + IN vẫn true -> ET giữ PT, không kích lại"
+expectedFrom: spec
+config: { scanPeriodMs: 100 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "T1"(IN := %M0.0, PT := T#1s);
+        %M1.0 := "T1".Q;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "T1" "TP"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 100, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 200, set: { "%M0.0": true }, expect: { "%M1.0": true, '"T1".ET': 0 } }
+  - { t: 1100, expect: { "%M1.0": true, '"T1".ET': 900 } }
+  - { t: 1200, expect: { "%M1.0": false, '"T1".ET': 1000 } }
+  - { t: 1300, expect: { "%M1.0": false, '"T1".ET': 1000 } }
+  - { t: 1500, set: { "%M0.0": false }, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 1600, set: { "%M0.0": true }, expect: { "%M1.0": true, '"T1".ET': 0 } }
+  - { t: 2600, expect: { "%M1.0": false, '"T1".ET': 1000 } }

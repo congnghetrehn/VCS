@@ -35,7 +35,9 @@ import type {
   IrStmt,
   IrType,
   IrUdt,
+  PrimitiveType,
   SrcRef,
+  TagAddr,
 } from '@vcs/runtime-iec';
 import { stdBlockInterface } from '@vcs/runtime-iec';
 import {
@@ -87,6 +89,48 @@ const BIN_FN: Record<string, 'add' | 'sub' | 'mul' | 'div' | 'mod' | 'eq' | 'ne'
 
 function byId(a: { id: string }, b: { id: string }): number {
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
+/** Độ rộng IR (bit) của một kiểu tag (OQ-198): bit → 8 + bit; còn lại theo
+ * kích thước kiểu (cùng quy ước OQ-110: Byte 8, Int 16, DInt 32, LReal 64). */
+function widthForTagType(type: PrimitiveType, bit: boolean): 8 | 16 | 32 | 64 {
+  if (bit) return 8;
+  switch (type) {
+    case 'Byte':
+    case 'SInt':
+    case 'USInt':
+      return 8;
+    case 'Word':
+    case 'Int':
+    case 'UInt':
+      return 16;
+    case 'DWord':
+    case 'DInt':
+    case 'UDInt':
+    case 'Real':
+    case 'Time':
+      return 32;
+    case 'LReal':
+      return 64;
+    case 'Bool':
+      return 8;
+  }
+}
+
+/**
+ * Tag đã giải (OQ-198) → IrLValue tuyệt đối. `type` lấy từ side-table
+ * (đã bằng kiểu khai báo của tag — typecheck đặt `info.type = tag.type`).
+ */
+function tagRefToIr(tag: TagAddr, type: IrType): IrLValue {
+  if (!isPrimitive(type)) {
+    throw new Error('lower: kiểu tag phải là primitive');
+  }
+  const width = widthForTagType(type, tag.bit !== undefined);
+  const bit = tag.bit !== undefined ? { bit: tag.bit } : {};
+  if (tag.area === 'DB') {
+    return { k: 'absDb', db: tag.db as number, byte: tag.byte, ...bit, width, type };
+  }
+  return { k: 'abs', area: tag.area, byte: tag.byte, ...bit, width, type };
 }
 
 class Lowerer {
@@ -208,6 +252,17 @@ class Lowerer {
       if (block.kind === 'FC' && base.name.toLowerCase() === block.name.toLowerCase()) {
         current = { k: 'local', name: block.name };
       } else {
+        // OQ-198: "TAG" đã giải thành tag → abs/absDb (không phải dbField).
+        // Tag là primitive nên path phải rỗng (member trên tag đã bị T005
+        // chặn ở typecheck).
+        const tag = this.checked.tagRefs.get(lv);
+        if (tag !== undefined) {
+          if (lv.path.length > 0) {
+            throw new Error('lower: tag có path — typecheck phải chặn (T005)');
+          }
+          current = tagRefToIr(tag, this.typeOf(lv));
+          return current;
+        }
         current = { k: 'dbField', db: base.name, path: [] };
       }
     } else {

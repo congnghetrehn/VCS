@@ -1,0 +1,25 @@
+id: counter-ctd-load-wins
+description: "CTD LD thắng đếm cùng scan (bảng M2)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "C1"(CD := %M0.0, LD := %M0.1, PV := 3);
+        %MW10 := "C1".CV;
+        %Q0.0 := "C1".QD;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "C1" "CTD"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 10, set: { "%M0.1": true }, expect: { "%MW10": 3, "%Q0.0": false } }
+  - { t: 20, set: { "%M0.1": false, "%M0.0": true }, expect: { "%MW10": 2, "%Q0.0": false } }
+  - { t: 30, set: { "%M0.0": false }, expect: { "%MW10": 2, "%Q0.0": false } }
+  - { t: 40, set: { "%M0.0": true, "%M0.1": true }, expect: { "%MW10": 3, "%Q0.0": false } }

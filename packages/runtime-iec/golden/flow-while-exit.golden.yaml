@@ -1,0 +1,25 @@
+id: flow-while-exit
+description: "WHILE TRUE + EXIT khi i>=3: dừng đúng i=3"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      VAR_TEMP
+        i : Int;
+      END_VAR
+      BEGIN
+        #i := 0;
+        WHILE TRUE DO
+          #i := #i + 1;
+          IF #i >= 3 THEN
+            EXIT;
+          END_IF;
+        END_WHILE;
+        %MW10 := #i;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 3 } }

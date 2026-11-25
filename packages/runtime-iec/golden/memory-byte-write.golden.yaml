@@ -1,0 +1,17 @@
+id: memory-byte-write
+description: "Byte 255 qua set: M20.7=true, M20.0=true, %MW20 đọc big-endian = -256"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %Q0.0 := %M20.7;
+        %Q0.1 := %M20.0;
+        %MW10 := %MW20;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%MB20": 255 }, expect: { "%Q0.0": false, "%Q0.1": false, "%MW10": 0 } }
+  - { t: 10, expect: { "%Q0.0": true, "%Q0.1": true, "%MW10": -256 } }

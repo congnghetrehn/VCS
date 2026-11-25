@@ -1,0 +1,85 @@
+id: demo-fb-timeout
+description: "Kịch bản B (§13): mất feedback RUN_FB, timer 3s trip fault"
+expectedFrom: spec
+config: { scanPeriodMs: 100 }
+sources:
+  - file: FB_Motor.scl
+    text: |
+      FUNCTION_BLOCK "FB_Motor"
+      VAR_INPUT
+        iStart : Bool;
+        iStopOk : Bool;
+        iOverloadOk : Bool;
+        iPermissive : Bool;
+        iRunFb : Bool;
+        iReset : Bool;
+      END_VAR
+      VAR_OUTPUT
+        qRun : Bool;
+        qFault : Bool;
+      END_VAR
+      VAR
+        sSeal : Bool;
+        sFbTimer : TON;
+        sStartEdge : R_TRIG;
+      END_VAR
+      BEGIN
+        #sStartEdge(CLK := #iStart);
+
+        IF #iReset AND #iOverloadOk THEN
+          #qFault := FALSE;
+        END_IF;
+
+        IF #sSeal AND (NOT #iOverloadOk) THEN
+          #qFault := TRUE;
+        END_IF;
+
+        #sFbTimer(IN := #sSeal AND (NOT #iRunFb), PT := T#3s);
+        IF #sFbTimer.Q THEN
+          #qFault := TRUE;
+        END_IF;
+
+        IF (NOT #iStopOk) OR (NOT #iPermissive) OR #qFault THEN
+          #sSeal := FALSE;
+        END_IF;
+
+        IF #sStartEdge.Q AND #iStopOk AND #iOverloadOk AND #iPermissive AND (NOT #qFault) THEN
+          #sSeal := TRUE;
+        END_IF;
+
+        #qRun := #sSeal;
+      END_FUNCTION_BLOCK
+
+  - file: FB_Motor_DB.scl
+    text: |
+      DATA_BLOCK "FB_Motor_DB" "FB_Motor"
+      BEGIN
+      END_DATA_BLOCK
+
+  - file: OB1.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "FB_Motor_DB"(iStart := "START_PB", iStopOk := "STOP_OK", iOverloadOk := "OVL_OK",
+                      iPermissive := "PERM", iRunFb := "RUN_FB", iReset := "RESET_PB");
+        "RUN_CMD" := "FB_Motor_DB".qRun;
+        "FAULT_LAMP" := "FB_Motor_DB".qFault;
+      END_ORGANIZATION_BLOCK
+
+tags:
+  - { name: START_PB, type: Bool, area: I, address: "%I0.0", controller: PLC1 }
+  - { name: STOP_OK, type: Bool, area: I, address: "%I0.1", controller: PLC1 }
+  - { name: OVL_OK, type: Bool, area: I, address: "%I0.2", controller: PLC1 }
+  - { name: PERM, type: Bool, area: I, address: "%I0.3", controller: PLC1 }
+  - { name: RUN_FB, type: Bool, area: I, address: "%I0.4", controller: PLC1 }
+  - { name: RESET_PB, type: Bool, area: I, address: "%I0.5", controller: PLC1 }
+  - { name: RUN_CMD, type: Bool, area: Q, address: "%Q0.0", controller: PLC1 }
+  - { name: FAULT_LAMP, type: Bool, area: Q, address: "%Q0.1", controller: PLC1 }
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { STOP_OK: true, OVL_OK: true, PERM: true }, expect: { RUN_CMD: false, FAULT_LAMP: false } }
+  - { t: 100, set: { START_PB: true }, expect: { RUN_CMD: true } }
+  - { t: 200, set: { START_PB: false }, expect: { RUN_CMD: true, '"FB_Motor_DB".sFbTimer.ET': 0 } }
+  - { t: 3100, expect: { RUN_CMD: true, '"FB_Motor_DB".sFbTimer.ET': 2900 } }
+  - { t: 3200, expect: { RUN_CMD: false, FAULT_LAMP: true, '"FB_Motor_DB".sFbTimer.ET': 3000 } }
+  - { t: 3300, expect: { RUN_CMD: false, FAULT_LAMP: true, '"FB_Motor_DB".sFbTimer.ET': 0 } }

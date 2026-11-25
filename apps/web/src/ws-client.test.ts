@@ -178,4 +178,51 @@ describe('WsClient', () => {
     );
     client.stop();
   });
+
+  it('plc.* gửi đúng JSON (P1.7, OQ-206/216)', () => {
+    const sockets: FakeWebSocket[] = [];
+    const client = new WsClient('ws://x/ws', () => {
+      const s = new FakeWebSocket();
+      sockets.push(s);
+      return s;
+    }, {
+      onMessage: () => {},
+      onConnectionChange: () => {},
+    });
+    client.connect();
+    sockets[0]?.open();
+    expect(client.plcWatch(['RUN_CMD', '%Q0.0'])).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({ type: 'plc.watch', refs: ['RUN_CMD', '%Q0.0'] }),
+    );
+    expect(client.plcWrite('RUN_CMD', true)).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({ type: 'plc.write', ref: 'RUN_CMD', value: true }),
+    );
+    expect(client.plcForce('RUN_CMD', true)).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({ type: 'plc.force', ref: 'RUN_CMD', value: true }),
+    );
+    expect(client.plcUnforce('RUN_CMD')).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(JSON.stringify({ type: 'plc.unforce', ref: 'RUN_CMD' }));
+    expect(client.plcUnwatch()).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(JSON.stringify({ type: 'plc.unwatch' }));
+    client.stop();
+  });
+
+  it('plc.watch refs rỗng → false (schema min 1)', () => {
+    const sockets: FakeWebSocket[] = [];
+    const client = new WsClient('ws://x/ws', () => {
+      const s = new FakeWebSocket();
+      sockets.push(s);
+      return s;
+    }, {
+      onMessage: () => {},
+      onConnectionChange: () => {},
+    });
+    client.connect();
+    sockets[0]?.open();
+    expect(client.plcWatch([])).toBe(false);
+    client.stop();
+  });
 });

@@ -1,0 +1,27 @@
+id: edge-r-trig-basic
+description: "R_TRIG bảng J1 (P1.5): Q lên đúng 1 scan khi CLK có cạnh lên"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "T1"(CLK := %M0.0);
+        %Q0.0 := "T1".Q;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "T1" "R_TRIG"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, set: { "%M0.0": false }, expect: { "%Q0.0": false } }
+  - { t: 20, expect: { "%Q0.0": false } }
+  - { t: 30, set: { "%M0.0": true }, expect: { "%Q0.0": true } }
+  - { t: 40, expect: { "%Q0.0": false } }
+  - { t: 50, set: { "%M0.0": false }, expect: { "%Q0.0": false } }
+  - { t: 60, set: { "%M0.0": true }, expect: { "%Q0.0": true } }
+  - { t: 70, set: { "%M0.0": false }, expect: { "%Q0.0": false } }

@@ -1,0 +1,19 @@
+id: arith-div-mod-int
+description: "Chia Int cắt về 0 (-7/2=-3); MOD mang dấu số bị chia (-7 MOD 3=-1, 7 MOD -3=1)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := 7 / 2;
+        %MW12 := -7 / 2;
+        %MW14 := 7 MOD 3;
+        %MW16 := -7 MOD 3;
+        %MW18 := 7 MOD -3;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%MW12": 0, "%MW14": 0, "%MW16": 0, "%MW18": 0 } }
+  - { t: 10, expect: { "%MW10": 3, "%MW12": -3, "%MW14": 1, "%MW16": -1, "%MW18": 1 } }

@@ -1,0 +1,44 @@
+FUNCTION_BLOCK "FB_Motor"
+VAR_INPUT
+  iStart : Bool;
+  iStopOk : Bool;
+  iOverloadOk : Bool;
+  iPermissive : Bool;
+  iRunFb : Bool;
+  iReset : Bool;
+END_VAR
+VAR_OUTPUT
+  qRun : Bool;
+  qFault : Bool;
+END_VAR
+VAR
+  sSeal : Bool;
+  sFbTimer : TON;
+  sStartEdge : R_TRIG;
+END_VAR
+BEGIN
+  #sStartEdge(CLK := #iStart);
+
+  IF #iReset AND #iOverloadOk THEN
+    #qFault := FALSE;
+  END_IF;
+
+  IF #sSeal AND (NOT #iOverloadOk) THEN
+    #qFault := TRUE;
+  END_IF;
+
+  #sFbTimer(IN := #sSeal AND (NOT #iRunFb), PT := T#3s);
+  IF #sFbTimer.Q THEN
+    #qFault := TRUE;
+  END_IF;
+
+  IF (NOT #iStopOk) OR (NOT #iPermissive) OR #qFault THEN
+    #sSeal := FALSE;
+  END_IF;
+
+  IF #sStartEdge.Q AND #iStopOk AND #iOverloadOk AND #iPermissive AND (NOT #qFault) THEN
+    #sSeal := TRUE;
+  END_IF;
+
+  #qRun := #sSeal;
+END_FUNCTION_BLOCK

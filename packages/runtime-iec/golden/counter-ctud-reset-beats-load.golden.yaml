@@ -1,0 +1,24 @@
+id: counter-ctud-reset-beats-load
+description: "CTUD R thắng LD (bảng N3): R+LD cùng true -> CV=0"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "C1"(CU := %M0.0, CD := %M0.1, R := %M0.2, LD := %M0.3, PV := 5);
+        %MW10 := "C1".CV;
+        %Q0.0 := "C1".QU;
+        %Q0.1 := "C1".QD;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "C1" "CTUD"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { '"C1".CV': 3, "%M0.2": true, "%M0.3": true }, expect: { "%MW10": 0, "%Q0.0": false, "%Q0.1": false } }
+  - { t: 10, expect: { "%MW10": 0, "%Q0.0": false, "%Q0.1": true } }
+  - { t: 20, set: { "%M0.2": false }, expect: { "%MW10": 5, "%Q0.0": true, "%Q0.1": false } }

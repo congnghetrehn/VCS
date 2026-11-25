@@ -1,0 +1,29 @@
+id: memory-array-for-loop
+description: "FOR ghi mảng: arr[i]=i*10, đọc lại arr[3]=30, arr[0]=0"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      VAR_TEMP
+        i : Int;
+      END_VAR
+      BEGIN
+        FOR #i := 0 TO 4 DO
+          "DB_A".arr[#i] := #i * 10;
+        END_FOR;
+        %MW10 := "DB_A".arr[3];
+        %MW12 := "DB_A".arr[0];
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_A" STRUCT
+        arr : ARRAY[0..4] OF Int;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%MW12": 0 } }
+  - { t: 10, expect: { "%MW10": 30, "%MW12": 0 } }

@@ -104,7 +104,10 @@ module.exports = {
   options: {
     doNotFollow: { path: 'node_modules' },
     tsConfig: { fileName: 'tsconfig.base.json' },
-    exclude: { path: '(\\.test\\.(ts|tsx)$|/tests/|node_modules)' },
+    // P1.7: build output (apps/web/dist — chunk Monaco có circular import
+    // nội bộ do bundler sinh) không phải source, không quét. Trước P1.7
+    // dist cũ (React) không có cycle nên không lộ; Monaco lộ 132 lỗi giả.
+    exclude: { path: '(\\.test\\.(ts|tsx)$|/tests/|node_modules|/dist/)' },
     moduleSystems: ['cjs', 'es6', 'tsd'],
   },
 };

@@ -1,0 +1,19 @@
+id: memory-dint-bits
+description: "DInt 70000 (0x00011170): M30.0=false, M32.0=true, M33.0=false, %MW30=1"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MD30 := 70000;
+        %Q0.0 := %M30.0;
+        %Q0.1 := %M32.0;
+        %Q0.2 := %M33.0;
+        %MW10 := %MW30;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false, "%Q0.1": false, "%Q0.2": false, "%MW10": 0 } }
+  - { t: 10, expect: { "%Q0.0": false, "%Q0.1": true, "%Q0.2": false, "%MW10": 1 } }

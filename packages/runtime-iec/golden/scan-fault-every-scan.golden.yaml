@@ -1,0 +1,17 @@
+id: scan-fault-every-scan
+description: "DIV_ZERO mỗi scan: delta fault [DIV_ZERO] ở mọi step có scan lỗi"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := 5 / %MW22;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 0 }, faults: ["DIV_ZERO"] }
+  - { t: 20, expect: { "%MW10": 0 }, faults: ["DIV_ZERO"] }
+  - { t: 30, expect: { "%MW10": 0 }, faults: ["DIV_ZERO"] }
