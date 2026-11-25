@@ -23,6 +23,7 @@ import type { FaultCollector, RuntimeFault, RuntimeFaultCode } from './faults.js
 import { createIntrinsicRegistry, type IntrinsicRegistry } from './intrinsics.js';
 import type {
   IrBlock,
+  IrDb,
   IrExpr,
   IrField,
   IrLValue,
@@ -57,7 +58,8 @@ export type LocalValue = TagValue | LocalValue[] | Map<string, LocalValue>;
 
 /** Frame thực thi một block (M1 §7.1). */
 export interface Frame {
-  /** VAR_TEMP + biến local FC (scalar) — cấp phát mới mỗi lần gọi. */
+  /** VAR_TEMP + biến local FC (scalar) — Map mới mỗi lần gọi, trừ khi block
+   * không có biến temp nào (dùng chung Map rỗng, xem createFrame). */
   temp: Map<string, TagValue>;
   /** FC: VAR_INPUT/OUTPUT (scalar). */
   vars: Map<string, TagValue>;
@@ -114,6 +116,12 @@ interface VarInfo {
 interface BlockInfo {
   block: IrBlock;
   byName: Map<string, VarInfo>;
+  /** Section nào có biến (tính một lần ở blockInfo) — createFrame dùng chung
+   * Map rỗng cho section không có biến (P1.7 bench). */
+  hasTemp: boolean;
+  hasVars: boolean;
+  hasComposite: boolean;
+  hasInout: boolean;
 }
 
 /** Ref đã biên dịch: đọc/ghi không cấp phát ở đường nóng (tạo một lần). */
@@ -254,22 +262,58 @@ function baseRef(
 }
 
 /**
+ * Tính trước offset tương đối + field lá cho một path field (lúc compile).
+ * Đi theo path đúng như `resolve` trong viewFieldRef (kể cả lỗi ném ra) —
+ * chỉ khác là chạy một lần thay vì mỗi lần truy cập.
+ */
+function resolvePathOffset(
+  fields: readonly IrField[],
+  path: readonly string[],
+): { offset: number; field: IrField } {
+  let offset = 0;
+  let current = fields;
+  let field: IrField | undefined;
+  for (const name of path) {
+    field = findField(current, name);
+    if (field === undefined) {
+      throw new Error(`interpreter: không tìm thấy field '${name}'`);
+    }
+    offset += field.byteOffset;
+    if (name !== path[path.length - 1]) {
+      if (typeof field.type === 'string' || field.type.kind !== 'struct') {
+        throw new Error(`interpreter: field '${name}' không phải struct`);
+      }
+      current = field.type.fields;
+    }
+  }
+  if (field === undefined) throw new Error('interpreter: path rỗng');
+  return { offset, field };
+}
+
+/**
  * Điều hướng một field trong một DbView (DB gốc, instance FB, struct lồng).
  * Path + kiểu lá biết ở compile time; store/offset lấy ở runtime (instance
- * của FB chỉ có khi chạy). Đi theo path bằng `findField` mỗi lần truy cập.
+ * của FB chỉ có khi chạy). Khi `precomputed` có (tính trước bằng
+ * resolvePathOffset từ danh sách field tĩnh), mỗi truy cập chỉ cộng offset —
+ * không đi theo path bằng `findField` nữa (P1.7 bench).
  */
 function viewFieldRef(
   viewOf: (frame: Frame) => DbView,
   path: readonly string[],
   type: IrType,
   recordArrayRange: (message: string) => void,
+  precomputed?: { offset: number; field: IrField },
 ): CompiledRef {
   /** Đi theo path tới field lá: trả store + offset tuyệt đối + field. */
   const resolve = (frame: Frame): { store: DbStore; offset: number; field: IrField } => {
-    let view = viewOf(frame);
+    const view = viewOf(frame);
+    if (precomputed !== undefined) {
+      return { store: view.store, offset: view.base + precomputed.offset, field: precomputed.field };
+    }
+    let v = view;
     let field: IrField | undefined;
     for (const name of path) {
-      field = findField(view.fields, name);
+      field = findField(v.fields, name);
       if (field === undefined) {
         throw new Error(`interpreter: không tìm thấy field '${name}'`);
       }
@@ -277,11 +321,11 @@ function viewFieldRef(
         if (typeof field.type === 'string' || field.type.kind !== 'struct') {
           throw new Error(`interpreter: field '${name}' không phải struct`);
         }
-        view = { store: view.store, fields: field.type.fields, base: view.base + field.byteOffset };
+        v = { store: v.store, fields: field.type.fields, base: v.base + field.byteOffset };
       }
     }
     if (field === undefined) throw new Error('interpreter: path rỗng');
-    return { store: view.store, offset: view.base + field.byteOffset, field };
+    return { store: v.store, offset: v.base + field.byteOffset, field };
   };
   if (typeof type === 'string') {
     return baseRef(type, (frame) => {
@@ -302,7 +346,12 @@ function viewFieldRef(
         if (subField === undefined) {
           throw new Error(`interpreter: không tìm thấy field '${sub}'`);
         }
-        return viewFieldRef(viewOf, [...path, sub], subField.type, recordArrayRange);
+        // Offset lồng = offset của struct cha + offset của field con.
+        const nested =
+          precomputed !== undefined
+            ? { offset: precomputed.offset + subField.byteOffset, field: subField }
+            : undefined;
+        return viewFieldRef(viewOf, [...path, sub], subField.type, recordArrayRange, nested);
       },
     };
     return ref;
@@ -568,45 +617,58 @@ function bindRef(compiled: CompiledRef, frame: Frame): Ref {
   return ref;
 }
 
+/** Map rỗng dùng chung cho section frame không có biến (P1.7 bench).
+ * Không bao giờ ghi vào các map này: mọi ghi vào frame map đều qua byName
+ * (xem createFrame + #localRef + invokeFc), nên section không có biến trong
+ * byName thì map của nó không bao giờ bị ghi. */
+const EMPTY_TAG_VALUES: Map<string, TagValue> = new Map();
+const EMPTY_LOCAL_VALUES: Map<string, LocalValue> = new Map();
+const EMPTY_REFS: Map<string, Ref> = new Map();
+
 /** Tạo frame mới cho một block (TEMP/vars về mặc định kiểu). */
 export function createFrame(info: BlockInfo, depth: number): Frame {
-  const temp = new Map<string, TagValue>();
-  const vars = new Map<string, TagValue>();
-  const composite = new Map<string, LocalValue>();
-  for (const [name, v] of info.byName) {
-    if (v.section === 'inout') continue;
-    // FB: input/output/static nằm trong instance DB, không ở frame.
-    if (info.block.kind === 'FB' && v.section !== 'temp') continue;
-    if (typeof v.type === 'string') {
-      const value = v.type === 'Bool' ? false : 0;
-      if (v.section === 'temp') temp.set(name, value);
-      else vars.set(name, value);
-    } else {
-      composite.set(name, defaultLocalValue(v.type));
+  const temp = info.hasTemp ? new Map<string, TagValue>() : EMPTY_TAG_VALUES;
+  const vars = info.hasVars ? new Map<string, TagValue>() : EMPTY_TAG_VALUES;
+  const composite = info.hasComposite ? new Map<string, LocalValue>() : EMPTY_LOCAL_VALUES;
+  const inout = info.hasInout ? new Map<string, Ref>() : EMPTY_REFS;
+  if (info.hasTemp || info.hasVars || info.hasComposite) {
+    for (const [name, v] of info.byName) {
+      if (v.section === 'inout') continue;
+      // FB: input/output/static nằm trong instance DB, không ở frame.
+      if (info.block.kind === 'FB' && v.section !== 'temp') continue;
+      if (typeof v.type === 'string') {
+        const value = v.type === 'Bool' ? false : 0;
+        if (v.section === 'temp') temp.set(name, value);
+        else vars.set(name, value);
+      } else {
+        composite.set(name, defaultLocalValue(v.type));
+      }
     }
   }
   // Giá trị khởi tạo (IrVar.init) — ghi đè mặc định 0/false khi có.
-  const applyInit = (list: readonly { name: string; type: IrType; init?: number | boolean }[]): void => {
-    for (const v of list) {
-      if (v.init === undefined) continue;
-      const key = v.name.toLowerCase();
-      const section = info.byName.get(key)?.section;
-      if (section === undefined || section === 'inout' || section === 'static') continue;
-      if ((section === 'input' || section === 'output') && info.block.kind === 'FB') continue;
-      if (typeof v.type === 'string') {
-        if (section === 'temp') temp.set(key, v.init);
-        else vars.set(key, v.init);
+  if (info.hasTemp || info.hasVars) {
+    const applyInit = (list: readonly { name: string; type: IrType; init?: number | boolean }[]): void => {
+      for (const v of list) {
+        if (v.init === undefined) continue;
+        const key = v.name.toLowerCase();
+        const section = info.byName.get(key)?.section;
+        if (section === undefined || section === 'inout' || section === 'static') continue;
+        if ((section === 'input' || section === 'output') && info.block.kind === 'FB') continue;
+        if (typeof v.type === 'string') {
+          if (section === 'temp') temp.set(key, v.init);
+          else vars.set(key, v.init);
+        }
       }
-    }
-  };
-  applyInit(info.block.interface.input);
-  applyInit(info.block.interface.output);
-  applyInit(info.block.interface.temp);
+    };
+    applyInit(info.block.interface.input);
+    applyInit(info.block.interface.output);
+    applyInit(info.block.interface.temp);
+  }
   return {
     temp,
     vars,
     composite,
-    inout: new Map<string, Ref>(),
+    inout,
     loopDepth: 0,
     flow: 'normal',
     ov: false,
@@ -624,7 +686,26 @@ function blockInfo(block: IrBlock): BlockInfo {
   add('inout', block.interface.inout);
   add('static', block.interface.static);
   add('temp', block.interface.temp);
-  return { block, byName };
+  // Flags cho createFrame — tính đúng theo điều kiện vòng lặp điền frame
+  // (inout riêng: map inout chỉ được ghi ở nơi gọi khi có inoutArgs).
+  let hasTemp = false;
+  let hasVars = false;
+  let hasComposite = false;
+  let hasInout = false;
+  for (const v of byName.values()) {
+    if (v.section === 'inout') {
+      hasInout = true;
+      continue;
+    }
+    if (block.kind === 'FB' && v.section !== 'temp') continue;
+    if (typeof v.type === 'string') {
+      if (v.section === 'temp') hasTemp = true;
+      else hasVars = true;
+    } else {
+      hasComposite = true;
+    }
+  }
+  return { block, byName, hasTemp, hasVars, hasComposite, hasInout };
 }
 
 export class Interpreter {
@@ -636,6 +717,15 @@ export class Interpreter {
   readonly #infos = new Map<string, BlockInfo>();
   readonly #compiled = new Map<string, CompiledBlock>();
   readonly #dbByNumber = new Map<number, DbStore>();
+  /** Index DB theo tên viết thường — thay quét tuyến tính program.dbs mỗi lần gọi FB (P1.7 bench: 200 DB × 200 lần gọi/scan). */
+  readonly #dbsByName = new Map<string, IrDb>();
+  /**
+   * Layout instance chuẩn theo tên FB (fields của DB đầu tiên mang fbName đó).
+   * Mọi DB cùng một FB có cùng layout (layoutIrFields thuần theo interface) —
+   * constructor kiểm chứng điều này trên toàn bộ DB, FB nào lệch thì loại khỏi
+   * map (dùng slow path). Dùng để tính trước offset field lúc compile (Opt E).
+   */
+  readonly #instanceFieldsByFb = new Map<string, readonly IrField[]>();
   readonly #intrinsics: IntrinsicRegistry;
   readonly #sysCalls: Map<string, SysCallHandler>;
   readonly #maxCallDepth: number;
@@ -662,6 +752,29 @@ export class Interpreter {
     for (const [name, number] of mem.dbNumbers) {
       const store = mem.dbs.get(name);
       if (store !== undefined) this.#dbByNumber.set(number, store);
+    }
+    for (const db of program.dbs) {
+      this.#dbsByName.set(db.name.toLowerCase(), db);
+    }
+    for (const db of program.dbs) {
+      if (db.fbName === undefined) continue;
+      const key = db.fbName.toLowerCase();
+      const canonical = this.#instanceFieldsByFb.get(key);
+      if (canonical === undefined) {
+        this.#instanceFieldsByFb.set(key, db.fields);
+        continue;
+      }
+      // Kiểm chứng: mọi DB cùng FB phải có cùng layout (tên + offset + size).
+      // Lệch → loại FB khỏi map, các truy cập field của nó dùng slow path.
+      const sameLayout =
+        canonical.length === db.fields.length &&
+        canonical.every(
+          (f, i) =>
+            f.name.toLowerCase() === (db.fields[i] as IrField).name.toLowerCase() &&
+            f.byteOffset === (db.fields[i] as IrField).byteOffset &&
+            f.size === (db.fields[i] as IrField).size,
+        );
+      if (!sameLayout) this.#instanceFieldsByFb.delete(key);
     }
     // Pass 1 — xây info cho mọi block trước: compileExpr/compileStmt của một
     // block có thể tra callee info (callFcExpr/callFb) bất kể thứ tự khai báo.
@@ -713,7 +826,7 @@ export class Interpreter {
         return type;
       }
       case 'dbField': {
-        const db = this.program.dbs.find((d) => d.name.toLowerCase() === lv.db.toLowerCase());
+        const db = this.#dbsByName.get(lv.db.toLowerCase());
         if (db === undefined) return undefined;
         let fields = db.fields;
         let type: IrType | undefined;
@@ -770,6 +883,7 @@ export class Interpreter {
       }
       // Còn lại chỉ có input/output/static (temp/inout đã return ở trên).
       if (info.block.kind === 'FB') {
+        const rootFields = this.#instanceFieldsByFb.get(info.block.name.toLowerCase());
         return viewFieldRef(
           (frame) => {
             if (frame.instance === undefined) {
@@ -780,6 +894,7 @@ export class Interpreter {
           [name],
           scalarType,
           recordArrayRange,
+          rootFields !== undefined ? resolvePathOffset(rootFields, [name]) : undefined,
         );
       }
       return baseRef(scalarType, (frame) => frame.vars.get(key) ?? defaultValue(scalarType), (frame, v) =>
@@ -899,6 +1014,7 @@ export class Interpreter {
             }
             type = sub.type;
           }
+          const rootFields = this.#instanceFieldsByFb.get(info.block.name.toLowerCase());
           return viewFieldRef(
             (frame) => {
               if (frame.instance === undefined) {
@@ -909,6 +1025,7 @@ export class Interpreter {
             lv.path,
             type,
             recordArrayRange,
+            rootFields !== undefined ? resolvePathOffset(rootFields, lv.path) : undefined,
           );
         }
         // Struct local trong frame.
@@ -927,7 +1044,7 @@ export class Interpreter {
         return lv.path.slice(1).reduce<CompiledRef>((ref, name) => ref.field(name), firstRef);
       }
       case 'dbField': {
-        const db = this.program.dbs.find((d) => d.name.toLowerCase() === lv.db.toLowerCase());
+        const db = this.#dbsByName.get(lv.db.toLowerCase());
         if (db === undefined) {
           throw new Error(`interpreter: không tìm thấy DB '${lv.db}'`);
         }
@@ -954,6 +1071,7 @@ export class Interpreter {
           lv.path,
           type,
           recordArrayRange,
+          resolvePathOffset(db.fields, lv.path),
         );
       }
       case 'abs': {
@@ -1450,7 +1568,7 @@ export class Interpreter {
         };
       }
       case 'dbField': {
-        const db = this.program.dbs.find((d) => d.name.toLowerCase() === instance.db.toLowerCase());
+        const db = this.#dbsByName.get(instance.db.toLowerCase());
         if (db === undefined) {
           throw new Error(`interpreter: không tìm thấy DB '${instance.db}'`);
         }
@@ -1682,6 +1800,7 @@ export class Interpreter {
         if (callee === undefined) {
           throw new Error(`interpreter: không tìm thấy FB '${stmt.block}'`);
         }
+        const calleeKey = stmt.block.toLowerCase();
         const inArgs = stmt.inArgs.map(([name, e]) => {
           const param = callee.byName.get(name.toLowerCase());
           if (param === undefined) {
@@ -1703,6 +1822,80 @@ export class Interpreter {
           name,
           ref: this.compileLValue(lv, info, fctx),
         }));
+        // Fast path (P1.7 bench): instance là DB tĩnh + mọi arg scalar + không
+        // IN_OUT → resolve view/offset/field một lần lúc compile; mỗi scan chỉ
+        // ghi/đọc trực tiếp qua writeMemValue/readMemValue, không tạo
+        // viewFieldRef (8 Ref × ~9 closure mỗi lần gọi) và không quét DB.
+        // Mọi trường hợp khác dùng slow path bên dưới (ngữ nghĩa không đổi).
+        let fast: {
+          view: DbView;
+          store: DbStore;
+          inArgs: { offset: number; field: IrField; scalar: (frame: Frame) => TagValue }[];
+          outArgs: { offset: number; field: IrField; ref: CompiledRef }[];
+        } | null = null;
+        if (stmt.instance.k === 'dbField' && inoutArgs.length === 0) {
+          const db = this.#dbsByName.get(stmt.instance.db.toLowerCase());
+          const store = this.mem.dbs.get(stmt.instance.db.toLowerCase());
+          if (db !== undefined && store !== undefined) {
+            const view = walkView({ store, fields: db.fields, base: 0 }, stmt.instance.path);
+            const fins: { offset: number; field: IrField; scalar: (frame: Frame) => TagValue }[] = [];
+            const fouts: { offset: number; field: IrField; ref: CompiledRef }[] = [];
+            let ok = true;
+            for (const arg of inArgs) {
+              if (arg.scalar === undefined) {
+                ok = false;
+                break;
+              }
+              const f = findField(view.fields, arg.name);
+              if (f === undefined) {
+                ok = false;
+                break;
+              }
+              fins.push({ offset: view.base + f.byteOffset, field: f, scalar: arg.scalar });
+            }
+            if (ok) {
+              for (const arg of outArgs) {
+                if (typeof arg.type !== 'string') {
+                  ok = false;
+                  break;
+                }
+                const f = findField(view.fields, arg.name);
+                if (f === undefined) {
+                  ok = false;
+                  break;
+                }
+                fouts.push({ offset: view.base + f.byteOffset, field: f, ref: arg.ref });
+              }
+            }
+            if (ok) fast = { view, store, inArgs: fins, outArgs: fouts };
+          }
+        }
+        if (fast !== null) {
+          const f = fast;
+          return (frame) => {
+            if (frame.depth + 1 > this.#maxCallDepth) {
+              this.#record(
+                'CALL_DEPTH',
+                fctx,
+                `vượt độ sâu lời gọi tối đa ${String(this.#maxCallDepth)} khi gọi '${stmt.block}'`,
+              );
+              return;
+            }
+            const cf = createFrame(callee, frame.depth + 1);
+            cf.instance = f.view;
+            for (const arg of f.inArgs) {
+              writeMemValue(f.store, arg.offset, arg.field, arg.scalar(frame));
+            }
+            const calleeEntry = this.#compiled.get(calleeKey);
+            if (calleeEntry === undefined) {
+              throw new Error(`interpreter: không tìm thấy FB '${stmt.block}'`);
+            }
+            calleeEntry.run(cf);
+            for (const arg of f.outArgs) {
+              arg.ref.write(frame, readMemValue(f.store, arg.offset, arg.field));
+            }
+          };
+        }
         return (frame) => {
           if (frame.depth + 1 > this.#maxCallDepth) {
             this.#record(
@@ -1733,7 +1926,7 @@ export class Interpreter {
           for (const arg of inoutArgs) {
             cf.inout.set(arg.name.toLowerCase(), bindRef(arg.ref, frame));
           }
-          const calleeEntry = this.#compiled.get(stmt.block.toLowerCase());
+          const calleeEntry = this.#compiled.get(calleeKey);
           if (calleeEntry === undefined) {
             throw new Error(`interpreter: không tìm thấy FB '${stmt.block}'`);
           }
