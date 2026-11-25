@@ -1,0 +1,24 @@
+id: bitlogic-output-hold
+description: "Tự giữ bằng IF (seal-in); nút nhấn nhả ra vẫn chạy tới khi STOP"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        IF %I0.0 THEN
+          %Q0.0 := TRUE;
+        END_IF;
+        IF %I0.1 THEN
+          %Q0.0 := FALSE;
+        END_IF;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, set: { "%I0.0": true }, expect: { "%Q0.0": true } }
+  - { t: 20, set: { "%I0.0": false }, expect: { "%Q0.0": true } }
+  - { t: 30, set: { "%I0.0": false }, expect: { "%Q0.0": true } }
+  - { t: 40, set: { "%I0.1": true }, expect: { "%Q0.0": false } }
+  - { t: 50, set: { "%I0.1": false }, expect: { "%Q0.0": false } }

@@ -1,0 +1,19 @@
+id: arith-mixed-expr
+description: "Độ ưu tiên và kết hợp trái: 2+3*4=14, (2+3)*4=20, 10-4-3=3, 2*3+4*5=26, 100/10/2=5"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := 2 + 3 * 4;
+        %MW12 := (2 + 3) * 4;
+        %MW14 := 10 - 4 - 3;
+        %MW16 := 2 * 3 + 4 * 5;
+        %MW18 := 100 / 10 / 2;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%MW12": 0, "%MW14": 0, "%MW16": 0, "%MW18": 0 } }
+  - { t: 10, expect: { "%MW10": 14, "%MW12": 20, "%MW14": 3, "%MW16": 26, "%MW18": 5 } }

@@ -1,0 +1,28 @@
+id: arith-real-to-int-round
+description: "REAL_TO_INT làm tròn half-even: 2.5->2, 3.5->4, -2.5->-2, 1.5->2, 0.5->0, -0.5->0, 4.5->4"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := REAL_TO_INT("DB_R".X);
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_R" STRUCT
+        X : Real;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { '"DB_R".X': 2.5 }, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 2 } }
+  - { t: 20, set: { '"DB_R".X': 3.5 }, expect: { "%MW10": 4 } }
+  - { t: 30, set: { '"DB_R".X': -2.5 }, expect: { "%MW10": -2 } }
+  - { t: 40, set: { '"DB_R".X': 1.5 }, expect: { "%MW10": 2 } }
+  - { t: 50, set: { '"DB_R".X': 0.5 }, expect: { "%MW10": 0 } }
+  - { t: 60, set: { '"DB_R".X': -0.5 }, expect: { "%MW10": 0 } }
+  - { t: 70, set: { '"DB_R".X': 4.5 }, expect: { "%MW10": 4 } }

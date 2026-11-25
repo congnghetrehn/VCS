@@ -1,0 +1,35 @@
+id: call-udt-struct-param
+description: "FC nhận tham số UDT: FC_SumPt cộng hai field của struct truyền qua DB"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := "FC_SumPt"("DB_P".pt);
+      END_ORGANIZATION_BLOCK
+  - file: fc.scl
+    text: |
+      TYPE "UDT_Pt" STRUCT
+        x : Int;
+        y : Int;
+      END_STRUCT;
+      END_TYPE
+      FUNCTION "FC_SumPt" : Int
+      VAR_INPUT
+        p : "UDT_Pt";
+      END_VAR
+      BEGIN
+        "FC_SumPt" := #p.x + #p.y;
+      END_FUNCTION
+      DATA_BLOCK "DB_P" STRUCT
+        pt : "UDT_Pt";
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { '"DB_P".pt.x': 3, '"DB_P".pt.y': 4 }, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 7 } }
+  - { t: 20, set: { '"DB_P".pt.x': 10, '"DB_P".pt.y': -2 }, expect: { "%MW10": 8 } }

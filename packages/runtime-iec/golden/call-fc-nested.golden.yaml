@@ -1,0 +1,25 @@
+id: call-fc-nested
+description: "FC lồng nhau: (1+2)+(3+4)=10"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := "FC_Add"("FC_Add"(1, 2), "FC_Add"(3, 4));
+      END_ORGANIZATION_BLOCK
+  - file: fc.scl
+    text: |
+      FUNCTION "FC_Add" : Int
+      VAR_INPUT
+        a : Int;
+        b : Int;
+      END_VAR
+      BEGIN
+        "FC_Add" := #a + #b;
+      END_FUNCTION
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 10 } }

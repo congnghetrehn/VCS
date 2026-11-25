@@ -1,0 +1,18 @@
+id: bitlogic-series-contacts
+description: "3 contact nối tiếp (AND); chỉ chạy khi cả 3 đều true"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %Q0.0 := %I0.0 AND %I0.1 AND %I0.2;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, set: { "%I0.0": true }, expect: { "%Q0.0": false } }
+  - { t: 20, set: { "%I0.1": true }, expect: { "%Q0.0": false } }
+  - { t: 30, set: { "%I0.2": true }, expect: { "%Q0.0": true } }
+  - { t: 40, set: { "%I0.0": false }, expect: { "%Q0.0": false } }

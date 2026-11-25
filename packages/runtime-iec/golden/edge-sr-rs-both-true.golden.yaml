@@ -1,0 +1,27 @@
+id: edge-sr-rs-both-true
+description: "SR + RS cùng scan, S=1 R=1 -> SR Q1=1, RS Q1=0 (bảng K3)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "S1"(S1 := %M0.0, R := %M0.1);
+        "R1"(S := %M0.0, R1 := %M0.1);
+        %Q0.0 := "S1".Q1;
+        %Q0.1 := "R1".Q1;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "S1" "SR"
+      BEGIN
+      END_DATA_BLOCK
+      DATA_BLOCK "R1" "RS"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false, "%Q0.1": false } }
+  - { t: 10, set: { "%M0.0": true, "%M0.1": true }, expect: { "%Q0.0": true, "%Q0.1": false } }
+  - { t: 20, set: { "%M0.0": false, "%M0.1": false }, expect: { "%Q0.0": true, "%Q0.1": false } }

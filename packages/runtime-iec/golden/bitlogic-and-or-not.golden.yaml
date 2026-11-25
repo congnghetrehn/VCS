@@ -1,0 +1,20 @@
+id: bitlogic-and-or-not
+description: "AND/OR/NOT/XOR trên bit %I -> %Q (M1 §12.2 nhóm bit logic)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %Q0.0 := %I0.0 AND %I0.1;
+        %Q0.1 := %I0.0 OR %I0.1;
+        %Q0.2 := NOT %I0.0;
+        %Q0.3 := %I0.0 XOR %I0.1;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false, "%Q0.1": false, "%Q0.2": false, "%Q0.3": false } }
+  - { t: 10, set: { "%I0.0": true }, expect: { "%Q0.0": false, "%Q0.1": true, "%Q0.2": false, "%Q0.3": true } }
+  - { t: 20, set: { "%I0.1": true }, expect: { "%Q0.0": true, "%Q0.1": true, "%Q0.2": false, "%Q0.3": false } }
+  - { t: 30, set: { "%I0.0": false }, expect: { "%Q0.0": false, "%Q0.1": true, "%Q0.2": true, "%Q0.3": true } }

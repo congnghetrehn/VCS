@@ -1,0 +1,26 @@
+id: arith-int-to-real
+description: "INT_TO_REAL mở rộng: 3 -> 3.0, -7 -> -7.0; BOOL_TO_INT: false->0, true->1"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "DB_R".X := INT_TO_REAL(%MW20);
+        "DB_R".Y := INT_TO_REAL(-7);
+        %MW10 := BOOL_TO_INT(%M0.0);
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_R" STRUCT
+        X : Real;
+        Y : Real;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%MW20": 3 }, expect: { '"DB_R".X': 0, '"DB_R".Y': 0, "%MW10": 0 } }
+  - { t: 10, expect: { '"DB_R".X': { approx: 3.0 }, '"DB_R".Y': { approx: -7.0 }, "%MW10": 0 } }
+  - { t: 20, set: { "%M0.0": true }, expect: { '"DB_R".X': { approx: 3.0 }, '"DB_R".Y': { approx: -7.0 }, "%MW10": 1 } }

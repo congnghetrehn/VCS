@@ -1,0 +1,33 @@
+id: counter-ctu-basic
+description: "CTU PV=3 (bảng L1): đếm lên theo cạnh CU, CU giữ không đếm, R thắng đếm; mọi scan ghi rõ input (edge-sensitive)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "C1"(CU := %M0.0, R := %M0.1, PV := 3);
+        %MW10 := "C1".CV;
+        %Q0.0 := "C1".QU;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "C1" "CTU"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 10, set: { "%M0.0": false }, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 20, set: { "%M0.0": true }, expect: { "%MW10": 1, "%Q0.0": false } }
+  - { t: 30, set: { "%M0.0": false }, expect: { "%MW10": 1, "%Q0.0": false } }
+  - { t: 40, set: { "%M0.0": true }, expect: { "%MW10": 2, "%Q0.0": false } }
+  - { t: 50, expect: { "%MW10": 2, "%Q0.0": false } }
+  - { t: 60, set: { "%M0.0": false }, expect: { "%MW10": 2, "%Q0.0": false } }
+  - { t: 70, set: { "%M0.0": true }, expect: { "%MW10": 3, "%Q0.0": true } }
+  - { t: 80, set: { "%M0.0": false }, expect: { "%MW10": 3, "%Q0.0": true } }
+  - { t: 90, set: { "%M0.0": true, "%M0.1": true }, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 100, set: { "%M0.1": false }, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 110, set: { "%M0.0": false }, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 120, set: { "%M0.0": true }, expect: { "%MW10": 1, "%Q0.0": false } }

@@ -1,0 +1,26 @@
+id: arith-power
+description: "Lũy thừa ** kết hợp phải: 2**3=8, 2**10=1024, 3**2=9, 2**3**2=512"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "DB_R".Z := 2.0 ** 3.0;
+        "DB_R".W := 2.0 ** 10.0;
+        %MW10 := REAL_TO_INT(2.0 ** 3.0 ** 2.0);
+        %MW12 := REAL_TO_INT(3.0 ** 2.0);
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_R" STRUCT
+        Z : Real;
+        W : Real;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { '"DB_R".Z': 0, '"DB_R".W': 0, "%MW10": 0, "%MW12": 0 } }
+  - { t: 10, expect: { '"DB_R".Z': { approx: 8.0 }, '"DB_R".W': { approx: 1024.0 }, "%MW10": 512, "%MW12": 9 } }

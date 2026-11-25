@@ -1,0 +1,28 @@
+id: arith-compare
+description: "So sánh Int và Real: < <= > >= = <>"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %Q0.0 := 3 < 5;
+        %Q0.1 := 5 <= 5;
+        %Q0.2 := 5 > 3;
+        %Q0.3 := 3 >= 4;
+        %Q0.4 := 4 = 4;
+        %Q0.5 := 4 <> 4;
+        %Q0.6 := "DB_R".X > 1.0;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_R" STRUCT
+        X : Real;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { '"DB_R".X': 1.5 }, expect: { "%Q0.0": false, "%Q0.1": false, "%Q0.2": false, "%Q0.3": false, "%Q0.4": false, "%Q0.5": false, "%Q0.6": false } }
+  - { t: 10, expect: { "%Q0.0": true, "%Q0.1": true, "%Q0.2": true, "%Q0.3": false, "%Q0.4": true, "%Q0.5": false, "%Q0.6": true } }

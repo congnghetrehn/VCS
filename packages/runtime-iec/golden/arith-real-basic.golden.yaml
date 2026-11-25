@@ -1,0 +1,30 @@
+id: arith-real-basic
+description: "Số thực qua DB field: + - * / trên Real (1.5 và 2.25, kết quả chính xác nhị phân)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "DB_R".Z := "DB_R".X + "DB_R".Y;
+        "DB_R".W := "DB_R".X * "DB_R".Y;
+        "DB_R".V := "DB_R".Y - "DB_R".X;
+        "DB_R".U := "DB_R".Y / "DB_R".X;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_R" STRUCT
+        X : Real;
+        Y : Real;
+        Z : Real;
+        W : Real;
+        V : Real;
+        U : Real;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { '"DB_R".X': 1.5, '"DB_R".Y': 2.25 }, expect: { '"DB_R".Z': 0, '"DB_R".W': 0, '"DB_R".V': 0, '"DB_R".U': 0 } }
+  - { t: 10, expect: { '"DB_R".Z': { approx: 3.75 }, '"DB_R".W': { approx: 3.375 }, '"DB_R".V': { approx: 0.75 }, '"DB_R".U': { approx: 1.5 } } }

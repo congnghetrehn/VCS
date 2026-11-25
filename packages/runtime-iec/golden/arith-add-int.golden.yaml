@@ -1,0 +1,18 @@
+id: arith-add-int
+description: "Cộng Int: 32767+1 tràn -> -32768 (M1 §7.2, chỉ set OV, không fault)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := %MW20 + 1;
+        %MW12 := 100 + 200;
+        %MW14 := -5 + 5;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%MW20": 32767 }, expect: { "%MW10": 0, "%MW12": 0, "%MW14": 0 } }
+  - { t: 10, expect: { "%MW10": -32768, "%MW12": 300, "%MW14": 0 } }
+  - { t: 20, expect: { "%MW10": -32768, "%MW12": 300, "%MW14": 0 } }

@@ -1,0 +1,18 @@
+id: arith-div-zero-fault
+description: "Chia/MOD cho 0 -> 0 + fault DIV_ZERO; mẫu số khác 0 lại chạy bình thường, không fault mới"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := %MW20 / %MW22;
+        %MW12 := %MW20 MOD %MW22;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%MW20": 5, "%MW22": 0 }, expect: { "%MW10": 0, "%MW12": 0 } }
+  - { t: 10, expect: { "%MW10": 0, "%MW12": 0 }, faults: ["DIV_ZERO"] }
+  - { t: 20, set: { "%MW22": 2 }, expect: { "%MW10": 2, "%MW12": 1 } }
+  - { t: 30, set: { "%MW22": 0 }, expect: { "%MW10": 0, "%MW12": 0 }, faults: ["DIV_ZERO"] }
