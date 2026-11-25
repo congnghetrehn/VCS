@@ -11,9 +11,9 @@
 ## 1. Vị trí hiện tại
 
 - Milestone: **M0** (P0.1 đã merge vào `develop` qua PR #8, merge commit `e8707f2`, CI 6/6 xanh; P0.2 đã merge vào `develop` qua PR #9, merge commit `f3d769a`, CI 6/6 xanh sau sửa lỗi khai báo `workspace:*`)
-- Prompt đang làm / vừa xong: P1.3 — **✔ đã merge PR #22 `681e39d` vào `develop` 2026-11-25 07:24 +07** (CI 8 successful + 2 skipped; STATE §18; OQ-106…129 đóng). Tiếp theo: P1.4 plan-first (STATE §19; X-002/S1 vẫn mở nhưng không chặn P1.4 — làm theo §7/§8, xem §19 OQ-152).
-- Nhánh: `m1/p1.4-interpreter` (từ `018c562` = nội dung `develop` sau merge PR #22, develop head `681e39d`)
-- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.3 đã merge PR #22; P1.4 plan-first)
+- Prompt đang làm / vừa xong: P1.4 — **✔ đã merge PR #23 `ae0bed3` vào `develop` 2026-11-25 10:56 +07** (CI 10 checks passed; STATE §19; OQ-130…160 đóng, OQ-161 mở). Tiếp theo: P1.5 plan-first (STATE §20; X-002/S1 vẫn mở nhưng không chặn P1.5 — làm theo §9, xem §20 OQ-179).
+- Nhánh: `m1/p1.5-std-blocks` (từ `ad1c9cf` = nội dung `develop` sau merge PR #23, develop head `ae0bed3`)
+- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.4 đã merge PR #23; P1.5 plan-first)
 
 ## 2. Tiến độ prompt
 
@@ -32,8 +32,8 @@
 | P1.1   | ✔ xong (gate xanh local; đã merge PR #20 `8b3dbb6` vào `develop` 2026-11-25 01:13 +07, CI xanh) | PR #20, nhánh `m1/p1.1-runtime-iec` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (651 test, 40 file; 144 test mới) + build xanh + bench guard PASS | xem §16; OQ-082…091 đóng |
 | P1.2   | ✔ xong (gate xanh local; đã merge PR #21 `278e3af` vào `develop` 2026-11-25 05:13 +07, CI 8 successful + 2 skipped) | PR #21, nhánh `m1/p1.2-scl-parser` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (746 test, 42 file; 95 test mới) + build xanh + bench guard PASS | xem §17; OQ-092…104 đóng, OQ-105 mở |
 | P1.3   | ✔ xong (gate xanh local; đã merge PR #22 `681e39d` vào `develop` 2026-11-25 07:24 +07, CI 8 successful + 2 skipped) | PR #22, nhánh `m1/p1.3-typecheck-lower` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (1310 test; 564 test mới) + build xanh + bench TagDB 4/4 (49,1M ops/s) + orchestrator 481.809 bước/s | xem §18; OQ-106…129 đóng |
-| P1.4   | ◐ plan-first (STATE §19, nhánh `m1/p1.4-interpreter`)                                                                                                                                                         |                                                   |                                                                                                                                                                           | X-002/S1 vẫn mở nhưng không chặn (làm theo §7/§8, OQ-152) |
-| P1.5   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
+| P1.4   | ✔ xong (gate xanh local; đã merge PR #23 `ae0bed3` vào `develop` 2026-11-25 10:56 +07, CI 10 checks passed)                                                                                                                                                         |                                                   |                                                                                                                                                                           | X-002/S1 vẫn mở nhưng không chặn (làm theo §7/§8, OQ-152) |
+| P1.5   | ◐ plan-first (STATE §20, nhánh `m1/p1.5-std-blocks`)                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P1.6   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | P1.7   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | G1     | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | gói nghiệm thu M1                                                 |
@@ -83,7 +83,7 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 - File/hàm đang sửa: — (G0 xong file nghiệm thu, CHƯA mở PR — xem `docs/acceptance/M0.md`)
 - Test đang hỏng (nguyên văn): — (G0: gate xanh ở bản sao sạch `/tmp/vcs-g0` install thật — vitest 439/439 + coverage §13 PASS (kernel 97,66%, schemas 95,92%, project 97,83%), e2e 5/5, review:cheats SẠCH, diagnostics khớp, build 3/3; bench TagDB 4/4 (set/get 44,8M ops/s), orchestrator 442 432 bước/s; `check-bench-regression` exit 0, không có hồi quy > 20%; hash ghim khớp 2 lần chạy. P0.7 trước đó: TagDB set/get 51,7M ops/s, orchestrator 508 058 bước/s bản chính.)
 - Lệnh tái hiện nhanh: `npx -y pnpm@10.15.0 run lint && npx -y pnpm@10.15.0 run typecheck && npx -y pnpm@10.15.0 run depcheck && npx -y pnpm@10.15.0 run test && npx -y pnpm@10.15.0 run test:e2e && npx -y pnpm@10.15.0 run review:cheats && npx -y pnpm@10.15.0 run docs:diagnostics --check` (ĐÃ CHẠY 2026-11-24 ở P0.6: cả 7 xanh ở cả bản sao `/tmp/vcs-p06` (`pnpm install --frozen-lockfile` exit 0 — OQ-007) lẫn bản sao chính; vitest 438 passed / 35 file (17 test unit mới); e2e 5/5 local (E1–E5, Chromium cài được ở VM — xem §6); depcheck "no violations, 82 modules, 134 dependencies" ở `/tmp` (86 modules, 148 dependencies ở bản chính — lệch do cruise cả `apps/*/dist/` + `test-results/`, không có violation); review:cheats SẠCH, quét 108 file; diagnostics --check khớp, 24 mã). `pnpm bench` ĐÃ CHẠY: set/get 45,4M ops/s (≥10M), flush 5000/0 đổi 0,14 µs (≤50), flush 1000 đổi + 1 sub 0,062 ms (≤1), heap −0,05 MB (<1) — TagDB 4/4 PASS; orchestrator 513 310 bước/s — PASS. `pnpm build` ĐÃ CHẠY: turbo xanh 3 app (server/cli tsup + web vite, `apps/web/dist` có `index.html` + assets); smoke: `vcs serve examples/hello-tags` → `GET /` trả `index.html`, `/api/health` `{"ok":true}`, asset JS 200.
-- Bước tiếp theo cụ thể: **P1.4 triển khai** theo plan §19 (nhánh `m1/p1.4-interpreter`), rồi mở PR P1.4 (plan + triển khai chung một PR), chờ CI xanh, merge; rồi P1.5 plan-first. X-002/S1 vẫn mở (chủ sản phẩm đưa mã SCL thật khi có) — không chặn P1.4. OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
+- Bước tiếp theo cụ thể: **P1.5 triển khai** theo plan §20 (nhánh `m1/p1.5-std-blocks`), rồi mở PR P1.5 (plan + triển khai chung một PR), chờ CI xanh, merge; rồi P1.6 plan-first (LAD). X-002/S1 vẫn mở (chủ sản phẩm đưa mã SCL thật khi có) — không chặn P1.5. OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn. OQ-161 (layout IN_OUT multi-instance lồng) vẫn mở — P1.5 không quyết (xem §20).
 - Đẩy qua UI — danh sách file P0.7 (so với `develop` @ `471a2ec`, nhánh `m0/p0.7-docs`, CHƯA mở PR): `package.json` (script `test` thêm `--coverage`, devDep `@vitest/coverage-v8@4.1.12`), `pnpm-lock.yaml`, `vitest.config.ts` (coverage v8, ngưỡng dòng theo glob §13), `apps/cli/src/commands/run.test.ts` (+1 test ghim hash §15.6), `packages/kernel/src/tags.test.ts` (timeout 60 s cho test heap 10M ops khi đo coverage — xem §14), `.github/workflows/ci.yml` (comment coverage + job bench gọi `check-bench-regression.mjs`), `scripts/check-bench-regression.mjs` (mới), `bench/baseline.json` (mới, trung vị 5 mẫu), `docs/architecture.md` (mới), `docs/semantics.md` (mới, phần M0), `docs/adr/0001-package-jit-monorepo.md` … `0007-main-guard-tsup-split.md` (mới), `README.md` (viết lại), `docs/STATE.md`, `docs/open-questions.md` (OQ-071…073 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `coverage/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.6 (so với `develop` @ `65cd373`, nhánh `m0/p0.6-web`, đã merge PR #13 `471a2ec` 2026-11-24): `package.json` (script `test:e2e`, `typecheck` thêm web tsconfig, devDep `@playwright/test@1.65.0`), `pnpm-lock.yaml` (react 19.3.1, react-dom 19.3.1, zustand 5.1.0, @tanstack/react-virtual 3.14.26, vite 8.3.7, @vitejs/plugin-react 6.3.0, tailwindcss 4.3.5, @tailwindcss/vite 4.3.5, @types/react 19.3.0, @types/react-dom 19.3.0, @playwright/test 1.65.0 + link workspace; lưu ý: `vite@8.3.8` trong lockfile là transitive của vitest 4.1.12, đã có từ trước P0.6 — không phải vite của web (8.3.7); `immer`/`use-sync-external-store` là peer optional của zustand, pnpm KHÔNG cài), `tsconfig.json` (exclude `apps/web/**`, include `playwright.config.ts`), `playwright.config.ts`, `.gitignore` (`apps/web/e2e/fixtures/big-project/`, `test-results/`), `.github/workflows/ci.yml` (job `e2e` mới, ubuntu), `scripts/ensure-web-dist.mjs`, `apps/web/package.json` (deps + script `dev`/`build`) + `tsconfig.json` (riêng: lib DOM, jsx react-jsx — root tsconfig lib ES2022 không typecheck được `.tsx`, xem §13) + `vite.config.ts` + `index.html` + `src/{main.tsx,App.tsx,format.ts,format.test.ts,store.ts,store.test.ts,ws-client.ts,ws-client.test.ts,vite-env.d.ts,index.css}` + `src/i18n/{index,vi,en}.ts` + `index.test.ts` + `src/components/{SimBar,TagTable,DiagnosticsPanel}.tsx` + `e2e/{helpers,e1,e2,e3,e4,e5,perf-scroll}.spec.ts` + `e2e/fixtures/gen-big-project.ts`, `apps/server/src/ws.test.ts` (fix OQ-044: test trỏ `webDistDir` vào thư mục tạm trống — kiểm chứng gate của parent), `docs/STATE.md`, `docs/open-questions.md` (OQ-057…OQ-070 đã ghi từ plan; OQ-062 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `apps/web/e2e/fixtures/big-project/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.4 (so với `develop` @ `4a1181a`): `package.json` (script `vcs` + dep `@vcs/project`), `pnpm-lock.yaml` (commander 15.1.0 + link workspace), `tsconfig.base.json` (path `@vcs/kernel/demo`), `.gitignore` (`bench/project-5000/`), `packages/kernel/package.json` (export `./demo`), `packages/kernel/src/{component,errors,orchestrator,builder,pacer,index}.ts` + `demo/{loopback,extension,index}.ts` + test (`orchestrator`, `builder`, `pacer`, `demo/loopback` test), `packages/test-utils/src/sim.ts` + `index.ts` + `sim.test.ts`, `apps/cli/package.json` (commander 15.1.0), `apps/cli/tsconfig.json`, `apps/cli/src/{index,extensions}.ts`, `apps/cli/src/commands/{index,version,validate,run}.ts` + test, `examples/hello-tags/{vcs.project.yaml,tags/tags.yaml}`, `scripts/gen-bench-project.ts`, `bench/orchestrator.bench.ts`, `docs/STATE.md`, `docs/open-questions.md` (OQ-030/031/032). KHÔNG đẩy `node_modules/`, `bench/results.json`, `bench/project-5000/`, file profile tạm (đã xóa).
@@ -2180,3 +2180,330 @@ Ghi chú đếm: bit logic 8 = G8 (1 test với 3 bộ input) + 7 test chương 
 **SỰ CỐ `.git` bị xóa (2026-11-25 ~09:00, trong phiên triển khai):** subagent chạy `rsync -a --delete …` không exclude `.git`; nguồn `/tmp/vcs-p14` (từ `git archive`, không có `.git`) nên rsync xóa `~/workspace/vcs/.git`. Chỉ `.git` mất — cây làm việc nguyên vẹn (dry-run rsync không còn diff; manifest hash cây ở `~/workspace/vcs-p14-tree-manifest.sha256`, 248 file). **Không thể commit "feat(m1): P1.4 interpreter + SoftPlc" cho tới khi `.git` được khôi phục** (quyết định của parent: true clone có history, vd máy Windows của owner; KHÔNG re-init mù). Từ nay rsync KHÔNG dùng `--delete` (hoặc luôn `--exclude .git`). Bài học: rsync đích có `.git` thì `--delete` mà không exclude `.git` là lệnh phá hoại.
 
 **Việc tiếp theo:** khôi phục `.git` (parent) → commit duy nhất "feat(m1): P1.4 interpreter + SoftPlc" trên `m1/p1.4-interpreter` (kiểm root `package.json` + lockfile không đổi + `user-chat/` không trong commit) → parent xác minh gate độc lập trên bản sao sạch → PR qua cloud browser → CI xanh → merge → P1.5 plan-first (std blocks).
+
+## 20. Kế hoạch P1.5 — System blocks: R_TRIG/F_TRIG, SR/RS, TON/TOF/TP/TONR, CTU/CTD/CTUD (plan-first, 2026-11-25)
+
+**Điểm xuất phát:** P1.4 **đã merge PR #23** (merge commit `ae0bed3`, develop head `ae0bed3` — xác minh qua MCP read, `merged_at` 2026-11-25T03:56:20Z tức 2026-11-25 10:56 +07; CI 10 checks passed). Tổng test hiện tại **1566**. Diagnostic: **42 mã**. PROMPTS P1.5 nguyên văn: "Làm P1.5 theo AGENTS.md §9 (plan-first). Đọc: … → M1 §9, 12.2. Nhiệm vụ: std blocks: R_TRIG/F_TRIG, SR/RS, TON/TOF/TP/TONR, CTU/CTD/CTUD theo sim time của scan. TRƯỚC KHI CODE: tự tính tay bảng timeline cho mỗi loại timer (gồm PT=0, IN dao động, timer không được gọi vài scan) và counter (R/LD ưu tiên, biên). Dùng làm golden. Gate: ≥ 14 golden timer, ≥ 10 golden counter, property test timer (TON ⇔ IN liên tục ≥ PT)."
+
+**Hiểu biết (tóm tắt):** (1) P1.5 là prompt cuối cùng mở khóa chương trình SCL "thật": từ P1.3 mọi chương trình dùng `TON`/`CTU`/`R_TRIG`/… đều dừng ở compile với SCL-U001 (OQ-111), và IR hợp lệ không bao giờ chứa `callSys` tới std block — P1.5 tháo đúng nút thắt đó ở cả ba tầng: typecheck chấp nhận kiểu + lời gọi, lower sinh `callSys`, interpreter chạy handler. (2) Điểm cắm đã có sẵn từ P1.4, không cần phát minh thêm: IR `callSys {fn, instance?, inArgs, outArgs}` (`ir.ts:184`), `SysCallHandler(instance, inArgs, outArgs, nowMs)` + registry `sysCalls` ở `Interpreter` (`interpreter.ts:86,640`), `callSys` không handler → fault `SYS_UNSUPPORTED` (OQ-143) — P1.5 chỉ việc điền registry và nối dây. (3) Một định nghĩa duy nhất cho mỗi block phải phục vụ cả hai phía: typecheck/lower cần interface (tên + kiểu + tham số bắt buộc) và layout instance DB; handler cần offsets các field (cả ẩn) — nguồn sự thật duy nhất đặt ở `runtime-iec/src/std/defs.ts`, `vendor-siemens` import từ `@vcs/runtime-iec` (rule `vendor-siemens-deps` đã cho phép, P1.3 đã import `ir.ts`/`layout.ts` theo đường này). (4) Timer/counter là trạng thái theo **sim time của scan** (`Interpreter.nowMs`, SoftPlc đặt trước mỗi scan, OQ-130): ET có độ phân giải = chu kỳ scan, PT không chia hết chu kỳ thì Q lật ở scan đầu tiên `elapsed ≥ PT` (bảng B2/B3); timer không được gọi vài scan thì trạng thái đóng băng, lần gọi sau dùng `now − _start` thật nên Q có thể lật ngay (M1 §9.3, bảng D). (5) Instance DB của std block = layout §3.5 (public + ẩn) nhưng chỉ field công khai được đọc/ghi từ SCL — field ẩn (`_start`, `_running`, `_prevIn`, `_accum`, `_m`, `_prevCU`…) chiếm byte trong layout nhưng không truy cập được (`"T1"._start` → T005, OQ-163); tiền lệ đã có ở P1.3: `resolveDb` layout cả slot IN_OUT 4 byte rồi lọc khỏi `IrDb.fields` (OQ-125). (6) Counter chỉ làm biến thể **Int** ở P1.5: spec §9.4 nói "biến thể DInt theo tham số kiểu" nhưng không định nghĩa cú pháp SCL nào để chọn (EBNF §4.2 cũng không có) — làm Int, ghi OQ-168, chờ mẫu TIA/S1. (7) X-002/S1 vẫn mở và lần này **liên quan trực tiếp** (VERIFY §14 mục 5–9 đều là ngữ nghĩa std block) nhưng vẫn **không chặn** P1.5 (OQ-179, cùng mẫu OQ-152): làm đúng spec §9, các mục VERIFY ghi `UNVERIFIED` ở semantics §16, S1/PLCSIM sau này chỉ nới lỏng qua SCR. (8) OQ-161 (layout IN_OUT multi-instance lồng) **vẫn mở sau P1.5**: P1.5 chạm `fbInterfaceStruct` (thêm trường hợp std) nhưng không quyết câu hỏi IN_OUT lồng — std block không có IN_OUT nên không bị ảnh hưởng; plan ghim hành vi hiện tại bằng test (bảng P) và để OQ-161 mở (OQ-173).
+
+**Phạm vi (PROMPTS P1.5; M1 §9, §12.2–12.3; AMENDMENTS — không có mục mới áp dụng; M1 §17):**
+
+| File | Nội dung |
+|---|---|
+| `packages/runtime-iec/src/std/defs.ts` | `StdBlockDef` × 11 block (interface + hidden + layout đã tính — bảng O), `STD_BLOCKS`, `getStdBlockDef`, `stdBlockInterface` |
+| `packages/runtime-iec/src/std/handlers.ts` | `createStdSysCalls(): Map<string, SysCallHandler>` + 11 handler (§9.1–9.4) |
+| `packages/runtime-iec/src/std/index.ts` | Export `std/*` |
+| `packages/runtime-iec/src/std/defs.test.ts` | Test defs/layout (bảng O) |
+| `packages/runtime-iec/src/std/handlers.test.ts` | Test handler trực tiếp với `DbStore` tay (không qua SoftPlc) |
+| `packages/runtime-iec/src/softplc-std.test.ts` | Golden scan (bảng A–N) qua SoftPlc + IR tay (`ir-testkit.ts`) |
+| `packages/runtime-iec/src/softplc.ts` | Nối `createStdSysCalls()` mặc định vào `Interpreter` (OQ-170) |
+| `packages/runtime-iec/src/ir-testkit.ts` | Helper test-only: dựng std instance DB + node `callSys` (thêm) |
+| `packages/runtime-iec/src/ir.ts` | Thêm `hidden?: boolean` vào `IrField` (OQ-163) |
+| `packages/runtime-iec/src/index.ts` | Export std defs/handlers |
+| `packages/vendor-siemens/src/scl/typecheck.ts` | Chấp nhận kiểu std + DB std + lời gọi std + member public-only (mục 4 thiết kế) |
+| `packages/vendor-siemens/src/scl/lower.ts` | Hạ lời gọi std (local `#sT(...)` + global `"T1"(...)`) → `callSys` (mục 5) |
+| `packages/vendor-siemens/src/scl/typecheck.test.ts` | Thêm test typecheck std (mục Test) |
+| `packages/vendor-siemens/src/scl/lower.test.ts` | Thêm test lower `callSys` (mục Test) |
+| `packages/vendor-siemens/src/scl/softplc-std.test.ts` | Pipeline SCL thật → IR → SoftPlc (mục Test, P-S1…P-S8) |
+| `docs/semantics.md` | Thêm §16: std blocks, mỗi điểm gắn `VERIFIED`/`UNVERIFIED` (VERIFY §14 mục 5–9) |
+| `docs/STATE.md`, `docs/open-questions.md` | Plan này (§20) + OQ-162…181 |
+
+**Thiết kế nhỏ nhất (từng mục — signature chính xác, chỗ KHÔNG làm):**
+
+1. **`std/defs.ts` — một định nghĩa duy nhất cho mỗi block (OQ-162).** Layout tính bằng `layoutStruct` (§3.4) **một lần lúc nạp module** trên danh sách field đầy đủ (public + ẩn, theo thứ tự interface: input + output + static-ẩn); kết quả là bảng offset dùng chung cho typecheck (size + public fields) và handler (mọi offset). Không tính layout lại lúc chạy scan.
+```ts
+export interface StdFieldDecl { name: string; type: PrimitiveType; hidden?: boolean; init?: number | boolean; }
+export interface StdBlockDef {
+  name: 'TON' | 'TOF' | 'TP' | 'TONR' | 'CTU' | 'CTD' | 'CTUD' | 'SR' | 'RS' | 'R_TRIG' | 'F_TRIG';
+  kind: 'edge' | 'bistable' | 'timer' | 'counter';
+  input: StdFieldDecl[]; output: StdFieldDecl[]; hidden: StdFieldDecl[];
+  /** Toàn bộ field (input + output + hidden) kèm offset đã tính — bảng O. */
+  layout: IrField[]; size: number;
+}
+export declare const STD_BLOCKS: ReadonlyMap<string, StdBlockDef>;
+export function getStdBlockDef(name: string): StdBlockDef | undefined; // name không phân biệt hoa/thường
+export function stdBlockInterface(name: string): IrInterface | undefined; // input/output/temp rỗng, R/LD mang init=false
+```
+Định nghĩa interface (theo M1 §9; `init: false` = tham số tùy chọn theo luật `hasInit` sẵn có của `checkCallArgs` — OQ-181):
+| Block | Input (bắt buộc, trừ ghi chú) | Output | Hidden |
+|---|---|---|---|
+| R_TRIG | `CLK: Bool` | `Q: Bool` | `_m: Bool` |
+| F_TRIG | `CLK: Bool` | `Q: Bool` | `_m: Bool` |
+| SR | `S1: Bool`, `R: Bool` | `Q1: Bool` | — |
+| RS | `S: Bool`, `R1: Bool` | `Q1: Bool` | — |
+| TON | `IN: Bool`, `PT: Time` | `Q: Bool`, `ET: Time` | `_start: DInt`, `_running: Bool`, `_prevIn: Bool` |
+| TOF | `IN: Bool`, `PT: Time` | `Q: Bool`, `ET: Time` | `_start: DInt`, `_running: Bool`, `_prevIn: Bool` |
+| TP | `IN: Bool`, `PT: Time` | `Q: Bool`, `ET: Time` | `_start: DInt`, `_running: Bool`, `_prevIn: Bool` |
+| TONR | `IN: Bool`, `R: Bool` (tùy chọn), `PT: Time` | `Q: Bool`, `ET: Time` | `_start: DInt`, `_running: Bool`, `_prevIn: Bool`, `_accum: DInt` |
+| CTU | `CU: Bool`, `R: Bool` (tùy chọn), `PV: Int` | `QU: Bool`, `CV: Int` | `_prevCU: Bool` |
+| CTD | `CD: Bool`, `LD: Bool` (tùy chọn), `PV: Int` | `QD: Bool`, `CV: Int` | `_prevCD: Bool` |
+| CTUD | `CU: Bool`, `CD: Bool`, `R: Bool` (tùy chọn), `LD: Bool` (tùy chọn), `PV: Int` | `QU: Bool`, `QD: Bool`, `CV: Int` | `_prevCU: Bool`, `_prevCD: Bool` |
+Quy tắc ghim: `_prevIn` có mặt ở cả 4 timer dù TON/TONR không đọc nó — thống nhất một bộ hidden theo dòng "Nội bộ: `_start`, `_running`, `_prevIn`" ở M1 §9.3, và nhờ Bool packing nó **không tốn thêm byte** nào (chung byte 16 với `_running`, bảng O); TONR thêm `_accum`. Counter **chỉ Int** (OQ-168 — không có biến thể DInt ở P1.5). Không có block nào có IN_OUT.
+
+2. **`std/handlers.ts` — 11 handler thuần theo `SysCallHandler` (P1.4).** Mỗi handler nhận `instance: DbView | undefined` (undefined → throw `Error` ồn ào — typecheck bảo đảm mọi lời gọi std đều có instance, tới đây mà thiếu là lỗi nội bộ), đọc inArgs đã tính sẵn, đọc/ghi field qua `instance.store` + offset trong `def.layout` + `instance.base` (không qua `instance.fields` — field ẩn không có trong đó), ghi output ra DB trước rồi ghi tiếp các out-arg `Ref` nếu có (OQ-175). Không cấp phát ngoài việc đọc/ghi trực tiếp (không `Map`, không mảng mới trong handler — Map inArgs/outArgs do closure `callSys` của P1.4 cấp phát, xem Rủi ro (3)). `nowMs` = sim ms của scan hiện tại (SoftPlc đặt `interpreter.nowMs` trước mỗi scan, OQ-130). `PT` hiệu dụng `PT' = max(PT, 0)` (OQ-172 — PT âm xử như 0, ET không bao giờ âm).
+```ts
+export function createStdSysCalls(): Map<string, SysCallHandler>; // đủ 11 tên, key hoa ('TON', …)
+```
+Ngữ nghĩa từng handler (M1 §9; `elapsed = nowMs − _start`, mọi phép tính Time là số nguyên ms):
+- **R_TRIG:** `Q = CLK AND NOT _m; _m = CLK` (đọc CLK từ inArgs; `_m` khởi tạo false ở DB init — OQ-164).
+- **F_TRIG:** `Q = NOT CLK AND _m; _m = CLK`.
+- **SR:** `Q1 = S1 OR (Q1 AND NOT R)` (đọc Q1 cũ từ DB, ghi lại — không hidden).
+- **RS:** `Q1 = NOT R1 AND (S OR Q1)`.
+- **TON:** `PT' ≤ 0` → `Q = IN; ET = 0; _running = false` (không chạm `_start`). Ngược lại: `IN` false → `Q=false; ET=0; _running=false`. `IN` true và `_running` false → `_start=now; _running=true`. `_running` → `ET=min(now−_start, PT'); Q=(now−_start) ≥ PT'`.
+- **TOF:** `IN` true → `Q=true; ET=0; _running=false`. `IN` false và `_prevIn` true → `_start=now; _running=true`. `_running` → `ET=min(now−_start, PT'); nếu (now−_start) ≥ PT' thì Q=false; _running=false` (ET giữ = PT' cho tới khi IN lên lại). Cuối mọi lần gọi: `_prevIn = IN`. `PT' ≤ 0`: cạnh xuống → Q=false ngay trong scan đó, ET=0 (cùng công thức với PT'=0).
+- **TP:** cạnh lên (`IN` true và `_prevIn` false) và `_running` false → `_start=now; _running=true`. `_running` → `ET=min(now−_start, PT'); Q=(now−_start) < PT'`; khi `(now−_start) ≥ PT'` → `_running=false` (Q=false). Không `_running` và `IN` false → `ET=0` (xung đã kết thúc + IN false — OQ-165: khi xung kết thúc mà IN vẫn true thì ET giữ = PT', Q=false, không kích lại cho tới khi IN xuống rồi lên). Cuối mọi lần gọi: `_prevIn = IN`. `PT' ≤ 0`: cạnh lên → Q=false ngay (xung độ dài 0), ET=0.
+- **TONR:** `R` true → `ET=0; Q=false; _accum=0; _running=false` (R thắng IN cùng scan — OQ-166). Ngược lại: `IN` true và `_running` false → `_start=now; _running=true`; `IN` true → `ET=_accum+(now−_start); Q=ET ≥ PT'`; `IN` false và `_running` → `_accum=_accum+(now−_start); _running=false; ET=_accum; Q=ET ≥ PT'`. `PT' ≤ 0` → `Q=IN; ET=0; _accum=0; _running=false` (OQ-166).
+- **CTU:** `R` true → `CV=0`. Ngược lại: cạnh lên CU (`CU` true và `_prevCU` false): nếu `CV < 32767` thì `CV+=1`. `QU = CV ≥ PV`. Cuối mọi lần gọi: `_prevCU = CU`. (R thắng đếm cùng scan; kẹp max, không wrap, không fault — OQ-167/177.)
+- **CTD:** `LD` true → `CV=PV`. Ngược lại: cạnh lên CD: nếu `CV > −32768` thì `CV−=1`. `QD = CV ≤ 0`. Cuối: `_prevCD = CD`. (LD thắng đếm cùng scan.)
+- **CTUD:** `R` true → `CV=0`. Ngược lại `LD` true → `CV=PV`. Ngược lại: cạnh lên CU → nếu `CV < 32767` thì `CV+=1`; cạnh lên CD → nếu `CV > −32768` thì `CV−=1` (cả hai cùng cạnh → tăng rồi giảm = giữ nguyên — OQ-167). `QU = CV ≥ PV; QD = CV ≤ 0`. Cuối: `_prevCU = CU; _prevCD = CD`. Thứ tự ưu tiên: **R > LD > đếm**.
+
+3. **Nối dây ở `SoftPlc` (OQ-170).** `SoftPlc` giữ một `#sysCalls = createStdSysCalls()` duy nhất và truyền vào **cả hai** chỗ dựng `Interpreter` (field initializer `softplc.ts:273` + `load()` `softplc.ts:745` — P1.4 cả hai đều không truyền `sysCalls`). `SoftPlcConfig` thêm `sysCalls?: Map<string, SysCallHandler>` tùy chọn: nếu caller truyền thì **thay thế** map mặc định (điểm nối cho test + cho P5 adapter ngoài nếu cần); không truyền → std đầy đủ. `Interpreter` không đổi (opts.sysCalls rỗng vẫn = không handler → SYS_UNSUPPORTED, giữ nguyên để test đường fault OQ-143).
+
+4. **Typecheck (`vendor-siemens/src/scl/typecheck.ts`) — tháo SCL-U001 đúng 4 chỗ, không viết lại checker:**
+   - `resolveTypeNode` (`named`): tên thuộc `SYSTEM_FB_NAMES` → trả `{ type: { kind: 'struct', fields: def.layout }, fbType: name }` (struct layout **đầy đủ gồm hidden** — dùng cho layout lồng, mục 6) thay vì U001 (dòng ~848). Kiểu std chỉ chấp nhận ở **VAR (static) + DATA_BLOCK**; ở VAR_TEMP → T004 (TEMP reset mỗi lần gọi nên timer/counter vô nghĩa — lỗi ồn ào thay vì chạy sai im lặng), ở vị trí kiểu khác (FC return, phần tử mảng, VAR_INPUT của FB người dùng) → T004 (OQ-171).
+   - `resolveDb`: `block.fbName` thuộc `SYSTEM_FB_NAMES` → không gọi `findBlock` (sẽ T001 sai); dựng `IrDb` từ def: layout trên toàn bộ field (public + hidden) qua `layoutIrFields`, `fields` = chỉ field public (lọc hidden như tiền lệ lọc IN_OUT ở OQ-125), `size` = `laid.size` (gồm hidden), `fbName` = tên std (giữ nguyên — lower phân biệt bằng `SYSTEM_FB_NAMES`). DB STRUCT thường vẫn từ chối instance FB (quy tắc cũ, không đổi).
+   - Lời gọi: đường local (`#sT(...)`, ~2147) và global (`"T1"(...)`, ~2205) — khi `sym.fbType` / `db.fbName` là tên std: `iface = stdBlockInterface(name)`, `checkCallArgs({ kind: 'FB', name, iface }, …)` **tái dùng nguyên xi** (luật `hasInit` sẵn có → R/LD tùy chọn, các input khác bắt buộc; namedOut `=>` cho phép vì kind 'FB' không rơi nhánh OQ-127 của FC; positional → T004 như FB thường, OQ-100). **Không** `recordEdge` cho lời gọi std (std là lá, không đệ quy — `callSys` không có trong call graph, xem comment ~2307). Lời gọi tên std **không có instance** (ident trần `TON(...)`, ~1518/~2261) → vẫn U001? Không — đổi thành T004 "gọi system block cần instance (#tOn hoặc \"T1\")" (cùng thông điệp như FB thường, ~2229) vì đây là lỗi dùng sai, không phải "chưa hỗ trợ". Lời gọi std trong **biểu thức** (`TON(...)` ở `checkCallExpr`, ~1518) → T004 (statement-only, OQ-175; lower không có đường callSys trong biểu thức).
+   - Member: `"T1".Q` / `#sT.ET` / `"C1".CV` phân giải qua field public của def; truy cập field ẩn (`"T1"._start`, `#sT._prevIn`) → **SCL-T005** "không tìm thấy field" (nhờ `IrField.hidden`, OQ-163 — kiểm tra ở mọi cấp, cả lồng trong struct cha). Đọc output std qua DB field là đường chính để quan sát Q/ET/QU/CV trong OB (không cần out-arg).
+   - `lookupInterface(name)`: tên std → trả `stdBlockInterface(name)` (dùng chung cho local/global/ctx; không duplicate bảng interface ở vendor-siemens — OQ-162).
+
+5. **Lower (`vendor-siemens/src/scl/lower.ts`) — sinh `callSys`, không đổi `callFb`/`callFc`:**
+   - `lowerCallStmt` nhánh local (`#sT(...)`, ~580): nếu `sym.fbType` thuộc `SYSTEM_FB_NAMES` → `{ op: 'callSys', fn: fbType, instance: { k: 'local', name }, inArgs, outArgs }` (tách args bằng `lowerFbArgs` hiện có với iface std — inArgs `:=`, outArgs `=>`; inoutArgs gặp phải → throw nội bộ vì typecheck đã chặn T004).
+   - Nhánh global (`"T1"(...)`, ~600): nếu `db.fbName` thuộc `SYSTEM_FB_NAMES` → `{ op: 'callSys', fn: db.fbName, instance: { k: 'dbField', db: callee.name, path: [] }, inArgs, outArgs }`. Các nhánh còn lại không đổi. `callSys` không có trong call graph / không sinh cạnh S020 (đã đúng từ P1.3).
+   - `ir.ts`: `IrField` thêm `hidden?: boolean` (tùy chọn, JSON-serializable; chỉ field ẩn của std mới đặt). Không đổi shape `callSys` (đã đủ: fn/instance/inArgs/outArgs). **Ràng buộc:** golden IR JSON hiện có không đổi (không field nào cũ có `hidden`; `irToJson` chỉ thêm key khi field có giá trị — kiểm bằng diff trước khi commit).
+
+6. **Multi-instance + OQ-161 (OQ-173).** FB con kiểu std trong `VAR` (static) của FB cha: `fbInterfaceStruct` đã nối `iface.static` vào layout cha — field kiểu std mang struct layout đầy đủ (public + hidden) nên vùng con có đúng size/offset (bảng P); lời gọi `#tOn(...)` trong cha resolve instance qua `frame.instance` + path như FB con thường (P1.4 `resolveInstance`/`walkView` đã hỗ trợ struct lồng). **OQ-161 vẫn mở:** nó hỏi về IN_OUT của FB *người dùng* lồng (slot 4 byte hay kích thước tự nhiên) — P1.5 không đụng tới (std không có IN_OUT); plan ghim hành vi hiện tại (IN_OUT lồng = kích thước tự nhiên, bảng P: `sub.io` Int @34, tổng size 38; nếu OQ-161 sau này quyết slot 4 byte thì bảng P đổi thành 40 kèm SCR) và **không** coi đó là quyết định OQ-161.
+
+7. **Snapshot/restore (OQ-180): không thêm code.** Trạng thái std (kể cả hidden) nằm trong byte của instance DB → `snapshot()`/`restore()` hiện có đã bao trọn; timer sau restore tiếp tục với `_start`/`_accum` đã lưu và đồng hồ đã restore nên `elapsed` nhất quán (không trôi). Một golden ghim: snapshot giữa TON đang chạy → chạy 3 scan → restore → chạy 3 scan → trace Q/ET/scanCount giống hệt.
+
+8. **`docs/semantics.md` §16** — std blocks: mỗi khối ghi ngữ nghĩa + `VERIFIED`/`UNVERIFIED`; các mục VERIFY §14.5 (TON PT=0/dao động/không gọi), §14.6 (TP IN giữ), §14.7 (TOF retrigger), §14.8 (counter biên/ưu tiên), §14.9 (R_TRIG scan đầu) ghi `UNVERIFIED` chờ PLCSIM/S1; OQ-162…181 dẫn chiếu. OQ-111 (U001) đóng ở P1.5 (đã áp dụng); `semantics.md` dòng OQ-111 cập nhật "đã hỗ trợ từ P1.5".
+
+**Đã loại:** (1) Biến thể counter DInt (OQ-168). (2) Tối ưu cấp phát `callSys` (xem Rủi ro (3) — P1.7). (3) Golden runner YAML + port ví dụ §12.1 `ton_basic_3s` sang YAML (P1.7; P1.5 dùng bảng TS + `expectedFrom: 'spec'`, OQ-174). (4) LAD (P1.6). (5) Demo `motor-interlock` / CLI / Watch / bench M1 §12.4 (P1.7). (6) Mã diagnostic mới — std dùng mã sẵn có (T004/T005/U001 đã đổi vai trò, SYS_UNSUPPORTED đã có); `docs/diagnostics.md` **không đổi** (42 mã, `--check` khớp). (7) ADR mới — std blocks là thực thi spec §9, không phải quyết định kiến trúc mới. (8) Sửa EBNF §4.2 / M1 §9. (9) Đổi `.dependency-cruiser.cjs` / `eslint.config.js` / `vitest.config.ts` / `packages/kernel` / `packages/schemas` / `apps/*` / `examples/` — không cần (rule dep đã cho phép vendor-siemens → runtime-iec; lint CORE_FILES đã bao runtime-iec; ngưỡng coverage 85 đã có cho cả hai package).
+
+**Bảng tính tay (tự tính, không sao chép từ implementation — dùng làm golden):**
+
+Quy ước chung: `scanPeriodMs = stepMs` (mỗi step = đúng 1 scan); scan tại `t = period, 2·period, …` (OQ-130 — scan đầu tại `t = period`, không phải 0). Cột input = giá trị tag trước step tạo ra scan đó (đặt qua TagDB/`write` trước step); cột output = giá trị sau scan đó (đọc qua `read("T1".Q)` / `read("T1".ET)` / …). Timer: period 100. Edge/bistable/counter: period 10. `ET`/`PT` tính bằng ms nguyên.
+
+**Bảng A — TON cơ bản (PT=3000):** OB1: `"T1"(IN := %M0.0, PT := T#3s);` (đọc Q/ET qua `"T1".Q` / `"T1".ET`).
+
+| Scan t | %M0.0 (IN) | ET | Q | Ghi chú |
+|---|---|---|---|---|
+| 100 | FALSE | 0 | FALSE | chưa lên |
+| 200 | TRUE | 0 | FALSE | cạnh lên: `_start=200` |
+| 300 | TRUE | 100 | FALSE | |
+| 1100 | TRUE | 900 | FALSE | |
+| 3100 | TRUE | 2900 | FALSE | |
+| 3200 | TRUE | 3000 | TRUE | `elapsed=3000 ≥ PT` |
+| 3300 | TRUE | 3000 | TRUE | ET kẹp ở PT |
+| 3400 | FALSE | 0 | FALSE | IN xuống → reset |
+
+**Bảng B — TON PT biên:**
+| # | PT | Diễn biến | Kỳ vọng |
+|---|---|---|---|
+| B1 | `T#0s` | t=100 IN=F; t=200 IN=T; t=300 IN=T; t=400 IN=F | (F,0,F) → (T,0,T) → (T,0,T) → (F,0,F): `Q=IN` ngay, ET=0 |
+| B2 | `T#50ms` (không chia hết chu kỳ 100) | t=100 IN=F; t=200 IN=T (cạnh lên); t=300 IN=T | (F,0,F) → (T,0,F) → (T,50,T): Q lật ở scan đầu `elapsed ≥ PT`, ET kẹp 50 |
+| B3 | `T#250ms` | t=200 IN=T; t=300; t=400; t=500 | ET 0 → 100 → 200 → 250; Q F,F,F,T (`elapsed=300 ≥ 250` ở t=500) |
+
+**Bảng C — TON IN dao động (PT=1000):** IN: TRUE t=200, FALSE t=500, TRUE t=700.
+
+| Scan t | IN | ET | Q | Ghi chú |
+|---|---|---|---|---|
+| 200 | TRUE | 0 | FALSE | cạnh lên `_start=200` |
+| 400 | TRUE | 200 | FALSE | |
+| 500 | FALSE | 0 | FALSE | IN xuống → reset, đếm lại từ đầu |
+| 700 | TRUE | 0 | FALSE | cạnh lên `_start=700` |
+| 1600 | TRUE | 900 | FALSE | |
+| 1700 | TRUE | 1000 | TRUE | `elapsed=1000 ≥ PT` |
+
+**Bảng D — TON không được gọi vài scan (PT=2000):** OB1: `IF %M0.1 THEN "T1"(IN := %M0.0, PT := T#2s); END_IF;` (%M1.0 := "T1".Q ngoài IF). %M0.0=TRUE từ t=200; %M0.1=TRUE trừ các scan 300…1500 (FALSE).
+
+| Scan t | Gọi? | ET | Q | Ghi chú |
+|---|---|---|---|---|
+| 200 | có | 0 | FALSE | cạnh lên `_start=200` |
+| 300…1500 | không | 0 | FALSE | đóng băng ở giá trị lần gọi cuối (ET=0) |
+| 1600 | có | 1400 | FALSE | "nhảy": `1600−200=1400` (timestamp, không phải 100) |
+| 2200 | có | 2000 | TRUE | `elapsed=2000 ≥ PT` |
+
+**Bảng E — TOF cơ bản (PT=2000):** IN TRUE từ đầu, FALSE từ t=500.
+
+| Scan t | IN | ET | Q | Ghi chú |
+|---|---|---|---|---|
+| 100 | TRUE | 0 | TRUE | IN true → Q=true, ET=0 |
+| 500 | FALSE | 0 | TRUE | cạnh xuống: `_start=500` |
+| 1500 | FALSE | 1000 | TRUE | đang đếm xuống |
+| 2400 | FALSE | 1900 | TRUE | |
+| 2500 | FALSE | 2000 | FALSE | `elapsed=2000 ≥ PT` → Q=false, ET giữ 2000 |
+| 2600 | FALSE | 2000 | FALSE | ET giữ = PT cho tới khi IN lên lại |
+| 3000 | TRUE | 0 | TRUE | IN lên → Q=true, ET=0 |
+
+**Bảng F — TOF retrigger (PT=2000):** IN: TRUE, FALSE t=500, TRUE t=1500 (đang đếm), FALSE t=2000.
+
+| Scan t | IN | ET | Q | Ghi chú |
+|---|---|---|---|---|
+| 500 | FALSE | 0 | TRUE | cạnh xuống `_start=500` |
+| 1400 | FALSE | 900 | TRUE | |
+| 1500 | TRUE | 0 | TRUE | IN lên giữa chừng → hủy đếm, ET=0 |
+| 2000 | FALSE | 0 | TRUE | cạnh xuống mới `_start=2000` |
+| 4000 | FALSE | 2000 | FALSE | đếm mới đủ PT |
+
+**Bảng G — TP cơ bản (PT=1000):** IN TRUE t=200, giữ TRUE, FALSE t=1500, TRUE t=1600.
+
+| Scan t | IN | ET | Q | Ghi chú |
+|---|---|---|---|---|
+| 200 | TRUE | 0 | TRUE | cạnh lên `_start=200` |
+| 1100 | TRUE | 900 | TRUE | |
+| 1200 | TRUE | 1000 | FALSE | `elapsed=1000` → hết xung, `_running=false` |
+| 1300 | TRUE | 1000 | FALSE | IN vẫn true: **không** kích lại, ET giữ 1000 (OQ-165) |
+| 1500 | FALSE | 0 | FALSE | xung đã hết + IN false → ET=0 |
+| 1600 | TRUE | 0 | TRUE | cạnh lên mới → xung mới |
+| 2600 | TRUE | 1000 | FALSE | hết xung thứ hai |
+
+**Bảng H — TP cạnh lên trong lúc phát xung bị bỏ qua (PT=1000):** IN TRUE t=200, FALSE t=400, TRUE t=600.
+| Scan t | IN | ET | Q | Ghi chú |
+|---|---|---|---|---|
+| 200 | TRUE | 0 | TRUE | cạnh lên `_start=200` |
+| 400 | FALSE | 200 | TRUE | xung vẫn chạy dù IN đã xuống |
+| 600 | TRUE | 400 | TRUE | cạnh lên trong xung → bỏ qua, `_start` vẫn 200 |
+| 1200 | TRUE | 1000 | FALSE | xung kết thúc đúng t=1200 (không phải 1600) — chứng minh không retrigger |
+Biến thể H2 (IN xuống t=400 và giữ FALSE): t=1200 → Q=FALSE, **ET=0** (xung kết thúc + IN false → ET=0, khác H1 giữ 1000).
+
+**Bảng I — TONR (PT=1000):** cột (IN, R, ET, Q).
+| Scan t | IN | R | ET | Q | Ghi chú |
+|---|---|---|---|---|---|
+| 200 | TRUE | FALSE | 0 | FALSE | cạnh lên `_start=200` |
+| 600 | TRUE | FALSE | 400 | FALSE | |
+| 700 | FALSE | FALSE | 500 | FALSE | IN xuống: `_accum=500`, `_running=false` |
+| 1200 | TRUE | FALSE | 500 | FALSE | cạnh lên `_start=1200`, ET=`_accum+0` |
+| 1700 | TRUE | FALSE | 1000 | TRUE | `500+500 ≥ PT` |
+| 2000 | TRUE | TRUE | 0 | FALSE | R thắng IN: ET=0, `_accum=0` |
+| 2100 | TRUE | FALSE | 0 | FALSE | cạnh lên lại sau reset |
+Biến thể I3 (TONR PT=0): (IN=T → Q=TRUE, ET=0), (IN=F → Q=FALSE, ET=0), `_accum` giữ 0 suốt (OQ-166).
+
+**Bảng J — R_TRIG / F_TRIG (period 10):** CLK: F,F,T,T,F,T,F ở t=10…70.
+
+| Scan t | CLK | R_TRIG Q | F_TRIG Q | Ghi chú |
+|---|---|---|---|---|
+| 10 | FALSE | FALSE | FALSE | `_m=false` |
+| 20 | FALSE | FALSE | FALSE | |
+| 30 | TRUE | TRUE | FALSE | R: cạnh lên; F: `NOT CLK` |
+| 40 | TRUE | FALSE | FALSE | |
+| 50 | FALSE | FALSE | TRUE | F: cạnh xuống |
+| 60 | TRUE | TRUE | FALSE | |
+| 70 | FALSE | FALSE | TRUE | |
+J3 (scan đầu sau load, CLK=TRUE ở t=10): R_TRIG Q=**TRUE** (`_m` khởi tạo false), F_TRIG Q=**FALSE**. J5 (STOP→RUN giữ `_m`): chạy t=10 CLK=TRUE → `_m=TRUE`; `stop()`; `start()`; scan CLK=TRUE → R_TRIG Q=**FALSE** (OQ-164, VERIFY §14.9).
+
+**Bảng K — SR / RS (period 10):**
+| Scan t | SR (S1,R) → Q1 | RS (S,R1) → Q1 | Ghi chú |
+|---|---|---|---|
+| 10 | (0,0) → 0 | (0,0) → 0 | Q1 init 0 |
+| 20 | (1,0) → 1 | (1,0) → 1 | set |
+| 30 | (0,0) → 1 | (0,0) → 1 | giữ |
+| 40 | (0,1) → 0 | (0,1) → 0 | reset |
+| 50 | (1,1) → **1** | (1,1) → **0** | cả hai true: SR set-dominant, RS reset-dominant |
+| 60 | (0,1) → 0 | (1,0) → 1 | |
+K3: SR và RS trong cùng OB, cùng cặp (S=1,R=1) một scan → SR Q1=1, RS Q1=0 (đối chiếu dominance trong cùng scan).
+
+**Bảng L — CTU (PV=3, period 10):** cột (CU, R, CV, QU).
+| Scan t | CU | R | CV | QU | Ghi chú |
+|---|---|---|---|---|---|
+| 10 | FALSE | FALSE | 0 | FALSE | |
+| 20 | TRUE | FALSE | 1 | FALSE | cạnh lên CU |
+| 40 | TRUE | FALSE | 2 | FALSE | cạnh lên lần 2 (CU đã xuống ở t=30) |
+| 50 | TRUE | FALSE | 2 | FALSE | CU giữ — không cạnh, không đếm |
+| 70 | TRUE | FALSE | 3 | TRUE | `CV ≥ PV` |
+| 90 | TRUE | TRUE | 0 | FALSE | R thắng đếm cùng scan |
+| 100 | TRUE | FALSE | 0 | FALSE | CU giữ (`_prevCU=TRUE`) — không đếm lại |
+| 120 | TRUE | FALSE | 1 | FALSE | cạnh lên mới (CU đã xuống ở t=110) |
+L3 (biên max): ghi `"C1".CV := 32767` trước scan, CU cạnh lên → CV giữ **32767** (kẹp, không wrap), QU=TRUE; R=TRUE scan sau → CV=0.
+
+**Bảng M — CTD (PV=3, period 10):** cột (CD, LD, CV, QD).
+| Scan t | CD | LD | CV | QD | Ghi chú |
+|---|---|---|---|---|---|
+| 10 | FALSE | FALSE | 0 | TRUE | `CV ≤ 0` |
+| 20 | FALSE | TRUE | 3 | FALSE | LD nạp PV |
+| 40 | TRUE | FALSE | 2 | FALSE | cạnh lên CD |
+| 70 | TRUE | FALSE | 1 | FALSE | cạnh lên lần 2 |
+| 90 | TRUE | FALSE | 0 | TRUE | `CV ≤ 0` |
+| 100 | FALSE | TRUE | 3 | FALSE | LD nạp lại |
+| 110 | TRUE | TRUE | 3 | FALSE | LD thắng đếm cùng scan (không xuống 2) |
+M3 (biên min): ghi `"C1".CV := −32768` trước scan, CD cạnh lên → CV giữ **−32768**, QD=TRUE.
+
+**Bảng N — CTUD (PV=5, period 10):** cột (CU, CD, R, LD, CV, QU, QD).
+| Scan t | CU | CD | R | LD | CV | QU | QD | Ghi chú |
+|---|---|---|---|---|---|---|---|---|
+| 10 | F | F | F | F | 0 | FALSE | TRUE | init |
+| 20 | F | F | F | T | 5 | TRUE | FALSE | LD nạp PV |
+| 30 | T | F | F | F | 6 | TRUE | FALSE | CU lên |
+| 50 | F | T | F | F | 5 | TRUE | FALSE | CD lên |
+| 60 | T | T | F | F | 5 | TRUE | FALSE | cả hai cùng cạnh → tăng rồi giảm = giữ nguyên |
+| 80 | T | F | T | F | 0 | FALSE | TRUE | R cao nhất (không đếm dù CU lên) |
+| 90 | F | F | T | T | 0 | FALSE | TRUE | R thắng LD |
+| 100 | F | F | F | T | 5 | TRUE | FALSE | LD (R false) |
+| 110 | T | F | F | F | 6 | TRUE | FALSE | CU lên |
+N4 (PV=0): CV=0 → QU=**TRUE** (`0 ≥ 0`) và QD=**TRUE** (`0 ≤ 0`) cùng lúc; CU cạnh lên → CV=1, QU=TRUE, QD=FALSE.
+
+**Bảng O — layout instance DB std block (§3.4; Bool gói theo bit, ≥2 byte bắt đầu ở offset chẵn, tổng làm tròn lên chẵn):**
+
+| Block | Fields (offset) | Size |
+|---|---|---|
+| R_TRIG | `CLK@0.0`, `Q@0.1`, `_m@0.2` | 2 |
+| F_TRIG | `CLK@0.0`, `Q@0.1`, `_m@0.2` | 2 |
+| SR | `S1@0.0`, `R@0.1`, `Q1@0.2` | 2 |
+| RS | `S@0.0`, `R1@0.1`, `Q1@0.2` | 2 |
+| TON | `IN@0.0`, `PT@2`, `Q@6.0`, `ET@8`, `_start@12`, `_running@16.0`, `_prevIn@16.1` | 18 |
+| TOF | như TON | 18 |
+| TP | như TON | 18 |
+| TONR | `IN@0.0`, `R@0.1`, `PT@2`, `Q@6.0`, `ET@8`, `_start@12`, `_running@16.0`, `_prevIn@16.1`, `_accum@18` | 22 |
+| CTU | `CU@0.0`, `R@0.1`, `PV@2`, `QU@4.0`, `CV@6`, `_prevCU@8.0` | 10 |
+| CTD | `CD@0.0`, `LD@0.1`, `PV@2`, `QD@4.0`, `CV@6`, `_prevCD@8.0` | 10 |
+| CTUD | `CU@0.0`, `CD@0.1`, `R@0.2`, `LD@0.3`, `PV@2`, `QU@4.0`, `QD@4.1`, `CV@6`, `_prevCU@8.0`, `_prevCD@8.1` | 10 |
+Ví dụ tính tay (TON): IN Bool byte 0 bit 0; PT Time (4 byte) cần offset chẵn → 2..5; Q Bool byte 6 bit 0; ET Time → offset chẵn 8..11; `_start` DInt → 12..15; `_running`/`_prevIn` Bool gói chung byte 16 (bit 0/1); tổng 17 byte → làm tròn chẵn = **18**. Nếu `layoutStruct` tính khác bảng này → đó là bug (của layout hoặc của bảng), báo và sửa theo §3.4 — **không** sửa bảng cho khớp code (AGENTS §6).
+
+**Bảng P — multi-instance lồng (OQ-161, ghim hành vi hiện tại):** FB `FB_Motor` (VAR_INPUT `iStart: Bool`; VAR_OUTPUT `qRun: Bool`; VAR `tOn: TON; cCount: CTU; sub: FB_Sub;`) với `FB_Sub` (VAR_INPUT `a: Int`; VAR_OUTPUT `q: Bool`; VAR_IN_OUT `io: Int`; VAR `s: Bool`). Layout DB top-level của `FB_Motor` (resolveDb §3.5: input + output + IN_OUT-slot + static, theo thứ tự khai báo):
+
+| Vùng | Offset tuyệt đối | Ghi chú |
+|---|---|---|
+| `iStart` | `0.0` | Bool |
+| `qRun` | `0.1` | Bool (gói chung byte 0) |
+| `tOn` (TON, size 18) | `2..19` | struct bắt đầu ở offset chẵn; trong vùng: `IN@+0.0`, `PT@+2`, `Q@+6.0`, `ET@+8`, `_start@+12`, `_running@+16.0`, `_prevIn@+16.1` |
+| `cCount` (CTU, size 10) | `20..29` | trong vùng: `CU@+0.0`, `R@+0.1`, `PV@+2`, `QU@+4.0`, `CV@+6`, `_prevCU@+8.0` |
+| `sub` (FB_Sub, size 8) | `30..37` | trong vùng (theo `fbInterfaceStruct` hiện tại — IN_OUT kích thước tự nhiên): `a@+0`, `q@+2.0`, `io@+4`, `s@+6.0` |
+| **Tổng size** | **38** | chẵn |
+Nếu OQ-161 sau này quyết IN_OUT lồng cũng là slot DInt 4 byte: `sub.io` thành slot `@+4..7`, `s@+8.0`, sub size 10, **tổng 40** — test bảng P lúc đó đổi kỳ vọng kèm SCR (không phải sửa lén).
+
+**Test (mục tiêu: ≥ 80 test mới; tổng ≥ 1646 = 1566 + 80):**
+
+| Nhóm | File | Test mới (tên + kỳ vọng) |
+|---|---|---|
+| defs/layout (~13) | `packages/runtime-iec/src/std/defs.test.ts` | Bảng O: mỗi block 1 test deep-equal `def.layout` (tên/kiểu/offset/bit/size) + `size` (11 test); `stdBlockInterface('TON')` trả input/output đúng + `R`/`LD` mang `init: false` (1); `getStdBlockDef('nope')` → `undefined` (1) |
+| handler unit (~24) | `packages/runtime-iec/src/std/handlers.test.ts` | Gọi handler trực tiếp với `DbStore` tay + `nowMs` cho trước (không qua SoftPlc): TON 4 (cơ bản, PT=0, PT=50 kẹp ET, IN xuống reset), TOF 3 (cơ bản, retrigger, PT=0), TP 3 (cơ bản, cạnh lên trong xung bỏ qua, xung hết + IN false → ET=0), TONR 2 (tích lũy + R reset, PT=0), edge 2 (R_TRIG/F_TRIG pattern 7 scan), bistable 2 (SR/RS truth + cả hai true), CTU 3 (đếm + QU, R thắng đếm, kẹp max), CTD 2 (LD + đếm xuống, kẹp min), CTUD 3 (cả hai cạnh cùng lúc, R>LD, QU/QD) |
+| typecheck/lower (~15) | `packages/vendor-siemens/src/scl/typecheck.test.ts` + `lower.test.ts` (thêm) | `VAR sT : TON` chấp nhận (hết U001); `DATA_BLOCK "T1" TON` → IrDb đúng bảng O; thiếu PT → T004; arg không tồn tại → T004; out-arg `Q => %M1.0` chấp nhận; arg IN_OUT cho std → T004; std trong biểu thức → T004; std làm kiểu trả FC → T004; std trong VAR_TEMP → T004; `"T1"._start` → T005; `"T1".Q` kiểu Bool / `"T1".ET` kiểu Time; CTU `PV`/`CV` kiểu Int (không có DInt); CTU không truyền `R` vẫn chấp nhận (init FALSE); lower: `#tOn(...)` → `callSys` local; `"T1"(...)` → `callSys` global |
+| golden scan (34) | `packages/runtime-iec/src/softplc-std.test.ts` | **Edge/bistable 8** (§12.2): J1 R_TRIG pattern, J2 F_TRIG pattern, J3 R_TRIG scan đầu CLK=true → Q=true, J4 F_TRIG scan đầu → Q=false, J5 R_TRIG STOP→RUN giữ `_m` → Q=false, K1 SR, K2 RS, K3 SR+RS cùng scan (dominance đối chiếu). **Timer 16** (§12.2 ≥ 14): A1 TON 3s, B1 TON PT=0, B2 TON PT=50, B3 TON PT=250, C1 TON IN dao động, D1 TON không gọi vài scan, E1 TOF cơ bản, E2 TOF PT=0, F1 TOF retrigger, G1 TP cơ bản, G2 TP PT=0, H1 TP cạnh lên trong xung bỏ qua, H2 TP xung hết + IN false → ET=0, I1 TONR tích lũy, I2 TONR R reset, I3 TONR PT=0. **Counter 10** (§12.2): L1 CTU đếm + QU, L2 CTU R ưu tiên + đếm lại, L3 CTU kẹp max, M1 CTD LD + đếm xuống + QD, M2 CTD LD thắng đếm, M3 CTD kẹp min, N1 CTUD đếm lên/xuống, N2 CTUD hai cạnh cùng lúc → giữ, N3 CTUD R>LD, N4 CTUD PV=0 (QU và QD cùng true). Mỗi golden ghi `expectedFrom: 'spec'` trong tên test (OQ-174). |
+| pipeline SCL (8) | `packages/vendor-siemens/src/scl/softplc-std.test.ts` | Chương trình SCL thật → `compileSclProgram` → SoftPlc (chứng minh cả ba tầng nối nhau): P-S1 TON (bảng A thu gọn), P-S2 TOF, P-S3 TP, P-S4 TONR, P-S5 R_TRIG + SR trong một OB, P-S6 CTU + CTUD, P-S7 multi-instance (`sT : TON` trong VAR của FB + gọi `#sT(...)`, bảng P thu gọn: `"Motor_DB".tOn.Q` đọc đúng), P-S8 out-arg `=>` (`"T1"(IN := %M0.0, PT := T#1s, Q => %M1.0, ET => %MD4)` với tag `%MD4` kiểu Time trong map test — Q và ET vừa ghi vào DB vừa ra Ref cùng giá trị) |
+| property (2) | `packages/runtime-iec/src/softplc-std.test.ts` | TON ⇔ IN liên tục ≥ PT (fast-check, seed cố định, §12.3: chuỗi IN ngẫu nhiên + dt ngẫu nhiên {10, 50, 100} so với mô hình tham chiếu tính thời điểm cạnh lên); counter: chuỗi CU/CD/R/LD ngẫu nhiên → CV luôn trong [min,max] + QU/QD đúng công thức theo CV/PV |
+| snapshot (1) | `packages/runtime-iec/src/softplc-std.test.ts` | Snapshot giữa TON đang chạy (ET=1500) → chạy 3 scan → restore → chạy 3 scan → trace Q/ET/scanCount giống hệt (OQ-180) |
+Tổng bảng trên = 13+24+15+34+8+2+1 = **97 test mới** (mục tiêu sàn ≥ 80, tổng ≥ 1646). Đối chiếu M1 §12.2 cho phần P1.5: R_TRIG/F_TRIG/SR/RS 8 ✓, timer 16 (≥ 14) ✓, counter 10 ✓. Thứ tự triển khai đề xuất: defs → handlers → SoftPlc wiring → typecheck → lower → semantics §16 (test viết cùng từng bước, golden scan cuối cùng).
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** vị trí file theo dep graph (`std/*` ở `runtime-iec`, typecheck/lower ở `vendor-siemens`); `IrField.hidden` là flag tùy chọn; handler đọc/ghi qua def offsets (không qua `instance.fields`); thứ tự triển khai (defs → handlers → wiring → typecheck → lower → semantics §16); test dùng `compileSclProgram` + SoftPlc ở vendor-siemens, IR tay qua `ir-testkit` ở runtime-iec (tiền lệ P1.4). **Tier B (mặc định + ghi OQ):** OQ-162 (một nguồn sự thật defs ở runtime-iec); OQ-163 (hidden trong layout, public-only ở member, flag `hidden`); OQ-164 (R_TRIG `_m` init false ở load/reset, STOP→RUN giữ — VERIFY §14.9); OQ-165 (TP xung hết + IN true: ET giữ PT', không kích lại — VERIFY §14.6); OQ-166 (TONR R thắng IN, PT≤0 → Q=IN/ET=0/`_accum`=0); OQ-167 (counter R > LD > đếm; CU+CD cùng cạnh → giữ nguyên — VERIFY §14.8); OQ-168 (counter chỉ Int, DInt hoãn); OQ-169 (timer không gọi vài scan: timestamp, đóng băng giữa các lần gọi — VERIFY §14.5); OQ-170 (SoftPlc nối std mặc định + `cfg.sysCalls` thay thế); OQ-171 (kiểu std chỉ VAR static + DB; VAR_TEMP/FC return/mảng → T004); OQ-172 (PT hiệu dụng `max(PT,0)`); OQ-173 (multi-instance std theo §3.5; OQ-161 vẫn mở); OQ-174 (golden TS + `expectedFrom: 'spec'`; YAML là P1.7); OQ-175 (out-arg `=>` hỗ trợ; handler ghi DB rồi Ref); OQ-176 (PT tính mỗi lần gọi, đổi giữa chừng áp dụng từ lần gọi sau); OQ-177 (counter kẹp max/min, không wrap/không fault — VERIFY §14.8); OQ-178 (SR/RS Q1 là output field, không hidden; dominance theo công thức); OQ-179 (X-002/S1 không chặn P1.5); OQ-180 (snapshot bao trạng thái std tự động); OQ-181 (R/LD tùy chọn `init: false`, input khác bắt buộc, output tùy chọn). **Tier C (không có mục mới):** không mục nào chặn P1.5 — OQ-105 (X-002/S1) vẫn mở từ P1.2, không chặn (OQ-179 ghi rõ lý do); OQ-161 vẫn mở, không chặn (OQ-173); nếu khi triển khai phát hiện §9 thiếu quy tắc mà chỉ mã thật/PLCSIM mới quyết được → ghi OQ/SCR, không tự nới lỏng.
+
+**Rủi ro + cách kiểm:** (1) Ngữ nghĩa std lệch TIA (VERIFY §14.5–9: TON PT=0/dao động/không gọi, TP kích lại, TOF retrigger, counter biên/ưu tiên, R_TRIG scan đầu) — giảm thiểu: mọi case trên đều có golden ghim lựa chọn spec + ghi `UNVERIFIED` ở semantics §16; xác minh bằng PLCSIM khi có (thí nghiệm M5 §10, P5.9) hoặc mẫu SCL thật (S1); nếu sai thì SCR đổi ngữ nghĩa + sửa golden (test là bằng chứng). (2) Tương tác với lưới scan OQ-130: ET có độ phân giải = chu kỳ scan; PT không chia hết chu kỳ → Q lật ở scan đầu `elapsed ≥ PT` (bảng B2/B3 ghim); nếu TIA tính timer theo thời gian thực bên trong scan thì sai lệch tối đa 1 chu kỳ — ghi `UNVERIFIED`, kiểm bằng PLCSIM. (3) Hiệu năng: closure `callSys` của P1.4 cấp phát 2 `Map` (inArgs/outArgs) **mỗi lần gọi mỗi scan** — với bench P1.7 (200 FB_Motor × 3 timer/edge) là 600 cặp Map/scan cộng thêm; P1.4 smoke đã chỉ ~520 scan/s (dưới mục tiêu P1.7 ≥ 1000 scan/s) **trước** P1.5 — giảm thiểu: P1.5 không tối ưu (ngoài phạm vi), nhưng handler tự thân không cấp phát; đo lại smoke ở P1.7 trước khi tối ưu (vd tái dùng Map hoặc truyền args theo vị trí). (4) OQ-161 lật: nếu IN_OUT lồng quyết slot 4 byte thì bảng P đổi 38 → 40 + sửa `fbInterfaceStruct` — giảm thiểu: test bảng P ghim số hiện tại, đổi kỳ vọng chỉ kèm SCR. (5) Mã thật dùng counter DInt hoặc timer trong VAR_TEMP: P1.5 từ chối ồn ào (T004) — không chạy sai im lặng; nếu S1 cho thấy TIA cho phép thì SCR nới lỏng (OQ-168/OQ-171). (6) `IrField.hidden` là thay đổi IR: golden IR JSON cũ không được đổi (kiểm bằng diff trước commit — mục 5 thiết kế); nếu `irToJson`/test nào assert shape field tuyệt đối thì đó là chỗ phải sửa test có lý do, báo trong triển khai.
+
+**Ngoài phạm vi:** biến thể counter DInt (OQ-168); LAD (P1.6); golden runner YAML + port ví dụ §12.1 `ton_basic_3s` (P1.7); demo `motor-interlock` + CLI `vcs plc run` + Watch + bench M1 §12.4 (P1.7); tối ưu cấp phát `callSys` (P1.7); S7/PLCSIM/SimaticML (M5); sửa EBNF §4.2 / M1 §9; đổi `.dependency-cruiser.cjs` / `eslint.config.js` / `vitest.config.ts` / `packages/kernel` / `packages/schemas` / `apps/*` / `examples/`; ADR mới; mã diagnostic mới (`docs/diagnostics.md` giữ 42 mã); `docs/facts/` mới; P0.9 PWA; script spike S1 (chạy khi có mã thật).
+
+**Gate P1.5 (triển khai):** `lint && typecheck && depcheck && test && test:e2e && review:cheats && docs:diagnostics --check` + `build` + bench guard M0 (`pnpm bench`: TagDB 4/4 PASS + orchestrator ≥ 100 000 bước/s; rớt > 20% so với baseline thì dừng điều tra, không hạ ngưỡng) + CI (check + test ubuntu/windows + e2e ubuntu) xanh. Tổng test sau P1.5: **≥ 1646** (≥ 80 mới), trong đó golden timer ≥ 14 + counter ≥ 10 (PROMPTS) + edge/bistable 8 (§12.2) + 2 property test fast-check (seed cố định). `pnpm-lock.yaml` **không đổi** (không dependency mới — diff lockfile khác rỗng là cờ đỏ, dừng kiểm tra). `pnpm install` trong VM vẫn EPERM (OQ-007) — triển khai làm ở bản sao `/tmp` như các prompt trước, cài thật `--frozen-lockfile` (dùng `git archive` để copy, không `cp -r` cả cây kèm `node_modules` — bài học ENOSPC ở P0.8), **rsync về `~/workspace/vcs` sau mỗi bước lớn, KHÔNG dùng `--delete` (hoặc luôn `--exclude .git`) — bài học mất `.git` ở P1.4**. **Cần kiểm lại khi triển khai:** root `package.json` không bị ghi đè (bài học P1.2 — kiểm `name: "vcs"` + diff vs HEAD trống trước khi commit); `user-chat/` không trong commit; golden IR JSON cũ không đổi (mục 5 thiết kế).
+
+**Kết quả triển khai P1.5 (2026-11-25, commit feat(m1) — xem `git log` nhánh `m1/p1.5-std-blocks`):**
+
+- **File:** mới `runtime-iec/src/std/defs.ts` (11 def + `STD_BLOCKS`/`getStdBlockDef`/`stdBlockInterface`, layout qua `layoutStruct` tính 1 lần lúc load module), `runtime-iec/src/std/handlers.ts` (`createStdSysCalls()` + 11 handler, đọc/ghi qua def offsets + `instance.base`, không cấp phát mỗi lần gọi, lookup field giải 1 lần lúc tạo handler), `runtime-iec/src/std/index.ts`, `runtime-iec/src/std/defs.test.ts` (15), `runtime-iec/src/std/handlers.test.ts` (26), `runtime-iec/src/softplc-std.test.ts` (37: 34 golden + 2 property + 1 snapshot), `vendor-siemens/src/scl/softplc-std.test.ts` (8 pipeline P-S1…P-S8); sửa `runtime-iec/src/ir.ts` (`IrField.hidden?`), `runtime-iec/src/index.ts` (export std), `runtime-iec/src/softplc.ts` (`SoftPlcConfig.sysCalls?` + nối `createStdSysCalls()` mặc định ở cả hai chỗ dựng Interpreter), `runtime-iec/src/ir-testkit.ts` (helper `stdDb`), `vendor-siemens/src/scl/typecheck.ts` (U001 gỡ ở 4 điểm: `lookupInterface` → std iface, `resolveTypeNode` placement static/other, `resolveDb` fbName → IrDb std, `checkCallExpr`/`checkCallStmt`/`checkCallStmtIdent` + T005 cho field hidden), `vendor-siemens/src/scl/lower.ts` (`#sT(...)`/`"T1"(...)` → `callSys`), `docs/semantics.md` §16 + cập nhật đoạn OQ-111 ở §14 ("hỗ trợ từ P1.5"). Không dependency mới; `pnpm-lock.yaml` + root `package.json` không đổi; diagnostics giữ 42 mã; golden IR JSON cũ không đổi (`git status` thư mục `golden/` sạch; `irToJson` chỉ thêm key `hidden` khi set — không field nào cũ có hidden).
+- **Test: 100 mới, tổng 1666 (1566 + 100)** — defs 15, handlers 26, golden scan 37 (34 + 2 property fast-check seed 20261125/20261124 + 1 snapshot), typecheck 12, lower 2, pipeline 8. Vượt sàn ≥ 80 mới / ≥ 1646 tổng. Golden timer 16 + counter 10 + edge/bistable 8 (§12.2) + 2 property.
+- **OQ-162…181 đóng (đã áp dụng)** — xem `open-questions.md`; **OQ-161 vẫn mở** (bảng P ghim 38 byte). OQ-111 cập nhật "hỗ trợ từ P1.5" (semantics §14 + §16).
+- **Lệch so với plan (ghi rõ, không sửa bảng):**
+  1. **Bảng N (CTUD):** các hàng liên tiếp trên lưới 10 ms tự mâu thuẫn — hàng t=50 có CD=true nhưng hàng t=60 cần cạnh lên CD, đòi scan trung gian CD=false không tồn tại giữa t=50 và t=60. Golden N1 chèn scan trung gian all-false (hàng "cả hai cùng cạnh" thành t=70); logic ghim không đổi (cả hai cạnh cùng scan → CV giữ nguyên). Bảng L/M không mâu thuẫn (khoảng 20–30 ms cho phép scan trung gian).
+  2. **Cú pháp DATA_BLOCK std:** plan viết `DATA_BLOCK "T1" TON` (không ngoặc) nhưng EBNF M1 §4.2 bắt tên FB trong ngoặc kép (`"\"" fbname "\""`) — parser P1.2/P1.3 đã theo EBNF (như `DATA_BLOCK "DB_X" "FB_X"`). Test dùng dạng có ngoặc `DATA_BLOCK "T1" "TON"`; đây là cách viết đúng theo grammar, không phải nới lỏng.
+  3. **`#sT(...)` trong biểu thức không parse được** (parser chỉ chấp nhận call dạng `"tên"(...)` ở vị trí biểu thức, như FC — FB không trả giá trị nên đúng là không có ý nghĩa); test "std trong biểu thức → T004" dùng dạng `"TON"(...)` trong OB thay vì `#sT(...)` trong FB.
+  4. **P-S4…P-S8:** thứ tự block khác bảng plan (P-S4 CTU thay vì TONR; P-S6 TONR+CTD thay vì CTU+CTUD; CTUD chỉ ở golden scan + handler, không ở pipeline); P-S8 out-arg ET vào `"DB_Out".et` thay vì `%MD4`; P-S7 DB tên `DB_Motor` (plan viết `"Motor_DB"`), đọc `"DB_Motor".cCount.CV`. Ý định (chứng minh cả ba tầng nối nhau qua SCL thật) giữ nguyên; mọi block đều có pipeline trừ CTUD/F_TRIG/RS (chỉ golden scan).
+  5. **TONR ET không kẹp PT:** P-S6 ghim ET=1200 khi IN xuống sau khi đã vượt PT=1000 (công thức §9.3 `ET=_accum+(now−_start)` không có kẹp; bảng I không có hàng vượt PT nên không ghim ngược). Ghi `UNVERIFIED` ở semantics §16 — chờ S1/PLCSIM; nếu TIA kẹp thì SCR + sửa handler + golden.
+  6. **P-S6 lúc đầu kỳ vọng sai:** tưởng TONR Q=false khi IN xuống sau khi Q đã lên — sai, TONR giữ Q (retentive, M1 §9.3: IN false → `Q = ET ≥ PT`). Test sửa kỳ vọng theo spec (Q=true, ET=1200 ở i=13; R reset rồi chạy đủ PT mới có cạnh CD thứ hai ở i=25) — đây là sửa test theo spec đã đọc lại, không phải sửa để xanh.
+  7. **3 test cũ đổi kỳ vọng do chính tính năng P1.5** (không phải sửa để qua gate): `typecheck.test.ts` "TON trong VAR_TEMP → U001" thành T004 (OQ-171), "gọi #sT → U001" thành hợp lệ; `typecheck-coverage.test.ts` "gọi system FB dạng statement → U001" thành T001 (không có DB). Thêm 1 test P1.4 phải đổi setup: `softplc-scan.test.ts` "TON không handler → SYS_UNSUPPORTED" nay truyền `sysCalls: new Map()` tường minh (OQ-170 — SoftPlc mặc định đã có handler); test vẫn ghim đúng hành vi OQ-143 và đồng thời kiểm đường override `cfg.sysCalls?`.
+- **Gate (ĐÃ CHẠY thật ở bản sao `/tmp/vcs-p15`, install thật `--frozen-lockfile`, log `/tmp/p15-*.log`):** lint EXIT=0; typecheck EXIT=0; depcheck EXIT=0 (115 modules, 218 deps, no violations); test **1666/1666** (63 files) EXIT=0; review:cheats **SẠCH** (161 file) EXIT=0; docs:diagnostics --check **khớp, 42 mã** EXIT=0; build EXIT=0; test:e2e **5 passed** EXIT=0; bench TagDB 4/4 PASS (set/get 49,169,293 ops/s ≥ 10M) + orchestrator **491,403 steps/s** (≥ 100k) EXIT=0. Smoke 200 FB_Motor CHƯA CHẠY (đo ở P1.7 theo plan).
+- **Việc tiếp theo:** PR P1.5 qua cloud browser (theo quy trình chuẩn) → CI xanh → merge → P1.6 (LAD).

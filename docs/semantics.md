@@ -482,9 +482,11 @@ warning; đọc trong nhánh IF chỉ gán một bên vẫn warning.
 (trực tiếp + gián tiếp, qua call graph của unit biên dịch + `ctx.blocks`);
 chỉ phát hiện trong phạm vi đã nạp, không quét toàn project.
 
-**VERIFIED (OQ-111).** Kiểu `TON`/`CTU`/`R_TRIG`/… trong `VAR` và call tới
-chúng → **SCL-U001** "system block chưa hỗ trợ (P1.5)" — chưa có layout
-std nên không thể kiểm tra arg; ồn ào, không im lặng.
+**VERIFIED (OQ-111, P1.5).** Kiểu `TON`/`CTU`/`R_TRIG`/… trong `VAR` và
+call tới chúng **được hỗ trợ từ P1.5** (trước đó → SCL-U001, xem §16):
+typecheck chấp nhận qua registry std duy nhất `runtime-iec/src/std/defs.ts`,
+lower sinh `callSys`, interpreter chạy handler. `DATA_BLOCK "T1" "TON"`
+(tên FB trong ngoặc kép, theo EBNF §4.2) tạo instance DB theo bảng O.
 
 **VERIFIED (OQ-112).** FC trả giá trị bằng gán vào tên FC của chính block
 (`"FC_A" := …` hoặc `#FC_A := …`, không phân biệt hoa/thường) → lower
@@ -675,3 +677,94 @@ quán với DB top-level (`fbInterfaceStruct` dùng kích thước tự nhiên,
 không slot 4 byte — OQ-161, mở). Hiệu năng: smoke 200 FB_Motor đo
 **519 và 533 scan/s** (2 lần, 2000 scan) — dưới mục tiêu P1.7 ≥ 1000
 scan/s; bench chính thức + tối ưu là P1.7, không phải gate P1.4.
+
+## 16. System block IEC — R_TRIG/F_TRIG, SR/RS, TON/TOF/TP/TONR, CTU/CTD/CTUD (M1 §9, P1.5)
+
+Nguồn sự thật duy nhất: `runtime-iec/src/std/defs.ts` (interface + field
+ẩn + layout qua `layoutStruct`, bảng O) + `runtime-iec/src/std/handlers.ts`
+(`createStdSysCalls()`). `SoftPlc` nối registry mặc định; `SoftPlcConfig`
+có `sysCalls?` tùy chọn **thay thế** toàn bộ map (OQ-170); `Interpreter`
+trần không có handler → `callSys` fault `SYS_UNSUPPORTED` như cũ (OQ-143).
+Golden: bảng A–P (STATE §20), test `softplc-std.test.ts` (34 scan) +
+`std/handlers.test.ts` + `std/defs.test.ts` + pipeline `softplc-std.test.ts`
+(P-S1…P-S8) — mọi kỳ vọng tính tay, `expectedFrom: 'spec'`.
+
+**VERIFIED (layout, bảng O).** Mỗi block có layout cố định qua
+`layoutStruct`: R_TRIG/F_TRIG `CLK@0.0, Q@0.1, _m@0.2` (2 byte);
+SR `S1@0.0, R@0.1, Q1@0.2`, RS `S@0.0, R1@0.1, Q1@0.2` (2 byte);
+TON/TOF/TP `IN@0.0, PT@2, Q@6.0, ET@8, _start@12, _running@16.0,
+_prevIn@16.1` (18 byte); TONR thêm `R@0.1, _accum@18` (22 byte);
+CTU `CU@0.0, R@0.1, PV@2, QU@4.0, CV@6, _prevCU@8.0` (10 byte);
+CTD `CD@0.0, LD@0.1, PV@2, QD@4.0, CV@6, _prevCD@8.0` (10 byte);
+CTUD `CU@0.0, CD@0.1, R@0.2, LD@0.3, PV@2, QU@4.0, QD@4.1, CV@6,
+_prevCU@8.0, _prevCD@8.1` (10 byte). Field ẩn (`_m`, `_start`,
+`_running`, `_prevIn`, `_accum`, `_prevCU`, `_prevCD`) chiếm byte
+trong layout nhưng **không truy cập được từ SCL** (`"T1"._start` →
+SCL-T005, OQ-163 — kiểm ở mọi cấp, kể cả lồng trong struct cha);
+`IrDb.fields` chỉ chứa field công khai, `size` tính cả ẩn.
+
+**VERIFIED (vị trí dùng, OQ-171).** Kiểu std chỉ ở `VAR` (static) của
+block và `DATA_BLOCK "T1" "TON"` (tên FB trong ngoặc kép, EBNF §4.2);
+`VAR_TEMP`, `VAR_INPUT`/`VAR_OUTPUT`/`VAR_IN_OUT`, kiểu trả FC, phần
+tử mảng, field struct/UDT/DB → **SCL-T004**. Multi-instance std qua
+`fbInterfaceStruct` (bảng P: FB_Motor DB 38 byte, xem §15 UNVERIFIED /
+OQ-161 — IN_OUT lồng vẫn mở).
+
+**VERIFIED (lời gọi, OQ-175/181).** Chỉ dạng statement: local `#sT(...)`
+và global `"T1"(...)` → IR `callSys {fn, instance, inArgs, outArgs}`;
+std trong biểu thức → **SCL-T004**; tên std trần không instance
+(`TON(...)`) → T004 "cần instance". Tham số: `checkCallArgs` tái dùng
+nguyên xi (kind 'FB') — R/LD có `init: false` nên **tùy chọn** (thiếu =
+FALSE); input khác bắt buộc, thiếu → T004 "thiếu tham số bắt buộc";
+output qua `=>` (tùy chọn); `:=` cho output → T004. Handler ghi output
+xuống DB **trước**, rồi mới ghi Ref out-arg cùng giá trị — đọc qua DB
+field là đường chính, `=>` là đường phụ, cả hai thấy cùng giá trị trong
+cùng scan. `callSys` không vào call graph (std là lá, không đệ quy).
+
+**VERIFIED (edge / bistable, bảng J–K).** R_TRIG: Q = cạnh lên CLK
+(`_m` nhớ CLK scan trước); F_TRIG: Q = cạnh xuống. `_m` khởi tạo
+false (scan đầu sau load CLK=true → R_TRIG Q=true, F_TRIG Q=false).
+SR: Q1 set bởi S1, reset bởi R, **cả hai true → Q1=true** (S thắng);
+RS ngược lại (**cả hai true → Q1=false**, R thắng). Q1 chính là trạng
+thái (không field ẩn).
+
+**VERIFIED (timer, bảng A–H, OQ-172/176).** Thời gian theo sim time của
+scan; PT hiệu dụng `PT' = max(PT, 0)` cho mọi timer, ET không bao giờ
+âm. PT thay đổi giữa chừng: áp dụng từ lần gọi sau, `_start` không
+tính lại. TON: Q = IN ∧ elapsed ≥ PT'; ET kẹp PT'. PT=0 → Q=IN, ET=0.
+TOF: cạnh xuống IN bắt đầu đếm; IN lên giữa chừng hủy đếm (retrigger);
+ET kẹp PT'. TP: cạnh lên IN bắt đầu xung dài PT'; cạnh lên trong xung
+bị bỏ qua; xung kết thúc + IN vẫn true → ET giữ PT', Q=false, **không**
+kích lại cho tới khi IN xuống rồi lên; xung kết thúc + IN false → ET=0
+ngay trong scan đó. TONR: IN xuống → `_accum` giữ, `_running=false`;
+IN lên lại → đếm tiếp từ `_accum`; R thắng IN cùng scan; PT=0 → Q=IN,
+ET=0, `_accum` giữ 0. **TONR ET không kẹp PT** (công thức §9.3
+`ET=_accum+(now−_start)`): P-S6 ghim ET=1200 khi IN xuống sau khi đã
+vượt PT=1000 — bảng I không có hàng vượt PT nên điểm này chờ đối
+chiếu S1 (xem UNVERIFIED dưới).
+
+**VERIFIED (counter, bảng L–N, OQ-168/177).** Chỉ biến thể **Int**
+(PV/CV Int, không có DInt — spec §9.4 nói "biến thể DInt theo tham số
+kiểu" nhưng EBNF §4.2 không có cú pháp chọn). CTU: cạnh lên CU → CV+1;
+R → CV=0 (R thắng đếm cùng scan); `QU = CV ≥ PV`. CTD: cạnh lên CD →
+CV−1; LD → CV=PV (LD thắng đếm cùng scan); `QD = CV ≤ 0`. CTUD: R >
+LD > đếm; CU+CD cùng cạnh lên → tăng rồi giảm = không đổi; `QU = CV ≥
+PV`, `QD = CV ≤ 0` (PV=0 → cả hai cùng true). Kẹp tại biên, không wrap,
+không fault: CTU giữ 32767, CTD giữ −32768.
+
+**VERIFIED (snapshot, OQ-180).** Không cần code riêng cho std: trạng
+thái nằm trong byte instance DB nên snapshot/restore đã bao trùm —
+snapshot giữa TON đang chạy (ET=1500) → 3 scan → restore → 3 scan cho
+trace Q/ET/scanCount giống hệt.
+
+**UNVERIFIED (VERIFY M1 §14.5–9, chờ PLCSIM/S1 — OQ-164/165/167/169/177).**
+Các mục sau theo spec §9 nhưng **chưa đối chiếu PLC thật**; nếu S1/PLCSIM
+cho kết quả khác thì SCR đổi spec + sửa bảng/golden (không âm thầm đổi):
+§14.5 TON — PT=0, IN dao động, timer không được gọi vài scan rồi gọi
+lại (bảng D ghim ET "nhảy" theo timestamp — OQ-169); §14.6 TP — IN
+giữ true sau khi hết xung (bảng G ghim không kích lại — OQ-165);
+§14.7 TOF — retrigger (bảng F); §14.8 counter — biên max/min, thứ tự
+R/LD, CU+CD cùng cạnh (bảng L–N, OQ-167/177); §14.9 R_TRIG — scan đầu
+sau STOP→RUN khi CLK đã true (bảng J5 ghim Q=false vì `_m` giữ —
+OQ-164). Ngoài §14: TONR ET không kẹp PT (P-S6 ghim 1200) và `_m` khởi
+tạo false sau load (bảng J3) cũng chưa đối chiếu.
