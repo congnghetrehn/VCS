@@ -109,7 +109,18 @@ export async function createServer(
     opts?.webDistDir ?? resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', 'web', 'dist');
   const hasWebBuild = existsSync(join(webDistDir, 'index.html'));
   if (hasWebBuild) {
-    await fastify.register(fastifyStatic, { root: webDistDir, prefix: '/' });
+    await fastify.register(fastifyStatic, {
+      root: webDistDir,
+      prefix: '/',
+      // P0.9 (OQ-223): SW + manifest không được HTTP cache giữ — nếu không
+      // bản SW mới đăng ký chậm/mất, cập nhật PWA không tới được user.
+      // @fastify/static setHeaders nhận FastifyReply (không phải raw res).
+      setHeaders: (reply, path) => {
+        if (path.endsWith('/sw.js') || path.endsWith('/manifest.webmanifest')) {
+          reply.header('Cache-Control', 'no-cache');
+        }
+      },
+    });
   }
   const projectInfo: ProjectInfo = {
     name: model.config.name,
