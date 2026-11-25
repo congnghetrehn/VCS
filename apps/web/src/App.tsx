@@ -11,6 +11,8 @@ import { SimBar } from './components/SimBar.js';
 import { TagTable } from './components/TagTable.js';
 import { effectiveLang, useSimSnapshot, useSimStore, type Theme } from './store.js';
 import { t, type Lang } from './i18n/index.js';
+import { wakeLockAvailable } from './pwa.js';
+import { applyPwaUpdate } from './pwa-register.js';
 import { WsClient, type WsSocketLike } from './ws-client.js';
 
 const LANG_KEY = 'vcs.lang';
@@ -108,45 +110,140 @@ export function App() {
     }
   }, [s.theme]);
 
+  // P0.9 (OQ-229): kiosk chặn zoom/pull-to-refresh ngoài ý muốn bằng viewport
+  // maximum-scale + user-scalable=no; chế độ thường giữ zoom (a11y P0.6).
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="viewport"]');
+    if (meta === null) return;
+    meta.setAttribute(
+      'content',
+      s.kiosk
+        ? 'width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no'
+        : 'width=device-width, initial-scale=1.0',
+    );
+  }, [s.kiosk]);
+
+  // P0.9 (OQ-228): Wake Lock khi vào kiosk, xin lại khi tab hiện lại, nhả
+  // khi thoát kiosk. Không hỗ trợ/bị từ chối → kiosk chạy tiếp, ghi chú.
+  useEffect(() => {
+    if (!s.kiosk) return;
+    const store = useSimStore.getState();
+    const supported = wakeLockAvailable(window.navigator);
+    store.setWakeLock(supported, false);
+    if (!supported) return;
+    let sentinel: WakeLockSentinel | null = null;
+    let cancelled = false;
+    const acquire = async (): Promise<void> => {
+      try {
+        sentinel = await window.navigator.wakeLock.request('screen');
+        if (!cancelled) useSimStore.getState().setWakeLock(true, true);
+      } catch {
+        // Bị từ chối (vd trình duyệt chặn): kiosk chạy tiếp không Wake Lock.
+      }
+    };
+    const onVisibility = (): void => {
+      if (document.visibilityState === 'visible') void acquire();
+    };
+    void acquire();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisibility);
+      if (sentinel !== null) void sentinel.release().catch(() => undefined);
+    };
+  }, [s.kiosk]);
+
+  /** P0.9 (OQ-227): Fullscreen chỉ từ nút bấm; fail thì kiosk chạy tiếp. */
+  const requestFullscreen = async (): Promise<void> => {
+    try {
+      await document.documentElement.requestFullscreen();
+    } catch {
+      // Trình duyệt chặn/không hỗ trợ: kiosk chạy tiếp trong cửa sổ.
+    }
+  };
+
+  /** P0.9 (OQ-226): thoát kiosk + gỡ ?kiosk=1 khỏi URL (reload không vào lại). */
+  const exitKiosk = (): void => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('kiosk');
+    window.history.replaceState(null, '', url);
+    useSimStore.getState().setKiosk(false);
+  };
+
+  /** P0.9 (OQ-222): bấm "Tải lại" trên banner cập nhật (dirty → hỏi trước). */
+  const onReloadUpdate = (): void => {
+    if (useSimStore.getState().plcDirty) {
+      if (!window.confirm(t(lang, 'pwa.update.confirmDirty'))) return;
+    }
+    applyPwaUpdate();
+  };
+
   const connectionText = t(lang, `header.connection.${s.connection}`);
   return (
-    <div className="flex h-screen flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div
+      className={`flex h-screen flex-col bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100${
+        s.kiosk ? ' overscroll-none touch-manipulation' : ''
+      }`}
+    >
       <header className="flex flex-wrap items-center gap-3 border-b border-gray-300 px-4 py-2 dark:border-gray-700">
         <h1 className="text-lg font-bold">{t(lang, 'app.title')}</h1>
         <span>
           {t(lang, 'header.project')}: {s.projectName}
         </span>
         <span data-testid="connection-badge">{connectionText}</span>
-        <label>
-          {t(lang, 'header.language')}{' '}
-          <select
-            data-testid="lang-select"
-            onChange={(e) => {
-              const v = e.target.value;
-              if (v !== 'vi' && v !== 'en') return;
-              useSimStore.getState().setLang(v);
-              try {
-                window.localStorage.setItem(LANG_KEY, v);
-              } catch {
-                // Bỏ qua: lựa chọn chỉ giữ trong phiên.
-              }
-            }}
-            value={lang}
-          >
-            <option value="vi">Tiếng Việt</option>
-            <option value="en">English</option>
-          </select>
-        </label>
-        <button
-          data-testid="theme-toggle"
-          onClick={() => {
-            useSimStore.getState().setTheme(s.theme === 'dark' ? 'light' : 'dark');
-          }}
-          type="button"
-        >
-          {s.theme === 'dark' ? t(lang, 'header.theme.light') : t(lang, 'header.theme.dark')}
-        </button>
+        {!s.kiosk && (
+          <>
+            <label>
+              {t(lang, 'header.language')}{' '}
+              <select
+                data-testid="lang-select"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v !== 'vi' && v !== 'en') return;
+                  useSimStore.getState().setLang(v);
+                  try {
+                    window.localStorage.setItem(LANG_KEY, v);
+                  } catch {
+                    // Bỏ qua: lựa chọn chỉ giữ trong phiên.
+                  }
+                }}
+                value={lang}
+              >
+                <option value="vi">Tiếng Việt</option>
+                <option value="en">English</option>
+              </select>
+            </label>
+            <button
+              data-testid="theme-toggle"
+              onClick={() => {
+                useSimStore.getState().setTheme(s.theme === 'dark' ? 'light' : 'dark');
+              }}
+              type="button"
+            >
+              {s.theme === 'dark' ? t(lang, 'header.theme.light') : t(lang, 'header.theme.dark')}
+            </button>
+          </>
+        )}
       </header>
+      {s.kiosk && (
+        <div className="flex flex-wrap items-center gap-3 border-b border-gray-300 bg-gray-100 px-4 py-1 dark:border-gray-700 dark:bg-gray-800">
+          <button
+            data-testid="kiosk-fullscreen"
+            onClick={() => {
+              void requestFullscreen();
+            }}
+            type="button"
+          >
+            {t(lang, 'kiosk.fullscreen')}
+          </button>
+          <button data-testid="kiosk-exit" onClick={exitKiosk} type="button">
+            {t(lang, 'kiosk.exit')}
+          </button>
+          {!s.wakeLockSupported && (
+            <span data-testid="kiosk-wake-lock-note">{t(lang, 'kiosk.noWakeLock')}</span>
+          )}
+        </div>
+      )}
       {s.lastError !== null && (
         <div className="bg-red-100 px-4 py-1 text-red-800 dark:bg-red-900 dark:text-red-100" role="alert">
           <span data-testid="last-error">
@@ -162,6 +259,14 @@ export function App() {
           </button>
         </div>
       )}
+      {s.updateAvailable && (
+        <div className="bg-amber-100 px-4 py-1 text-amber-900 dark:bg-amber-900 dark:text-amber-100">
+          <span data-testid="pwa-update-banner">{t(lang, 'pwa.update.available')}</span>{' '}
+          <button data-testid="pwa-update-reload" onClick={onReloadUpdate} type="button">
+            {t(lang, 'pwa.update.reload')}
+          </button>
+        </div>
+      )}
       <SimBar
         lang={lang}
         onCommand={(cmd) => {
@@ -171,28 +276,30 @@ export function App() {
           clientRef.current?.timeScale(v);
         }}
       />
-      <nav aria-label="views" className="flex gap-2 border-b border-gray-300 px-4 py-1 dark:border-gray-700">
-        <button
-          data-testid="nav-tags"
-          onClick={() => {
-            setView('tags');
-          }}
-          type="button"
-          className={view === 'tags' ? 'font-bold underline' : undefined}
-        >
-          {t(lang, 'nav.tags')}
-        </button>
-        <button
-          data-testid="nav-plc"
-          onClick={() => {
-            setView('plc');
-          }}
-          type="button"
-          className={view === 'plc' ? 'font-bold underline' : undefined}
-        >
-          {t(lang, 'nav.plc')}
-        </button>
-      </nav>
+      {!s.kiosk && (
+        <nav aria-label="views" className="flex gap-2 border-b border-gray-300 px-4 py-1 dark:border-gray-700">
+          <button
+            data-testid="nav-tags"
+            onClick={() => {
+              setView('tags');
+            }}
+            type="button"
+            className={view === 'tags' ? 'font-bold underline' : undefined}
+          >
+            {t(lang, 'nav.tags')}
+          </button>
+          <button
+            data-testid="nav-plc"
+            onClick={() => {
+              setView('plc');
+            }}
+            type="button"
+            className={view === 'plc' ? 'font-bold underline' : undefined}
+          >
+            {t(lang, 'nav.plc')}
+          </button>
+        </nav>
+      )}
       {view === 'tags' ? (
         <TagTable
           lang={lang}
