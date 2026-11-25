@@ -499,7 +499,11 @@ export class PlantEngine implements SimComponent {
       equipment: this.#order.map((rt) => {
         const entry: PlantSnapshot['equipment'][number] = {
           id: rt.id,
-          state: rt.state,
+          // P2.2: state PHẢI deep-copy — model mutate state tại chỗ mỗi bước
+          // nên giữ reference sẽ làm snapshot "trôi" theo (restore không tua
+          // được về thời điểm snapshot; motor_dol STARTING → RUNNING).
+          // S là JSON-serializable theo hợp đồng (PACKAGE-RULES §plant).
+          state: structuredClone(rt.state),
           rng: { ...rt.rng },
           obs: { ...rt.obs },
           source: rt.source !== undefined ? { ...rt.source, spec: { ...rt.source.spec } } : null,
