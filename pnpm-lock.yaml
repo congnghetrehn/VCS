@@ -90,6 +90,9 @@ importers:
       '@vcs/server':
         specifier: workspace:*
         version: link:../server
+      '@vcs/vendor-siemens':
+        specifier: workspace:*
+        version: link:../../packages/vendor-siemens
       commander:
         specifier: 15.1.0
         version: 15.1.0
