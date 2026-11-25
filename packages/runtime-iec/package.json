@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "@vcs/kernel": "workspace:*",
-    "@vcs/schemas": "workspace:*"
+    "@vcs/schemas": "workspace:*",
+    "yaml": "2.9.1",
+    "zod": "4.6.7"
   },
   "exports": {
     ".": "./src/index.ts"
