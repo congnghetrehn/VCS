@@ -32,6 +32,8 @@ import {
   type PlcMemory,
 } from './interpreter.js';
 import { DbStore, MemoryArea, type MemoryScalarType } from './memory.js';
+import { createStdSysCalls } from './std/handlers.js';
+import type { SysCallHandler } from './interpreter.js';
 import { buildTagAddressMap, canonicalRef, parsePlcRef, type ParsedRef, type TagAddressMap, type TagAddr } from './tagmap.js';
 import { sizeOf } from './types.js';
 
@@ -48,6 +50,12 @@ export interface SoftPlcConfig {
   maxLoopIterations?: number;
   /** Mặc định 'zero' (§17). */
   outputsOnStop?: 'zero' | 'hold';
+  /**
+   * Registry system block (OQ-170): mặc định `createStdSysCalls()` (đủ 11
+   * block M1 §9); truyền vào thì THAY THẾ map mặc định (điểm nối test /
+   * adapter ngoài). `Interpreter` không đổi: không truyền → SYS_UNSUPPORTED.
+   */
+  sysCalls?: Map<string, SysCallHandler>;
 }
 
 export interface ScanInfo {
@@ -270,6 +278,10 @@ export class SoftPlc implements ControllerAdapter, ControllerIntrospection {
     dbs: new Map<string, DbStore>(),
     dbNumbers: new Map<string, number>(),
   };
+  /** Registry system block duy nhất của PLC (OQ-170): mặc định đủ 11 block
+   * M1 §9; `cfg.sysCalls` (nếu có) thay thế ở constructor, trước khi
+   * `#setupProgram` dựng Interpreter thật. */
+  #sysCalls: Map<string, SysCallHandler> = createStdSysCalls();
   #interpreter: Interpreter = new Interpreter(
     { blocks: [], dbs: [], udts: [], organization: [] },
     {
@@ -280,6 +292,7 @@ export class SoftPlc implements ControllerAdapter, ControllerIntrospection {
       dbNumbers: new Map<string, number>(),
     },
     this.#faults,
+    { sysCalls: this.#sysCalls },
   );
   #scanPeriodMs: number;
   readonly #maxScansPerStep: number;
@@ -313,6 +326,7 @@ export class SoftPlc implements ControllerAdapter, ControllerIntrospection {
     this.#maxCallDepth = cfg.maxCallDepth ?? 24;
     this.#maxLoopIterations = cfg.maxLoopIterations ?? 10_000;
     this.#outputsOnStop = cfg.outputsOnStop ?? 'zero';
+    if (cfg.sysCalls !== undefined) this.#sysCalls = cfg.sysCalls;
     this.#setupProgram(program, tagMap);
   }
 
@@ -745,6 +759,7 @@ export class SoftPlc implements ControllerAdapter, ControllerIntrospection {
     this.#interpreter = new Interpreter(program, mem, this.#faults, {
       maxCallDepth: this.#maxCallDepth,
       maxLoopIterations: this.#maxLoopIterations,
+      sysCalls: this.#sysCalls,
     });
     this.#bindObs(program);
     this.#faults.clear();

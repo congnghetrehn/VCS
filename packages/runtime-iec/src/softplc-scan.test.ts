@@ -475,7 +475,11 @@ describe('bảng D — gọi block (FB + IN_OUT + TEMP + độ sâu + giới h�
       callSysStmt('TON', [['IN', bool(true)], ['PT', num(1000, 'Time')]], []),
       assign(abs('M', 2, 'Int'), num(2)),
     ]);
-    const plc = scanOnce(prog([ob], [], [{ ob: 1, block: 'Main' }]));
+    // P1.5 (OQ-170): SoftPlc nối std handler mặc định nên "không handler"
+    // phải truyền sysCalls rỗng tường minh — đồng thời kiểm đường override.
+    const plc = scanOnce(prog([ob], [], [{ ob: 1, block: 'Main' }]), {
+      sysCalls: new Map(),
+    });
     expect(plc.read('%MW0')).toBe(1);
     expect(plc.read('%MW2')).toBe(2);
     expect(faultCount(plc, 'SYS_UNSUPPORTED')).toBe(1);

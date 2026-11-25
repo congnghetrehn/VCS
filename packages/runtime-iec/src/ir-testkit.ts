@@ -82,6 +82,7 @@ import type { TagAddressMap } from './tagmap.js';
 import { FaultCollector } from './faults.js';
 import { Interpreter, initDbStore, type PlcMemory } from './interpreter.js';
 import { DbStore, MemoryArea } from './memory.js';
+import { getStdBlockDef } from './std/defs.js';
 
 /** Bộ nhớ PLC cho test interpreter: vùng I/Q/M 64 byte + DB theo IrDb. */
 export function makeMem(dbs: IrDb[] = [], sizeBytes = 64): PlcMemory {
@@ -337,6 +338,25 @@ export function dbForFb(fbName: string, dbName: string, intf: IrInterface): IrDb
       };
     });
   return { id: dbName.toLowerCase(), name: dbName, fbName, fields, size: layout.size };
+}
+
+/** DB instance cho một system block (P1.5): layout từ def (bảng O, STATE
+ * §20); `fields` chỉ public (hidden bị lọc như `resolveDb` — OQ-163). */
+export function stdDb(dbName: string, blockName: string): IrDb {
+  const def = getStdBlockDef(blockName);
+  if (def === undefined) {
+    throw new Error(`ir-testkit: không có system block '${blockName}'`);
+  }
+  const fields: IrField[] = def.layout
+    .filter((f) => f.hidden !== true)
+    .map((f) => ({
+      name: f.name,
+      type: f.type,
+      byteOffset: f.byteOffset,
+      ...(f.bitOffset !== undefined ? { bitOffset: f.bitOffset } : {}),
+      size: f.size,
+    }));
+  return { id: dbName.toLowerCase(), name: dbName, fbName: def.name, fields, size: def.size };
 }
 
 /** SoftPlc trực tiếp (không qua orchestrator): period 10, id PLC1. */
