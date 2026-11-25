@@ -21,6 +21,27 @@ describe('generateDiagnosticsMarkdown', () => {
       expect(md).toContain(`\`${code}\``);
     }
   });
+
+  it('chứa đủ 13 mã SCL mới (P1.3: T001–T011, S020, W001)', () => {
+    const md = generateDiagnosticsMarkdown();
+    for (const code of [
+      'SCL-T001',
+      'SCL-T002',
+      'SCL-T003',
+      'SCL-T004',
+      'SCL-T005',
+      'SCL-T006',
+      'SCL-T007',
+      'SCL-T008',
+      'SCL-T009',
+      'SCL-T010',
+      'SCL-T011',
+      'SCL-S020',
+      'SCL-W001',
+    ]) {
+      expect(md).toContain(`\`${code}\``);
+    }
+  });
 });
 
 describe('scanCodes', () => {
@@ -33,6 +54,12 @@ describe('scanCodes', () => {
 
   it('tìm được mã SCL (regex bao L/P/U, không chỉ E/W)', () => {
     expect(scanCodes('lỗi SCL-P002 và SCL-L001')).toEqual(new Set(['SCL-P002', 'SCL-L001']));
+  });
+
+  it('tìm được mã T/S/W của P1.3 (regex bao T/S/W)', () => {
+    expect(scanCodes('lỗi SCL-T002 và SCL-S020, cảnh báo SCL-W001')).toEqual(
+      new Set(['SCL-T002', 'SCL-S020', 'SCL-W001']),
+    );
   });
 });
 
