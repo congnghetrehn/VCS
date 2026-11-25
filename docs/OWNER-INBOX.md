@@ -7,9 +7,9 @@
 Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần cứng) · **X** DỮ LIỆU CẦN CÓ · **S** THAY ĐỔI SPEC/LỚN · **K** KÝ DUYỆT milestone · **R** DUYỆT SAU (tầng B)
 
 ## 0. Tóm tắt (AI cập nhật mỗi lần ghi)
-- Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). D-001/D-004 ĐÃ XONG (xem mục D-001/D-004); M0 ĐÃ KÝ 2026-11-24.
-- Việc cần anh trong tuần này: quyết D-001…D-005; chạy T-001 (S6, môi trường Windows); chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA
-- Cập nhật lần cuối: 2026-11-24
+- Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). D-001/D-004/D-005 ĐÃ XONG; M0 ĐÃ KÝ 2026-11-24; M1 ĐÃ KÝ 2026-11-25.
+- Việc cần anh trong tuần này: quyết §16.5 (D-006) + OQ-161; chạy T-001 (S6, môi trường Windows); chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA; VERIFY §14 với PLCSIM + mã thật (xem `docs/verify-owner-guide.md` mục 3)
+- Cập nhật lần cuối: 2026-11-25
 - Nhãn/milestone GitHub (II.7): CHƯA CHẠY — GitHub MCP không có tool tạo nhãn/milestone (46 tool đã kiểm, không có); cần làm qua giao diện GitHub hoặc chủ sản phẩm. Không tự đổi branch protection (D-001).
 
 ---
@@ -58,10 +58,20 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 **Bối cảnh:** P0.9 là prompt tùy chọn (PWA shell), ngoài spec; nếu làm cần quyết HTTPS cho LAN.
 **Lựa chọn:**
 - [ ] A — Hoãn tới sau M0 (mặc định)
-- [ ] B — Làm ở P0.9, cần quyết HTTPS cho LAN trước
+- [x] B — Làm ở P0.9, cần quyết HTTPS cho LAN trước
+**Đã quyết 2026-11-25: chọn B.** Chủ sản phẩm yêu cầu làm P0.9 ngay sau khi ký M1. HTTPS cho LAN: P0.9 ghi ADR đề xuất phương án (mkcert/reverse proxy) vào OWNER-INBOX mục D, KHÔNG tự đổi bind mặc định.
 **Đề xuất của AI:** A, để M0 không bị kéo dài.
 **Hệ quả nếu chọn khác:** B thì cần anh quyết cách cấp chứng chỉ HTTPS cho LAN.
 **Việc đang chờ:** P0.9 · **Liên quan:** BOOTSTRAP bước 7, SKILL-ui-pwa-hmi §9
+
+### D-006 · §16.5 — giữ mã lỗi tách riêng hay gom về U001? · Chặn: không chặn ký M1 · Hạn mong muốn: trước M2
+**Bối cảnh:** Chữ spec §16.5 viết "SCL-U001" cho mọi lệnh chưa hỗ trợ, nhưng thực tế đã kiểm chứng bằng probe (đều lỗi ồn ào, có vị trí, exit 2 — không gì chạy sai im lặng): `String` → SCL-U001 (3:7); `POINTER`/`ANY` → SCL-T001 "kiểu chưa biết"; mảng nhiều chiều/`GOTO` → SCL-P002. Chỉ M1 §17 quy định String → U001; các trường hợp còn lại rơi vào nhánh lỗi kiểu/cú pháp trước khi tới U001. Xem `docs/acceptance/M1.md` §16.5 và `docs/verify-owner-guide.md` mục 6.
+**Lựa chọn:**
+- [ ] A — Giữ nguyên, chỉ ghi anh chấp nhận phạm vi mã này, không sửa code
+- [ ] B — SCR gom mọi cấu trúc ngoài EBNF về một mã U001 (đổi spec + sửa parser, làm ở phase sau)
+**Đề xuất của AI:** A, vì mọi trường hợp đều đã ồn ào + có vị trí; gom mã chỉ đổi tên lỗi, không tăng an toàn.
+**Hệ quả nếu chọn khác:** B thì cần SCR + sửa parser ở phase sau.
+**Việc đang chờ:** M1 đã ký (giữ mặc định) · **Liên quan:** M1 §16.5, OQ-102
 
 ## 2. KIỂM THẬT (T) — cần anh chạy trên môi trường thật
 
@@ -139,8 +149,8 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 ## 5. KÝ DUYỆT MILESTONE (K)
 | Milestone | Gói bằng chứng | Mục KIỂM THẬT liên quan | Trạng thái | Ký (ngày/người) |
 |---|---|---|---|---|
-| M0 | docs/acceptance/M0.md | — | ☐ chưa yêu cầu | |
-| M1 | docs/acceptance/M1.md | T-… | ☐ | |
+| M0 | docs/acceptance/M0.md | — | ✔ đã ký 2026-11-24 | 2026-11-24 / Tiến |
+| M1 | docs/acceptance/M1.md | VERIFY §14 (PLCSIM/S1, T-002/T-003) | ✔ đã ký 2026-11-25 | 2026-11-25 / Tiến |
 | M2 | docs/acceptance/M2.md | X-003 | ☐ | |
 | M3 | docs/acceptance/M3.md | X-004 | ☐ | |
 | M4 | docs/acceptance/M4.md | T-… (UaExpert/SCADA/Modbus) | ☐ | |
@@ -151,6 +161,8 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 |---|---|---|---|---|
 | R-001 | Bootstrap | Merge PR `chore/docs-bootstrap` → `develop` khi tự rà soát sạch, dù chưa có CI — ngoại lệ duy nhất theo BOOTSTRAP bước 9 | Chưa có CI ở bước bootstrap; PR chỉ chứa tài liệu | ☐ chấp nhận · ☐ đổi thành: |
 | R-002 | P0.1 | Viết `package.json` theo mặc định D-002 (A): repo private, `license: UNLICENSED`, tên gói giữ `@vcs/*`, chưa tạo file LICENSE | D-002 đang mở; P0.1 cần `package.json` để cài tooling | ☐ chấp nhận · ☐ đổi thành: |
+| R-003 | P1.6 | 15 mặc định tier B (OQ-182…196): LAD theo M1 §5 khi chưa có mã LAD thật (OQ-182); `pos`/`neg` theo R_TRIG/F_TRIG (OQ-183); bảng rlo sau box std, CTUD→QU (OQ-184); box std luôn gọi, box toán chỉ khi EN (OQ-185, golden L); network map = chỉ số body (OQ-186); DB field không địa chỉ trực tiếp (OQ-187); instance DB từ ctx/SCL DATA_BLOCK (OQ-188); temp `__lad_rlo` (OQ-189); export `fbInterfaceStruct` (OQ-190); `Array[lo..hi] of T` (OQ-191); FC/OB không static (OQ-192); diagnostic line=1/col=1 + network id trong message (OQ-193); tên key box IN1/IN2/OUT/… (OQ-194); Const không type → Int, PT bắt buộc `type:'Time'` (OQ-195); local `#name.member` (OQ-196). Không có tier C — plan → triển khai liên tục theo quyết định 2026-11-25. | Các mục ghi VERIFY (OQ-183/184/185) chỉ PLCSIM/S1 mới chốt được; sai thì SCR | ☐ chấp nhận · ☐ đổi thành: |
+| R-004 | P1.7 | 20 mặc định tier B (OQ-197…216): X-002/S1 không chặn P1.7 (OQ-197); tag `"NAME"` giải qua ctx tags, không thấy → T001 (OQ-198 — phát hiện: OB1.scl §13 hiện không biên dịch được); quy tắc step runner bảng E (OQ-199); key YAML mở rộng force/snapshot/restore (OQ-200); lỗi runner = GoldenError, exit 0/1/2 (OQ-201); discovery `plc/*.scl` + `*.lad.json` (OQ-202); `vcs run --scans N` (OQ-203); `ir dump <dir>` (OQ-204); `vcs golden run` (OQ-205); WS `plc.*` 10 Hz LWW (OQ-206); `sim.state.plc?` (OQ-207); Build compile-check, không hot reload; Save chỉ trong `plc/` (OQ-208); Monaco + ADR-0008 (OQ-209); heap bench < 1 MB, profile trước (OQ-210); 100 YAML golden (OQ-211); draft VERIFY, không chạy thí nghiệm (OQ-212); không thêm `scanAt` (OQ-213); LAD YAML cần DB SCL trước (OQ-214); layout demo motor-interlock (OQ-215); Watch write/force qua introspection (OQ-216). Không có tier C — plan → triển khai liên tục theo quyết định 2026-11-25. | Bench là rủi ro lớn nhất (smoke P1.4 chỉ ~520 scan/s vs mục tiêu ≥ 1000); nếu 3 lần tối ưu không đạt → dừng, báo + đề xuất thu hẹp (tier C), không hạ ngưỡng | ☐ chấp nhận · ☐ đổi thành: |
 
 ## 7. Lịch sử (đã xử lý)
 | ID | Ngày | Kết quả | Ghi chú |
