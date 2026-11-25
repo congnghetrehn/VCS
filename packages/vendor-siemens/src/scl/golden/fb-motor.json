@@ -1,0 +1,151 @@
+{
+  "blocks": [
+    {
+      "body": [
+        {
+          "cond": {
+            "op": "load",
+            "ref": {
+              "k": "local",
+              "name": "iStart"
+            },
+            "type": "Bool"
+          },
+          "else": [],
+          "elsif": [],
+          "op": "if",
+          "src": {
+            "col": 3,
+            "endCol": 9,
+            "endLine": 15,
+            "file": "FB_Motor.scl",
+            "line": 13
+          },
+          "then": [
+            {
+              "op": "assign",
+              "src": {
+                "col": 5,
+                "endCol": 21,
+                "endLine": 14,
+                "file": "FB_Motor.scl",
+                "line": 14
+              },
+              "target": {
+                "k": "local",
+                "name": "latched"
+              },
+              "value": {
+                "op": "const",
+                "type": "Bool",
+                "value": true
+              }
+            }
+          ]
+        },
+        {
+          "cond": {
+            "op": "load",
+            "ref": {
+              "k": "local",
+              "name": "iStop"
+            },
+            "type": "Bool"
+          },
+          "else": [],
+          "elsif": [],
+          "op": "if",
+          "src": {
+            "col": 3,
+            "endCol": 9,
+            "endLine": 18,
+            "file": "FB_Motor.scl",
+            "line": 16
+          },
+          "then": [
+            {
+              "op": "assign",
+              "src": {
+                "col": 5,
+                "endCol": 22,
+                "endLine": 17,
+                "file": "FB_Motor.scl",
+                "line": 17
+              },
+              "target": {
+                "k": "local",
+                "name": "latched"
+              },
+              "value": {
+                "op": "const",
+                "type": "Bool",
+                "value": false
+              }
+            }
+          ]
+        },
+        {
+          "op": "assign",
+          "src": {
+            "col": 3,
+            "endCol": 20,
+            "endLine": 19,
+            "file": "FB_Motor.scl",
+            "line": 19
+          },
+          "target": {
+            "k": "local",
+            "name": "qRun"
+          },
+          "value": {
+            "op": "load",
+            "ref": {
+              "k": "local",
+              "name": "latched"
+            },
+            "type": "Bool"
+          }
+        }
+      ],
+      "id": "FB_Motor",
+      "interface": {
+        "inout": [],
+        "input": [
+          {
+            "name": "iStart",
+            "type": "Bool"
+          },
+          {
+            "name": "iStop",
+            "type": "Bool"
+          }
+        ],
+        "output": [
+          {
+            "name": "qRun",
+            "type": "Bool"
+          }
+        ],
+        "static": [
+          {
+            "name": "latched",
+            "type": "Bool"
+          }
+        ],
+        "temp": []
+      },
+      "kind": "FB",
+      "name": "FB_Motor",
+      "src": {
+        "col": 1,
+        "endCol": 19,
+        "endLine": 20,
+        "file": "FB_Motor.scl",
+        "line": 1
+      }
+    }
+  ],
+  "dbs": [],
+  "organization": [],
+  "udts": []
+}

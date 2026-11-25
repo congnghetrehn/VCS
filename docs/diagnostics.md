@@ -22,7 +22,20 @@
 | `SCL-P001` | error | Thiếu ';' cuối statement | Thêm ';' cuối statement tại vị trí đã báo. |
 | `SCL-P002` | error | Lỗi cú pháp SCL | Sửa theo "expected ..." tại vị trí đã báo. |
 | `SCL-P003` | error | Quá nhiều lỗi cú pháp (tối đa 100) | Sửa 100 lỗi đầu đã báo rồi biên dịch lại. |
+| `SCL-S020` | error | Đệ quy gọi block | FC/FB không được gọi chính nó (trực tiếp hay gián tiếp) — tách thành block khác. |
+| `SCL-T001` | error | Tên chưa khai báo | Khai báo biến/kiểu/block trước khi dùng, kiểm tra chính tả. |
+| `SCL-T002` | error | Kiểu không khớp | Đổi kiểu biến hoặc giá trị cho khớp; thu hẹp phải dùng hàm chuyển đổi tường minh. |
+| `SCL-T003` | error | Toán tử không áp dụng cho kiểu | Phép số học chỉ dùng cho số nguyên/số thực/Time; AND/OR/XOR/NOT dùng cho Bool hoặc Byte/Word/DWord. |
+| `SCL-T004` | error | Lỗi gọi block/hàm | Gọi FB cần instance (#fb hoặc "DB"); kiểm tra tên và kiểu tham số trong khai báo block. |
+| `SCL-T005` | error | Truy cập member/index sai | Kiểm tra tên field, kiểu index và khoảng chỉ số hằng của mảng. |
+| `SCL-T006` | error | Gán không hợp lệ | VAR_INPUT chỉ đọc trong FB/FC; VAR_CONSTANT không được gán. |
+| `SCL-T007` | error | EXIT/CONTINUE ngoài vòng lặp | EXIT/CONTINUE chỉ dùng trong FOR/WHILE/REPEAT. |
+| `SCL-T008` | error | Biểu thức không hằng | Giá trị khởi tạo, label CASE và init DB phải là hằng (literal, phép tính trên hằng, VAR_CONSTANT). |
+| `SCL-T009` | error | Khai báo trùng tên | Đổi tên một trong hai khai báo trong cùng scope. |
+| `SCL-T010` | error | Thu hẹp ngầm định | Dùng REAL_TO_INT(...)/TRUNC(...) hoặc hàm X_TO_Y tường minh. |
+| `SCL-T011` | error | Định nghĩa kiểu đệ quy | UDT không được chứa chính nó (trực tiếp hay gián tiếp). |
 | `SCL-U001` | error | Cấu trúc SCL chưa hỗ trợ | Dùng cấu trúc trong phạm vi M1 (xem M1 §4.2 và Phụ lục A); String không hỗ trợ. |
+| `SCL-W001` | warning | Đọc TEMP trước khi ghi | TEMP không khởi tạo trên PLC thật; gán giá trị trước khi đọc. |
 | `SIM-E001` | error | Component lỗi khi chạy | Xem diagnostics của component và sửa logic của nó. |
 | `SIM-E002` | error | Component bất đồng bộ trong đường đồng bộ | Chuyển component sang đường async (asyncStep), hoặc viết lại thành đồng bộ. |
 | `SIM-E003` | error | Snapshot không tương thích | Snapshot được tạo bởi phiên bản khác; chạy lại từ đầu hoặc migrate snapshot. |

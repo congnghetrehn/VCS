@@ -6,6 +6,7 @@ import { Command } from 'commander';
 import { runCommand } from './run.js';
 import { serveCommand } from './serve.js';
 import { validateCommand } from './validate.js';
+import { irDumpCommand } from './ir.js';
 import { VERSION, versionCommand } from './version.js';
 
 export function createProgram(): Command {
@@ -73,6 +74,15 @@ export function createProgram(): Command {
         process.exitCode = await serveCommand(dir, opts);
       },
     );
+
+  const ir = program.command('ir').description('Lệnh liên quan tới IR (M1 §6)');
+  ir.command('dump')
+    .description('Biên dịch file SCL ra IR JSON (exit 0 ok, 2 lỗi biên dịch, 3 sai tham số)')
+    .argument('[file]', 'file SCL (.scl)')
+    .option('--out <file>', 'ghi JSON ra file thay vì stdout')
+    .action(async (file: string | undefined, opts: { out?: string }) => {
+      process.exitCode = await irDumpCommand(file, opts);
+    });
 
   return program;
 }
