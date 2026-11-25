@@ -11,9 +11,9 @@
 ## 1. Vị trí hiện tại
 
 - Milestone: **M1 — ĐÃ KÝ 2026-11-25** (M0 đã ký 2026-11-24, trên main `31c7200`; P1.1–P1.7 + G1 đã merge vào `develop` qua PR #20–#27; M1 đã đẩy main PR #29 `1a2beed3`; P0.9 đã merge PR #30 `6a9d083` vào `develop`)
-- Prompt đang làm / vừa xong: P0.9 — **✔ đã merge PR #30 `6a9d083` vào `develop` 2026-11-26 01:33 +07**. Tiếp theo: M2, bắt đầu P2.1 (plan §24).
-- Nhánh: `m2/p2.1-plant-foundation` (từ `878401e` = P0.9 trên `develop` `6a9d083`)
-- Cập nhật lần cuối: 2026-11-25 bởi AI (M1 đã ký; đẩy main + P0.9 tiếp theo)
+- Prompt đang làm / vừa xong: P2.1 — **✔ đã merge PR #31 `348f4dd` vào `develop` 2026-11-26 03:49 +07**. Tiếp theo: P2.2 (plan §25, bản này).
+- Nhánh: `m2/p2.2-motor-dol` (từ `598618f` = P2.1 trên `develop` `348f4dd`)
+- Cập nhật lần cuối: 2026-11-26 bởi AI (P2.1 đã merge PR #31; P2.2 plan §25)
 
 ## 2. Tiến độ prompt
 
@@ -37,8 +37,8 @@
 | P1.6   | ✔ xong (gate xanh local; đã merge PR #25 `0f58e15` vào `develop` 2026-11-25 13:28 +07, CI 8 successful + 2 skipped) | PR #25, nhánh `m1/p1.6-lad` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-25 (1749 test, 68 file; 83 test mới) + build xanh + bench guard PASS | xem §21; OQ-182…196 đóng, OQ-161 mở |
 | P1.7   | ✔ xong (gate xanh local; đã merge PR #26 `7a927e1` vào `develop` 2026-11-25 16:23 +07, CI 8 successful + 2 skipped) | PR #26, nhánh `m1/p1.7-golden-runner` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-25 (1927 test, 76 file; 178 test mới) + build xanh + bench softplc 1738 scan/s (parent) / 1664 scan/s (G1) | xem §22; OQ-197…216 đóng, OQ-217 mới, OQ-161 mở |
 | G1     | ✔ đã ký 2026-11-25 (gói nghiệm thu `docs/acceptance/M1.md`, 9/9 §16 ĐẠT; probe bổ sung 4/4 PASS; §16.5 + OQ-161 chưa quyết, giữ mặc định) | nhánh `m1/g1-acceptance` (đã merge PR #27 `85ab770`) | gate xanh 2026-11-25 ở bản sao sạch `/tmp/vcs-g1` (1927 test + coverage PASS, e2e 6/6, bench softplc 1664 scan/s) | gói nghiệm thu M1; ký là tier C |
-| P2.1   | ◐ đang làm (plan §24, 2026-11-26; 18 OQ tier B OQ-235…252, không có tier C chặn) | nhánh `m2/p2.1-plant-foundation` (plan) |                                                                                                                                                                           | ⚠ plan-first; X-003 không chặn P2.1 (chỉ chặn P2.7) |
-| P2.2   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
+| P2.1   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #31 `348f4dd` vào `develop` 2026-11-26 03:49 +07, CI 8 successful + 2 skipped) | PR #31, nhánh `m2/p2.1-plant-foundation` (đã merge) | lint/typecheck/depcheck/test/review:cheats xanh 2026-11-26 (2121 test, 87 file; 175 test mới) + build xanh + bench softplc 1677 scan/s (parent) | xem §24; OQ-235…252 đóng |
+| P2.2   | ◐ đang làm (plan §25, 2026-11-26; 14 OQ tier B OQ-253…266, không có tier C chặn) | nhánh `m2/p2.2-motor-dol` (plan) |                                                                                                                                                                           | ⚠ plan-first; X-003 không chặn P2.2 (chỉ chặn P2.7) |
 | P2.3   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | P2.4   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P2.5   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
@@ -3358,3 +3358,404 @@ opt-in). OQ-235…252 đóng hết (18/18, đã áp dụng ở P2.1).
 (chỉ chặn P2.7). PL-W020 phát ở validate (đã làm); `wireBreakRaw` mặc định
 32767 + raw clamp + Real fround ghi UNVERIFIED ở semantics §20. P2.2 tiếp
 theo: `motor_dol` (model thật đầu tiên).
+
+## 25. P2.2 — model `motor_dol` (plan)
+
+**Prompt (PROMPTS M2, phase P2.2 — nguyên văn):**
+```
+Làm P2.2 theo AGENTS.md §9 (plan-first). Đọc: … → M2 §7.1, 11.1.
+Nhiệm vụ: motor_dol đúng máy trạng thái M2 §7.1 + docgen sinh docs/equipment/motor_dol.md.
+TRƯỚC KHI CODE: tự tính tay bảng timeline M2 §11.1 (startDelayMs 500, stopDelayMs 800, stepMs 10) và thêm ≥ 6 timeline cho fault (overload, failToStart, contactorStuck, notReady, localMode).
+Gate: ≥ 14 golden motor_dol; mỗi fault/preset có test.
+```
+**Nhánh:** `m2/p2.2-motor-dol` (từ `598618f`, nội dung = develop sau PR #31).
+**Trạng thái:** ☑ plan → ☑ implement → ☑ gate (xanh, bản sao sạch `~/.cache/vcs-p22`) → ☐ PR → ☐ merge.
+
+### Đọc
+- AGENTS.md (luật, gate, tier A/B/C); PROMPTS M2 phase P2.2; M2 spec §2
+  (file golden/docgen), §3–§7 (nền plant), §7.1 (`motor_dol`), §11.1
+  (timeline mẫu), §11.2 (snapshot), §12 (bench); STATE §24 (P2.1);
+  AMENDMENTS; OWNER-INBOX (§6 R-006); PACKAGE-RULES.md §`@vcs/plant`.
+- Điểm xuất phát P2.1 (đã merge PR #31, commit `348f4dd`): `@vcs/plant`
+  (registry, engine, FaultManager, adapter, delay/lag/hysteresis, rng
+  mulberry32, EventLog, source manual/const/ramp/sine/link + topo,
+  snapshot/restore, fake model trong test-helpers), `@vcs/schemas`
+  (equipment/naming/profile/fault), 2121 test (87 file), plant coverage
+  91.84% lines, diagnostics 58 mã, lint heap 4096 (commit `598618f`).
+
+### Tóm tắt hiểu biết (≤ 8 dòng)
+1. P2.2 = model thật đầu tiên trên nền P2.1: `motor_dol` (M2 §7.1); không
+   đổi nền trừ phần mở rộng ghi ở đây.
+2. Model: 6 role (runCmd DO Bool bắt buộc; runFb DI Bool bắt buộc;
+   ready/remote/overloadOk DI Bool tùy chọn; currentFb AI Int tùy chọn),
+   14 tham số có mặc định, 5 trạng thái, 5 fault thiết bị + 4 preset.
+3. State machine 6 luật theo thứ tự 1–6; emit mỗi bước
+   runFb/overloadOk/ready/remote/currentFb; speedPct + currentA là observable.
+4. Golden: 1 file YAML/model, 14 case tối thiểu (§11.1) — bảng A–K tính tay
+   dưới đây.
+5. Docgen: `plant/src/docgen.ts` + script `scripts/gen-equipment-docs.ts`
+   → `docs/equipment/motor_dol.md`, CI `--check`.
+6. Không cần I/O list thật (X-003 chỉ chặn P2.7); không chạm OQ-161
+   (không FB lồng); không đổi spec M1 → không SCR.
+7. Không mã diagnostic mới (dùng PL-E001 chung); không bench mới (OQ-245:
+   bench ở P2.3/P2.4).
+8. Test target ≥ 44 mới, tổng ≥ 2165.
+
+### Phạm vi
+**Làm:**
+- `packages/plant/src/models/motor_dol.ts`: `MotorDolParams` (zod, mặc định
+  §7.1), `MotorDolState`, `motorDolModel: EquipmentModel` (qua helper
+  `register()` của registry), `docs` (states/transitions/notes, OQ-260).
+- Đăng ký model vào `defaultRegistry` (`models/index.ts` import + register;
+  `motor_dol` export công khai khỏi `@vcs/plant` qua `index.ts`).
+- Golden runner plant: `packages/plant/src/golden/{schema,runner}.ts` +
+  harness `packages/plant/src/golden/motor-dol.test.ts` (mẫu M1:
+  `readdirSync` + `describe.each`, P1.7) + file
+  `packages/plant/golden/motor_dol.golden.yaml` (14 case A–K).
+- Docgen: `packages/plant/src/docgen.ts` (`generateEquipmentMarkdown`) +
+  `scripts/gen-equipment-docs.ts` (+ `--check`) + script `docs:equipment` ở
+  root `package.json` + CI check job 1 dòng + `docs/equipment/motor_dol.md`
+  (sinh ra, commit).
+- Unit test: state machine (edge case ngoài golden), params validation,
+  docgen, snapshot/restore giữa STARTING (§11.2).
+- `docs/semantics.md` §21 mới: ngữ nghĩa motor_dol + các điểm UNVERIFIED
+  (OQ-256, OQ-259).
+**Không làm (out of scope):** model khác (conveyor_simple, valve_2way… —
+P2.3); loader file `plant/*.yaml` (P2.4, OQ-252); import CSV/XLSX (P2.5);
+address/validate/diff (P2.6); auto-suggest (P2.7, X-003); UI (P2.8); bench
+plant (P2.3/P2.4, OQ-245); sửa nền P2.1 (engine/FaultManager/adapter) trừ
+khi test chỉ ra lỗi — khi đó sửa nền + ghi vào §25 "Lệch so với plan".
+
+### Thiết kế
+1. **Model định nghĩa** (`motor_dol.ts`, ~250 dòng): `paramsSchema` zod
+   (không `.strict()` — theo quy ước P2.1 §24; unknown key bị zod strip,
+   test ghim hành vi này). Roles đúng bảng §7.1, synonyms nguyên văn (không
+   tự bịa): runCmd DO Bool bắt buộc [RUN_CMD, START_CMD, RUN, START, CMD,
+   BETRIEB_BEFEHL]; runFb DI Bool bắt buộc [RUN_FB, RUNNING, RUN_ST, AUX,
+   RUN_FBK, RUECKMELDUNG]; ready DI Bool tùy chọn [READY, RDY, MCB_OK,
+   BREAKER_ON]; remote DI Bool tùy chọn [REMOTE, REM, AUTO_SEL]; overloadOk
+   DI Bool tùy chọn [OVL_OK, OL_OK, THERMAL_OK, OVERLOAD_OK, OVL];
+   currentFb AI Int tùy chọn [CUR, CURRENT, AMP, I_ACT] unit A. Params +
+   mặc định đúng §7.1 (14 tham số): các `*_Ms` int ≥ 0; `ratedCurrentA ≥ 0`;
+   `noLoadCurrentFrac`/`loadFraction` ∈ [0,1]; `inrushMult ≥ 1`;
+   `inrushMs ≥ 0`; `overloadNC`/`resetRequiresCmdOff`/`defaultRemote`/
+   `defaultReady` boolean. Sai → zod throw → engine validate phát PL-E001
+   (mã cấu hình chung, không mã mới). `version: '1.0.0'` (string — theo
+   registry P2.1; spec §4.5 ghi `version: number` là lệch so với registry đã
+   làm, motor_dol theo registry, không đổi registry). State:
+   `{state, t0, t1, speedPct, tripClearedAt}` (JSON-serializable;
+   `initialState` = STOPPED, t0=t1=0, speedPct=0, tripClearedAt=undefined).
+2. **State machine** (`step(ctx)`): đọc `runCmd = ctx.cmd('runCmd')` (DO
+   Bool); `canRun` từ `ctx.fault('localMode')`/`ctx.fault('notReady')`
+   (không đọc tag ready/remote — chúng là đầu ra emit, OQ-259). 6 luật theo
+   thứ tự, **một chuyển đổi duy nhất mỗi bước** (else-if, OQ-255): luật 1
+   overload trip (T−sinceMs ≥ tripDelayMs; sinceMs = activateAtMs —
+   FaultManager đặt sinceMs = activateAtMs khi advance, đã kiểm code);
+   luật 2 STOPPED→STARTING (t0=T); luật 3 STARTING: !runCmd → STOPPED, else
+   T−t0 ≥ startDelayMs → RUNNING; luật 4 RUNNING: !runCmd &&
+   !contactorStuck → STOPPING (t1=T); luật 5 STOPPING: T−t1 ≥ stopDelayMs →
+   STOPPED (runCmd trong STOPPING bị bỏ qua); luật 6 TRIPPED: !overload.active
+   && T−clearedAtMs ≥ overloadResetMs && (!resetRequiresCmdOff || !runCmd) →
+   STOPPED (clearedAtMs = ctx.fault('overload').clearedAtMs, OQ-263).
+   - `speedPct`: target = (state sau chuyển đổi ∈ {STARTING, RUNNING}) ?
+     100 : 0 (OQ-256); dùng lại `rateLimitStep(speedPct, target, 10,
+     100/accelTimeMs, 100/coastTimeMs)` của P2.1.
+   - `currentFb`: nếu state sau chuyển đổi ∈ {STARTING, RUNNING} và
+     ratedCurrentA > 0: base = rated×(noLoad + (1−noLoad)×load×speed/100);
+     cộng inrush rated×(inrushMult−1)×(1−(T−t0)/inrushMs) khi T−t0 <
+     inrushMs; ngược lại 0. Emit qua `ctx.emit('currentFb', currentA)`
+     (tag harness dùng scaling 0..100 A, OQ-258).
+   - Emit mỗi bước: `runFb = state ∈ {RUNNING, STOPPING}`; `overloadOk =
+     overloadNC ? (state != TRIPPED) : (state == TRIPPED)`; `ready = readyOk
+     && state != TRIPPED`; `remote = remoteOk`. (Role chưa gán → engine bỏ
+     qua emit, không lỗi.)
+   - Observables: `state` (string), `speedPct`, `currentA`,
+     `running = speedPct > 5`, `energized = state ∈ {STARTING, RUNNING}`.
+   - Không cấp phát trong step (§5.6): model không new object/array/Map
+     trong step; API ctx của P2.1 đã có — implementer kiểm tra
+     `ctx.fault()`/`ctx.cmd()`/`ctx.emit()` không tạo object mới mỗi bước;
+     nếu API hiện tại cấp phát thì ghi OQ, không sửa nền trong P2.2.
+3. **Faults + presets** (§7.1): 5 equipment fault — `overload`,
+   `failToStart` (lệnh bị bỏ qua, không dòng), `contactorStuck` (giữ RUNNING
+   dù hết lệnh; runFb vẫn true), `notReady`, `localMode` (PLC không điều
+   khiển được; remote=false). Tất cả latch tới khi clear (không
+   durationMs); không paramsSchema (spec không khai param). 4 preset:
+   `noRunFeedback` = signal `stuck(false)` trên `runFb`;
+   `feedbackStuckOn` = `stuck(true)` trên `runFb`; `overloadTrip` =
+   equipment `overload`; `commandLost` = signal `lost` trên `runCmd`.
+   Engine P2.1 đã có `injectFault`/`clearFault`/`applyPreset` (inject sau
+   step(t) với `when: {at:'now'}` → activateAtMs = simTime = t, hiệu lực từ
+   step t+dt; clear → clearedAtMs = t) — golden runner dùng đúng các API
+   này, không thêm API engine.
+4. **Golden runner plant** (`packages/plant/src/golden/`): `schema.ts`
+   (zod cho file golden — OQ-253), `runner.ts` (`parseGoldenYaml`,
+   `runPlantGolden(engine, golden)` — harness dựng fresh `PlantEngine` mới
+   cho mỗi case, không phụ thuộc `engine.reset()`), harness
+   `motor-dol.test.ts` (mẫu `vendor-siemens/src/golden/golden.test.ts`:
+   `readdirSync` + `describe.each` + test inventory: đủ 14 case, id duy
+   nhất). Định dạng file (OQ-253/254/264):
+   ```yaml
+   model: motor_dol
+   stepMs: 10
+   seed: 42
+   cases:
+     - id: start-stop
+       description: Timeline §11.1 — start/stop cơ bản
+       params: {}            # ghi đè defaultParams (tùy chọn)
+       steps:
+         - t: 0
+           expect: {state: STOPPED, runFb: false, overloadOk: true, ready: true, remote: true, speedPct: 0, running: false, energized: false}
+         - t: 100
+           cmd: {runCmd: true}
+           expect: {state: STOPPED}
+         - t: 110
+           expect: {state: STARTING, runFb: false, speedPct: 0.6667}
+   ```
+   Ngữ nghĩa 1 step entry `{t, cmd?, fault?, expect?}` (OQ-254): runner gọi
+   `engine.step(t)`; kiểm `expect` sau step, TRƯỚC khi áp cmd/fault của
+   entry này; sau đó áp `cmd` (ghi TagDB trực tiếp — cùng cơ chế test P2.1
+   dùng), `fault` (inject/preset/signal với `when: {at:'now'}`), `clear`.
+   `fault` entry: `{id: overload}` | `{preset: overloadTrip}` |
+   `{signal: {role: runFb, type: stuck, params: {value: false}}}` |
+   `{clear: overload}`; inject thêm `durationMs?`. Validate: t tăng dần,
+   gap là bội số stepMs (mirror M1 OQ-199); `stepMs` trong file phải bằng
+   stepMs harness (10). `expect` (OQ-257): key resolve role trước (giá trị
+   tag sau step, eng đối với AI), rồi observable
+   (state/speedPct/currentA/running/energized); key lạ → GoldenError. Số:
+   |a−b| ≤ 0.01 mặc định; `{approx, eps}` ghi đè; Bool/string chính xác.
+   Harness tags (OQ-258): gán đủ 6 role qua helper trong
+   `packages/plant/src/test-helpers.ts` (mở rộng helper hiện có); currentFb
+   scaling 0..100 A explicit; currentA kiểm qua observable, không qua tag
+   (tag read-back qua adapter có sai số làm tròn — kiểm riêng ở unit test).
+   Dep mới: `yaml@2.9.1` vào `packages/plant/package.json` (OQ-262; đã có
+   trong tree qua `@vcs/schemas`, không dep ngoài mới).
+5. **Docgen** (`packages/plant/src/docgen.ts`): `generateEquipmentMarkdown(
+   model: EquipmentModel): string` — thuần, tất định: `# <type>`,
+   description, version; bảng Roles (role/kind/type/optional/synonyms);
+   bảng Tham số (tên/mặc định/mô tả — motor_dol ghi `.describe()` tiếng
+   Việt cho mỗi field paramsSchema); bảng Observables; bảng Equipment fault;
+   bảng Preset; mục Trạng thái + Chuyển đổi (từ `model.docs`, OQ-260); mục
+   Ghi chú (từ `docs.notes` — gồm OQ-259: defaultRemote/defaultReady chưa
+   dùng). `EquipmentModel` thêm `docs?: { states?: Array<{state: string;
+   description: string}>; transitions?: string[]; notes?: string[] }`
+   (OQ-260) — additive, không breaking; motor_dol điền states/transitions
+   từ §7.1. Script `scripts/gen-equipment-docs.ts`: import
+   `defaultRegistry` từ `@vcs/plant` (root package.json thêm
+   `@vcs/plant: workspace:*` vào devDependencies — tiền lệ
+   `scripts/gen-diagnostics.ts` dùng `@vcs/schemas`; OQ-261); lặp
+   `listModels()` → ghi `docs/equipment/<type>.md`; `--check`: so sánh với
+   file đã commit, khác → exit 1 + liệt kê file. Npm script
+   `docs:equipment` (root); CI check job thêm `pnpm docs:equipment --check`
+   sau `pnpm docs:diagnostics --check` (1 dòng). `docs/equipment/motor_dol.md`
+   commit (file sinh ra).
+
+### Bảng tính tay (quy ước chung — OQ-254)
+- T = thời điểm step; `cmd`/`fault`/`clear` ghi ở cột "sau step T" được áp
+  sau `engine.step(T)` (hiệu lực từ step T+dt); `expect` kiểm sau step(T),
+  trước khi áp cmd/fault của entry đó. stepMs = 10, dt = 10 ms.
+- speedPct: +2/3 mỗi bước khi target 100 (100/1500×10), −1/3 mỗi bước khi
+  target 0 (100/3000×10); target lấy theo state SAU chuyển đổi (OQ-256).
+  Số bước tăng từ 110: T=600 → 50 bước → 33.33; T=610 → 51 → 34;
+  T=1000 → 90 → 60.
+- currentA (bảng B): base = rated×(noLoad + (1−noLoad)×load×speed/100);
+  inrush = rated×(inrushMult−1)×(1−(T−t0)/inrushMs) trong inrushMs đầu từ t0.
+
+**Bảng A — §11.1 base (start/stop), tham số mặc định, ratedCurrentA=0:**
+| T | sự kiện sau step | expect sau step T |
+|---|---|---|
+| 0 | — | STOPPED, runFb=0, overloadOk=1, ready=1, remote=1, speedPct=0, running=0, energized=0 |
+| 100 | runCmd=1 | STOPPED (plant chưa thấy) |
+| 110 | — | STARTING, runFb=0, speedPct≈0.67 |
+| 600 | — | STARTING, runFb=0, speedPct≈33.33 |
+| 610 | — | RUNNING, runFb=1, speedPct=34 |
+| 1000 | runCmd=0 | RUNNING, runFb=1, speedPct=60 |
+| 1010 | — | STOPPING, runFb=1, speedPct≈59.67 |
+| 1800 | — | STOPPING, runFb=1, speedPct≈33.33 |
+| 1810 | — | STOPPED, runFb=0, speedPct=33 |
+
+**Bảng B — currentFb (ratedCurrentA=10, noLoad 0.35, load 0.8, inrush ×6/1000 ms),**
+cmd như bảng A (runCmd=1 sau step 100, =0 sau step 2000):
+| T | tính tay | expect |
+|---|---|---|
+| 110 | base 10×(0.35+0.65×0.8×0.0067)=3.53; inrush 10×5×(1−0)=50 | currentA≈53.53, speedPct≈0.67 |
+| 610 | base 10×(0.35+0.52×0.34)=5.27; inrush 10×5×(1−0.5)=25 | currentA≈30.27, speedPct=34 |
+| 1110 | base 10×(0.35+0.52×0.6733)=7.00; inrush 0 (1000 ms đã hết) | currentA≈7.00, speedPct≈67.33 |
+| 1610 | speed=100 (đạt ở bước 1600: 150 bước ×2/3) | currentA=8.70, speedPct=100 |
+| 2010 | STOPPING — contactor đã nhả (state ∉ {STARTING, RUNNING}) | currentA=0, speedPct≈99.67 |
+
+**Bảng C — overload khi RUNNING → TRIPPED + reset (F1):** start như bảng A
+(RUNNING từ 610). T=700: fault overload (sau step) — expect RUNNING.
+T=710: TRIPPED, runFb=0, overloadOk=0, ready=0, speedPct≈39.67 (ở 700:
+60 bước ×2/3=40, rồi target 0 → 40−1/3). T=1000: clear overload (sau
+step) — expect TRIPPED. T=1010: TRIPPED (10 < 1000). T=1200: runCmd=0 (sau
+step) — expect TRIPPED. T=2000: STOPPED (2000−1000=1000 ≥ 1000, runCmd=0),
+speedPct=0 (về 0 ở bước 1900: 39.67 ÷ 1/3 = 119 bước). T=2100: runCmd=1
+(sau step) — expect STOPPED. T=2110: STARTING. T=2610: RUNNING.
+
+**Bảng D — overload khi STARTING + tripDelayMs=200 (F2):** runCmd=1 sau
+step 100 → STARTING 110. T=300: fault overload (sau step) — expect
+STARTING. T=490: STARTING (490−300=190 < 200). T=500: TRIPPED
+(500−300=200 ≥ 200), runFb=0 (chưa kịp lên), speedPct≈26.33 (40 bước
+×2/3=26.67 rồi target 0 → 26.67−1/3).
+
+**Bảng E — failToStart (F3):** T=100: fault failToStart + runCmd=1 (sau
+step) — expect STOPPED. T=110…490: STOPPED, runFb=0, currentA=0,
+speedPct=0. T=500: clear failToStart (sau step) — expect STOPPED. T=510:
+STARTING (runCmd vẫn 1). T=1010: RUNNING (510+500).
+
+**Bảng F — contactorStuck (F4):** RUNNING từ 610. T=700: fault
+contactorStuck (sau step). T=1000: runCmd=0 (sau step) — expect RUNNING.
+T=1010: RUNNING (kẹt), runFb=1, speedPct≈60.67 (91 bước ×2/3). T=1500:
+clear stuck (sau step) — expect RUNNING. T=1510: STOPPING, runFb=1,
+speedPct≈93.67 (141 bước ×2/3=94 rồi target 0 → 94−1/3). T=2310: STOPPED,
+speedPct≈66.67 (81 bước giảm ×1/3: 93.67−27).
+
+**Bảng G — notReady (F5):** T=100: fault notReady + runCmd=1 (sau step) —
+expect STOPPED, ready=0. T=400: clear notReady (sau step) — expect STOPPED,
+ready=0 (tại step 400 fault còn active). T=410: STARTING, ready=1. T=910:
+RUNNING.
+
+**Bảng H — localMode (F6):** T=100: fault localMode + runCmd=1 (sau step) —
+expect STOPPED, remote=0. T=400: clear localMode (sau step) — expect
+STOPPED, remote=0. T=410: STARTING, remote=1. T=910: RUNNING.
+
+**Bảng I — runCmd lại true trong lúc STOPPING bị bỏ qua (F7):** RUNNING từ
+610. T=1000: runCmd=0 (sau step) → STOPPING 1010. T=1200: runCmd=1 (sau
+step) — expect STOPPING. T=1810: STOPPED (chỉ 1 chuyển đổi/step — OQ-255;
+luật 2 không bắn cùng bước), runFb=0, speedPct≈32.67 (1010: 59.67; 81 bước
+giảm ×1/3 → 59.67−27). T=1820: STARTING, speedPct≈33.33 (32.67+2/3).
+T=2320: RUNNING, speedPct≈66.67 (50 bước ×2/3 sau 1820: 33.33+33.33).
+
+**Bảng J — STARTING abort (F8):** runCmd=1 sau step 100 → STARTING 110.
+T=300: runCmd=0 (sau step) — expect STARTING, speedPct≈13.33 (20 bước
+×2/3). T=310: STOPPED, runFb=0 (chưa kịp lên), speedPct=13.
+
+**Bảng K — presets (4):**
+- K1 noRunFeedback: preset sau step 100 (+runCmd=1). T=610: RUNNING nhưng
+  runFb=0 (stuck false thắng emit true), speedPct=34.
+- K2 feedbackStuckOn: preset sau step 0. T=10: STOPPED nhưng runFb=1.
+- K3 overloadTrip: preset sau step 700 (như bảng C). T=710: TRIPPED.
+- K4 commandLost: preset sau step 1000 (đang RUNNING). T=1010: STOPPING
+  (plant thấy runCmd=0 dù tag PLC vẫn 1), runFb=1. T=1810: STOPPED.
+
+Tổng: 10 timeline (A–J) + 4 preset (K1–K4) = **14 golden case** = tối thiểu
+§11.1; 8 timeline fault (C–J) ≥ 6 theo prompt (5 fault + 3 edge
+restart/abort).
+
+### Test target
+- Golden: 14 case (A–J + K1–K4) trong 1 file
+  `packages/plant/golden/motor_dol.golden.yaml` + harness
+  `motor-dol.test.ts` (readdirSync + describe.each + test inventory: đủ 14
+  case, id duy nhất).
+- Unit (~30):
+  - Model definition (2): roles/synonyms/params mặc định đúng §7.1;
+    paramsSchema reject (startDelayMs âm, ratedCurrentA âm, loadFraction >
+    1, noLoadCurrentFrac < 0) → PL-E001 qua validate.
+  - State machine edge (10): overload khi STOPPED không trip; overload clear
+    trước khi hết tripDelay → không trip; resetRequiresCmdOff=false → reset
+    khi runCmd còn 1 (sau overloadResetMs); overloadNC=false → overloadOk
+    đảo; role ready/remote không gán → emit bỏ qua, canRun chỉ theo fault
+    (OQ-259); speedPct kẹp 100 (chạy dài); currentFb = 0 khi STOPPING;
+    runFb trong STOPPING vẫn true; snapshot/restore giữa STARTING (§11.2:
+    snapshot ở T=300, chạy tới 700, restore, chạy lại → trace giống hệt,
+    so sánh hash).
+  - Golden runner (6): schema reject (t không tăng; gap không phải bội
+    stepMs; expect key lạ; file thiếu case); cmd/fault áp sau step (bảng A
+    t=100); `{approx, eps}`.
+  - Docgen (4): md chứa đủ bảng (roles/params/observables/faults/presets/
+    states); states/transitions từ docs render đúng; file commit khớp
+    `--check` (CI chạy --check thật).
+  - Harness/tags (2): currentFb tag round-trip qua adapter với scaling
+    0..100 A (eng→raw→eng); golden harness gán đủ 6 role (validate không
+    báo role bắt buộc thiếu).
+- **Tổng: ≥ 44 test mới (14 golden + ~30 unit) → tổng ≥ 2165** (từ 2121).
+  Coverage plant giữ ≥ 85 lines (OQ-251/OQ-265); diagnostics giữ 58 mã
+  (không mã mới).
+
+### Mơ hồ (phân loại)
+**Tier A (tự quyết):** vị trí file theo M2 §2 + dep graph; fake model ở lại
+test-helpers; `version: '1.0.0'` string theo registry (spec §4.5 ghi number
+là lệch, theo registry); spec §7.1 liệt kê **5** fault thiết bị (không phải
+6) — "≥6 timeline" thỏa bằng 8 timeline C–J; overload khi STOPPED không
+trip (luật 1 chỉ STARTING/RUNNING); overload clear trước tripDelay → không
+trip (luật 1 xét lại mỗi bước); `speedPct`/`currentFb` dùng `rateLimitStep`
+P2.1; `paramsSchema` không `.strict()` theo quy ước P2.1.
+**Tier B (mặc định + ghi OQ + R-007):** OQ-253 (1 file golden/model,
+`cases: [...]`); OQ-254 (cmd/fault/clear áp sau step(t), expect sau step(t));
+OQ-255 (1 chuyển đổi/step, else-if); OQ-256 (speed/current target theo
+state sau chuyển đổi); OQ-257 (expect: số ±0.01 mặc định, `{approx, eps}`
+ghi đè, Bool/string chính xác, key lạ → lỗi); OQ-258 (harness gán đủ 6 role,
+currentFb scaling 0..100 A, currentA kiểm qua observable); OQ-259
+(defaultRemote/defaultReady: chấp nhận, không ảnh hưởng hành vi P2.2 —
+luật §7.1 chỉ dùng fault; ghi vào md + semantics, chờ dữ liệu thật xác
+minh); OQ-260 (EquipmentModel.docs? + cấu trúc md); OQ-261 (script
+`docs:equipment` + CI `--check` + root dep `@vcs/plant`); OQ-262
+(`yaml@2.9.1` cho `@vcs/plant`); OQ-263 (tripClearedAt mirror
+`ctx.fault('overload').clearedAtMs` — FaultManager là nguồn thật); OQ-264
+(định dạng fault entry golden); OQ-265 (coverage plant 85 lines, không
+ngưỡng mới); OQ-266 (không bench ở P2.2 — OQ-245 đứng, bench ở P2.3/P2.4;
+không-cấp-phát-trong-step kiểm bằng review, không file bench mới).
+**Tier C (không có mục chặn P2.2):** không đổi spec/kiến trúc lõi; không dep
+ngoài mới (`yaml` đã có trong tree); không hạ ngưỡng; không dữ liệu thật
+(X-003 chỉ chặn P2.7); OQ-161 không chạm; D-006/D-007 không liên quan; không
+kiểm thật. Plan → triển khai liên tục theo quyết định 2026-11-25.
+
+### Rủi ro top-3
+1. **Sai ngữ nghĩa timing 1 bước** (cmd/fault áp trước hay sau step; 1
+   chuyển đổi/step) → sai cả 14 golden. Giảm: bảng tính tay A–K + OQ-254/255
+   + test ghim t=100 (bảng A).
+2. **Speed/current target tính theo state trước/sau chuyển đổi** (OQ-256) —
+   nếu sai, speed lệch 1 bước ở mọi biên (610/1010/1810). Giảm: bảng A ghim
+   speedPct tại 610/1010/1810 + OQ-256.
+3. **Docgen/CI `--check` drift** (md commit khác md sinh). Giảm: test so
+   sánh + CI `--check` (mẫu gen-diagnostics); script chạy trong gate.
+
+### Kết quả triển khai
+**Kết quả triển khai (2026-11-26, commit feat sau plan — xem git log):** 50 test mới
+(14 golden + 16 model unit + 14 runner + 4 docgen + 1 inventory + 1 registry),
+tổng **2171/2171 (91 file)** — vượt mục tiêu ≥ 44/≥ 2165. Gate xanh ở bản sao
+sạch `~/.cache/vcs-p22` (install thật, lockfile cập nhật): lint 0, typecheck 0,
+depcheck 0 (145 modules, 301 deps), test 2171/2171 + coverage plant **93.94%
+lines** (motor_dol 100%, docgen 100%, runner 85.18%; ≥ 85), diagnostics
+--check khớp (58 mã, không mã mới), docs:equipment --check khớp (1 model),
+review:cheats SẠCH, build 3/3. e2e CHƯA CHẠY (không chạm web); bench không
+làm ở P2.2 (OQ-266). OQ-253…266 đóng (đã áp dụng, bằng chứng ở gate này);
+OQ-267 mới (tier B, mở): `ctx.fault()`/`ctx.emit()` cấp phát mỗi bước —
+ghi nhận, sửa ở P2.3/P2.4. `docs/semantics.md` thêm §21. `docs/equipment/
+motor_dol.md` sinh bằng `pnpm docs:equipment` (4623 bytes).
+
+**Lệch so với plan (tier B — test/bảng tính tay chứng minh, không đổi spec):**
+1. **Bảng tính tay speedPct sai ở bước chuyển trạng thái (D/F/I):** plan tính
+   speed ở bước chuyển như vừa tăng (theo state cũ) vừa giảm (theo state
+   mới); thực tế rate limiter chỉ áp 1 lần/bước theo target của state SAU
+   chuyển đổi (OQ-256). Script tham chiếu độc lập (`/tmp/p22-ref.mjs`,
+   chỉ cài luật §7.1) xác nhận giá trị đúng — golden dùng giá trị đúng:
+   D T=500: 25.6667 (plan 26.33); F T=1510: 93 (plan 93.67), T=2310: 66.3333
+   (plan 66.67); I T=1810: 33 (plan 32.67), T=1820: 33.6667 (plan 33.33),
+   T=2320: 67 (plan 66.67). Bảng A/C/E/G/H/J khớp plan.
+2. **Bảng G/H, T=100:** plan ghi ready/remote=0, nhưng theo OQ-254 fault chỉ
+   áp SAU step(100) nên ở T=100 ready/remote vẫn =1; giá trị 0 dời sang
+   T=110 (đã thêm step T=110 vào golden, expect ready/remote=false).
+3. **Số tham số:** spec §7.1 liệt kê **15** tham số (plan ghi 14 là đếm
+   thiếu) — implement đủ 15, test ghim `defaultParams` đủ 15.
+4. **Bug nền P2.1 (sửa nền + ghi đây):** `PlantEngine.snapshot()` giữ
+   `state` bằng reference nên restore không tua được state (probe:
+   snapshot ở T=300 STARTING/14, chạy tới 600, restore vẫn RUNNING/34).
+   Sửa 1 dòng `engine.ts`: `state: structuredClone(rt.state)` (S là
+   JSON-serializable theo hợp đồng). Test snapshot P2.2 ghim cả state sau
+   restore (STARTING, speedPct ≈ 14) lẫn hash trace. Lưu ý: test hash cũ
+   của P2.1 vẫn xanh vì `TraceHasher` chỉ hash luồng thay đổi tag (không có
+   timestamp) — runFb false→true xảy ra 1 lần ở cả 2 lần chạy nên hash trùng
+   dù thời điểm khác nhau; test P2.2 mới ghim state nên bắt được lỗi.
+5. **Hình dạng API golden:** `runPlantGolden(engine, golden)` trong plan
+   thành `runPlantGoldenCase(ctx, case)` (1 case/lần, harness dựng fresh
+   engine mỗi case + `describe.each`) — cùng ngữ nghĩa OQ-253/254, chỉ rõ
+   hình dạng hàm.
+6. **`docs` của `EquipmentModel`:** thêm `ModelDocs` + `deriveModel`
+   chuyển tiếp `docs` (additive, không breaking) — plan chỉ nói
+   `EquipmentModel.docs?`, deriveModel cần cùng field để không mất docs
+   khi derive.
+7. **Test `speedPct kẹp 100`:** plan không cho mốc cụ thể; test chia 2 pha
+   (chạy dài tới 2000 kẹp 100; dừng ở 2010, về 0 ở 5100).
+8. **Test `currentFb` tag round-trip:** đọc lại qua adapter cho 53.53 ±
+   0.01 (sai số làm tròn raw 1 đơn vị ≈ 0.0036 A) — ghim ở OQ-258.
