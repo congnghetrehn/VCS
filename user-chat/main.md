@@ -1577,3 +1577,39 @@ Không có mục nào chờ anh chốt nên em My triển khai luôn — code xo
 ---
 Log tới thời điểm 2026-11-25 13:37 +07.
 ---
+
+## 2026-11-25 15:48 +07 — TraMuse
+
+P1.7 triển khai xong, anh Tiến. TraMuse tự kiểm gate trên bản sao sạch (commit `8b8e8f9`, 161 file): test **1927/1927** (76 file, 178 mới), lint/typecheck/depcheck 0, cheats SẠCH, diagnostics khớp 51 mã, build OK, e2e **6/6** (E6 mới: PLC Workspace + Watch + force). Bench softplc **1738 scan/s** (ngưỡng ≥1000) — từ ~520 ở P1.4 lên ~3,3× sau tối ưu.
+
+3 bug thật đã sửa đúng gốc: gọi DB instance cross-file vỡ ở lower, SoftPlc không start qua server/CLI, E6 phát hiện build status trống khi build sạch. OQ-197…216 đóng; OQ-217 mới (tier B, fail-fast PLC); OQ-161 vẫn mở.
+
+PR đang đẩy lên GitHub theo lô (161 file, batch 1/5 xong, batch 2 đang chạy). TraMuse merge sau khi CI xanh rồi báo anh. Dashboard cập nhật ở lần refresh sáng mai 07:20 theo quy định.
+
+Ngoài ra: bản backup cây P1.7 trước đó đã có sẵn (`vcs-p14-backup-2026-11-25.tar.gz`, 821 KB) để phòng mất dữ liệu.
+
+---
+Log tới thời điểm 2026-11-25 15:48 +07.
+---
+
+## 2026-11-25 16:24 +07 — Em My
+
+P1.7 merge xong, anh Tiến ạ. Em My kiểm rồi: PR #26 merge vào develop lúc 16:23, merge commit 7a927e1, CI 8/8 xanh (bench skip theo thiết kế), compare đúng 161 file thay đổi. Test 1927/1927, bench softplc 1738 scan/s (≥1000), e2e 6/6.
+
+M1 giờ chỉ còn G1 (gói nghiệm thu) rồi chờ anh ký. Em My làm tiếp G1 luôn.
+
+---
+Log tới thời điểm 2026-11-25 16:24 +07.
+---
+
+## 2026-11-25 16:48 +07 — TraMuse
+
+G1 merge xong, anh Tiến ạ. TraMuse kiểm rồi: PR #27 merge vào develop lúc 16:48, merge commit 85ab770, CI 8/8 xanh. Gói nghiệm thu M1 (`docs/acceptance/M1.md`): **9/9 tiêu chí §16 ĐẠT, 0 CHƯA ĐẠT, 10 CẦN KIỂM TAY** — bằng chứng chạy trên bản sao sạch, test 1927/1927, bench softplc 1664 scan/s (≥1000), e2e 6/6.
+
+M1 chờ anh duyệt theo REVIEW-CHECKLISTS mục M1 rồi ký ở STATE.md §8. TraMuse không tự ký.
+
+Một điểm cần anh phán (§16.5, đã ghi trong M1.md): POINTER/ANY ra SCL-T001, mảng nhiều chiều/GOTO ra SCL-P002 — không phải U001 như chữ spec viết. Tất cả đều lỗi ồn ào có vị trí, không im lặng. Nếu anh muốn gom về một mã U001 thì là SCR, TraMuse làm sau.
+
+---
+Log tới thời điểm 2026-11-25 16:48 +07.
+---
