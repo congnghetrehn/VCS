@@ -5,3 +5,20 @@ export { MemoryArea, DbStore } from './memory.js';
 export type { MemoryScalarType } from './memory.js';
 export { layoutStruct } from './layout.js';
 export type { FieldType, FieldDecl, FieldInfo, StructLayout } from './layout.js';
+export type {
+  PrimitiveType,
+  IrType,
+  IrField,
+  IrVar,
+  IrInterface,
+  SrcRef,
+  IrBlock,
+  IrDb,
+  IrUdt,
+  IrObBinding,
+  IrProgram,
+  BinFn,
+  IrExpr,
+  IrLValue,
+  IrStmt,
+} from './ir.js';
