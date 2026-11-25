@@ -1,0 +1,17 @@
+id: force-persists-across-gap
+description: "Force giữ qua gap nhiều scan: Q giữ true qua 9 scan dù OB ghi false"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %Q0.0 := %M0.0;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, force: { "%Q0.0": true }, expect: { "%Q0.0": true } }
+  - { t: 100, expect: { "%Q0.0": true } }
+  - { t: 110, unforce: ["%Q0.0"], expect: { "%Q0.0": false } }

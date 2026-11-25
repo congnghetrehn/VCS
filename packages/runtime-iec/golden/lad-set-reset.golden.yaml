@@ -1,0 +1,57 @@
+id: lad-set-reset
+description: "LAD set/reset: I0.0 set Q0.0 (giữ), I0.1 reset Q0.0 (giữ)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.lad.json
+    text: |
+      {
+        "kind": "OB",
+        "name": "Main",
+        "interface": {},
+        "networks": [
+          {
+            "id": "N1",
+            "rung": [
+              {
+                "t": "contact",
+                "mode": "NO",
+                "operand": {
+                  "abs": "%I0.0"
+                }
+              },
+              {
+                "t": "set",
+                "operand": {
+                  "abs": "%Q0.0"
+                }
+              }
+            ]
+          },
+          {
+            "id": "N2",
+            "rung": [
+              {
+                "t": "contact",
+                "mode": "NO",
+                "operand": {
+                  "abs": "%I0.1"
+                }
+              },
+              {
+                "t": "reset",
+                "operand": {
+                  "abs": "%Q0.0"
+                }
+              }
+            ]
+          }
+        ]
+      }
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, set: { "%I0.0": true }, expect: { "%Q0.0": true } }
+  - { t: 20, set: { "%I0.0": false }, expect: { "%Q0.0": true } }
+  - { t: 30, set: { "%I0.1": true }, expect: { "%Q0.0": false } }
+  - { t: 40, set: { "%I0.1": false }, expect: { "%Q0.0": false } }

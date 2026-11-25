@@ -1,0 +1,17 @@
+id: scan-multi-scan-gap
+description: "Gap 50ms = 5 scan (chu kỳ 10ms): bộ đếm tăng 5 trong một step"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := %MW10 + 1;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 50, expect: { "%MW10": 5 } }
+  - { t: 60, expect: { "%MW10": 6 } }
+  - { t: 160, expect: { "%MW10": 16 } }

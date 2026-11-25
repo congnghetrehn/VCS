@@ -1,0 +1,29 @@
+id: scan-ob100-before-ob1
+description: "OB100 chạy trước OB1 trong scan đầu: OB1 đọc được cờ f=TRUE ngay scan đầu"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %Q0.0 := "DB_S".f;
+      END_ORGANIZATION_BLOCK
+  - file: ob100.scl
+    text: |
+      ORGANIZATION_BLOCK "OB100"
+      BEGIN
+        "DB_S".f := TRUE;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_S" STRUCT
+        f : Bool;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 100 }, { ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, expect: { "%Q0.0": true } }
+  - { t: 20, expect: { "%Q0.0": true } }

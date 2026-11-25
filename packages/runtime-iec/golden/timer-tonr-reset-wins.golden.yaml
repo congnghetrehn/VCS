@@ -1,0 +1,24 @@
+id: timer-tonr-reset-wins
+description: "TONR R reset (bảng I2): R + IN cùng scan -> ET=0; chạy lại từ 0"
+expectedFrom: spec
+config: { scanPeriodMs: 100 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "T1"(IN := %M0.0, R := %M0.1, PT := T#1s);
+        %M1.0 := "T1".Q;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "T1" "TONR"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 100, set: { "%M0.0": true, "%M0.1": true }, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 200, set: { "%M0.1": false }, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 600, expect: { "%M1.0": false, '"T1".ET': 400 } }
+  - { t: 700, set: { "%M0.1": true }, expect: { "%M1.0": false, '"T1".ET': 0 } }

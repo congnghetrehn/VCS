@@ -1,0 +1,24 @@
+id: flow-for-sum
+description: "FOR 1 TO 5 cộng dồn: 1+2+3+4+5=15"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      VAR_TEMP
+        i : Int;
+        s : Int;
+      END_VAR
+      BEGIN
+        #s := 0;
+        FOR #i := 1 TO 5 DO
+          #s := #s + #i;
+        END_FOR;
+        %MW10 := #s;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 15 } }
+  - { t: 20, expect: { "%MW10": 15 } }

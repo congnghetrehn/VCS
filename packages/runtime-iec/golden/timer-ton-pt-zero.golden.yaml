@@ -1,0 +1,24 @@
+id: timer-ton-pt-zero
+description: "TON PT=0 (bảng B1): Q=IN ngay, ET=0"
+expectedFrom: spec
+config: { scanPeriodMs: 100 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "T1"(IN := %M0.0, PT := T#0s);
+        %M1.0 := "T1".Q;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "T1" "TON"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 100, expect: { "%M1.0": false, '"T1".ET': 0 } }
+  - { t: 200, set: { "%M0.0": true }, expect: { "%M1.0": true, '"T1".ET': 0 } }
+  - { t: 300, expect: { "%M1.0": true, '"T1".ET': 0 } }
+  - { t: 400, set: { "%M0.0": false }, expect: { "%M1.0": false, '"T1".ET': 0 } }

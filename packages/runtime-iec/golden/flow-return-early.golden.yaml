@@ -1,0 +1,20 @@
+id: flow-return-early
+description: "RETURN bỏ qua phần còn lại của OB: đếm chỉ tăng khi M0.0=false"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        IF %M0.0 THEN
+          RETURN;
+        END_IF;
+        %MW10 := %MW10 + 1;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 1 } }
+  - { t: 20, set: { "%M0.0": true }, expect: { "%MW10": 1 } }
+  - { t: 30, set: { "%M0.0": false }, expect: { "%MW10": 2 } }

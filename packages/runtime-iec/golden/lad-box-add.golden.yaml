@@ -1,0 +1,57 @@
+id: lad-box-add
+description: "LAD box ADD: chỉ chạy khi RLO true (contact I0.0); %MW12 = %MW10 + 5"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.lad.json
+    text: |
+      {
+        "kind": "OB",
+        "name": "Main",
+        "interface": {},
+        "networks": [
+          {
+            "id": "N1",
+            "rung": [
+              {
+                "t": "contact",
+                "mode": "NO",
+                "operand": {
+                  "abs": "%I0.0"
+                }
+              },
+              {
+                "t": "box",
+                "fn": "ADD",
+                "inputs": {
+                  "IN1": {
+                    "abs": "%MW10"
+                  },
+                  "IN2": {
+                    "const": 5
+                  }
+                },
+                "outputs": {
+                  "OUT": {
+                    "abs": "%MW12"
+                  }
+                }
+              },
+              {
+                "t": "coil",
+                "mode": "normal",
+                "operand": {
+                  "abs": "%Q0.0"
+                }
+              }
+            ]
+          }
+        ]
+      }
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%MW10": 3 }, expect: { "%MW12": 0, "%Q0.0": false } }
+  - { t: 10, expect: { "%MW12": 0, "%Q0.0": false } }
+  - { t: 20, set: { "%I0.0": true }, expect: { "%MW12": 8, "%Q0.0": true } }
+  - { t: 30, set: { "%MW10": 10 }, expect: { "%MW12": 15, "%Q0.0": true } }
+  - { t: 40, set: { "%I0.0": false }, expect: { "%MW12": 15, "%Q0.0": false } }

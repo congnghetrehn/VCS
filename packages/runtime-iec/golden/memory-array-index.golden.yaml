@@ -1,0 +1,26 @@
+id: memory-array-index
+description: "Mảng Int [0..4]: ghi/đọc theo chỉ số, phần tử chưa ghi = 0"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "DB_A".arr[2] := 42;
+        "DB_A".arr[4] := -7;
+        %MW10 := "DB_A".arr[2];
+        %MW12 := "DB_A".arr[0];
+        %MW14 := "DB_A".arr[4];
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_A" STRUCT
+        arr : ARRAY[0..4] OF Int;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%MW12": 0, "%MW14": 0 } }
+  - { t: 10, expect: { "%MW10": 42, "%MW12": 0, "%MW14": -7 } }

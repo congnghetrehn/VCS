@@ -1,0 +1,67 @@
+id: lad-box-ton
+description: "LAD box TON qua DB T1 (SCL khai DB trước, LAD sau): Q lên t=3200, ET kẹp 3000"
+expectedFrom: spec
+config: { scanPeriodMs: 100 }
+sources:
+  - file: db.scl
+    text: |
+      DATA_BLOCK "T1" "TON"
+      BEGIN
+      END_DATA_BLOCK
+
+  - file: main.lad.json
+    text: |
+      {
+        "kind": "OB",
+        "name": "Main",
+        "interface": {},
+        "networks": [
+          {
+            "id": "N1",
+            "rung": [
+              {
+                "t": "contact",
+                "mode": "NO",
+                "operand": {
+                  "abs": "%I0.0"
+                }
+              },
+              {
+                "t": "box",
+                "fn": "TON",
+                "instance": {
+                  "sym": "T1"
+                },
+                "inputs": {
+                  "IN": {
+                    "abs": "%I0.0"
+                  },
+                  "PT": {
+                    "const": 3000,
+                    "type": "Time"
+                  }
+                },
+                "outputs": {
+                  "Q": {
+                    "abs": "%M1.0"
+                  }
+                }
+              },
+              {
+                "t": "coil",
+                "mode": "normal",
+                "operand": {
+                  "abs": "%Q0.0"
+                }
+              }
+            ]
+          }
+        ]
+      }
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false, '"T1".ET': 0 } }
+  - { t: 100, set: { "%I0.0": true }, expect: { "%Q0.0": false, '"T1".ET': 0 } }
+  - { t: 3000, expect: { "%Q0.0": false, '"T1".ET': 2900 } }
+  - { t: 3100, expect: { "%Q0.0": true, '"T1".ET': 3000 } }
+  - { t: 3300, set: { "%I0.0": false }, expect: { "%Q0.0": false, '"T1".ET': 0 } }

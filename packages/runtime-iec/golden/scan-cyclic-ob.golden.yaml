@@ -1,0 +1,23 @@
+id: scan-cyclic-ob
+description: "OB35 chu kỳ 100ms: chạy tại scan t=100, 200 (không chạy ở scan đầu t=10)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := %MW10 + 1;
+      END_ORGANIZATION_BLOCK
+  - file: ob35.scl
+    text: |
+      ORGANIZATION_BLOCK "OB35"
+      BEGIN
+        %MW12 := %MW12 + 1;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }, { ob: 35, cycleMs: 100 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%MW12": 0 } }
+  - { t: 10, expect: { "%MW10": 1, "%MW12": 0 } }
+  - { t: 100, expect: { "%MW10": 10, "%MW12": 1 } }
+  - { t: 200, expect: { "%MW10": 20, "%MW12": 2 } }

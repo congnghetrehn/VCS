@@ -1,0 +1,30 @@
+id: scan-ob100-once
+description: "OB100 chạy đúng 1 lần sau RUN: bộ đếm n tăng lên 1 ở scan đầu, giữ nguyên các scan sau"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := "DB_S".n;
+      END_ORGANIZATION_BLOCK
+  - file: ob100.scl
+    text: |
+      ORGANIZATION_BLOCK "OB100"
+      BEGIN
+        "DB_S".n := "DB_S".n + 1;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_S" STRUCT
+        n : Int;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 100 }, { ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 1 } }
+  - { t: 20, expect: { "%MW10": 1 } }
+  - { t: 30, expect: { "%MW10": 1 } }
