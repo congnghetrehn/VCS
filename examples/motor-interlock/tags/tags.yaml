@@ -1,0 +1,59 @@
+# tags/tags.yaml — examples/motor-interlock (M1 §13 nguyên văn).
+# STOP_OK/OVL_OK là NC (true = bình thường).
+tags:
+  - name: START_PB
+    type: Bool
+    area: I
+    address: "%I0.0"
+    controller: PLC1
+    signal:
+      kind: DI
+  - name: STOP_OK
+    type: Bool
+    area: I
+    address: "%I0.1"
+    controller: PLC1
+    signal:
+      kind: DI
+  - name: OVL_OK
+    type: Bool
+    area: I
+    address: "%I0.2"
+    controller: PLC1
+    signal:
+      kind: DI
+  - name: PERM
+    type: Bool
+    area: I
+    address: "%I0.3"
+    controller: PLC1
+    signal:
+      kind: DI
+  - name: RUN_FB
+    type: Bool
+    area: I
+    address: "%I0.4"
+    controller: PLC1
+    signal:
+      kind: DI
+  - name: RESET_PB
+    type: Bool
+    area: I
+    address: "%I0.5"
+    controller: PLC1
+    signal:
+      kind: DI
+  - name: RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.0"
+    controller: PLC1
+    signal:
+      kind: DO
+  - name: FAULT_LAMP
+    type: Bool
+    area: Q
+    address: "%Q0.1"
+    controller: PLC1
+    signal:
+      kind: DO

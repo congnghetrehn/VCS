@@ -1,0 +1,44 @@
+id: call-fb-multi-instance
+description: "Hai instance FB_Cnt độc lập: A đếm riêng, B đếm riêng (FB + DB cùng file, DB sau FB)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "DB_A"(inc := %M0.0);
+        "DB_B"(inc := %M0.1);
+        %MW10 := "DB_A".q;
+        %MW12 := "DB_B".q;
+      END_ORGANIZATION_BLOCK
+  - file: fb.scl
+    text: |
+      FUNCTION_BLOCK "FB_Cnt"
+      VAR_INPUT
+        inc : Bool;
+      END_VAR
+      VAR_OUTPUT
+        q : Int;
+      END_VAR
+      VAR
+        cnt : Int;
+      END_VAR
+      BEGIN
+        IF #inc THEN
+          #cnt := #cnt + 1;
+        END_IF;
+        #q := #cnt;
+      END_FUNCTION_BLOCK
+      DATA_BLOCK "DB_A" "FB_Cnt"
+      BEGIN
+      END_DATA_BLOCK
+      DATA_BLOCK "DB_B" "FB_Cnt"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%MW12": 0 } }
+  - { t: 10, set: { "%M0.0": true }, expect: { "%MW10": 1, "%MW12": 0 } }
+  - { t: 20, set: { "%M0.0": false, "%M0.1": true }, expect: { "%MW10": 1, "%MW12": 1 } }
+  - { t: 30, set: { "%M0.0": true }, expect: { "%MW10": 2, "%MW12": 2 } }

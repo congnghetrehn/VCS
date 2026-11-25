@@ -27,6 +27,9 @@ interface Connection {
   greeted: boolean;
   /** Chỉ số defs đã subscribe (vị trí trong snapshot defs của kết nối). */
   sub: { defs: number[]; localIndex: Map<number, number> } | null;
+  /** P1.7 (OQ-206): Watch PLC — refs theo thứ tự đăng ký + giá trị đã gửi
+   * gần nhất (LWW: chỉ gửi ref đổi). */
+  plcWatch: { refs: string[]; last: Map<number, TagValue> } | null;
 }
 
 export interface WsHubOptions {
@@ -70,7 +73,7 @@ export class WsHub {
         socket.close(1013, 'too many connections');
         return;
       }
-      const conn: Connection = { socket, greeted: false, sub: null };
+      const conn: Connection = { socket, greeted: false, sub: null, plcWatch: null };
       this.#connections.add(conn);
       this.#fastify.log.info('ws: kết nối mới');
       socket.on('message', (data) => {
@@ -118,17 +121,46 @@ export class WsHub {
       this.#lastBroadcastState = stateJson;
     }
     const changes = this.#service.drainDelta();
-    if (changes.length === 0) return;
-    const simTimeMs = this.#service.simTimeMs;
-    for (const conn of this.#connections) {
-      if (conn.sub === null) continue;
-      const local: Array<[number, TagValue]> = [];
-      for (const [g, v] of changes) {
-        const l = conn.sub.localIndex.get(g);
-        if (l !== undefined) local.push([l, v]);
+    if (changes.length > 0) {
+      const simTimeMs = this.#service.simTimeMs;
+      for (const conn of this.#connections) {
+        if (conn.sub === null) continue;
+        const local: Array<[number, TagValue]> = [];
+        for (const [g, v] of changes) {
+          const l = conn.sub.localIndex.get(g);
+          if (l !== undefined) local.push([l, v]);
+        }
+        if (local.length === 0) continue;
+        this.#send(conn, { type: 'tags.delta', simTimeMs, changes: local });
       }
-      if (local.length === 0) continue;
-      this.#send(conn, { type: 'tags.delta', simTimeMs, changes: local });
+    }
+    // P1.7 (OQ-206): plc.values ở nhịp tick, LWW — chỉ gửi ref đổi.
+    const plc = this.#service.plc();
+    if (plc !== undefined) {
+      for (const conn of this.#connections) {
+        if (conn.plcWatch === null) continue;
+        const values: Array<[number, TagValue]> = [];
+        conn.plcWatch.refs.forEach((ref, i) => {
+          let v: TagValue;
+          try {
+            v = plc.read(ref);
+          } catch {
+            return;
+          }
+          const prev = conn.plcWatch?.last.get(i);
+          if (prev === undefined || !Object.is(prev, v)) {
+            values.push([i, v]);
+            conn.plcWatch?.last.set(i, v);
+          }
+        });
+        if (values.length > 0) {
+          this.#send(conn, {
+            type: 'plc.values',
+            simTimeMs: this.#service.simTimeMs,
+            values,
+          });
+        }
+      }
     }
   }
 
@@ -236,6 +268,21 @@ export class WsHub {
       case 'tag.write':
         this.#onTagWrite(conn, msg);
         break;
+      case 'plc.watch':
+        this.#onPlcWatch(conn, msg);
+        break;
+      case 'plc.unwatch':
+        conn.plcWatch = null;
+        break;
+      case 'plc.write':
+        this.#onPlcWrite(conn, msg);
+        break;
+      case 'plc.force':
+        this.#onPlcForce(conn, msg);
+        break;
+      case 'plc.unforce':
+        this.#onPlcUnforce(conn, msg);
+        break;
     }
   }
 
@@ -325,6 +372,93 @@ export class WsHub {
       this.#sendError(conn, r.code ?? 'TAG-E003', r.message ?? 'tag.write lỗi');
     }
   }
+
+  /** P1.7 (OQ-206): đăng ký Watch — đọc thử từng ref, ref lạ → lỗi, không đăng ký. */
+  #onPlcWatch(conn: Connection, msg: Extract<ClientMessage, { type: 'plc.watch' }>): void {
+    const plc = this.#service.plc();
+    if (plc === undefined) {
+      this.#sendError(conn, 'SIM-E001', 'plc.watch: project không có PLC (không có plc/)');
+      return;
+    }
+    for (const ref of msg.refs) {
+      try {
+        plc.read(ref);
+      } catch (err) {
+        this.#sendError(
+          conn,
+          plcErrorCode(err),
+          `plc.watch: ref '${ref}' không đọc được (${err instanceof Error ? err.message : String(err)})`,
+        );
+        return;
+      }
+    }
+    conn.plcWatch = { refs: [...msg.refs], last: new Map() };
+  }
+
+  /** P1.7 (OQ-206/216): ghi qua introspection; sai kiểu → TAG-E001. */
+  #onPlcWrite(conn: Connection, msg: Extract<ClientMessage, { type: 'plc.write' }>): void {
+    const plc = this.#service.plc();
+    if (plc === undefined) {
+      this.#sendError(conn, 'SIM-E001', 'plc.write: project không có PLC (không có plc/)');
+      return;
+    }
+    try {
+      plc.write(msg.ref, msg.value);
+    } catch (err) {
+      this.#sendError(
+        conn,
+        plcErrorCode(err),
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+  }
+
+  #onPlcForce(conn: Connection, msg: Extract<ClientMessage, { type: 'plc.force' }>): void {
+    const plc = this.#service.plc();
+    if (plc === undefined) {
+      this.#sendError(conn, 'SIM-E001', 'plc.force: project không có PLC (không có plc/)');
+      return;
+    }
+    try {
+      plc.force(msg.ref, msg.value);
+    } catch (err) {
+      this.#sendError(
+        conn,
+        plcErrorCode(err),
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+  }
+
+  #onPlcUnforce(conn: Connection, msg: Extract<ClientMessage, { type: 'plc.unforce' }>): void {
+    const plc = this.#service.plc();
+    if (plc === undefined) {
+      this.#sendError(conn, 'SIM-E001', 'plc.unforce: project không có PLC (không có plc/)');
+      return;
+    }
+    try {
+      plc.unforce(msg.ref);
+    } catch (err) {
+      this.#sendError(
+        conn,
+        plcErrorCode(err),
+        err instanceof Error ? err.message : String(err),
+      );
+    }
+  }
+}
+
+/**
+ * Mã lỗi cho thao tác PLC qua WS (P1.7): TagError mang mã ở đầu message
+ * (`TAG-E001: ...`); ref không parse được (RangeError `parsePlcRef: ...`)
+ * → TAG-E003 (không tồn tại, cùng quy ước tag.write); còn lại SIM-E001.
+ */
+function plcErrorCode(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  const m = /^([A-Z]{2,4}-[EW]\d{3})/.exec(message);
+  if (m?.[1] !== undefined) return m[1];
+  if (message.startsWith('parsePlcRef:')) return 'TAG-E003';
+  return 'SIM-E001';
 }
 
 function rawToString(data: unknown): string | undefined {

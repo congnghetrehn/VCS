@@ -1,0 +1,23 @@
+id: flow-if-elsif-else
+description: "IF/ELSIF/ELSE theo dấu của x: âm, bằng 0, dương"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        IF %MW20 < 0 THEN
+          %Q0.0 := TRUE; %Q0.1 := FALSE; %Q0.2 := FALSE;
+        ELSIF %MW20 = 0 THEN
+          %Q0.0 := FALSE; %Q0.1 := TRUE; %Q0.2 := FALSE;
+        ELSE
+          %Q0.0 := FALSE; %Q0.1 := FALSE; %Q0.2 := TRUE;
+        END_IF;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%MW20": -5 }, expect: { "%Q0.0": false, "%Q0.1": false, "%Q0.2": false } }
+  - { t: 10, expect: { "%Q0.0": true, "%Q0.1": false, "%Q0.2": false } }
+  - { t: 20, set: { "%MW20": 0 }, expect: { "%Q0.0": false, "%Q0.1": true, "%Q0.2": false } }
+  - { t: 30, set: { "%MW20": 7 }, expect: { "%Q0.0": false, "%Q0.1": false, "%Q0.2": true } }

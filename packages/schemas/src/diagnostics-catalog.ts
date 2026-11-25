@@ -153,5 +153,151 @@ export const PRJ_CATALOG: DiagnosticCatalog = defineDiagnostics({
   },
 });
 
-/** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E hoặc -W, rồi 3 chữ số. */
-export const DIAGNOSTIC_CODE_RE = /\b[A-Z]{2,4}-[EW]\d{3}\b/g;
+/** Danh mục mã SCL (M1 §4.4, OQ-095). */
+export const SCL_CATALOG: DiagnosticCatalog = defineDiagnostics({
+  'SCL-L001': {
+    severity: 'error',
+    title: 'Lỗi từ vựng SCL',
+    hint: 'Kiểm tra ký tự tại vị trí đã báo; đóng comment (* *) và dấu nháy "...".',
+  },
+  'SCL-P001': {
+    severity: 'error',
+    title: "Thiếu ';' cuối statement",
+    hint: "Thêm ';' cuối statement tại vị trí đã báo.",
+  },
+  'SCL-P002': {
+    severity: 'error',
+    title: 'Lỗi cú pháp SCL',
+    hint: 'Sửa theo "expected ..." tại vị trí đã báo.',
+  },
+  'SCL-P003': {
+    severity: 'error',
+    title: 'Quá nhiều lỗi cú pháp (tối đa 100)',
+    hint: 'Sửa 100 lỗi đầu đã báo rồi biên dịch lại.',
+  },
+  'SCL-U001': {
+    severity: 'error',
+    title: 'Cấu trúc SCL chưa hỗ trợ',
+    hint: 'Dùng cấu trúc trong phạm vi M1 (xem M1 §4.2 và Phụ lục A); String không hỗ trợ.',
+  },
+  'SCL-T001': {
+    severity: 'error',
+    title: 'Tên chưa khai báo',
+    hint: 'Khai báo biến/kiểu/block trước khi dùng, kiểm tra chính tả.',
+  },
+  'SCL-T002': {
+    severity: 'error',
+    title: 'Kiểu không khớp',
+    hint: 'Đổi kiểu biến hoặc giá trị cho khớp; thu hẹp phải dùng hàm chuyển đổi tường minh.',
+  },
+  'SCL-T003': {
+    severity: 'error',
+    title: 'Toán tử không áp dụng cho kiểu',
+    hint: 'Phép số học chỉ dùng cho số nguyên/số thực/Time; AND/OR/XOR/NOT dùng cho Bool hoặc Byte/Word/DWord.',
+  },
+  'SCL-T004': {
+    severity: 'error',
+    title: 'Lỗi gọi block/hàm',
+    hint: 'Gọi FB cần instance (#fb hoặc "DB"); kiểm tra tên và kiểu tham số trong khai báo block.',
+  },
+  'SCL-T005': {
+    severity: 'error',
+    title: 'Truy cập member/index sai',
+    hint: 'Kiểm tra tên field, kiểu index và khoảng chỉ số hằng của mảng.',
+  },
+  'SCL-T006': {
+    severity: 'error',
+    title: 'Gán không hợp lệ',
+    hint: 'VAR_INPUT chỉ đọc trong FB/FC; VAR_CONSTANT không được gán.',
+  },
+  'SCL-T007': {
+    severity: 'error',
+    title: 'EXIT/CONTINUE ngoài vòng lặp',
+    hint: 'EXIT/CONTINUE chỉ dùng trong FOR/WHILE/REPEAT.',
+  },
+  'SCL-T008': {
+    severity: 'error',
+    title: 'Biểu thức không hằng',
+    hint: 'Giá trị khởi tạo, label CASE và init DB phải là hằng (literal, phép tính trên hằng, VAR_CONSTANT).',
+  },
+  'SCL-T009': {
+    severity: 'error',
+    title: 'Khai báo trùng tên',
+    hint: 'Đổi tên một trong hai khai báo trong cùng scope.',
+  },
+  'SCL-T010': {
+    severity: 'error',
+    title: 'Thu hẹp ngầm định',
+    hint: 'Dùng REAL_TO_INT(...)/TRUNC(...) hoặc hàm X_TO_Y tường minh.',
+  },
+  'SCL-T011': {
+    severity: 'error',
+    title: 'Định nghĩa kiểu đệ quy',
+    hint: 'UDT không được chứa chính nó (trực tiếp hay gián tiếp).',
+  },
+  'SCL-S020': {
+    severity: 'error',
+    title: 'Đệ quy gọi block',
+    hint: 'FC/FB không được gọi chính nó (trực tiếp hay gián tiếp) — tách thành block khác.',
+  },
+  'SCL-W001': {
+    severity: 'warning',
+    title: 'Đọc TEMP trước khi ghi',
+    hint: 'TEMP không khởi tạo trên PLC thật; gán giá trị trước khi đọc.',
+  },
+});
+
+/** Danh mục mã LAD (M1 §5, P1.6). */
+export const LAD_CATALOG: DiagnosticCatalog = defineDiagnostics({
+  'LAD-S001': {
+    severity: 'error',
+    title: 'Schema/cấu trúc LAD không hợp lệ',
+    hint: 'Kiểm tra JSON theo M1 §5.1: rung/parallel không rỗng, key đúng tên, FC/OB không có VAR (static).',
+  },
+  'LAD-T001': {
+    severity: 'error',
+    title: 'Tên chưa khai báo',
+    hint: 'Khai báo tag/biến/DB trước khi dùng, kiểm tra chính tả.',
+  },
+  'LAD-T002': {
+    severity: 'error',
+    title: 'Kiểu không khớp',
+    hint: 'Đổi kiểu operand hoặc giá trị cho khớp; thu hẹp phải dùng box CONVERT.',
+  },
+  'LAD-T003': {
+    severity: 'error',
+    title: 'Toán tử không áp dụng cho kiểu',
+    hint: 'Phép số học chỉ dùng cho số; so sánh không dùng cho Bool/struct.',
+  },
+  'LAD-T004': {
+    severity: 'error',
+    title: 'Lỗi gọi box',
+    hint: 'Kiểm tra instance, tên và kiểu input/output của box theo bảng chữ ký (STATE §21).',
+  },
+  'LAD-T005': {
+    severity: 'error',
+    title: 'Truy cập member/index sai',
+    hint: 'Kiểm tra tên field; field ẩn (hidden) không truy cập được.',
+  },
+  'LAD-T006': {
+    severity: 'error',
+    title: 'Gán không hợp lệ',
+    hint: 'VAR_INPUT chỉ đọc; không ghi vào VAR_INPUT.',
+  },
+  'LAD-T009': {
+    severity: 'error',
+    title: 'Trùng tên',
+    hint: 'Đổi tên một trong các khai báo trùng (biến, network, temp __lad_*).',
+  },
+  'LAD-U001': {
+    severity: 'error',
+    title: 'Box/kiểu chưa hỗ trợ',
+    hint: 'Dùng box/kiểu trong phạm vi M1 §5; String và mảng lồng nhau chưa hỗ trợ.',
+  },
+});
+
+/** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E/-W/-L/-P/-S/-T/-U, rồi 3 chữ số.
+ * Mở rộng cho SCL (L/P/U) để `gen-diagnostics --check` kiểm được mã SCL dùng
+ * trong parser (không thì mã lạ lọt qua im lặng); P1.3 thêm T/S cho typecheck
+ * (OQ-107). */
+export const DIAGNOSTIC_CODE_RE = /\b[A-Z]{2,4}-[ELPSTWU]\d{3}\b/g;

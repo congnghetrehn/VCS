@@ -16,6 +16,7 @@ import { loadProject, nodeFS } from '@vcs/project';
 import { hasErrors } from '@vcs/schemas';
 import { isOriginAllowed, resolveServerConfig, type ServerConfigInput } from './config.js';
 import { SERVER_EXTENSIONS } from './extensions.js';
+import { loadPlcProgram, plcExtension } from './plc.js';
 import { registerRestRoutes, type ProjectInfo } from './routes.js';
 import { SimulationService } from './sim-service.js';
 import { WsHub } from './ws.js';
@@ -57,8 +58,16 @@ export async function createServer(
   if (hasErrors(model.diagnostics)) {
     throw new ProjectInvalidError(model.diagnostics);
   }
+  // P1.7 (OQ-217, tier B): plc/ có file → biên dịch; lỗi biên dịch → dừng
+  // khởi động như lỗi project (exit 2, in diagnostics) thay vì chạy im
+  // lặng không PLC. Không có plc/ → chạy như cũ.
+  const plc = await loadPlcProgram(dir, model.catalog.all());
+  if (plc !== null && hasErrors(plc.diagnostics)) {
+    throw new ProjectInvalidError([...plc.diagnostics]);
+  }
   const bundle = await createSimulation(model, {
-    extensions: [...SERVER_EXTENSIONS],
+    extensions:
+      plc !== null ? [...SERVER_EXTENSIONS, plcExtension(plc.program)] : [...SERVER_EXTENSIONS],
     errorPolicy: 'isolate',
   });
   const config = resolveServerConfig(opts?.config);
@@ -121,7 +130,10 @@ export async function createServer(
     tagCount: model.catalog.all().length,
     diagnostics: model.diagnostics,
   };
-  registerRestRoutes(fastify, projectInfo, { hasWebBuild });
+  registerRestRoutes(fastify, projectInfo, {
+    hasWebBuild,
+    plc: { dir, tags: model.catalog.all() },
+  });
   let url = `http://${config.host}:${String(config.port)}/`;
   let started = false;
   let stopped = false;

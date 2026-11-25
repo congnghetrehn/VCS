@@ -8,7 +8,7 @@
 import { diag, PRJ_CATALOG } from '@vcs/schemas';
 import type { Diagnostic, Unsub } from '@vcs/schemas';
 import type { SimClock } from './clock.js';
-import type { Phase, SimComponent, StepResult } from './component.js';
+import type { ControllerAdapter, Phase, SimComponent, StepResult } from './component.js';
 import { SimComponentError } from './errors.js';
 import type { IoBus } from './iobus.js';
 import type { TagDB, TagDBSnapshot } from './tags.js';
@@ -145,6 +145,20 @@ export class SimulationOrchestrator {
    */
   applyInbox(): void {
     this.#drainInbox(this.clock.nowMs());
+  }
+
+  /**
+   * True khi và chỉ khi có ≥ 1 component đã đăng ký là ControllerAdapter với
+   * `asyncStep === true` (C1, OQ-078). Chỉ là cờ hỏi — không đổi đường chạy:
+   * `stepOnce()` gặp component trả Promise vẫn ném `SIM-E002` như M0.
+   */
+  requiresAsync(): boolean {
+    for (const { component } of this.#byId.values()) {
+      if ('asyncStep' in component && (component as ControllerAdapter).asyncStep === true) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /** Đường ĐỒNG BỘ; component trả Promise → ném `SIM-E002`. */

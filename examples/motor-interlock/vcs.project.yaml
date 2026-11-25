@@ -1,0 +1,13 @@
+# vcs.project.yaml — examples/motor-interlock (M1 §13, P1.7).
+# Demo chấp nhận M1: FB_Motor + OB1 + DB, 8 tag I/Q, scan 100 ms.
+schemaVersion: 1
+name: Motor Interlock
+language: vi
+seed: 1
+simulation: { stepMs: 100, plcScanMs: 100 }
+controllers:
+  - id: PLC1
+    mode: builtin
+    vendor: siemens
+    config:
+      scanPeriodMs: 100

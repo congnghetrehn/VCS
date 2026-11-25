@@ -4,7 +4,7 @@ export { ManualClock } from './clock.js';
 export type { SimClock } from './clock.js';
 export { TagError, SimComponentError, ProjectInvalidError } from './errors.js';
 export type { TagErrorCode } from './errors.js';
-export { TagDB } from './tags.js';
+export { TagDB, validateTagValue } from './tags.js';
 export type {
   TagHandle,
   TagSource,
@@ -14,6 +14,7 @@ export type {
   TagChange,
   TagDBOptions,
   TagDBSnapshot,
+  TagValueError,
 } from './tags.js';
 export { TagDbIoBus } from './iobus.js';
 export type { IoPort, IoBus } from './iobus.js';

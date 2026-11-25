@@ -1,0 +1,26 @@
+id: arith-abs-neg
+description: "ABS và phủ định: ABS(-5)=5, ABS(5)=5, -(-7)=7, ABS(-2.5)=2.5"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := ABS(-5);
+        %MW12 := ABS(5);
+        %MW14 := -(-7);
+        "DB_R".Y := ABS("DB_R".X);
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_R" STRUCT
+        X : Real;
+        Y : Real;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { '"DB_R".X': -2.5 }, expect: { "%MW10": 0, "%MW12": 0, "%MW14": 0, '"DB_R".Y': 0 } }
+  - { t: 10, expect: { "%MW10": 5, "%MW12": 5, "%MW14": 7, '"DB_R".Y': { approx: 2.5 } } }

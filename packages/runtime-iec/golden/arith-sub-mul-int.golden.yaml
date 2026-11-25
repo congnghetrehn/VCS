@@ -1,0 +1,24 @@
+id: arith-sub-mul-int
+description: "Trừ/nhân Int: 200*300 tràn -> -5536; DB preset -32768 trừ 1 -> 32767"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := 100 - 300;
+        %MW12 := %MW20 * %MW22;
+        %MW14 := "DB_I".A - 1;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_I" STRUCT
+        A : Int;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { '"DB_I".A': -32768, "%MW20": 200, "%MW22": 300 }, expect: { "%MW10": 0, "%MW12": 0, "%MW14": 0 } }
+  - { t: 10, expect: { "%MW10": -200, "%MW12": -5536, "%MW14": 32767 } }

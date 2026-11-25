@@ -10,6 +10,7 @@
   "dependencies": {
     "@tanstack/react-virtual": "3.14.26",
     "@vcs/schemas": "workspace:*",
+    "monaco-editor": "0.57.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "zustand": "5.1.0"

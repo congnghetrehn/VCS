@@ -1,8 +1,8 @@
 // Test TagDB (M0 §6.2, §12.1: ≥ 40).
 import * as fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { ManualClock, TagDB, TagError } from './index.js';
-import type { TagChange, TagDBSnapshot, TagHandle, TagSource } from './index.js';
+import { ManualClock, TagDB, TagError, validateTagValue } from './index.js';
+import type { TagChange, TagDBSnapshot, TagHandle, TagSource, TagValueError } from './index.js';
 import type { DataType, SignalKind, TagDef, TagValue } from '@vcs/schemas';
 
 function mkDef(
@@ -679,5 +679,94 @@ describe('TagDB — property (fast-check, seed cố định)', () => {
       }),
       { seed: 20261124, numRuns: 100 },
     );
+  });
+});
+
+/**
+ * Bảng tính tay cho `validateTagValue` (STATE.md §15, từ M0 §6.2 quy tắc 5 +
+ * `TYPE_RANGES`): mỗi hàng là [kiểu, giá trị, kind kỳ vọng | undefined].
+ * Dùng chung cho cả kiểm hàm mới và kiểm tương đương với `TagDB.write`.
+ */
+const VALIDATE_CASES: ReadonlyArray<readonly [DataType, TagValue, 'TYPE' | 'RANGE' | undefined]> = [
+  ['Bool', true, undefined],
+  ['Bool', false, undefined],
+  ['Bool', 1, 'TYPE'],
+  ['Bool', 'true', 'TYPE'],
+  ['Word', 0, undefined],
+  ['Word', 65535, undefined],
+  ['Word', -1, 'RANGE'],
+  ['Word', 65536, 'RANGE'],
+  ['Int', 32767, undefined],
+  ['Int', 32768, 'RANGE'],
+  ['Int', 1.5, 'RANGE'],
+  ['Int', '5', 'TYPE'],
+  ['DWord', 4294967295, undefined],
+  ['DWord', 4294967296, 'RANGE'],
+  ['DWord', -1, 'RANGE'],
+  ['Real', Number.NaN, undefined],
+  ['Real', Number.POSITIVE_INFINITY, undefined],
+  ['Real', 'x', 'TYPE'],
+  ['SInt', -128, undefined],
+  ['SInt', -129, 'RANGE'],
+  ['Time', 0, undefined],
+  ['Time', -1, 'RANGE'],
+  ['Time', 1.5, 'RANGE'],
+  ['String', '', undefined],
+  ['String', 5, 'TYPE'],
+];
+
+describe('validateTagValue (P0.8, B3)', () => {
+  it('export từ @vcs/kernel', () => {
+    expect(typeof validateTagValue).toBe('function');
+  });
+
+  it.each(VALIDATE_CASES)('validateTagValue(%s, %s) → %s', (type, v, expected) => {
+    const err: TagValueError | undefined = validateTagValue(type, v);
+    if (expected === undefined) {
+      expect(err).toBeUndefined();
+    } else {
+      expect(err?.kind).toBe(expected);
+      expect(err?.message).toContain(`không hợp lệ cho kiểu '${type}'`);
+    }
+  });
+
+  it('tương đương với TagDB.write: lỗi → TAG-E001 cùng message; hợp lệ → ghi được', () => {
+    for (const [type, v, expected] of VALIDATE_CASES) {
+      const clock = new ManualClock();
+      const tags = new TagDB([mkDef('T', type, 'I', { kind: 'DI' })], clock);
+      const h = 0 as TagHandle;
+      const err = validateTagValue(type, v);
+      if (expected === undefined) {
+        expect(err).toBeUndefined();
+        tags.write(h, v, 'system');
+        const got = tags.get(h);
+        if (typeof v === 'number' && Number.isNaN(v)) {
+          expect(got).toBeNaN();
+        } else {
+          expect(got).toBe(v);
+        }
+      } else {
+        expect(err?.kind).toBe(expected);
+        try {
+          tags.write(h, v, 'system');
+          expect.unreachable('write phải ném TAG-E001');
+        } catch (e) {
+          expect(e).toBeInstanceOf(TagError);
+          const te = e as TagError;
+          expect(te.code).toBe('TAG-E001');
+          expect(te.message).toContain(`tag 'T': ${err?.message ?? ''}`);
+        }
+      }
+    }
+  });
+
+  it('validate ≠ normalize: Real không fround ở validate, chỉ ở write', () => {
+    const v = 0.30000000000000004;
+    expect(validateTagValue('Real', v)).toBeUndefined();
+    const clock = new ManualClock();
+    const tags = new TagDB([mkDef('R', 'Real', 'I', { kind: 'AI' })], clock);
+    tags.write(0 as TagHandle, v, 'system');
+    expect(tags.get(0 as TagHandle)).toBe(Math.fround(v));
+    expect(validateTagValue('DWord', 4294967295)).toBeUndefined();
   });
 });

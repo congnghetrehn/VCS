@@ -114,3 +114,72 @@ describe('store', () => {
     }
   });
 });
+
+describe('store PLC (P1.7)', () => {
+  beforeEach(() => {
+    const s = useSimStore.getState();
+    s.setPlcFiles([]);
+    s.setPlcWatch([]);
+    s.setPlcDiagnostics([]);
+  });
+
+  it('setPlcFiles + openPlcFile: danh sách + file hiện tại, dirty false', () => {
+    const s = useSimStore.getState();
+    s.setPlcFiles(['FB_Motor.scl', 'OB1.scl']);
+    expect(useSimStore.getState().plcFiles).toEqual(['FB_Motor.scl', 'OB1.scl']);
+    s.openPlcFile('OB1.scl', 'BEGIN\nEND_ORGANIZATION_BLOCK\n');
+    const s2 = useSimStore.getState();
+    expect(s2.plcCurrentPath).toBe('OB1.scl');
+    expect(s2.plcCurrentContent).toContain('BEGIN');
+    expect(s2.plcDirty).toBe(false);
+  });
+
+  it('setPlcContent: sửa → dirty true; gõ lại đúng nội dung đã lưu → dirty false', () => {
+    const s = useSimStore.getState();
+    s.openPlcFile('OB1.scl', 'A');
+    s.setPlcContent('AB');
+    expect(useSimStore.getState().plcDirty).toBe(true);
+    s.setPlcContent('A');
+    expect(useSimStore.getState().plcDirty).toBe(false);
+  });
+
+  it('markPlcSaved: dirty false, nội dung đã lưu cập nhật', () => {
+    const s = useSimStore.getState();
+    s.openPlcFile('OB1.scl', 'A');
+    s.setPlcContent('AB');
+    s.markPlcSaved();
+    const s2 = useSimStore.getState();
+    expect(s2.plcDirty).toBe(false);
+    s2.setPlcContent('AB');
+    expect(useSimStore.getState().plcDirty).toBe(false);
+  });
+
+  it('setPlcWatch reset values; applyPlcValues merge theo chỉ số', () => {
+    const s = useSimStore.getState();
+    s.setPlcWatch(['RUN_CMD', 'FAULT_LAMP']);
+    s.applyPlcValues({ type: 'plc.values', simTimeMs: 100, values: [[0, true]] });
+    expect(useSimStore.getState().plcWatchValues.get(0)).toBe(true);
+    expect(useSimStore.getState().plcWatchValues.get(1)).toBeUndefined();
+    s.applyPlcValues({ type: 'plc.values', simTimeMs: 200, values: [[1, true]] });
+    expect(useSimStore.getState().plcWatchValues.get(0)).toBe(true);
+    expect(useSimStore.getState().plcWatchValues.get(1)).toBe(true);
+    // Đổi danh sách watch → values reset.
+    s.setPlcWatch(['RUN_CMD']);
+    expect(useSimStore.getState().plcWatchValues.size).toBe(0);
+  });
+
+  it('markPlcForced thêm/xóa ref', () => {
+    const s = useSimStore.getState();
+    s.markPlcForced('RUN_CMD', true);
+    expect(useSimStore.getState().plcForced.has('RUN_CMD')).toBe(true);
+    s.markPlcForced('RUN_CMD', false);
+    expect(useSimStore.getState().plcForced.has('RUN_CMD')).toBe(false);
+  });
+
+  it('setPlcDiagnostics lưu danh sách build', () => {
+    const s = useSimStore.getState();
+    s.setPlcDiagnostics([{ code: 'SCL-T001', severity: 'error', message: 'x' }]);
+    expect(useSimStore.getState().plcDiagnostics).toHaveLength(1);
+    expect(useSimStore.getState().plcDiagnostics[0]?.code).toBe('SCL-T001');
+  });
+});

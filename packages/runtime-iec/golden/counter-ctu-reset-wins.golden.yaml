@@ -1,0 +1,25 @@
+id: counter-ctu-reset-wins
+description: "CTU R thắng đếm cùng scan (bảng L2): CV=2 sẵn, R+CU cùng true -> 0; đếm lại sau khi CU xuống/lên"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "C1"(CU := %M0.0, R := %M0.1, PV := 3);
+        %MW10 := "C1".CV;
+        %Q0.0 := "C1".QU;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "C1" "CTU"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { '"C1".CV': 2, "%M0.0": true, "%M0.1": true }, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 10, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 20, set: { "%M0.1": false }, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 30, set: { "%M0.0": false }, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 40, set: { "%M0.0": true }, expect: { "%MW10": 1, "%Q0.0": false } }

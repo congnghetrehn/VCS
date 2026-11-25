@@ -94,30 +94,48 @@ function defaultInitial(type: DataType): TagValue {
   return 0;
 }
 
-/** Kiểm tra giá trị theo kiểu; sai → `TagError('TAG-E001')`. */
-function validateValue(type: DataType, value: TagValue, where: string): void {
-  let ok: boolean;
+/** Lỗi kiểm tra giá trị tag (B3, M4 §3): TYPE = sai kiểu JS, RANGE = số ngoài
+ * khoảng kiểu hoặc không nguyên với kiểu nguyên. */
+export interface TagValueError {
+  kind: 'TYPE' | 'RANGE';
+  message: string;
+}
+
+/**
+ * Kiểm tra giá trị theo kiểu mà không ném lỗi (B3, M4 §3 hàng 3 + §4.2).
+ * Hợp lệ → `undefined` (không cấp phát ở đường thành công); sai → lỗi có
+ * `kind` để caller phân loại. Real/LReal chấp nhận mọi số kể cả NaN/±Infinity
+ * (M0 §6.2 quy tắc 5); Time: số nguyên ≥ 0. Hàm này KHÔNG chuẩn hóa
+ * (fround `Real`, `>>> 0` cho DWord/UDInt chỉ trong `TagDB.write`).
+ */
+export function validateTagValue(type: DataType, v: TagValue): TagValueError | undefined {
+  // Không cấp phát ở đường thành công (đường nóng TagDB.set): chỉ tính `kind`
+  // bằng biến cục bộ; object lỗi chỉ tạo ở đường lỗi.
+  let kind: 'TYPE' | 'RANGE' | undefined;
   if (type === 'Bool') {
-    ok = typeof value === 'boolean';
+    if (typeof v !== 'boolean') kind = 'TYPE';
   } else if (type === 'String') {
-    ok = typeof value === 'string';
-  } else if (typeof value !== 'number') {
-    ok = false;
+    if (typeof v !== 'string') kind = 'TYPE';
+  } else if (typeof v !== 'number') {
+    kind = 'TYPE';
   } else {
     const range = TYPE_RANGES[type];
     if (range === undefined) {
-      ok = false;
+      kind = 'TYPE';
     } else if (range.int) {
-      ok = Number.isInteger(value) && value >= range.min && value <= range.max;
-    } else {
-      ok = true; // Real/LReal chấp nhận mọi số, kể cả NaN/±Infinity
+      if (!Number.isInteger(v) || v < range.min || v > range.max) kind = 'RANGE';
     }
+    // Real/LReal: mọi số hợp lệ, kể cả NaN/±Infinity.
   }
-  if (!ok) {
-    throw new TagError(
-      'TAG-E001',
-      `${where}: giá trị ${formatValue(value)} không hợp lệ cho kiểu '${type}'`,
-    );
+  if (kind === undefined) return undefined;
+  return { kind, message: `giá trị ${formatValue(v)} không hợp lệ cho kiểu '${type}'` };
+}
+
+/** Kiểm tra giá trị theo kiểu; sai → `TagError('TAG-E001')`. */
+function validateValue(type: DataType, value: TagValue, where: string): void {
+  const err = validateTagValue(type, value);
+  if (err !== undefined) {
+    throw new TagError('TAG-E001', `${where}: ${err.message}`);
   }
 }
 

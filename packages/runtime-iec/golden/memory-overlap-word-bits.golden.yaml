@@ -1,0 +1,18 @@
+id: memory-overlap-word-bits
+description: "Word big-endian: %MW10=4660 (0x1234) -> M10.4=true, M11.0=false, M11.2=true"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := 4660;
+        %Q0.0 := %M10.4;
+        %Q0.1 := %M11.0;
+        %Q0.2 := %M11.2;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false, "%Q0.1": false, "%Q0.2": false } }
+  - { t: 10, expect: { "%Q0.0": true, "%Q0.1": false, "%Q0.2": true } }

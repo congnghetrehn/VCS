@@ -1,0 +1,17 @@
+id: arith-shift-left
+description: "SHL: 255<<4=4080; số lần dịch >= độ rộng -> 0; số lần âm -> 0"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := SHL(255, 4);
+        %MW12 := SHL(255, 16);
+        %MW14 := SHL(255, -1);
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%MW12": 0, "%MW14": 0 } }
+  - { t: 10, expect: { "%MW10": 4080, "%MW12": 0, "%MW14": 0 } }

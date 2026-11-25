@@ -1,0 +1,29 @@
+id: flow-nested-if-case
+description: "IF lồng trong CASE: x=2 phân nhánh theo y, x=1 và ELSE riêng"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        CASE %MW20 OF
+          1: %Q0.3 := TRUE; %Q0.0 := FALSE; %Q0.1 := FALSE; %Q0.2 := FALSE;
+          2:
+            IF %M0.0 THEN
+              %Q0.0 := TRUE; %Q0.1 := FALSE;
+            ELSE
+              %Q0.0 := FALSE; %Q0.1 := TRUE;
+            END_IF;
+            %Q0.2 := FALSE; %Q0.3 := FALSE;
+        ELSE
+          %Q0.0 := FALSE; %Q0.1 := FALSE; %Q0.2 := TRUE; %Q0.3 := FALSE;
+        END_CASE;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%MW20": 2, "%M0.0": true }, expect: { "%Q0.0": false, "%Q0.1": false, "%Q0.2": false, "%Q0.3": false } }
+  - { t: 10, expect: { "%Q0.0": true, "%Q0.1": false, "%Q0.2": false, "%Q0.3": false } }
+  - { t: 20, set: { "%M0.0": false }, expect: { "%Q0.0": false, "%Q0.1": true, "%Q0.2": false, "%Q0.3": false } }
+  - { t: 30, set: { "%MW20": 1 }, expect: { "%Q0.0": false, "%Q0.1": false, "%Q0.2": false, "%Q0.3": true } }
+  - { t: 40, set: { "%MW20": 9 }, expect: { "%Q0.0": false, "%Q0.1": false, "%Q0.2": true, "%Q0.3": false } }

@@ -20,5 +20,7 @@ export type { WsHubOptions } from './ws.js';
 export { resolveServerConfig, isOriginAllowed, DEFAULT_SERVER_CONFIG } from './config.js';
 export type { ServerConfig, ServerConfigInput } from './config.js';
 export { registerRestRoutes } from './routes.js';
-export type { ProjectInfo } from './routes.js';
+export type { ProjectInfo, PlcRoutesContext } from './routes.js';
+export { compilePlcDir, discoverPlcFiles, loadPlcProgram, plcExtension, savePlcFile, startPlcControllers } from './plc.js';
+export type { PlcLoadResult } from './plc.js';
 export { SERVER_EXTENSIONS } from './extensions.js';

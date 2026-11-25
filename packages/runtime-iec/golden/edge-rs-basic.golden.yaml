@@ -1,0 +1,26 @@
+id: edge-rs-basic
+description: "RS bảng K2: set-giữ-reset; S và R cùng true -> Q1=false (R thắng)"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "T1"(S := %M0.0, R1 := %M0.1);
+        %Q0.0 := "T1".Q1;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "T1" "RS"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, expect: { "%Q0.0": false } }
+  - { t: 20, set: { "%M0.0": true }, expect: { "%Q0.0": true } }
+  - { t: 30, set: { "%M0.0": false }, expect: { "%Q0.0": true } }
+  - { t: 40, set: { "%M0.1": true }, expect: { "%Q0.0": false } }
+  - { t: 50, set: { "%M0.0": true }, expect: { "%Q0.0": false } }
+  - { t: 60, set: { "%M0.1": false }, expect: { "%Q0.0": true } }

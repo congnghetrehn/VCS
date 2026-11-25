@@ -3,9 +3,10 @@
 // Sim bar + bảng Tags + Diagnostics panel. WS client nối cùng origin
 // (OQ-058); message server → store; lỗi server hiện ở banner lastError.
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { TagValue } from '@vcs/schemas';
 import { DiagnosticsPanel } from './components/DiagnosticsPanel.js';
+import { PlcWorkspace } from './components/PlcWorkspace.js';
 import { SimBar } from './components/SimBar.js';
 import { TagTable } from './components/TagTable.js';
 import { effectiveLang, useSimSnapshot, useSimStore, type Theme } from './store.js';
@@ -45,6 +46,7 @@ export function App() {
   const s = useSimSnapshot();
   const lang = effectiveLang(s);
   const clientRef = useRef<WsClient | null>(null);
+  const [view, setView] = useState<'tags' | 'plc'>('tags');
 
   useEffect(() => {
     const store = useSimStore.getState();
@@ -79,6 +81,9 @@ export function App() {
             break;
           case 'diagnostics':
             st.applyDiagnostics(msg);
+            break;
+          case 'plc.values':
+            st.applyPlcValues(msg);
             break;
           case 'error':
             st.setLastError(`${msg.code}: ${msg.message}`);
@@ -166,16 +171,59 @@ export function App() {
           clientRef.current?.timeScale(v);
         }}
       />
-      <TagTable
-        lang={lang}
-        onWriteTag={(name: string, value: TagValue) => {
-          const sent = clientRef.current?.writeTag(name, value) ?? false;
-          if (!sent) {
-            // OQ-059: write lúc mất kết nối thì bỏ + hiện trạng thái.
-            useSimStore.getState().setLastError(t(lang, 'header.connection.disconnected'));
-          }
-        }}
-      />
+      <nav aria-label="views" className="flex gap-2 border-b border-gray-300 px-4 py-1 dark:border-gray-700">
+        <button
+          data-testid="nav-tags"
+          onClick={() => {
+            setView('tags');
+          }}
+          type="button"
+          className={view === 'tags' ? 'font-bold underline' : undefined}
+        >
+          {t(lang, 'nav.tags')}
+        </button>
+        <button
+          data-testid="nav-plc"
+          onClick={() => {
+            setView('plc');
+          }}
+          type="button"
+          className={view === 'plc' ? 'font-bold underline' : undefined}
+        >
+          {t(lang, 'nav.plc')}
+        </button>
+      </nav>
+      {view === 'tags' ? (
+        <TagTable
+          lang={lang}
+          onWriteTag={(name: string, value: TagValue) => {
+            const sent = clientRef.current?.writeTag(name, value) ?? false;
+            if (!sent) {
+              // OQ-059: write lúc mất kết nối thì bỏ + hiện trạng thái.
+              useSimStore.getState().setLastError(t(lang, 'header.connection.disconnected'));
+            }
+          }}
+        />
+      ) : (
+        <PlcWorkspace
+          lang={lang}
+          onPlcForce={(ref, value) => {
+            clientRef.current?.plcForce(ref, value);
+          }}
+          onPlcUnforce={(ref) => {
+            clientRef.current?.plcUnforce(ref);
+          }}
+          onPlcUnwatch={() => {
+            clientRef.current?.plcUnwatch();
+          }}
+          onPlcWatch={(refs) => {
+            clientRef.current?.plcWatch(refs);
+          }}
+          onPlcWrite={(ref, value) => {
+            clientRef.current?.plcWrite(ref, value);
+          }}
+        />
+      )}
       <DiagnosticsPanel lang={lang} />
     </div>
   );

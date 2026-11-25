@@ -1,0 +1,24 @@
+id: arith-convert-range-fault
+description: "REAL_TO_INT ngoài miền Int -> 0 + fault CONV_RANGE; giá trị trong miền chạy bình thường"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := REAL_TO_INT("DB_R".X);
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_R" STRUCT
+        X : Real;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { '"DB_R".X': 40000.0 }, expect: { "%MW10": 0 } }
+  - { t: 10, expect: { "%MW10": 0 }, faults: ["CONV_RANGE"] }
+  - { t: 20, set: { '"DB_R".X': 100.0 }, expect: { "%MW10": 100 } }
+  - { t: 30, set: { '"DB_R".X': 1.0e10 }, expect: { "%MW10": 0 }, faults: ["CONV_RANGE"] }

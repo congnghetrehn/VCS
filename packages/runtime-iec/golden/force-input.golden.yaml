@@ -1,0 +1,18 @@
+id: force-input
+description: "Force đầu vào %I0.0 (vùng I): OB đọc true dù giá trị thật false; unforce chỉ gỡ ép buộc, bộ nhớ giữ giá trị force cuối (OQ-141) cho tới khi set lại"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %Q0.0 := %I0.0;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%Q0.0": false } }
+  - { t: 10, expect: { "%Q0.0": false } }
+  - { t: 20, force: { "%I0.0": true }, expect: { "%Q0.0": true } }
+  - { t: 30, unforce: ["%I0.0"], expect: { "%Q0.0": true } }
+  - { t: 40, set: { "%I0.0": false }, expect: { "%Q0.0": false } }

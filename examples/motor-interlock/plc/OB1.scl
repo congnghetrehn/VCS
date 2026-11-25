@@ -1,0 +1,7 @@
+ORGANIZATION_BLOCK "Main"
+BEGIN
+  "FB_Motor_DB"(iStart := "START_PB", iStopOk := "STOP_OK", iOverloadOk := "OVL_OK",
+                iPermissive := "PERM", iRunFb := "RUN_FB", iReset := "RESET_PB");
+  "RUN_CMD" := "FB_Motor_DB".qRun;
+  "FAULT_LAMP" := "FB_Motor_DB".qFault;
+END_ORGANIZATION_BLOCK

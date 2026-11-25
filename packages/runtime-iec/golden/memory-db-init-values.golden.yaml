@@ -1,0 +1,26 @@
+id: memory-db-init-values
+description: "DB khởi tạo trong BEGIN: a=42, b=TRUE có ngay từ scan đầu"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := "DB_D".a;
+        %Q0.0 := "DB_D".b;
+      END_ORGANIZATION_BLOCK
+  - file: db.scl
+    text: |
+      DATA_BLOCK "DB_D" STRUCT
+        a : Int;
+        b : Bool;
+      END_STRUCT;
+      BEGIN
+        "DB_D".a := 42;
+        "DB_D".b := TRUE;
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%Q0.0": false } }
+  - { t: 10, expect: { "%MW10": 42, "%Q0.0": true } }

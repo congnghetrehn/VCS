@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "@vcs/runtime-iec": "workspace:*",
+    "@vcs/schemas": "workspace:*",
+    "chevrotain": "13.2.0",
+    "zod": "4.6.7"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "name": "@vcs/vendor-siemens",
+  "private": true,
+  "scripts": {
+    "lint": "eslint src",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}

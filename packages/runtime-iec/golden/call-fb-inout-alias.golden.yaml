@@ -1,0 +1,39 @@
+id: call-fb-inout-alias
+description: "IN_OUT là bí danh trực tiếp (OQ-148): FB tăng field DB_G.x qua tham chiếu, giữ qua các scan"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "DB_A"(v := "DB_G".x);
+        %MW10 := "DB_G".x;
+        %MW12 := "DB_A".q;
+      END_ORGANIZATION_BLOCK
+  - file: fb.scl
+    text: |
+      FUNCTION_BLOCK "FB_Alias"
+      VAR_IN_OUT
+        v : Int;
+      END_VAR
+      VAR_OUTPUT
+        q : Int;
+      END_VAR
+      BEGIN
+        #v := #v + 1;
+        #q := #v;
+      END_FUNCTION_BLOCK
+      DATA_BLOCK "DB_A" "FB_Alias"
+      BEGIN
+      END_DATA_BLOCK
+      DATA_BLOCK "DB_G" STRUCT
+        x : Int;
+      END_STRUCT;
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%MW12": 0 } }
+  - { t: 10, expect: { "%MW10": 1, "%MW12": 1 } }
+  - { t: 20, expect: { "%MW10": 2, "%MW12": 2 } }

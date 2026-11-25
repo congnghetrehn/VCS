@@ -1,0 +1,19 @@
+id: force-two-outputs
+description: "Force chọn lọc từng ngõ ra: unforce Q0.0 trả quyền cho OB, Q0.1 vẫn bị force"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %Q0.0 := %I0.0;
+        %Q0.1 := %I0.1;
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, set: { "%I0.0": true, "%I0.1": true }, expect: { "%Q0.0": false, "%Q0.1": false } }
+  - { t: 10, expect: { "%Q0.0": true, "%Q0.1": true } }
+  - { t: 20, force: { "%Q0.0": false, "%Q0.1": false }, expect: { "%Q0.0": false, "%Q0.1": false } }
+  - { t: 30, unforce: ["%Q0.0"], expect: { "%Q0.0": true, "%Q0.1": false } }
+  - { t: 40, unforce: ["%Q0.1"], expect: { "%Q0.0": true, "%Q0.1": true } }

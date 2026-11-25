@@ -1,0 +1,17 @@
+id: arith-shift-right
+description: "SHR số có dấu là dịch số học: -16>>2=-4; 256>>4=16; số lần >= độ rộng -> 0"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        %MW10 := SHR(-16, 2);
+        %MW12 := SHR(256, 4);
+        %MW14 := SHR(256, 32);
+      END_ORGANIZATION_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0, "%MW12": 0, "%MW14": 0 } }
+  - { t: 10, expect: { "%MW10": -4, "%MW12": 16, "%MW14": 0 } }

@@ -13,6 +13,17 @@ export const simStateSchema = z.object({
   timeScale: z.union([z.number(), z.literal('max')]),
   lagging: z.boolean(),
   achievedScale: z.number(),
+  /** B4 (M4 §2 hàng 4): khóa điều khiển khi có controller ngoài. Optional,
+   * additive — server P0.8 không bao giờ gửi trường này (OQ-080). */
+  locked: z.boolean().optional(),
+  /** P1.7 (OQ-207): thống kê SoftPlc khi project có plc/ — additive, chỉ
+   * có khi có controller introspectable `builtin:siemens`. */
+  plc: z
+    .object({
+      scanCount: z.number().int().min(0),
+      faultCount: z.number().int().min(0),
+    })
+    .optional(),
 });
 
 export type SimState = z.infer<typeof simStateSchema>;
@@ -46,6 +57,32 @@ const tagWriteSchema = z.object({
   value: tagValueSchema,
 });
 
+/** P1.7 (OQ-206): Watch PLC — đăng ký danh sách ref cần theo dõi. */
+const plcWatchSchema = z.object({
+  type: z.literal('plc.watch'),
+  refs: z.array(z.string().min(1)).min(1).max(200),
+});
+
+const plcUnwatchSchema = z.object({ type: z.literal('plc.unwatch') });
+
+/** P1.7 (OQ-206/216): ghi qua introspection; sai kiểu → lỗi TAG-E001. */
+const plcWriteSchema = z.object({
+  type: z.literal('plc.write'),
+  ref: z.string().min(1),
+  value: tagValueSchema,
+});
+
+const plcForceSchema = z.object({
+  type: z.literal('plc.force'),
+  ref: z.string().min(1),
+  value: tagValueSchema,
+});
+
+const plcUnforceSchema = z.object({
+  type: z.literal('plc.unforce'),
+  ref: z.string().min(1),
+});
+
 export const clientMessageSchema = z.discriminatedUnion('type', [
   helloSchema,
   simCommandSchema,
@@ -53,6 +90,11 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
   tagsSubscribeSchema,
   tagsUnsubscribeSchema,
   tagWriteSchema,
+  plcWatchSchema,
+  plcUnwatchSchema,
+  plcWriteSchema,
+  plcForceSchema,
+  plcUnforceSchema,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
@@ -106,6 +148,65 @@ const errorMessageSchema = z.object({
   ref: z.string().optional(),
 });
 
+/** P1.7 (OQ-206): giá trị Watch — [vị trí trong danh sách watch, giá trị],
+ * gửi ở nhịp 10 Hz, chỉ khi có ref đổi (LWW). */
+const plcValuesSchema = z.object({
+  type: z.literal('plc.values'),
+  simTimeMs: z.number().int().min(0),
+  values: z.array(z.tuple([z.number().int(), tagValueSchema])),
+});
+
+/** Thống kê gateway (M4 §5.3, nguyên văn). */
+export const gatewayStatsSchema = z.object({
+  state: z.enum(['stopped', 'starting', 'running', 'error']),
+  startedAtWallMs: z.number().int().optional(),
+  lastError: z.string().optional(),
+  clients: z.number().int().min(0),
+  reads: z.number().int().min(0),
+  writes: z.number().int().min(0),
+  errors: z.number().int().min(0),
+  monitoredItems: z.number().int().min(0).optional(),
+  subscriptions: z.number().int().min(0).optional(),
+});
+
+export type GatewayStats = z.infer<typeof gatewayStatsSchema>;
+
+/** Trạng thái comms (M4 §5.3 + §10.1; envelope đề xuất ở OQ-076 — P0.8 chỉ
+ * schema, server chưa phát message này). */
+export const commsStatusSchema = z.object({
+  type: z.literal('comms.status'),
+  gateways: z.array(
+    z.object({
+      id: z.string(),
+      kind: z.enum(['opcua-server', 'modbus-server']),
+      stats: gatewayStatsSchema,
+      endpoints: z.array(z.string()),
+    }),
+  ),
+});
+
+export type CommsStatus = z.infer<typeof commsStatusSchema>;
+
+/** Một mục RingLog (M4 §5.4, nguyên văn; `level` giữ string, xem OQ-077). */
+export const commsLogEntrySchema = z.object({
+  tWallMs: z.number().int(),
+  gateway: z.string(),
+  level: z.string(),
+  kind: z.enum(['session', 'request', 'write', 'error', 'info']),
+  summary: z.string(),
+  detail: z.string().optional(),
+});
+
+export type CommsLogEntry = z.infer<typeof commsLogEntrySchema>;
+
+/** Log comms (M4 §5.4; envelope đề xuất ở OQ-076 — P0.8 chỉ schema). */
+export const commsLogSchema = z.object({
+  type: z.literal('comms.log'),
+  entries: z.array(commsLogEntrySchema),
+});
+
+export type CommsLog = z.infer<typeof commsLogSchema>;
+
 export const serverMessageSchema = z.discriminatedUnion('type', [
   welcomeSchema,
   simStateMessageSchema,
@@ -113,6 +214,9 @@ export const serverMessageSchema = z.discriminatedUnion('type', [
   tagsDeltaSchema,
   diagnosticsMessageSchema,
   errorMessageSchema,
+  plcValuesSchema,
+  commsStatusSchema,
+  commsLogSchema,
 ]);
 
 export type ServerMessage = z.infer<typeof serverMessageSchema>;

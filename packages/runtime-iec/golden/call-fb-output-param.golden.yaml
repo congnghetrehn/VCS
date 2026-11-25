@@ -1,0 +1,38 @@
+id: call-fb-output-param
+description: "Tham số ra q => %MW10: đếm qua namedOut, không qua đọc DB"
+expectedFrom: spec
+config: { scanPeriodMs: 10 }
+sources:
+  - file: main.scl
+    text: |
+      ORGANIZATION_BLOCK "Main"
+      BEGIN
+        "DB_A"(inc := %M0.0, q => %MW10);
+      END_ORGANIZATION_BLOCK
+  - file: fb.scl
+    text: |
+      FUNCTION_BLOCK "FB_Cnt"
+      VAR_INPUT
+        inc : Bool;
+      END_VAR
+      VAR_OUTPUT
+        q : Int;
+      END_VAR
+      VAR
+        cnt : Int;
+      END_VAR
+      BEGIN
+        IF #inc THEN
+          #cnt := #cnt + 1;
+        END_IF;
+        #q := #cnt;
+      END_FUNCTION_BLOCK
+      DATA_BLOCK "DB_A" "FB_Cnt"
+      BEGIN
+      END_DATA_BLOCK
+organization: [{ ob: 1 }]
+steps:
+  - { t: 0, expect: { "%MW10": 0 } }
+  - { t: 10, set: { "%M0.0": true }, expect: { "%MW10": 1 } }
+  - { t: 20, set: { "%M0.0": false }, expect: { "%MW10": 1 } }
+  - { t: 30, set: { "%M0.0": true }, expect: { "%MW10": 2 } }
