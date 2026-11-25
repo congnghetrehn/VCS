@@ -59,6 +59,66 @@ describe('SCL → IR → SoftPlc (FB_Motor latch)', () => {
   });
 });
 
+describe('hai instance cùng FB độc lập (P1.7 Opt B/C/E)', () => {
+  it('TEMP về 0 ở đầu mỗi lần gọi; static không rò giữa 2 DB', () => {
+    const src = `FUNCTION_BLOCK "FB_Cnt"
+VAR_INPUT
+  iEn : Bool;
+END_VAR
+VAR_OUTPUT
+  qCnt : Int;
+END_VAR
+VAR_TEMP
+  tStep : Int;
+END_VAR
+VAR
+  sCnt : Int;
+END_VAR
+BEGIN
+  #qCnt := #sCnt + #tStep;
+  #tStep := 5;
+  IF #iEn THEN
+    #sCnt := #sCnt + 1;
+  END_IF;
+END_FUNCTION_BLOCK
+
+DATA_BLOCK "DB_A" "FB_Cnt"
+BEGIN
+END_DATA_BLOCK
+
+DATA_BLOCK "DB_B" "FB_Cnt"
+BEGIN
+END_DATA_BLOCK
+
+ORGANIZATION_BLOCK "Main"
+BEGIN
+  "DB_A"(iEn := %I0.0);
+  "DB_B"(iEn := %I0.1);
+  %MW0 := "DB_A".qCnt;
+  %MW2 := "DB_B".qCnt;
+END_ORGANIZATION_BLOCK`;
+    const { program, diagnostics } = compileSclProgram(src, 'Cnt.scl');
+    expect(diagnostics.filter((d) => d.severity === 'error')).toEqual([]);
+    const plc = new SoftPlc(program, new Map(), { id: 'PLC1', scanPeriodMs: 10 });
+    plc.start();
+    const scan = (a: boolean, b: boolean): [number, number] => {
+      plc.write('%I0.0', a);
+      plc.write('%I0.1', b);
+      plc.step(plc.getDiagnostics().scanCount * 10, 10);
+      return [plc.read('%MW0') as number, plc.read('%MW2') as number];
+    };
+    // #tStep đọc trước khi ghi trong lần gọi → luôn 0 (frame mới mỗi lần
+    // gọi). Nếu frame dùng chung map temp, lần gọi thứ hai trong cùng scan
+    // sẽ đọc 5 (rò từ lần gọi trước) thay vì 0.
+    // #qCnt gán TRƯỚC khi #sCnt tăng nên trễ 1 scan so với sCnt.
+    expect(scan(false, false)).toEqual([0, 0]);
+    expect(scan(true, false)).toEqual([0, 0]);
+    expect(scan(true, false)).toEqual([1, 0]);
+    expect(scan(false, true)).toEqual([2, 0]);
+    expect(scan(true, true)).toEqual([2, 1]);
+  });
+});
+
 describe('cross-test parsePlcRef vs parseAddress (P1.1)', () => {
   const map = buildTagAddressMap([]);
   const cases: string[] = [

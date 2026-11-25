@@ -10,7 +10,7 @@ import type { Diagnostic } from '@vcs/schemas';
 import { diag, SCL_CATALOG, sortDiagnostics } from '@vcs/schemas';
 import type { IrBlock, IrDb, IrExpr, IrField, IrInterface, IrLValue, IrStmt, IrType, IrUdt, IrVar, PrimitiveType, SrcRef } from '@vcs/runtime-iec';
 import { isBitStringType, isFloatType, isIntegerType, layoutStruct, stdBlockInterface, getStdBlockDef } from '@vcs/runtime-iec';
-import type { FieldDecl, FieldType } from '@vcs/runtime-iec';
+import type { FieldDecl, FieldType, TagAddr, TagAddressMap } from '@vcs/runtime-iec';
 import type {
   CallExpr,
   CallStmt,
@@ -64,6 +64,12 @@ export interface TypecheckResult {
   dbs: Map<string, IrDb>;
   /** Kiểu trả của các FC trong file (key = tên FC lowercase). */
   returnTypes: Map<string, IrType>;
+  /**
+   * Lvalue `"TAG"` đã giải thành tag (OQ-198): key = node lvalue, value =
+   * địa chỉ tag. Lower dùng bảng này để hạ thành `abs`/`absDb` thay vì
+   * `dbField` (tag không phải DB).
+   */
+  tagRefs: Map<SclLValue, TagAddr>;
 }
 
 /** Bảng tra cứu tích lũy qua các lần compile cùng ctx (cùng hình với
@@ -73,6 +79,13 @@ export interface CrossFileTables {
   udts: Map<string, IrUdt>;
   dbs: Map<string, IrDb>;
   blocks: Map<string, IrBlock>;
+  /**
+   * Bảng tag của project (OQ-198): do `compileProject` đặt trước khi biên
+   * dịch, từ `tags.yaml` qua `buildTagAddressMap`. Không có → `"NAME"` chỉ
+   * giải thành DB/block (hành vi P1.3). Thứ tự giải `"NAME"`: DB/block
+   * trước, tag sau (tag không che tên DB/block).
+   */
+  tags?: TagAddressMap;
 }
 
 /** Tên kiểu elementary chuẩn hóa (case-insensitive) → DataType. */
@@ -697,6 +710,8 @@ class Typechecker {
   private readonly resolvingBlock: string[] = [];
   private readonly fcReturnTypes = new Map<string, IrType>();
   private readonly broken = new Set<string>();
+  /** Lvalue `"TAG"` đã giải thành tag (OQ-198) — lower dùng để hạ abs. */
+  readonly tagRefs = new Map<SclLValue, TagAddr>();
   private readonly pendingStructInits: PendingStructInit[] = [];
   private readonly callEdges: CallEdge[] = [];
   private currentBlock: ObBlock | FcBlock | FbBlock | undefined;
@@ -749,6 +764,25 @@ class Typechecker {
 
   private findUdtBlock(name: string): UdtBlock | undefined {
     return this.udtBlockByName.get(name.toLowerCase());
+  }
+
+  /**
+   * Tra tag trong `ctx.tags` (OQ-198): khớp đúng case trước (cùng quy ước
+   * `parsePlcRef` ở runtime-iec), rồi khớp không phân biệt hoa/thường (SCL
+   * không phân biệt hoa/thường — OQ-098). Hai tag chỉ khác case → lấy tag
+   * khớp đúng case trước; nếu cả hai đều lệch case thì lấy tag đầu tiên
+   * theo thứ tự khai báo (ghi rõ: tránh đặt tên tag chỉ khác case).
+   */
+  private findTag(name: string): TagAddr | undefined {
+    const tags = this.ctx.tags;
+    if (tags === undefined) return undefined;
+    const exact = tags.get(name);
+    if (exact !== undefined) return exact;
+    const lower = name.toLowerCase();
+    for (const [key, addr] of tags) {
+      if (key.toLowerCase() === lower) return addr;
+    }
+    return undefined;
   }
 
   /** BlockSymbols của block trong file (build + cache) hoặc từ ctx. */
@@ -1431,8 +1465,15 @@ class Typechecker {
             this.err('SCL-T004', base.loc, `'${base.name}' phải gọi dạng "${base.name}"(...)`);
             return undefined;
           }
-          this.err('SCL-T001', base.loc, `tên chưa khai báo: "${base.name}"`);
-          return undefined;
+          // OQ-198: không phải DB/block → tra tag (DB/block trước, tag sau).
+          const tag = this.findTag(base.name);
+          if (tag !== undefined) {
+            info = { type: tag.type };
+            this.tagRefs.set(lv, tag);
+          } else {
+            this.err('SCL-T001', base.loc, `tên chưa khai báo: "${base.name}"`);
+            return undefined;
+          }
         }
       }
     } else {
@@ -2557,13 +2598,20 @@ class Typechecker {
       if (b.kind === 'OB' || b.kind === 'FC' || b.kind === 'FB') this.checkBlockBody(b);
     }
     this.checkRecursion();
+    // P1.7 (bug P1.3): `dbs` phải gộp cả ctx — lower tra cứu DB callee
+    // (`"DB"(...)`) qua `checked.dbs`; trước đây chỉ có DB của file hiện
+    // tại nên gọi instance DB ở file khác bị throw ở lower dù typecheck
+    // đã chấp nhận (findDb có tra ctx). Cùng quy ước với `blocks` (đã
+    // cache cả ctx, xem getBlockSymbols). File hiện tại thắng khi trùng tên.
+    const dbs = new Map<string, IrDb>([...this.ctx.dbs, ...this.dbs]);
     return {
       diagnostics: sortDiagnostics(this.diags),
       types: this.types,
       blocks: this.blocks,
       udts: this.udts,
-      dbs: this.dbs,
+      dbs,
       returnTypes: this.fcReturnTypes,
+      tagRefs: this.tagRefs,
     };
   }
 }
