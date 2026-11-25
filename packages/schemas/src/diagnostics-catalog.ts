@@ -180,9 +180,75 @@ export const SCL_CATALOG: DiagnosticCatalog = defineDiagnostics({
     title: 'Cấu trúc SCL chưa hỗ trợ',
     hint: 'Dùng cấu trúc trong phạm vi M1 (xem M1 §4.2 và Phụ lục A); String không hỗ trợ.',
   },
+  'SCL-T001': {
+    severity: 'error',
+    title: 'Tên chưa khai báo',
+    hint: 'Khai báo biến/kiểu/block trước khi dùng, kiểm tra chính tả.',
+  },
+  'SCL-T002': {
+    severity: 'error',
+    title: 'Kiểu không khớp',
+    hint: 'Đổi kiểu biến hoặc giá trị cho khớp; thu hẹp phải dùng hàm chuyển đổi tường minh.',
+  },
+  'SCL-T003': {
+    severity: 'error',
+    title: 'Toán tử không áp dụng cho kiểu',
+    hint: 'Phép số học chỉ dùng cho số nguyên/số thực/Time; AND/OR/XOR/NOT dùng cho Bool hoặc Byte/Word/DWord.',
+  },
+  'SCL-T004': {
+    severity: 'error',
+    title: 'Lỗi gọi block/hàm',
+    hint: 'Gọi FB cần instance (#fb hoặc "DB"); kiểm tra tên và kiểu tham số trong khai báo block.',
+  },
+  'SCL-T005': {
+    severity: 'error',
+    title: 'Truy cập member/index sai',
+    hint: 'Kiểm tra tên field, kiểu index và khoảng chỉ số hằng của mảng.',
+  },
+  'SCL-T006': {
+    severity: 'error',
+    title: 'Gán không hợp lệ',
+    hint: 'VAR_INPUT chỉ đọc trong FB/FC; VAR_CONSTANT không được gán.',
+  },
+  'SCL-T007': {
+    severity: 'error',
+    title: 'EXIT/CONTINUE ngoài vòng lặp',
+    hint: 'EXIT/CONTINUE chỉ dùng trong FOR/WHILE/REPEAT.',
+  },
+  'SCL-T008': {
+    severity: 'error',
+    title: 'Biểu thức không hằng',
+    hint: 'Giá trị khởi tạo, label CASE và init DB phải là hằng (literal, phép tính trên hằng, VAR_CONSTANT).',
+  },
+  'SCL-T009': {
+    severity: 'error',
+    title: 'Khai báo trùng tên',
+    hint: 'Đổi tên một trong hai khai báo trong cùng scope.',
+  },
+  'SCL-T010': {
+    severity: 'error',
+    title: 'Thu hẹp ngầm định',
+    hint: 'Dùng REAL_TO_INT(...)/TRUNC(...) hoặc hàm X_TO_Y tường minh.',
+  },
+  'SCL-T011': {
+    severity: 'error',
+    title: 'Định nghĩa kiểu đệ quy',
+    hint: 'UDT không được chứa chính nó (trực tiếp hay gián tiếp).',
+  },
+  'SCL-S020': {
+    severity: 'error',
+    title: 'Đệ quy gọi block',
+    hint: 'FC/FB không được gọi chính nó (trực tiếp hay gián tiếp) — tách thành block khác.',
+  },
+  'SCL-W001': {
+    severity: 'warning',
+    title: 'Đọc TEMP trước khi ghi',
+    hint: 'TEMP không khởi tạo trên PLC thật; gán giá trị trước khi đọc.',
+  },
 });
 
-/** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E/-W/-L/-P/-U, rồi 3 chữ số.
+/** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E/-W/-L/-P/-S/-T/-U, rồi 3 chữ số.
  * Mở rộng cho SCL (L/P/U) để `gen-diagnostics --check` kiểm được mã SCL dùng
- * trong parser (không thì mã lạ lọt qua im lặng). */
-export const DIAGNOSTIC_CODE_RE = /\b[A-Z]{2,4}-[ELPWU]\d{3}\b/g;
+ * trong parser (không thì mã lạ lọt qua im lặng); P1.3 thêm T/S cho typecheck
+ * (OQ-107). */
+export const DIAGNOSTIC_CODE_RE = /\b[A-Z]{2,4}-[ELPSTWU]\d{3}\b/g;
