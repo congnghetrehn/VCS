@@ -154,6 +154,27 @@ export class WsClient {
     return this.send({ type: 'tag.write', name, value });
   }
 
+  /** P1.7 — PLC Watch (OQ-206/216). */
+  plcWatch(refs: string[]): boolean {
+    return this.send({ type: 'plc.watch', refs });
+  }
+
+  plcUnwatch(): boolean {
+    return this.send({ type: 'plc.unwatch' });
+  }
+
+  plcWrite(ref: string, value: TagValue): boolean {
+    return this.send({ type: 'plc.write', ref, value });
+  }
+
+  plcForce(ref: string, value: TagValue): boolean {
+    return this.send({ type: 'plc.force', ref, value });
+  }
+
+  plcUnforce(ref: string): boolean {
+    return this.send({ type: 'plc.unforce', ref });
+  }
+
   #handleText(text: string | null): void {
     if (text === null) {
       this.#opts.onInvalidMessage?.('WS: message không phải text');
