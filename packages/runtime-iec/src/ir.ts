@@ -85,6 +85,8 @@ export interface IrObBinding {
   ob: number;
   block: string;
   cycleMs?: number;
+  /** Phase (ms) của OB chu kỳ so với lưới scan; mặc định 0. */
+  phaseMs?: number;
 }
 
 export interface IrProgram {

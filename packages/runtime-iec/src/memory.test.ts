@@ -328,3 +328,23 @@ describe('memory — property (fast-check, seed cố định)', () => {
     );
   });
 });
+
+describe('SInt + kiểu không có kích thước', () => {
+  it('SInt: write -5 → read -5 (getInt8/setInt8)', () => {
+    const mem = new MemoryArea(8);
+    mem.write('SInt', 0, -5);
+    expect(mem.read('SInt', 0)).toBe(-5);
+    mem.write('SInt', 1, 127);
+    expect(mem.read('SInt', 1)).toBe(127);
+  });
+
+  it("read/write 'String' → throw (dùng getBit/setBit)", () => {
+    const mem = new MemoryArea(8);
+    // MemoryScalarType loại Bool/String ở kiểu TS; cast để kiểm nhánh phòng thủ runtime.
+    expect(() => mem.read('String' as unknown as 'Int', 0)).toThrow(/getBit\/setBit/);
+    expect(() => { mem.write('String' as unknown as 'Int', 0, 0); }).toThrow(/getBit\/setBit/);
+    // Nhánh "không có kích thước cố định" (#sizeOf) là dead code: sizeOf chỉ
+    // trả undefined cho 'String' (đã bị chặn ở trên); kiểu lạ khác crash ngay
+    // trong sizeOf (TYPE_INFO[type] undefined) nên không test ở đây.
+  });
+});
