@@ -1711,7 +1711,6 @@ Sau khi anh duyệt xong `docs/acceptance/M1.md` (9/9 tiêu chí §16 ĐẠT, 0 
 ---
 Log tới thời điểm 2026-11-25 22:51 +07.
 ---
-
 ## 2026-11-25 22:58 +07 — Anh Tiến
 
 ghi lại hướng dẫn chi tiết này vào file docs/verify-owner-guide.md . Các mục sau nếu cần verify em cũng hướng dẫn thật chi tiết và ghi vào file này nhé.
@@ -1752,4 +1751,29 @@ Lưu ý nhỏ: PR ký M1 vẫn đang chạy trên trình duyệt cloud, chưa c�
 
 ---
 Log tới thời điểm 2026-11-25 23:04 +07.
+---## 2026-11-25 23:12 +07 — Anh Tiến
+
+[Ảnh chụp bảng B.1 Gói bàn giao (handoff pack) trong file prompt-backup-va-chatlog-chuyen-tai-khoan.md]
+
+một tài khoản đang có dự án đang chạy dở, code với AI nhưng chưa được setup chuẩn chỉ với gói bàn giao (handoff) như em gợi ý. Hãy cho a prompt để AI tạo handoff pack bàn giao chuẩn chỉ như em đang làm với VCS và như em gợi ý lúc nãy (ảnh)
+
+## 2026-11-25 23:12 +07 — TraMuse
+
+TraMuse thêm vào cùng file đó rồi, anh Tiến ạ — **Phần C: prompt để AI tạo gói bàn giao cho dự án đang chạy dở**.
+
+Prompt này bắt AI bên kia tự làm 5 bước, không cần anh ngồi kể lại:
+
+1. **Khảo sát dự án** — đọc cây thư mục, git log/status/branch, README, config, CI; tự trả lời dự án là gì, đang ở giai đoạn nào, kẹt ở đâu.
+2. **Khai thác lịch sử chat** — rút tên anh, cách xưng hô, quyết định đã chốt, việc chờ anh, bài học từ lỗi cũ. Chỉ lấy điều có bằng chứng.
+3. **Tạo đủ 13 file** theo đúng mẫu VCS: MEMORY, USER, SOUL, AGENTS, IDENTITY, PROACTIVE_PREFERENCES, STATE, OWNER-INBOX (D/T/X/S/K/R), AMENDMENTS, open-questions (OQ-...), verify-owner-guide, acceptance M*, và user-chat/main.md lưu toàn bộ trao đổi.
+4. **Setup backup + chat log** theo Phần A luôn.
+5. **Tự kiểm** — đọc lại gói, tóm tắt 10 dòng cho anh xác nhận, kèm tối đa 3 câu hỏi cần chốt (mỗi câu có lựa chọn + mặc định đề xuất).
+
+Có 3 luật cứng trong prompt: không bịa (chỗ không chắc ghi "CHƯA XÁC MINH" + cách kiểm), không ghi secret vào gói, không ghi đè file đã có mà không đọc trước. Cuối file TraMuse thêm checklist 5 mục để anh kiểm trong 10 phút sau khi AI tạo xong, gồm cả lệnh grep tìm secret lọt vào gói.
+
+[Prompt backup + chat log, chuyển tài khoản (đã thêm Phần C)](sandbox://workspace/your_files/prompt-backup-va-chatlog-chuyen-tai-khoan.md)
+
 ---
+Log tới thời điểm 2026-11-25 23:12 +07.
+---
+
