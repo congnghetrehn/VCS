@@ -569,3 +569,109 @@ PLCSIM để đối chiếu; nếu TIA cho phép rộng hơn (vd `Int := Real` t
 code cũ) thì sinh SCR nới lỏng, không tự sửa typecheck. `X_TO_Y` với
 `SInt`/`USInt`/`UInt`/`UDInt`/`Time` hiện không nhận (tập `CONVERTIBLE_TYPES`
 chỉ 8 kiểu) — chờ S1 xác nhận có cần mở rộng không.
+
+## 15. Interpreter + SoftPlc (M1 §7.2–7.3, §8, §10, P1.4)
+
+**VERIFIED (bảng E, test `arithmetic.test.ts` + `intrinsics.test.ts`).**
+Số nguyên wrap theo kiểu đích (`Int` 16 bit, `DInt` 32 bit, unsigned theo
+độ rộng); tràn `Int` đặt cờ `OV` trên frame (xóa ở đầu scan, không lộ ra
+IR — OQ-135). Chia nguyên cắt về 0; chia/MOD cho 0 → kết quả 0 + fault
+`DIV_ZERO` (OQ-133). `roundHalfEven` làm tròn .5 về số chẵn gần nhất
+(2.5→2, 3.5→4, −3.5→−4); `TRUNC` cắt; `CEIL`/`FLOOR` qua registry rồi
+chuẩn hóa về `DInt` qua `convertChecked` (ngoài khoảng → `CONV_RANGE`).
+`Real` fround sau **mỗi** phép tính; so sánh trên giá trị đã fround
+(OQ-159) — `0.1 + 0.2 = 0.3` là TRUE. `convertChecked` kiểm khoảng với
+mọi chuyển đổi số theo kiểu đích (kể cả thu hẹp `Int→Int` hẹp, không
+wrap — OQ-150); `NaN` → 0 + `CONV_RANGE`; `Bool↔số` qua 0/1. Shift:
+count âm → 0, count ≥ độ rộng → 0; `SHR` có dấu mở rộng dấu; độ rộng
+Byte 8 / Word-UInt-Int 16 / DWord-UDInt-DInt 32 (OQ-134). `ABS` của số
+nguyên nhỏ nhất wrap về chính nó, không fault (OQ-134). Intrinsics §7.3
+đủ 14 hàm trong registry (`POWER`, `ABS`, `SQRT`, `MIN`, `MAX`, `LIMIT`,
+`SHL`, `SHR`, `ROL`, `ROR`, `CEIL`, `FLOOR`, `NORM_X`, `SCALE_X` —
+OQ-144); `NORM_X`/`SCALE_X` không kẹp khi x ngoài [0..1]; `SCALE_X`
+kiểu nguyên làm tròn half-even; `SQRT` âm → `NaN`.
+
+**VERIFIED (scan, bảng A/B/C, test `softplc-scan.test.ts`).** Mô hình
+**lưới thời gian đều** (OQ-130): scan thứ k trong một `step(T, dt)` chạy
+tại `lastScanTime + k*period`; với stepMs = period = 10 → scan tại 10,
+20, 30… (không có scan tại 0). Vượt `maxScansPerStep` (mặc định 50) →
+giữ acc thừa để bắt kịp ở bước sau + `SCAN_OVERRUN` đếm số scan bị cắt
+(OQ-131). Thứ tự một scan: (a) latch PII từ IoBus qua `readInputsInto`
++ áp force I; (b) OB100 một lần khi chuyển STOP→RUN; (c) cyclic OB đến
+hạn (tối đa 1 lần/scan, theo số OB tăng dần, `CYCLE_OVERRUN` đếm kỳ
+trễ); (d) OB1; (e) áp force Q + `writeOutputsFrom`. Process image:
+ghi `%Q` trong OB1 thấy ngay trong scan, ghi `%I` chỉ thấy ở scan kế
+sau latch (bảng B). Thiếu OB100/OB1 → bỏ qua im lặng, scan vẫn đếm
+(OQ-146). `step` khi STOP = no-op; dt = 0 → no-op; dt < 0 hoặc T đi
+ngược → `RangeError` (OQ-160). `start`/`stop` idempotent; `start`
+không reset bộ nhớ; STOP→RUN re-arm OB100 + rebase lưới (OQ-154).
+`stop()` với `outputsOnStop: 'zero'` đẩy Q = 0 ra IoBus ngay (OQ-153).
+`faultPolicy: 'stop'` dừng sau khi scan xong nếu có fault mới (OQ-158).
+
+**VERIFIED (gọi block / frame, bảng D + test `interpreter*.test.ts`).**
+Interpreter biên dịch IR → closures **một lần** lúc `load()` (2 pass:
+pass 1 xây `BlockInfo` cho mọi block để gọi chéo file/thứ tự khai báo
+tùy ý, pass 2 compile). FC: tham số IN copy vào frame, giá trị trả qua
+local tổng hợp tên = tên FC (OQ-112); gọi FC trong biểu thức sâu tối đa
+`maxCallDepth` = 24, vượt → fault `CALL_DEPTH`, trả giá trị mặc định
+của kiểu trả. FB: instance DB là view trực tiếp lên `DbStore` (ghi vào
+field = ghi vào DB ngay); IN copy vào field input của view, OUT copy ra
+sau khi chạy, **IN_OUT = alias trực tiếp** (Ref), không copy-back
+(OQ-148). Multi-instance lồng: FB con trong static của FB cha, gọi qua
+`frame.instance` + field struct. TEMP reset mỗi lần gọi FC; static FB
+giữ qua các scan (latch 4-scan, bảng D). `FOR` bao hàm hai đầu, 0 lần
+khi hướng sai, kiểm tràn trước khi tăng (OQ-149); `FOR BY 0` → cắt bởi
+`LOOP_LIMIT`. Vòng lặp vượt `maxLoopIterations` = 10_000 → fault
+`LOOP_LIMIT`, thoát vòng lặp, chạy tiếp (OQ-132). Điều kiện không phải
+`Bool` → nhánh/vòng lặp bị bỏ qua im lặng (typecheck P1.3 đã chặn
+non-Bool trước). `callSys` không có handler → fault `SYS_UNSUPPORTED`,
+bỏ qua, chạy tiếp (OQ-143; std block thật là P1.5). Index ngoài khoảng
+→ đọc 0/false + fault `ARRAY_RANGE`, ghi bỏ qua + fault; chỉ số không
+nguyên → throw. Gán cả mảng/struct = deep copy; mảng/struct làm tham số
+FC = copy; làm IN_OUT FB = alias. Mảng trong mảng và member sau index
+sâu hơn 1 cấp **chưa hỗ trợ** ở P1.4 — throw ồn ào lúc compile.
+
+**VERIFIED (force / snapshot, bảng F, test `softplc-snapshot.test.ts`).**
+Force là lớp phủ ở API `read`/`write` (không chạm bộ nhớ đối với
+`%M`/DB); chỉ force I (áp vào PII sau latch) và force Q (áp vào PIQ sau
+OB1) chạm bộ nhớ trong scan. `write` vào ref đang force → bỏ qua, không
+báo lỗi; sai kiểu → `TagError('TAG-E001')` (OQ-141). Force chuẩn hóa về
+key địa chỉ (`%MB10` ≠ `%MW10` vì khác width); `listForces` trả dạng
+chuẩn sắp xếp theo ref (OQ-142). Snapshot/restore: bộ nhớ dạng
+`number[]` (OQ-147); restore validate chặt (version, state, độ dài byte
+từng vùng/DB, cyclic khớp OB, force parse + validate, fault đúng hình)
+rồi mới áp dụng — sai hình → throw, trạng thái cũ nguyên vẹn.
+Snapshot → 3 scan → restore → 3 scan cho trace Q + scanCount + faults
+**giống hệt** (F6); force nằm trong snapshot (F7); tích hợp
+orchestrator `snapshotAll`/`restoreAll` qua `createSimulation` cho
+TagDB Q + scanCount + simTime giống hệt (F8).
+
+**VERIFIED (địa chỉ / DB, test `tagmap.test.ts` + `softplc.test.ts`).**
+`TagAddressMap` ở `runtime-iec` với parser riêng (mirror `parseAddress`
+P1.1, cross-test ~20 địa chỉ ở vendor-siemens); `sym:` → throw chưa hỗ
+trợ (OQ-137). Địa chỉ tuyệt đối trần diễn giải theo width: bit → `Bool`,
+8 → `Byte`, 16 → `Int`, 32 → `DInt` (OQ-110); `LReal` 64-bit qua dạng
+`%ML10`/`DB1.DBL4` (chỉ có trong `parsePlcRef`, không có trong
+`parseAddress`). Layout instance DB (§3.5, OQ-125): `VAR_INPUT` +
+`VAR_OUTPUT` + `VAR_IN_OUT` (tham chiếu — slot 4 byte nội bộ, **không
+lộ**; truy cập field IN_OUT trong DB → T005) + `VAR(static)`, theo thứ
+tự khai báo — **sửa bug P1.3** ở `resolveDb` (bản cũ chỉ lấy `static` +
+prefix 4 byte, làm interpreter không tìm được field input). Số DB gán
+1..n theo `id` đã sort ở `load()`; ref ngoài → `load()` throw (OQ-136).
+`load()` yêu cầu STOP + xóa forces + reset trạng thái (OQ-139);
+`reset()` cold toàn phần (OQ-140). `init()` build lại map từ `cfg.tags`
+(OQ-138); cyclic OB không có `cycleMs` trong IR → period mặc định
+100 ms (chuẩn Siemens OB30–38; bổ sung OQ-145 — `compileSclProgram`
+không bao giờ sinh `cycleMs`).
+
+**UNVERIFIED.** Mô hình scan lưới đều (OQ-130) và số DB 1..n (OQ-136)
+chưa đối chiếu TIA/PLCSIM — chờ S1/PLCSIM (VERIFY §14.9/§14.14); nếu
+sai thì SCR đổi mô hình + sửa bảng A. OV/ENO không quan sát được từ SCL
+(OQ-135) — nếu PLCSIM cho thấy ENO ảnh hưởng luồng thì cần SCR thêm ENO
+vào IR (P1.7). Ngữ nghĩa intrinsics ở biên (`NORM_X`/`SCALE_X` ngoài
+[0..1], tập `X_TO_Y`, `BOOL_TO_*`) theo spec §7.3, chưa đối chiếu code
+thật (X-002/S1). Layout IN_OUT của **multi-instance lồng** chưa nhất
+quán với DB top-level (`fbInterfaceStruct` dùng kích thước tự nhiên,
+không slot 4 byte — OQ-161, mở). Hiệu năng: smoke 200 FB_Motor đo
+**519 và 533 scan/s** (2 lần, 2000 scan) — dưới mục tiêu P1.7 ≥ 1000
+scan/s; bench chính thức + tối ưu là P1.7, không phải gate P1.4.

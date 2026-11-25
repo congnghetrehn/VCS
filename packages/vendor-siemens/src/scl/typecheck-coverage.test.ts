@@ -225,19 +225,43 @@ describe('checkCallStmt — các dạng callee', () => {
 });
 
 describe('DB — resolveDb + checkDbInit', () => {
-  it('DB dạng "fbname" → layout 4 byte nội bộ + VAR(static)', () => {
+  it('DB dạng "fbname" → layout INPUT+OUTPUT+IN_OUT(4B, không lộ)+STATIC (§3.5)', () => {
     const src = `FUNCTION_BLOCK "FB_S"\nVAR_INPUT\n  i : Bool;\nEND_VAR\nVAR\n  st : Int;\n  b : Bool;\nEND_VAR\nBEGIN\nEND_FUNCTION_BLOCK\nDATA_BLOCK "DB_S" "FB_S"\nBEGIN\nEND_DATA_BLOCK`;
     const { result } = checkSrc(src);
     expectNoErrors(result);
     const db = result.dbs.get('db_s');
     expect(db).toBeDefined();
     expect(db?.fbName).toBe('FB_S');
-    // 4 byte nội bộ + Int (offset 4, size 2) + Bool (offset 6, bit 0) → size 8.
+    // i: Bool byte 0 bit 0; st: Int byte 2 (căn chẵn, size 2); b: Bool byte 4 bit 0 → size 6.
     expect(db?.fields.map((f) => [f.name, f.byteOffset, f.size])).toEqual([
-      ['st', 4, 2],
-      ['b', 6, 1],
+      ['i', 0, 1],
+      ['st', 2, 2],
+      ['b', 4, 1],
     ]);
+    expect(db?.fields.find((f) => f.name === 'i')?.bitOffset).toBe(0);
+    expect(db?.fields.find((f) => f.name === 'b')?.bitOffset).toBe(0);
+    expect(db?.size).toBe(6);
+  });
+
+  it('DB dạng "fbname" có IN_OUT → slot 4 byte, field không lộ (truy cập → T005)', () => {
+    const src = `FUNCTION_BLOCK "FB_T"\nVAR_INPUT\n  a : Bool;\nEND_VAR\nVAR_OUTPUT\n  q : Bool;\nEND_VAR\nVAR_IN_OUT\n  io : Int;\nEND_VAR\nVAR\n  st : Int;\nEND_VAR\nBEGIN\nEND_FUNCTION_BLOCK\nDATA_BLOCK "DB_T" "FB_T"\nBEGIN\nEND_DATA_BLOCK`;
+    const { result } = checkSrc(src);
+    expectNoErrors(result);
+    const db = result.dbs.get('db_t');
+    expect(db).toBeDefined();
+    // a byte 0 bit 0; q byte 0 bit 1; io chiếm slot DInt byte 2..5 (không lộ);
+    // st: Int byte 6, size 2 → tổng 8.
+    expect(db?.fields.map((f) => [f.name, f.byteOffset, f.size])).toEqual([
+      ['a', 0, 1],
+      ['q', 0, 1],
+      ['st', 6, 2],
+    ]);
+    expect(db?.fields.some((f) => f.name.toLowerCase() === 'io')).toBe(false);
     expect(db?.size).toBe(8);
+    const bad = checkSrc(
+      `${src}\nORGANIZATION_BLOCK "Main"\nVAR_TEMP\n  n : Int;\nEND_VAR\nBEGIN\n  #n := "DB_T".io;\nEND_ORGANIZATION_BLOCK`,
+    );
+    expectDiag(bad.result, 'SCL-T005', "không có field 'io'");
   });
 
   it('DB dạng "fbname" với FB không biết → SCL-T001', () => {
