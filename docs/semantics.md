@@ -1087,3 +1087,29 @@ tiếp sau `Math.fround` (PL-W020 ở validate, OQ-239) chưa kiểm chứng v�
 PLC thật; lag/rate-limit/hysteresis và delay line chưa đối chiếu với hành vi
 thiết bị thật (chỉ có bảng tính tay nội bộ). Model thật đầu tiên là
 `motor_dol` ở P2.2 (OQ-246); `fake_motor`/`fake_sensor` chỉ phục vụ test.
+
+## 21. Plant — model `motor_dol` (M2 §7.1, P2.2)
+
+**VERIFIED (bảng tính tay A–K, ghim bằng 14 golden + unit test).** Máy trạng
+thái 5 trạng thái, 6 luật theo thứ tự 1–6, một chuyển đổi duy nhất mỗi bước
+(OQ-255); `speedPct`/`currentFb` tính theo state SAU chuyển đổi (OQ-256).
+`speedPct` tăng `100/accelTimeMs`, giảm `100/coastTimeMs` mỗi ms (rate
+limiter P2.1); `currentA = rated × (noLoad + (1−noLoad) × load × speed/100)`
++ inrush `rated × (inrushMult−1) × (1−(T−t0)/inrushMs)` trong `inrushMs` đầu,
+bằng 0 khi state ∉ {STARTING, RUNNING}. Emit mỗi bước: `runFb =
+state ∈ {RUNNING, STOPPING}`; `overloadOk = overloadNC ? (state != TRIPPED)
+: (state == TRIPPED)`; `ready = readyOk && state != TRIPPED`;
+`remote = remoteOk` (OQ-259). `tripClearedAt` mirror
+`FaultManager.clearedAtMs` (OQ-263). Golden runner: `cmd`/`fault` áp SAU
+`engine.step(t)`, `expect` kiểm sau step(t) (OQ-254); số so `|a−b| ≤ 0.01`
+mặc định (OQ-257). Snapshot/restore: `snapshot()` deep-copy state
+(`structuredClone`) — giữ reference làm restore không tua được state
+(lỗi nền P2.1 do P2.2 phát hiện, đã sửa).
+
+**UNVERIFIED (chờ dữ liệu motor thật — S1).** `defaultRemote`/`defaultReady`
+được chấp nhận nhưng không ảnh hưởng hành vi P2.2 (OQ-259): nếu motor thật
+cho thấy ready/remote phải đọc từ tiếp điểm ngoài thì cần SCR. Ngữ nghĩa
+thời gian (start/stop/trip delay, tốc độ tăng/giảm, inrush) chỉ có bảng
+tính tay nội bộ, chưa đối chiếu với động cơ thật. `ctx.fault()`/`ctx.emit()`
+của engine cấp phát object nhỏ mỗi bước (OQ-267) — không-cấp-phát-trong-step
+chưa đạt hoàn toàn, đo lại ở P2.3/P2.4.

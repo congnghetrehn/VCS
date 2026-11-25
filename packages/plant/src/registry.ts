@@ -67,6 +67,13 @@ export interface StepCtx<P = unknown, S = unknown> {
   log(level: 'info' | 'warn', msg: string, data?: Record<string, unknown>): void;
 }
 
+/** Tài liệu mô hình cho docgen (OQ-260, P2.2): trạng thái/chuyển đổi/ghi chú. */
+export interface ModelDocs {
+  states?: Array<{ state: string; description: string }>;
+  transitions?: string[];
+  notes?: string[];
+}
+
 /** Model thiết bị. `init`/`step` khai báo dạng method để variance hai chiều
  *  (một model P/S cụ thể gán được cho EquipmentModel<unknown, unknown>). */
 export interface EquipmentModel<P = unknown, S = unknown> {
@@ -80,6 +87,8 @@ export interface EquipmentModel<P = unknown, S = unknown> {
   faults: FaultDef[];
   presets?: Record<string, FaultPreset>;
   hasSource?: boolean;
+  /** Tài liệu cho docgen — additive, không breaking (OQ-260). */
+  docs?: ModelDocs;
   init(params: P, rng: () => number): S;
   step(ctx: StepCtx<P, S>): void;
 }
@@ -137,6 +146,7 @@ export function deriveModel<P extends object, S>(
     faults?: FaultDef[];
     presets?: Record<string, FaultPreset>;
     hasSource?: boolean;
+    docs?: ModelDocs;
     init?: EquipmentModel<P, S>['init'];
     step?: EquipmentModel<P, S>['step'];
   },
@@ -154,6 +164,7 @@ export function deriveModel<P extends object, S>(
     ...(patch.faults !== undefined ? { faults: patch.faults } : {}),
     ...(patch.presets !== undefined ? { presets: patch.presets } : {}),
     ...(patch.hasSource !== undefined ? { hasSource: patch.hasSource } : {}),
+    ...(patch.docs !== undefined ? { docs: patch.docs } : {}),
     ...(patch.init !== undefined ? { init: patch.init } : {}),
     ...(patch.step !== undefined ? { step: patch.step } : {}),
   };

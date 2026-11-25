@@ -1,0 +1,264 @@
+# Golden timeline motor_dol (M2 §11.1, P2.2 — bảng A–K, STATE §25).
+# Quy ước (OQ-254): cmd/fault áp SAU engine.step(t); expect kiểm sau step(t).
+# speedPct bảng D/F/I đã hiệu chỉnh theo script tham chiếu độc lập (xem STATE §25
+# "Lệch so với plan"): D T=500: 25.6667; F T=1510: 93, T=2310: 66.3333;
+# I T=1810: 33, T=1820: 33.6667, T=2320: 67.
+model: motor_dol
+stepMs: 10
+seed: 42
+cases:
+  - id: start-stop
+    description: Timeline §11.1 — start/stop cơ bản (bảng A)
+    steps:
+      - t: 0
+        expect: { state: STOPPED, runFb: false, overloadOk: true, ready: true, remote: true, speedPct: 0, running: false, energized: false }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 110
+        expect: { state: STARTING, runFb: false, speedPct: 0.6667, running: false, energized: true }
+      - t: 600
+        expect: { state: STARTING, runFb: false, speedPct: 33.3333 }
+      - t: 610
+        expect: { state: RUNNING, runFb: true, speedPct: 34 }
+      - t: 1000
+        cmd: { runCmd: false }
+        expect: { state: RUNNING, runFb: true, speedPct: 60 }
+      - t: 1010
+        expect: { state: STOPPING, runFb: true, speedPct: 59.6667 }
+      - t: 1800
+        expect: { state: STOPPING, runFb: true, speedPct: 33.3333 }
+      - t: 1810
+        expect: { state: STOPPED, runFb: false, speedPct: 33 }
+
+  - id: current
+    description: Dòng điện theo tốc độ + inrush (bảng B, ratedCurrentA=10)
+    params: { ratedCurrentA: 10 }
+    steps:
+      - t: 0
+        expect: { state: STOPPED, currentA: 0, speedPct: 0 }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 110
+        expect: { state: STARTING, speedPct: 0.6667, currentA: 53.53 }
+      - t: 610
+        expect: { state: RUNNING, speedPct: 34, currentA: 30.27 }
+      - t: 1110
+        expect: { state: RUNNING, speedPct: 67.3333, currentA: 7 }
+      - t: 1610
+        expect: { state: RUNNING, speedPct: 100, currentA: 8.7 }
+      - t: 2000
+        cmd: { runCmd: false }
+        expect: { state: RUNNING, speedPct: 100, currentA: 8.7 }
+      - t: 2010
+        expect: { state: STOPPING, speedPct: 99.6667, currentA: 0 }
+
+  - id: overload-running-reset
+    description: Overload khi RUNNING → TRIPPED + reset, chạy lại (bảng C)
+    steps:
+      - t: 0
+        expect: { state: STOPPED }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING, speedPct: 34 }
+      - t: 700
+        fault: { id: overload }
+        expect: { state: RUNNING, speedPct: 40 }
+      - t: 710
+        expect: { state: TRIPPED, runFb: false, overloadOk: false, ready: false, speedPct: 39.6667 }
+      - t: 1000
+        fault: { clear: overload }
+        expect: { state: TRIPPED, speedPct: 30 }
+      - t: 1010
+        expect: { state: TRIPPED, speedPct: 29.6667 }
+      - t: 1200
+        cmd: { runCmd: false }
+        expect: { state: TRIPPED, speedPct: 23.3333 }
+      - t: 2000
+        expect: { state: STOPPED, speedPct: 0, overloadOk: true, ready: true }
+      - t: 2100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 2110
+        expect: { state: STARTING, speedPct: 0.6667 }
+      - t: 2610
+        expect: { state: RUNNING, speedPct: 34 }
+
+  - id: overload-starting-tripdelay
+    description: Overload khi STARTING + tripDelayMs=200 (bảng D)
+    params: { tripDelayMs: 200 }
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 300
+        fault: { id: overload }
+        expect: { state: STARTING, speedPct: 13.3333 }
+      - t: 490
+        expect: { state: STARTING, speedPct: 26 }
+      - t: 500
+        expect: { state: TRIPPED, runFb: false, speedPct: 25.6667 }
+
+  - id: fail-to-start
+    description: failToStart chặn khởi động, clear xong chạy được (bảng E)
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        fault: { id: failToStart }
+        expect: { state: STOPPED }
+      - t: 110
+        expect: { state: STOPPED, runFb: false, currentA: 0, speedPct: 0 }
+      - t: 490
+        expect: { state: STOPPED }
+      - t: 500
+        fault: { clear: failToStart }
+        expect: { state: STOPPED }
+      - t: 510
+        expect: { state: STARTING, speedPct: 0.6667 }
+      - t: 1010
+        expect: { state: RUNNING, speedPct: 34 }
+
+  - id: contactor-stuck
+    description: contactorStuck giữ RUNNING dù hết lệnh (bảng F)
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING }
+      - t: 700
+        fault: { id: contactorStuck }
+        expect: { state: RUNNING, speedPct: 40 }
+      - t: 1000
+        cmd: { runCmd: false }
+        expect: { state: RUNNING, speedPct: 60 }
+      - t: 1010
+        expect: { state: RUNNING, runFb: true, speedPct: 60.6667 }
+      - t: 1500
+        fault: { clear: contactorStuck }
+        expect: { state: RUNNING, speedPct: 93.3333 }
+      - t: 1510
+        expect: { state: STOPPING, runFb: true, speedPct: 93 }
+      - t: 2310
+        expect: { state: STOPPED, runFb: false, speedPct: 66.3333 }
+
+  - id: not-ready
+    description: notReady chặn chạy, clear xong chạy được (bảng G)
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        fault: { id: notReady }
+        expect: { state: STOPPED, ready: true }
+      - t: 110
+        expect: { state: STOPPED, ready: false }
+      - t: 400
+        fault: { clear: notReady }
+        expect: { state: STOPPED, ready: false }
+      - t: 410
+        expect: { state: STARTING, ready: true, speedPct: 0.6667 }
+      - t: 910
+        expect: { state: RUNNING, speedPct: 34 }
+
+  - id: local-mode
+    description: localMode chặn chạy, clear xong chạy được (bảng H)
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        fault: { id: localMode }
+        expect: { state: STOPPED, remote: true }
+      - t: 110
+        expect: { state: STOPPED, remote: false }
+      - t: 400
+        fault: { clear: localMode }
+        expect: { state: STOPPED, remote: false }
+      - t: 410
+        expect: { state: STARTING, remote: true, speedPct: 0.6667 }
+      - t: 910
+        expect: { state: RUNNING, speedPct: 34 }
+
+  - id: restart-in-stopping
+    description: runCmd lại true trong lúc STOPPING bị bỏ qua (bảng I)
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING }
+      - t: 1000
+        cmd: { runCmd: false }
+        expect: { state: RUNNING, speedPct: 60 }
+      - t: 1010
+        expect: { state: STOPPING, runFb: true, speedPct: 59.6667 }
+      - t: 1200
+        cmd: { runCmd: true }
+        expect: { state: STOPPING, speedPct: 53.3333 }
+      - t: 1810
+        expect: { state: STOPPED, runFb: false, speedPct: 33 }
+      - t: 1820
+        expect: { state: STARTING, speedPct: 33.6667 }
+      - t: 2320
+        expect: { state: RUNNING, speedPct: 67 }
+
+  - id: starting-abort
+    description: Hết lệnh khi STARTING → về STOPPED, runFb không kịp lên (bảng J)
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 300
+        cmd: { runCmd: false }
+        expect: { state: STARTING, speedPct: 13.3333 }
+      - t: 310
+        expect: { state: STOPPED, runFb: false, speedPct: 13 }
+
+  - id: preset-no-run-feedback
+    description: Preset noRunFeedback — RUNNING nhưng runFb = 0 (bảng K1)
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        fault: { preset: noRunFeedback }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING, runFb: false, speedPct: 34 }
+
+  - id: preset-feedback-stuck-on
+    description: Preset feedbackStuckOn — STOPPED nhưng runFb = 1 (bảng K2)
+    steps:
+      - t: 0
+        fault: { preset: feedbackStuckOn }
+        expect: { state: STOPPED, runFb: false }
+      - t: 10
+        expect: { state: STOPPED, runFb: true, speedPct: 0 }
+
+  - id: preset-overload-trip
+    description: Preset overloadTrip — trip như overload (bảng K3)
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING }
+      - t: 700
+        fault: { preset: overloadTrip }
+        expect: { state: RUNNING, speedPct: 40 }
+      - t: 710
+        expect: { state: TRIPPED, runFb: false, speedPct: 39.6667 }
+
+  - id: preset-command-lost
+    description: Preset commandLost — plant thấy mất lệnh dù tag PLC vẫn 1 (bảng K4)
+    steps:
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING }
+      - t: 1000
+        fault: { preset: commandLost }
+        expect: { state: RUNNING, speedPct: 60 }
+      - t: 1010
+        expect: { state: STOPPING, runFb: true, speedPct: 59.6667 }
+      - t: 1810
+        expect: { state: STOPPED, runFb: false, speedPct: 33 }

@@ -33,6 +33,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm depcheck
       - run: pnpm docs:diagnostics --check
+      - run: pnpm docs:equipment --check
       - run: pnpm review:cheats
 
   test:

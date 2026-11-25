@@ -30,6 +30,9 @@ importers:
       '@types/ws':
         specifier: 8.18.2
         version: 8.18.2
+      '@vcs/plant':
+        specifier: workspace:*
+        version: link:packages/plant
       '@vitest/coverage-v8':
         specifier: 4.1.12
         version: 4.1.12(vitest@4.1.12)
@@ -215,6 +218,9 @@ importers:
       '@vcs/schemas':
         specifier: workspace:*
         version: link:../schemas
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
       zod:
         specifier: 4.6.7
         version: 4.6.7
