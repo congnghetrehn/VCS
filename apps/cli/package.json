@@ -4,6 +4,7 @@
     "@fastify/websocket": "11.3.7",
     "@vcs/kernel": "workspace:*",
     "@vcs/project": "workspace:*",
+    "@vcs/runtime-iec": "workspace:*",
     "@vcs/schemas": "workspace:*",
     "@vcs/server": "workspace:*",
     "@vcs/vendor-siemens": "workspace:*",
