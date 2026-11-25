@@ -10,10 +10,10 @@
 
 ## 1. Vị trí hiện tại
 
-- Milestone: **M1** (M0 đã ký 2026-11-24, trên main `31c7200`; P1.1–P1.5 đã merge vào `develop` qua PR #20–#24)
-- Prompt đang làm / vừa xong: P1.5 — **✔ đã merge PR #24 `02d75ef` vào `develop` 2026-11-25 11:59 +07** (CI 8 successful + 2 skipped; STATE §20; OQ-162…181 đóng, OQ-161 mở). Tiếp theo: P1.6 plan-first (STATE §21; X-002/S1 vẫn mở nhưng không chặn P1.6 — làm theo M1 §5, xem §21 OQ-182).
-- Nhánh: `m1/p1.6-lad` (từ `c60fa9c` = nội dung `develop` sau merge PR #24, develop head `02d75ef`)
-- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.5 đã merge PR #24; P1.6 plan-first)
+- Milestone: **M1** (M0 đã ký 2026-11-24, trên main `31c7200`; P1.1–P1.6 đã merge vào `develop` qua PR #20–#25)
+- Prompt đang làm / vừa xong: P1.6 — **✔ đã merge PR #25 `0f58e15` vào `develop` 2026-11-25 13:28 +07** (CI 8 successful + 2 skipped; STATE §21; OQ-182…196 đóng, OQ-161 mở). Tiếp theo: P1.7 plan-first (STATE §22; X-002/S1 vẫn mở nhưng không chặn P1.7 — làm theo M1 §11–13, xem §22 OQ-197).
+- Nhánh: `m1/p1.7-golden-runner` (từ `9420b8a` = nội dung `develop` sau merge PR #25, develop head `0f58e15`)
+- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.6 đã merge PR #25; P1.7 plan-first)
 
 ## 2. Tiến độ prompt
 
@@ -34,7 +34,8 @@
 | P1.3   | ✔ xong (gate xanh local; đã merge PR #22 `681e39d` vào `develop` 2026-11-25 07:24 +07, CI 8 successful + 2 skipped) | PR #22, nhánh `m1/p1.3-typecheck-lower` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (1310 test; 564 test mới) + build xanh + bench TagDB 4/4 (49,1M ops/s) + orchestrator 481.809 bước/s | xem §18; OQ-106…129 đóng |
 | P1.4   | ✔ xong (gate xanh local; đã merge PR #23 `ae0bed3` vào `develop` 2026-11-25 10:56 +07, CI 10 checks passed)                                                                                                                                                         |                                                   |                                                                                                                                                                           | X-002/S1 vẫn mở nhưng không chặn (làm theo §7/§8, OQ-152) |
 | P1.5   | ✔ xong (gate xanh local; đã merge PR #24 `02d75ef` vào `develop` 2026-11-25 11:59 +07, CI 8 successful + 2 skipped) | PR #24, nhánh `m1/p1.5-std-blocks` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-25 (1666 test, 63 file; 100 test mới) + build xanh + bench guard PASS | xem §20; OQ-162…181 đóng, OQ-161 mở |
-| P1.6   | ◐ plan-first (STATE §21, nhánh `m1/p1.6-lad`) |  |  | ⚠ plan-first |
+| P1.6   | ✔ xong (gate xanh local; đã merge PR #25 `0f58e15` vào `develop` 2026-11-25 13:28 +07, CI 8 successful + 2 skipped) | PR #25, nhánh `m1/p1.6-lad` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-25 (1749 test, 68 file; 83 test mới) + build xanh + bench guard PASS | xem §21; OQ-182…196 đóng, OQ-161 mở |
+| P1.7   | ◐ plan-first (STATE §22, nhánh `m1/p1.7-golden-runner`) |  |  | ⚠ plan-first |
 | P1.7   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | G1     | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | gói nghiệm thu M1                                                 |
 | P2.1   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
@@ -2838,3 +2839,207 @@ Sự cố trong quá trình triển khai (bài học):
 
 CHƯA CHẠY: CI trên GitHub (chạy sau khi PR mở — parent mở PR qua
 cloud browser, chờ CI xanh rồi merge). SUY ĐOÁN: không có.
+
+## 22. P1.7 — Golden runner + demo motor-interlock + UI Watch + bench (plan, 2026-11-25)
+
+**Prompt P1.7 (nguyên văn):** "Làm P1.7 theo AGENTS.md §9. Đọc: … → AMENDMENTS (A10, E6) → M1 §11–13, 14. Nhiệm vụ: golden runner (format 12.1, expectedFrom), demo examples/motor-interlock (4 kịch bản M1 §13), editor SCL tối thiểu + Watch table (qua server WS — KHÔNG Worker), benchmark M1 §12.4, docs/semantics.md (VERIFIED/UNVERIFIED), danh sách VERIFY (M1 §14) thành docs/verify-experiments-draft.md. Gate: 4 kịch bản đúng qua CLI và UI; bench ≥ 1000 scan/s (200 FB_Motor); mọi mục M1 §16."
+
+**Tóm tắt hiểu biết (6 dòng):** (1) P1.7 là prompt "đóng gói" M1: mọi mảnh P1.1–P1.6 đã có (parser, typecheck, IR, interpreter, std, LAD) — P1.7 nối chúng thành chương trình chạy được từ file project + bằng chứng golden dạng YAML + UI tối thiểu + bench. (2) Golden runner chạy file `*.golden.yaml` (§12.1: sources + steps + expectedFrom) trên SoftPlc trực tiếp, mỗi file là 1 test case trong `pnpm test`. (3) Demo motor-interlock (§13) là 4 kịch bản A–D trên cùng FB_Motor — vừa là golden YAML, vừa là e2e CLI (`vcs golden run`) và UI (Playwright E6). (4) UI theo A10/E6: mô phỏng chạy trong server Node, web qua WS — KHÔNG Worker (§11 ghi Worker nhưng AMENDMENTS A10 thắng). (5) Bench §12.4: 200 FB_Motor × ~30 statement, ≥ 1000 scan/s; hiện trạng smoke P1.4 chỉ 519/533 scan/s — cần profile trước, tối ưu sau, không hạ ngưỡng. (6) `verify-experiments-draft.md` liệt kê mọi mục VERIFY (§14 + UNVERIFIED trong semantics) thành thí nghiệm chờ PLCSIM/S1 — P1.7 chỉ viết bản nháp, không chạy thí nghiệm (việc của chủ sản phẩm, M5/P5.9).
+
+**Đọc:** PROMPTS P1.7 (dòng 242); M1 §11 (UI tối thiểu), §12.1–12.4 (golden format, số lượng, property, bench), §13 (demo + 4 kịch bản), §14 (14 mục VERIFY), §16 (9 tiêu chí nghiệm thu), §17 (mặc định); AMENDMENTS A10 (server Node thay Worker), E6, D2 (scanPeriodMs), D3 (introspection P1.4), D6 (diagnostic catalog), E5 (fround), E7 (examples/); STATE §19 (smoke 519/533 scan/s; OQ-151 port 56 golden; OQ-156 scanAt), §20 (OQ-174 port 34 golden; rủi ro callSys 2 Map/scan), §21 (OQ-182…196; LAD golden A–L); semantics §12–17 (18 điểm UNVERIFIED); open-questions OQ-161 (mở), OQ-105 (X-002/S1); AGENTS.md §9 (quy trình), §3 (dep graph), §11 (không sửa file sinh tay).
+
+**Phát hiện quan trọng (quyết định thiết kế):**
+1. **OB1.scl mẫu §13 hiện KHÔNG biên dịch được.** Nó dùng `"START_PB"`, `"RUN_CMD"` (tên tag trong `tags.yaml`) — typecheck P1.3 chỉ giải `"..."` thành DB/block (không thấy → SCL-T001 `tên chưa khai báo`, typecheck.ts:1434); không có chỗ nào trong `typecheck.ts`/`lower.ts`/`compile.ts` tra tag. P1.7 phải thêm giải tên tag vào compile (OQ-198): `CompileContext` nhận thêm bảng tag (từ `tags.yaml` qua `buildTagAddressMap`), `"NAME"` không phải DB/block → tra tag → lower thành abs ref; không thấy → T001. Không được "sửa demo dùng %I0.0" — §13 là spec-literal, tên symbol chính là ý nghĩa của tags.yaml.
+2. **`compileProject` là mảnh còn thiếu đã được hẹn từ P1.4** (`extension.ts`: "chưa có nguồn program từ project file — việc đó là P1.7 `compileProject`"). Nó biên dịch nhiều file (SCL + LAD JSON) trong một ctx chung, trả `{program, diagnostics}`; CLI/server dùng nó để nạp `examples/motor-interlock` và để `vcs ir dump <dir>`.
+3. **SoftPlc đã đủ API cho runner/UI mà không cần thêm `scanAt`** (OQ-156 → OQ-213: không thêm): `step(T, dt)` + `start/stop` + `read/write/force/unforce/listForces` + `snapshot/restore` + `getDiagnostics` (scanCount, faults). Runner lái scan qua `step()` theo quy tắc bảng E.
+4. **Server chưa hề dùng `ControllerIntrospection`** (grep `sim-service/ws/routes`: 0 kết quả) và `SimulationBundle.controllers` đã có sẵn (builder.ts:69) — Watch đi qua đó, không cần API mới ở kernel.
+5. **Web không được import vendor-siemens/runtime-iec** (rule `web-deps`: chỉ schemas/expr/hmi) — mọi compile/Watch đều qua server (REST/WS). Build ở web = POST lên server, không compile trong browser.
+
+**Phạm vi:**
+- Mới: golden runner (`packages/runtime-iec/src/golden/runner.ts` + test; file YAML ở `packages/runtime-iec/golden/*.golden.yaml`); `compileProject` (`packages/vendor-siemens/src/scl/compile-project.ts` + test); CLI `vcs golden run` (`apps/cli/src/commands/golden.ts`); `vcs run --scans N`; `vcs ir dump <dir>`; demo `examples/motor-interlock/` (project + tags + 3 file SCL + 4 golden YAML); server PLC wiring (`apps/server/src/plc.ts`: nạp + compile + `softPlcExtension`, dùng chung cho `serve`/`run` qua `@vcs/server`); WS `plc.*` (`protocol.ts` + `sim-service.ts` + `ws.ts`); web PLC Workspace (file tree + Monaco + Build/Save + Watch table + SimBar mở rộng scan/fault count); bench `bench/softplc.bench.ts` + baseline; `docs/verify-experiments-draft.md`; ADR-0008 (Monaco); `docs/semantics.md` §18.
+- Tái dùng (không viết lại): `compileSclProgram`/`compileLad`/`programFromCtx` (ctx chung SCL+LAD); `SoftPlc` + `softPlcExtension` (P1.4, OQ-155/170); `buildTagAddressMap`/`parsePlcRef` (P1.4, OQ-137/138); `IrProgram`/`irToJson` (P1.3); `loadProject`/`nodeFS` (P0.2); `createSimulation` + `SimulationBundle.controllers` (P0.4); `SimulationService` (lệnh xếp hàng giữa lát, D4); WS protocol + `tags.delta` 10 Hz LWW (P0.5, OQ-033); SimBar/TagTable/DiagnosticsPanel (P0.6); `check-bench-regression.mjs` + `bench/baseline.json` (P0.7); fast-check seed cố định (P1.1).
+- KHÔNG thuộc phạm vi: LAD editor đồ họa (§11: không bắt buộc trong M1); Worker transport (A10 thắng — KHÔNG làm); hot reload chương trình PLC khi Build (Build chỉ compile-check, OQ-208); PLCSIM/S1/thí nghiệm VERIFY (chỉ viết draft, M5/P5.9); S7/SimaticML (M5); M2 plant (P2.x); P0.9; sửa EBNF §4.2 / M1 §5/§13 (demo giữ nguyên văn, kể cả khi §13 có điểm lạ — xem bảng B–E); ADR khác ngoài 0008; `docs/facts/` mới.
+
+**Thiết kế (8 điểm):**
+1. **Golden runner — `packages/runtime-iec/src/golden/runner.ts`:** schema zod `GoldenFile {id, description?, config: {scanPeriodMs}, sources: [{file, text}], organization?, steps: [{t, set?, expect?, faults?, force?, unforce?, snapshot?, restore?}], expectedFrom}` (OQ-200: `force/unforce/snapshot/restore` là mở rộng ngoài §12.1 cho nhóm force/snapshot; `organization?` mặc định = organization của program; `set/expect` nhận ref `%M0.0`, `"DB".field`, tên tag). `loadGolden(text, fileName) → {golden, diagnostics}` (lỗi file → `GoldenError` có file+step, OQ-201 — không thêm mã catalog). `runGolden(golden) → {pass, failures[]}`: compile sources bằng `compileSclProgram`/`compileLad` trên ctx chung (LAD cần DB SCL biên dịch trước, OQ-214); `new SoftPlc(program, tagMap, {scanPeriodMs})` + `start()`; mỗi step theo quy tắc bảng E (OQ-199); `expect` so Real bằng `Object.is` sau fround hoặc `{approx, eps}`; `faults` so mã RuntimeFault trong `getDiagnostics()`; lỗi in rõ id + step + ref + mong đợi vs thực tế + nguồn IR (§12.1). Test discovery: `packages/runtime-iec/src/golden/runner.test.ts` duyệt `../golden/*.golden.yaml` (vitest `describe.each`), mỗi file = 1 test case — `pnpm test` chạy toàn bộ golden (OQ-211).
+2. **`compileProject` — `packages/vendor-siemens/src/scl/compile-project.ts`:** `compileProject(files: Array<{path, text}>, opts: {tags: TagDef[]}) → {program, diagnostics}`. Discovery (OQ-202): đọc `plc/*.scl` + `plc/*.lad.json` trong thư mục project, sắp xếp theo tên file; biên dịch theo thứ tự tên tăng dần, LAD sau SCL (DB phải có trước khi LAD tham chiếu, OQ-188); file khác bỏ qua. Tag: `tags` từ catalog của `loadProject` → `buildTagAddressMap` → đưa vào ctx (OQ-198). DB numbering 1..n theo id đã sort (OQ-136, không đổi). Lỗi biên dịch → diagnostics gộp có file/line/col; compile fail → CLI/server dừng ồn ào (exit 2 / server không start), không chạy chương trình rỗng.
+3. **CLI:** `vcs golden run <path>` (OQ-205): path là file `.golden.yaml` hoặc thư mục (đệ quy `*.golden.yaml`, sắp xếp); in từng file PASS/FAIL + tóm tắt; exit 0 hết xanh / 1 có fail / 2 lỗi file/CLI. `vcs run <dir> --scans N` (OQ-203): chạy orchestrator tới khi SoftPlc `scanCount` tăng N (đọc qua `bundle.controllers` + `isIntrospectable`); không có controller siemens → lỗi exit 2. `vcs ir dump <dir>` (OQ-204): dir mode = `compileProject` rồi `irToJson` (file mode cũ giữ nguyên). `vcs run`/`vcs serve` trên project có `plc/` → nạp qua `plc.ts` (điểm 4); project không có `plc/` → hành vi cũ không đổi (hello-tags).
+4. **Server PLC wiring — `apps/server/src/plc.ts`:** `loadPlcExtensions(dir, model) → SimulationExtension[]`: nếu `plc/` tồn tại → đọc file → `compileProject` → `[softPlcExtension(program)]`, dùng `cfg.scanPeriodMs` từ controller def (`config.scanPeriodMs ?? simulation.plcScanMs`, D2); compile fail → throw có diagnostics (server không start). `main.ts`/`serve.ts` dùng helper này thay `SERVER_EXTENSIONS` cố định khi project có PLC; CLI `run` import helper từ `@vcs/server` (CLI đã phụ thuộc `@vcs/server`; server thêm link workspace `@vcs/vendor-siemens` + `@vcs/runtime-iec` — lockfile chỉ thêm importer). `softPlcExtension` không đổi (OQ-155: vẫn không thêm vào `SERVER_EXTENSIONS`/`CLI_EXTENSIONS` tĩnh — wiring là động theo project).
+5. **Watch + editor qua server (A10/E6, KHÔNG Worker):** protocol additive, `PROTOCOL_VERSION` giữ 1 (tiền lệ P0.8). Client → server: `plc.watch {refs: string[]}`, `plc.unwatch`, `plc.write {ref, value}`, `plc.force {ref, value}`, `plc.unforce {ref}` (OQ-206). Server → client: `plc.values {simTimeMs, values: [string, TagValue][]}` — server poll `introspection.read` cho refs đang watch ở cùng nhịp 10 Hz với `tags.delta`, chỉ gửi khi đổi (LWW). `sim.state` thêm optional `plc?: {scanCount: number, faultCount: number}` (OQ-207) — SimBar hiện scan count + số RuntimeFault (§11). `plc.write` → `introspection.write` (sai kiểu → `TAG-E001` qua message `error`); `plc.force` → `introspection.force` (force thắng ghi, OQ-141; Watch hiện badge Force). Không có controller siemens → server trả message `error` với code `'PLC-NO-CONTROLLER'` (chuỗi tự do của message `error`, không đăng ký catalog — mã catalog chỉ cho diagnostic đã định nghĩa ở D6). REST: `GET /api/project` thêm `plcFiles: string[]` (additive); `POST /api/plc/build {files: [{path, text}]}` → compile-check, trả diagnostics (OQ-208: không hot reload — áp dụng chương trình mới cần restart server, ghi rõ trong UI); `POST /api/plc/files {path, text}` → Save, chỉ cho path trong `plc/` (chặn traversal, lỗi 400 nếu ra ngoài). Web: trang PLC Workspace (cây file trái từ `plcFiles`; Monaco editor SCL + marker Diagnostic từ Build; nút Build/Save; Watch table: thêm ref tay, giá trị realtime ≤ 10 Hz, cột write + checkbox Force; SimBar hiện có tái dùng + thêm scan/fault count). Monaco: xem OQ-209.
+6. **Bench M1 §12.4 — `bench/softplc.bench.ts`:** chương trình bench = FB_Motor §13 × 200 instance (mỗi instance ~30 statement, 2 std call R_TRIG + TON — §12.4 mô tả "3 timer/edge" nhưng FB_Motor nguyên văn chỉ có 2; bench dùng nguyên văn, ghi rõ trong báo cáo, không bịa thêm call). Scan 10 ms sim; warm-up; 5 mẫu, lấy trung vị (tiền lệ bench orchestrator); ngưỡng **≥ 1000 scan/s, exit ≠ 0 nếu FAIL**; heap: sau warm-up chạy 2000 scan, heap tăng < 1 MB (OQ-210 — lấy bound từ test heap TagDB, không tune theo số đo). Kết quả merge vào `bench/results.json`; baseline mới `bench/baseline.json` thêm mục softplc (trung vị 5 lần, commit); `check-bench-regression.mjs` so softplc > 20% → warning (không fail, tiền lệ P0.7). `pnpm bench` chạy tagdb + orchestrator + softplc. **Profile trước, tối ưu sau:** chạy `node --cpu-prof` trên bench (hoặc timing theo pha) rồi mới sửa; ứng viên đã biết (chưa chứng minh — đo rồi mới chọn): (a) `callSys` cấp phát 2 Map/call/scan (600 cặp Map/scan — §20 rủi ro 3); (b) Frame/Ref cấp phát mỗi lần gọi FB (§19 smoke SUY ĐOÁN); (c) `viewFieldRef` mỗi lần truy cập field. Ràng buộc: không đổi ngữ nghĩa (toàn bộ golden + test cũ phải xanh); không cấp phát mới ở đường nóng sau tối ưu.
+7. **`docs/verify-experiments-draft.md` (OQ-212):** bảng mỗi mục VERIFY: ID (V-01… từ M1 §14 mục 1–14 + UNVERIFIED trong semantics §12/§14/§15/§16/§17), câu hỏi, cách kiểm (project TIA S7-1500 + PLCSIM Advanced, hoặc mẫu S1), golden liên quan + `expectedFrom` hiện tại (`spec`) → đổi thành `plcsim` khi có kết quả, trạng thái (chưa làm). Không chạy thí nghiệm nào trong P1.7; không đổi `expectedFrom` của golden.
+8. **`docs/semantics.md` §18 (mới):** golden runner + compileProject + Watch + bench — quy tắc nào VERIFIED (runner stepping, tag resolution, demo A–D qua test) / UNVERIFIED (ngữ nghĩa timer/counter/layout đã ghi từ §15–17 giữ nguyên — P1.7 không xác minh thêm cái nào, chỉ liệt kê lại + trỏ draft).
+
+**Golden tính tay (bảng A–H; nguồn §12.1/§13 đã verify bằng tay — không sao chép số từ implementation):**
+- **Bảng A — §12.1 `ton_basic_3s` (mẫu format, chu kỳ 100 ms):** IN lên t=200 → ET=0 tại t=200; t=300 ET=100; t=3100 ET=2900; t=3200 ET=3000, Q=true; t=3300 IN=false → ET=0, Q=false. (TON timestamp: ET = now − lúc IN lên; xem bảng E.)
+- **Bảng B — Demo kịch bản A (chạy bình thường rồi trip overload, reset; scan 100 ms; đầu STOP_OK=OVL_OK=PERM=1):** t=0 RUN=0 FAULT=0; t=100 START=1 → RUN=1; t=200 START=0 → RUN=1; t=300 RUN_FB=1 → RUN=1, ET=0; t=400 OVL=0 → RUN=0 FAULT=1; t=500 OVL=1 → RUN=0 FAULT=1 (chốt); t=600 RESET=1 → FAULT=0 RUN=0; t=700 RESET=0 START=1 → RUN=1. Đã tính tay từng scan theo code FB_Motor (§13): tại t=400 `sSeal AND NOT OVL` set qFault trước khi `qFault` clear seal; tại t=600 `iReset AND iOverloadOk` clear fault trước khi seal-set (edge Q=0 nên không seal lại).
+- **Bảng C — Kịch bản B (mất feedback, RUN_FB luôn 0):** t=100 START=1 → RUN=1; t=200 START=0 → RUN=1 (timer bắt đầu: ET=0 tại scan 200 vì seal mới lên ở scan 100, timer call ở scan 100 thấy seal=0); t=3100 → RUN=1, ET=2900; t=3200 → RUN=0 FAULT=1 (ET=3000 → Q → qFault → seal=0); t=3300 → RUN=0 FAULT=1, ET=0. Khớp §13 (ET=2900 tại 3100 chứng tỏ TON tính từ lúc IN lên, không phải cộng dồn từ scan đầu).
+- **Bảng D — Kịch bản C/D (permissive):** C: PERM=0 khi đang chạy → RUN=0, FAULT=0 (không set qFault — chỉ clear seal); PERM=1 lại → vẫn RUN=0 (cần cạnh START mới — `sStartEdge.Q` đã qua). D: START khi PERM=0 → không chạy (điều kiện seal đòi `iPermissive`).
+- **Bảng E — Quy tắc step của runner (chứng minh từ `SoftPlc.step`, softplc.ts:410–448):** lưới scan đều: lần `step()` đầu rebase `lastScanTimeMs = simTimeMs`; mỗi scan tại `lastScanTime + k·period`. Runner: với các step YAML theo thời gian tăng dần t₀<t₁<…: gọi `step(tᵢ₋₁, tᵢ − tᵢ₋₁)` (step đầu `step(t₀, 0)` = no-op, chỉ kiểm trạng thái đầu). Kiểm chứng với bảng A: t₀=0 → no-op; t=100 → rebase 0, scan tại 100; t=200 → scan tại 200 (ET=0); t=300 → ET=100; gap 300→3100 → 28 scan tại 400…3100 (ET=2900) ✓. Hệ quả: gap `(tᵢ − tᵢ₋₁)` phải chia hết cho `scanPeriodMs`, không thì `GoldenError` (OQ-199); `t` giảm → `GoldenError`.
+- **Bảng F — Bench baseline (số đo thật P1.4, STATE §19):** 200 FB latch × 2000 scan: 519 scan/s (3,86 s) và 533 scan/s (3,75 s); ~1,9 ms/scan, ~9,6 µs/FB call. Mục tiêu ≥ 1000 scan/s ⇒ cần nhanh ≥ 1,9× (≤ 1,0 ms/scan, ≤ 5,0 µs/FB). Chương trình bench P1.7 nặng hơn smoke P1.4 (FB_Motor §13 đầy đủ thay cho FB latch) nên số đo P1.7 không so trực tiếp với 519/533 — baseline mới đo ở P1.7, ngưỡng giữ 1000.
+- **Bảng G — Tồn kho golden TS hiện có (nguồn port sang YAML):** P1.4: interpreter 22 + softplc 33 + softplc-scan 57 + softplc-snapshot 20 (+ arithmetic 17 cases §19) — nhóm §12.2 của P1.4 = 56 golden (OQ-151); P1.5: golden scan 37 (bảng A–P, §20) — nhóm §12.2 của P1.5 = 34 (OQ-174); P1.6: golden scan 12 (bảng A–L, §21) — nhóm LAD §12.2 = 8. Port không sao chép số từ implementation: giá trị kỳ vọng lấy từ bảng tính tay trong STATE §19/§20/§21 (đã verify ở các prompt đó); runner chạy YAML là kiểm độc lập lần nữa — YAML nào đỏ thì lỗi ở khâu port hoặc ở code cũ (báo, không sửa kỳ vọng).
+- **Bảng H — Tồn kho YAML đích (§12.2 + demo, OQ-211):**
+
+  | Nhóm (§12.2) | YAML | Nguồn |
+  |---|---|---|
+  | Bit logic / contact / coil / set / reset | 8 | Mới tính tay (P1.7) — P1.4 không có bảng golden riêng cho nhóm này |
+  | R_TRIG / F_TRIG / SR / RS | 8 | Port P1.5 (bảng edge/bistable) |
+  | Timer TON/TOF/TP/TONR (PT=0, IN dao động, không gọi vài scan) | 14 | Port P1.5 (bảng timer) |
+  | Counter CTU/CTD/CTUD (R/LD ưu tiên, biên max/min) | 10 | Port P1.5 (bảng counter) |
+  | Toán/so sánh/convert/làm tròn/tràn số/chia 0 | 14 | Port P1.4 (bảng số học §19, 17 cases → chọn 14) + mới cho convert |
+  | Điều khiển luồng (IF/CASE/FOR/WHILE/REPEAT/EXIT/CONTINUE/RETURN, giới hạn vòng lặp) | 8 | Port P1.4 (interpreter tests) |
+  | Gọi block: FC trả giá trị, FB + instance DB, multi-instance, IN_OUT, TEMP | 8 | Port P1.4 (softplc tests) |
+  | Bộ nhớ & địa chỉ: chồng lấn %MW/%MB, big-endian, bit trong DB, layout struct | 8 | Port P1.1 (bảng A–C) + P1.4 (memory tests) |
+  | Scan: process image I/Q, OB100 1 lần, cyclic OB, STOP/RUN/reset | 6 | Port P1.4 (softplc-scan tests) |
+  | Force/snapshot/restore | 4 | Port P1.4 (softplc-snapshot tests) — cần key `force/snapshot/restore` (OQ-200) |
+  | LAD (series/parallel/box/negated coil/edge) | 8 | Port P1.6 (bảng A–L → chọn 8) |
+  | E2E demo motor-interlock | 4 | Bảng B–E (§13) |
+  | **Tổng** | **100** | Vượt sàn §16.2 (≥ 80); runner assert ≥ 80 + đủ minima từng nhóm |
+
+**Dependencies mới:**
+- `packages/runtime-iec`: thêm dep trực tiếp **`yaml@2.9.1`** (đã có trong cây qua `@vcs/schemas`; phát hành 2024, thỏa ≥ 14 ngày) + **`zod@4.6.7`** (đã có trong cây qua schemas/vendor-siemens). Lockfile chỉ thêm 2 importer (tiền lệ P1.1/P1.6). Không dep mới nào khác cho runner.
+- `apps/web`: **`monaco-editor`** (phiên bản ghim ở triển khai, kiểm ngày phát hành ≥ 14 ngày bằng `npm view` trước khi thêm — như P1.6 đã làm với zod; nếu bản mới nhất < 14 ngày thì lấy bản trước đó đủ tuổi). Dep lớn → **ADR-0008** (AGENTS §5). Nạp worker qua Vite `?worker` (không thêm plugin monaco vite). Nếu build Vite gặp vấn đề với worker → dừng, báo (không tự đổi sang textarea — đó là đổi spec §11).
+- `apps/server`: thêm link workspace `@vcs/vendor-siemens` + `@vcs/runtime-iec` (chỉ importer, lockfile). CLI đã có vendor-siemens; `vcs golden` import runner — ưu tiên import qua `@vcs/vendor-siemens` re-export để khỏi thêm link cho CLI; nếu re-export làm mờ ranh giới thì thêm link `@vcs/runtime-iec` trực tiếp cho CLI + ghi rõ trong triển khai.
+- Không dep mới cho bench (dùng `node --cpu-prof` có sẵn).
+
+**Test target (≥ 163 mới, tổng ≥ 1912):**
+
+| Nhóm | File | Số lượng |
+|---|---|---|
+| YAML golden (100) | `packages/runtime-iec/golden/*.golden.yaml` (chạy qua runner.test.ts) | 100 (bảng H; mỗi file = 1 test case) |
+| runner unit (20) | `packages/runtime-iec/src/golden/runner.test.ts` | schema lỗi (thiếu field, expectedFrom sai); stepping rule (gap không chia hết, t giảm); approx Real; faults; force/snapshot/restore; lỗi compile (SCL-T001 + vị trí); LAD source; `set` tên tag vs abs vs DB field |
+| compileProject (12) | `packages/vendor-siemens/src/scl/compile-project.test.ts` | discovery (sắp xếp, bỏ file lạ); tag `"NAME"` → abs (OQ-198) + T001 khi không thấy; multi-file FB+OB+DB; LAD sau SCL; lỗi gộp nhiều file; dir rỗng; DB numbering 1..n |
+| CLI (10) | `apps/cli/src/commands/golden.test.ts` (+ `run.test.ts`, `ir.test.ts`) | golden run pass/fail/exit 0/1/2; `--scans` đúng N scan; `--scans` không có PLC → exit 2; `ir dump <dir>`; `run examples/motor-interlock` in cuối RUN_CMD (spawn thật, tiền lệ run.test.ts) |
+| server WS (8) | `apps/server/src/ws.test.ts` + `sim-service.test.ts` | plc.watch → plc.values đổi mới gửi; plc.write sai kiểu → error TAG-E001; plc.force/unforce + listForces; watch ref sai → error; không có PLC → error; sim.state có `plc.scanCount` |
+| web unit (10) | `apps/web/src/store.test.ts` + `ws-client.test.ts` + `sclLanguage.test.ts` | apply plc.values (LWW); gửi plc.watch/write/force; Monarch SCL: keyword/comment/string/number đăng ký đúng (không render component — tiền lệ P0.6) |
+| property (2) | `packages/runtime-iec/src/golden/property.test.ts` | timer §12.3 (Q TON ⇔ IN liên tục ≥ PT); counter §12.3 (CV không vượt biên) — fast-check, seed cố định |
+| e2e (1) | `apps/web/e2e/e6.spec.ts` | E6: motor-interlock qua UI — serve demo, START qua Watch write, RUN_CMD=1; OVL=0 → FAULT=1; RESET → FAULT=0 (kịch bản A rút gọn) |
+
+Tổng bảng = 100+20+12+10+8+10+2+1 = **163 test mới** (tổng ≥ 1912). Coverage: giữ ngưỡng hiện có (runtime-iec/vendor-siemens ≥ 85% lines; web không có ngưỡng coverage — tiền lệ P0.6). Thứ tự triển khai đề xuất: compileProject (tag resolution) → demo project + golden A–D → runner + YAML port theo nhóm → CLI golden/run/ir → bench profile + tối ưu → server plc.* + web Watch/editor → verify-experiments-draft + semantics §18 (test viết cùng từng bước).
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** vị trí file theo M1 §2 + dep graph (runner ở runtime-iec; compileProject ở vendor-siemens; plc.ts ở server; web chỉ qua REST/WS); `GoldenError` thay vì mã catalog mới; thứ tự triển khai trên; demo giữ nguyên văn §13 (kể cả tên tag `"..."`); bench dùng FB_Motor §13 nguyên văn (2 std call/instance, ghi rõ không đủ 3 như §12.4 mô tả); `pnpm bench` chạy 3 bench. **Tier B (mặc định + ghi OQ):** OQ-197 (X-002/S1 không chặn P1.7 — làm theo M1 §11–13, tiền lệ OQ-105/121/152/179/182); OQ-198 (tag `"NAME"` → abs qua ctx tags; không thấy → T001); OQ-199 (quy tắc step bảng E; gap không chia hết → GoldenError); OQ-200 (key YAML mở rộng force/snapshot/restore; approx Real; faults; organization? mặc định = program); OQ-201 (lỗi runner = GoldenError; exit 0/1/2); OQ-202 (discovery `plc/*.scl` + `plc/*.lad.json`, tên tăng dần, LAD sau SCL); OQ-203 (`--scans N` đếm scanCount SoftPlc); OQ-204 (`ir dump <dir>` = compileProject); OQ-205 (`vcs golden run` file/thư mục); OQ-206 (WS `plc.*`, 10 Hz LWW, controller đầu tiên introspectable); OQ-207 (`sim.state.plc?` additive); OQ-208 (Build compile-check, không hot reload; Save chỉ trong `plc/`); OQ-209 (Monaco + ADR-0008 + Monarch tối thiểu); OQ-210 (heap bench < 1 MB/2000 scan; profile trước); OQ-211 (100 YAML; assert ≥ 80 + minima nhóm); OQ-212 (draft VERIFY, không chạy thí nghiệm); OQ-213 (không thêm `scanAt` — OQ-156 quyết xong); OQ-214 (LAD YAML cần DB SCL trước); OQ-215 (layout demo: stepMs/plcScanMs 100, controller `builtin/siemens`); OQ-216 (Watch write/force qua introspection; sai kiểu → TAG-E001; force có badge). **Tier C (không có mục mới):** không mục nào chặn P1.7 — OQ-105 (X-002/S1) vẫn mở từ P1.2, không chặn (OQ-197 ghi rõ lý do); OQ-161 vẫn mở, không chặn (demo dùng layout §3.5 hiện tại; nếu OQ-161 lật, bảng P + golden layout đổi theo + SCR); nếu khi triển khai phát hiện §11–13 thiếu quy tắc mà chỉ mã thật/PLCSIM mới quyết được → ghi OQ/SCR, không tự nới lỏng. **Triển khai liên tục (chủ sản phẩm 2026-11-25 12:11 +07):** plan không có tier C → sau plan, triển khai → tự kiểm gate → PR → merge, không dừng chờ.
+
+**Rủi ro + cách kiểm:** (1) **Bench không đạt 1000 scan/s sau tối ưu** — rủi ro lớn nhất P1.7: smoke P1.4 chỉ ~520; nếu profile cho thấy cổ chai là kiến trúc interpreter (không phải cấp phát) thì tối ưu có thể chạm ngữ nghĩa. Giảm thiểu: profile trước (OQ-210), tối ưu từng bước nhỏ có đo lại sau mỗi bước, giữ toàn bộ golden xanh; nếu 3 lần tối ưu không đạt → dừng theo AGENTS §9 (gate hỏng 3 lần), báo nguyên nhân + đề xuất thu hẹp (vd bench với FB latch thay FB_Motor đầy đủ — nhưng đó là đổi §12.4, cần chủ sản phẩm quyết, tier C). Không hạ ngưỡng 1000. (2) **Tag `"NAME"` làm đổi hành vi typecheck cũ** — `"NAME"` trước đây luôn T001; nay tag hợp lệ → lower thành abs. Giảm thiểu: thứ tự giải — DB/block trước, tag sau (tag không được che tên DB/block); test hồi quy: `"..."` không phải tag vẫn T001; golden IR JSON cũ không đổi (kiểm bằng diff). (3) **Monaco build rắc rối trên Vite/Windows** — worker + CSS + bundle lớn. Giảm thiểu: ADR-0008 ghi rõ cách nạp; kiểm build + e2e trên CI windows (job test windows chạy build? — CI `check` chạy build? nếu CI không build web thì e2e ubuntu là bằng chứng; ghi rõ trong triển khai). Nếu Monaco chặn build → dừng, báo (không tự thay editor). (4) **YAML port sai lệch TS golden** — 100 file viết tay, lỗi đánh máy cho số kỳ vọng sai. Giảm thiểu: port theo bảng tính tay STATE (không sao chép từ code), runner là kiểm độc lập; file nào đỏ thì tra bảng gốc trước khi nghi code. (5) **OQ-161 lật** — golden layout/memory đổi theo; test ghim số hiện tại, đổi kỳ vọng chỉ kèm SCR (tiền lệ P1.5/P1.6). (6) **Watch realtime qua WS chậm/lệch** — poll 10 Hz + LWW; nếu SimBar scan count và Watch lệch nhau do nhịp khác nhau → ghi chú trong UI (Watch ≤ 10 Hz theo spec §11, không cam kết từng scan).
+
+**Kết quả (triển khai 2026-11-25, commit `feat(m1): P1.7 golden runner + demo + Watch + bench`):**
+
+- **Test mới: 178, tổng 1927/1927** (1749 + 178 — gate đầy đủ đếm thật,
+  hơn đếm tay 1):
+  YAML 101 (97 `packages/runtime-iec/golden/` + 4 demo) + runner unit 22 +
+  compileProject 12 + property 2 (TON/CTUD, fast-check seed 20261125) +
+  server PLC 10 (`apps/server/src/plc.test.ts`) + CLI 15 (golden 6 + run-plc 6
+  + ir-dir 3) + web unit 13 (store 6 + ws-client 2 + plc-helpers 5) + e2e E6 1
+  + hồi quy interpreter 1 (TEMP/instance độc lập — xem dưới).
+- **Gate đầy đủ (bản sao sạch `/tmp/vcs-p17v`, `git archive ad4e625` +
+  `pnpm install --frozen-lockfile` exit 0; log `/tmp/p17-gate-*.log`):**
+  lint **0**, typecheck **0**, depcheck **0** (121 module), test
+  **1927/1927 (76 file)**, test:e2e **6/6** (E1–E6, 20.8 s),
+  review:cheats **SẠCH** (186 file), diagnostics --check **khớp** (51 mã),
+  build **OK** (3 task), bench **exit 0**: TagDB set/get 42,502,739 ops/s
+  PASS + flush 0.14 µs PASS + heap −0.05 MB PASS; orchestrator 331,091
+  steps/s PASS; **softplc 1730 scan/s PASS** (ngưỡng ≥ 1000) + heap +0.22 MB
+  PASS. Gate đỏ 2 lần trong quá trình chạy (lint 11 lỗi + typecheck 2 lỗi
+  ở code mới; depcheck 132 lỗi giả do quét `dist/` — xem lệch 16, 17),
+  sửa đúng gốc rồi amend, gate cuối xanh toàn bộ.
+- **OQ-197…216 đóng (đã áp dụng); OQ-217 mới (tier B, đã áp dụng, xem
+  open-questions.md); OQ-161 vẫn mở.**
+- **ADR-0008** (Monaco 0.57.0); `docs/semantics.md` §18 mới;
+  `docs/verify-experiments-draft.md` mới (M1 §14 mục 1–14 + 13 mục ngoài,
+  CHƯA chạy thí nghiệm nào).
+
+**Lệch so với plan §22 (ghi rõ, không sửa plan ngược):**
+
+1. **Demo DB đổi tên:** `plc/db.scl` → `plc/FB_Motor_DB.scl`. Cả hai kiểu
+   sort đều biên dịch sai với `db.scl` (case-sensitive: OB1 trước db →
+   T001 `FB_Motor_DB`; case-insensitive: db trước FB → T001 `FB_Motor`).
+   Sort là case-insensitive (OQ-202 bổ sung).
+2. **Bug thật P1.3 — cross-file DB instance:** `TypecheckResult.dbs` chỉ có
+   DB file hiện tại; `lower.ts` tra `checked.dbs` → gọi instance DB ở file
+   khác ném `lower: không tìm được FC ...` dù typecheck chấp nhận. Sửa:
+   `dbs: new Map([...ctx.dbs, ...this.dbs])` (file hiện tại thắng khi trùng
+   tên). Chưa từng nổ vì P1.4 đặt FB+DB+OB trong một file. Demo 3 file là
+   hồi quy. FC cross-file đã probe: đúng cả hai vị trí (statement/expression).
+3. **Bug thật — SoftPlc không bao giờ start qua server/CLI:** `SoftPlc`
+   khởi tạo STOP; chỉ golden runner gọi `start()`. Sửa:
+   `startPlcControllers(bundle)` trong `apps/server/src/plc.ts`, gọi ở
+   `SimulationService.run()`/`step()` + CLI `runCommand`. Hồi quy:
+   `plc.test.ts` "sim.command run → scanCount ≥ 2".
+4. **Bug thật (E6 phát hiện) — Build status trống khi build sạch:**
+   `PlcWorkspace` hiện status theo `diagnostics.length === 0 → ''` nên
+   build thành công không diagnostic thì không hiện gì. Sửa: theo
+   `plcFiles.length === 0 → ''` (chưa build), có file + không lỗi →
+   "Build OK".
+5. **E6 phải Force input (OQ-141), không Write:** write `%I` chỉ tới lần
+   latch kế (scan latch %I từ IoBus/TagDB rồi mới áp force). Test cũ chỉ ghi
+   START_PB=true (thiếu STOP_OK/OVL_OK/PERM) và ghi khi đang chạy → RUN_CMD
+   không bao giờ lên. Sửa E6: Watch 5 ref → ghi true khi IDLE → poll true
+   → Force từng cái → Run → RUN_CMD TRUE → Reset → FALSE, scan 0. Nút Force
+   force giá trị đang hiển thị. `afterAll` kill cả process group (pnpm
+   spawn để lại server chiếm 4171).
+6. **101 YAML thay vì 100:** bitlogic 9 (plan 8) + arith 14 (plan 14, đã
+   đúng) — inventory test assert tổng ≥ 100 + minima nhóm nên 101 vẫn đạt.
+7. **Property test ở `packages/vendor-siemens/src/golden/property.test.ts`**
+   (plan ghi nhầm `packages/runtime-iec/src/golden/property.test.ts`).
+8. **Không có `sclLanguage.test.ts`** (plan liệt kê trong web unit):
+   Monarch đăng ký chưa có test unit; e2e E6 (editor hiện + Build OK) là
+   bằng chứng. Web unit thực tế 13 (store 6 + ws-client 2 + helpers 5).
+9. **Server WS test ở `apps/server/src/plc.test.ts` (10 test)** thay vì
+   `ws.test.ts` + `sim-service.test.ts` như plan ghi (8 test).
+10. **CLI 15 test thay vì 10** (golden 6 + run-plc 6 + ir-dir 3).
+11. **Thêm ngoài plan (nhỏ, có lý do):** `GET /api/plc/files?path=` (editor
+    cần ĐỌC file; 404 khi thiếu, 400 khi thoát `plc/`); OQ-217 fail-fast
+    PLC (tier B, quyết lúc triển khai).
+12. **Root `package.json` suýt ghi đè** (lệnh `cp` nhiều nguồn vào thư mục
+    — xem AGENTS.md bài học): phát hiện qua `git status`, khôi phục bằng
+    `git checkout -- package.json`; thay đổi hợp lệ duy nhất là 1 dòng
+    script `bench`.
+13. **`compilePlcDir` thiếu export** ở `apps/server/src/index.ts` (2 test
+    ir-dir lỗi `TypeError: compilePlcDir is not a function`): thêm export.
+14. **Monaco worker:** `monaco-editor/esm/vs/editor/editor.worker?worker`
+    không resolve dưới Vite 8/Rolldown; đúng là
+    `monaco-editor/editor/editor.worker.js?worker`. Monaco ghim **0.57.0**
+    (2026-09-24, ≥ 14 ngày); 0.58.0 ra 2026-11-23 mới 2 ngày — loại.
+15. **Deps:** lockfile +46 dòng vs plan commit (runtime-iec yaml+zod +6;
+    server + CLI workspace links +9; web monaco-editor 0.57.0 +31). Chỉ
+    importer, không đổi version ngoài.
+16. **Gate tìm ra: depcheck quét `apps/web/dist/`** — config chỉ loại trừ
+    `node_modules`/test, không loại `dist/`; chunk Monaco có circular
+    import nội bộ do bundler sinh → 132 lỗi giả, depcheck exit 26 (lần
+    chạy đầu trước khi build thì exit 0 nên không lộ). Sửa đúng gốc:
+    `.dependency-cruiser.cjs` thêm `/dist/` vào `exclude` (build output
+    không phải source; không nới lỏng rule nào cho source). Sau sửa:
+    depcheck exit 0 với `dist/` còn nguyên, 121 module.
+17. **Gate tìm ra: 11 lỗi lint + 2 lỗi typecheck ở code mới P1.7**
+    (nửa đầu chỉ chạy vitest nên không lộ): `runUntilScans`/`main`
+    async không await → sync; 2 arrow trả void shorthand → thêm `{}`;
+    `as unknown` thừa; template literal với số → `String(...)`;
+    `afterAll` async không await; disable comment cho rule
+    `react-hooks/exhaustive-deps` không tồn tại trong config → xóa
+    (AGENTS §5 cấm eslint-disable); `fmt` dùng `??` thừa +
+    `expected !== null` thừa; property test thiếu `id` trong
+    `SoftPlcConfig`. Sửa code, không sửa kỳ vọng; amend vào commit.
+
+**Bench — tối ưu interpreter (profile trước, từng bước có đo, golden xanh
+sau mỗi bước; baseline 127 scan/s, heap PASS):**
+
+| Bước | Thay đổi | Kết quả |
+|---|---|---|
+| A | Index DB theo tên (`#dbsByName`) thay quét tuyến tính `program.dbs` mỗi lần gọi FB | 127 → 127 (0× — quét DB không phải cổ chai; giữ lại) |
+| B | Fast path `callFb` (instance dbField + mọi arg scalar + không IN_OUT): resolve view/offset/field một lần lúc compile, ghi/đọc trực tiếp `writeMemValue`/`readMemValue` | 127 → 618 (4.9×) |
+| C | `createFrame` dùng chung Map rỗng cho section không có biến (mọi ghi frame map đều qua `byName`; vòng reset mặc định vẫn chạy khi section có biến) | 618 → 760 (1.23×) |
+| E | `viewFieldRef` tính trước offset + field lá lúc compile (canonical layout: fields DB đầu tiên mỗi FB; constructor kiểm chứng mọi DB cùng FB cùng layout, lệch → slow path) | 760 → **1652–1660 (2.17×) — PASS** |
+
+- Tổng **127 → ~1660 scan/s (13×)**, ngưỡng ≥ 1000 đạt với biên ~66%;
+  heap +0.17–0.19 MB/2000 scan PASS. "set TextDecoder" 21.6% trong profile
+  tsx là artifact của tsx (không có `TextDecoder` trong code; profile CLI
+  dist không thấy) — không truy tiếp vì bench A/B đã cho đáp án.
+- **Không làm Opt D** (callSys tái dùng Map theo site): không cần vì đã vượt
+  ngưỡng; ghi làm cơ hội sau (ước ~800 Map/scan).
+- **Test hồi quy mới** (`softplc.test.ts`, +1): hai instance cùng FB độc
+  lập + TEMP về 0 ở đầu mỗi lần gọi. Kiểm chứng bằng mutation: bỏ vòng
+  reset frame → test đỏ (`[0,5]` thay vì `[0,0]`) — test thực sự ghim bất
+  biến, không phải test trang trí. Lưu ý tính tay: `#qCnt` gán TRƯỚC khi
+  `#sCnt` tăng nên trễ 1 scan (`[0,0],[0,0],[1,0],[2,0],[2,1]`).
+- **Rủi ro còn lại:** bench đo trên VM share 1.5 CPU — số tuyệt đối dao động
+  theo tải (1652 vs 1660 giữa 2 lần chạy); biên 66% đủ lớn. CI bench job
+  là manual/nightly (skipped ở PR) nên gate bench là local.

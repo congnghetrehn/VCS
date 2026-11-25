@@ -863,3 +863,166 @@ golden G/J ghim); EN-gating — std box luôn chạy, toán chỉ chạy khi EN
 coil sau TON lên **dù contact trước mở**; ADD không chạy, MW20 giữ 0
 — đúng theo chữ spec nhưng ngược trực giác, nếu TIA chặn timer khi
 EN=false thì SCR sửa OQ-185 + bảng L).
+
+## 18. Golden runner + demo + Watch + bench (M1 §11–§14, P1.7)
+
+**VERIFIED (golden runner, M1 §12.1).** Mỗi file `*.golden.yaml` = 1 test case
+(`describe.each` qua `packages/vendor-siemens/src/golden/golden.test.ts`);
+`runGolden` (`packages/runtime-iec/src/golden/runner.ts`) chạy SoftPlc trực
+tiếp: bước 0 = trạng thái khởi tạo, chưa scan (bảng E STATE §22); mỗi bước
+`set` áp dụng TRƯỚC mọi scan trong gap của nó; gap phải chia hết cho
+`scanPeriodMs` (không thì `GoldenError`); `expect` số nguyên so `Object.is`
+tuyệt đối, số thực so sau `Math.fround` hai vế (hoặc `{approx, eps?}`,
+mặc định eps 1e-6); `faults` phải KHỚP CHÍNH XÁC tập mã lỗi tăng thêm từ
+bước trước (lỗi không liệt kê → fail — "không im lặng"); `snapshot` sau
+`expect`, `restore` trước `set`/scan của bước đó. Ref tuyệt đối `%MD0` đọc
+theo `typeForWidth` (32-bit → DInt): muốn expect Real phải dùng ref có kiểu
+(DB field hoặc tên tag). `scanCount` nằm trong snapshot nên restore tua lại
+nó (bước cùng `t` sau restore, gap 0, không tạo thêm scan).
+
+**VERIFIED (step 0 + gap, bài học port YAML).** Bước `t=0` chỉ được expect giá
+trị KHỞI TẠO (false/0) — golden nào expect giá trị sau scan ở t=0 là sai
+(sửa ở bitlogic-and-or-not, bitlogic-negated-contact, 5 file counter).
+Golden nhạy cạnh (edge) phải dùng bước liên tiếp (gap = period): `set` trong
+một bước áp dụng trước scan ĐẦU TIÊN của gap, không phải scan cuối (sửa 6
+file timer + 3 file counter; TOF retrigger cần thêm bước t=1900). Mô tả YAML
+chứa `": "` phải đặt trong dấu nháy kép (lỗi parse YAML).
+
+**VERIFIED (địa chỉ + kiểu, bài học port YAML).** `%MW0` chồng lên các bit
+`%M0.0–%M0.7` (counter golden dùng `%MW10` cho CV, không `%MW0`); từ Siemens
+big-endian (`%MW0` = byte0<<8 | byte1: `%M0.0`+`%M0.1` → 768, không phải 3).
+Typecheck fold hằng + kiểm khoảng: `32767 + 1` → T002, `200 * 300` → T002,
+chỉ số mảng hằng ngoài khoảng → T005 lúc biên dịch (golden tràn/chỉ số phải
+dùng giá trị runtime `%MW20` / chỉ số biến). `**` (POWER) có kiểu Real:
+`2 ** 3` gán cho Int → T010 (không thu hẹp ngầm); `REAL_TO_INT(2.0 ** 3.0
+** 2.0)` = 512. Biến TEMP trong thân OB phải có tiền tố `#` (`#i`, `#s`;
+`FOR #i := ...`); khai báo giữ nguyên không `#`. Thứ tự biên dịch
+`compileProject` theo tên file: file DB tham chiếu FB/TYPE phải đứng SAU file
+chứa FB/TYPE (sửa 4 golden call + memory-struct-nested: gộp FB/TYPE + DB vào
+một file, FB/TYPE trước). `DATA_BLOCK` không nhận UDT làm kiểu
+(`"DB_O" "UDT_Outer"` → T001): khai báo DB dạng STRUCT chứa field UDT.
+Khởi tạo trong DB BEGIN cần lvalue đủ qualified (`"DB_D".a := 42;`, không
+`a := 42;`).
+
+**VERIFIED (tag resolution, OQ-198).** `"NAME"` không phải DB/block → tra bảng
+tag (`CompileContext.tags`, từ catalog qua `buildTagAddressMap`) → lower
+thành abs ref; không thấy → T001 như trước. Thứ tự giải: DB/block TRƯỚC,
+tag sau (tag không che tên DB/block — test `compile-project.test.ts`).
+Hồi quy: golden IR JSON cũ không đổi (typecheck cũ không tra tag nên mọi
+`"..."` hợp lệ trước đây đều là DB/block).
+
+**VERIFIED (bug P1.3 sửa ở P1.7 — cross-file DB instance).**
+`TypecheckResult.dbs` trước đây chỉ chứa DB của file hiện tại; `lower.ts`
+`lowerCallStmt` tra `checked.dbs` nên gọi instance DB khai ở file khác ném
+`lower: không tìm được FC ...` dù typecheck chấp nhận (chưa từng nổ vì P1.4
+đặt FB+DB+OB trong một file). Sửa: `dbs: new Map([...ctx.dbs, ...this.dbs])`
+(file hiện tại thắng khi trùng tên — cùng tiền lệ `checked.blocks`). Demo
+motor-interlock (3 file) là hồi quy. FC cross-file đã probe: gọi trong biểu
+thức và trong statement đều cho IR đúng (`callFc` không có `ret` khi không
+có `Q =>` — `ret` chỉ từ namedOut tường minh, không phải bug).
+
+**VERIFIED (compile order + tên file demo, OQ-202).** Sort file
+case-insensitive (tên file Windows/TIA không phân biệt hoa/thường); với
+`db.scl` thì cả hai kiểu sort đều sai (case-sensitive: OB1 trước db → T001
+`FB_Motor_DB`; case-insensitive: db trước FB → T001 `FB_Motor`). Demo đổi
+tên `db.scl` → `FB_Motor_DB.scl` (OQ-202 cho phép quy ước tên tránh lỗi):
+thứ tự `FB_Motor.scl` < `FB_Motor_DB.scl` < `OB1.scl` đúng với cả hai sort.
+Bench dùng `00_FB_Motor.scl`, `01_DBs.scl`, `02_OB1.scl` cùng lý do.
+
+**VERIFIED (force, OQ-141 + OQ-216).** Force CHỈ áp cho vùng I/Q
+(`SoftPlc.#applyForcesToMem('I' | 'Q')`): force `%M` hoặc DB field chỉ lưu
+lớp phủ ở `read()` (OB không bao giờ thấy — golden force-db-field đổi thành
+force-two-outputs). Unforce KHÔNG khôi phục giá trị vật lý: bộ nhớ giữ giá
+trị force cuối cho tới lần ghi/set sau (và `set` cùng bước với `unforce` bị
+rớt vì runner áp set → force → unforce theo thứ tự đó; golden force-input
+ghim: t=30 unforce → Q vẫn true; t=40 set false → Q false). Write `%I` chỉ
+tới lần latch kế (OQ-141: scan latch %I từ IoBus/TagDB rồi mới áp force):
+ghi input khi đang chạy bị latch xóa ngay scan sau — E6 phải Force input
+mới seal được (xem STATE §22). Write vào ref đang force → bỏ qua im lặng
+(OQ-141). Sai kiểu → `TAG-E001`.
+
+**VERIFIED (scan/cyclic OB, §8.2).** Rebase lưới ở bước đầu sau start
+(`lastScanTimeMs = simTimeMs`): OB35 period 100 phase 0 chạy ở scan t=100,
+200 (không phải t=10); phase 50 chạy ở t=50, 150 (golden scan ghim).
+Cyclic OB không có `cycleMs` → period mặc định 100 ms (OB30–38); muốn đặt
+`cycleMs` phải qua `organization` trong YAML golden (compileScl không sinh
+`cycleMs` từ SCL).
+
+**VERIFIED (LAD box TON + JSON).** Box TON bắt đầu đếm ở scan đầu tiên có
+IN=true (t=100), khác FB_Motor (seal đặt SAU lệnh gọi timer nên timer bắt
+đầu t=200 — golden lad-box-ton ghim ET=2900 ở t=3000, Q ở t=3100). Golden
+LAD cần DB SCL trước (OQ-214).
+
+**VERIFIED (SoftPlc start qua server/CLI — bug thật sửa ở P1.7).**
+`SoftPlc` khởi tạo ở STOP; `step()` ở STOP là no-op; trước P1.7 chỉ golden
+runner gọi `start()`. Server/CLI nạp PLC qua `softPlcExtension` nhưng không
+ai gọi `start()` → PLC chết (Run không scan). Sửa: `startPlcControllers
+(bundle)` (`apps/server/src/plc.ts`) — start mọi controller introspectable
+(`start()` là no-op khi đã RUN); gọi trong `SimulationService.run()`/`step()`
+và CLI `runCommand` sau `createSimulation`. Cold reset (`resetAll`) đưa PLC
+về STOP (OQ-140); lần run/step sau start lại (rebase lưới + OB100 — đúng
+ngữ nghĩa STOP→RUN). Hồi quy: `plc.test.ts` "sim.command run → scanCount
+≥ 2".
+
+**VERIFIED (fail-fast PLC, OQ-217 — tier B, quyết lúc triển khai).**
+`vcs run`/`vcs serve` trên project có `plc/` biên dịch lỗi → FAIL FAST
+(exit 2 + in diagnostics, như project-invalid), không chạy khi thiếu PLC.
+Lý do: sai im lặng nguy hiểm hơn lỗi ồn ào (SOUL); luồng editor
+(POST /api/plc/files + build) là để kiểm tra code. Project không có `plc/`
+không ảnh hưởng.
+
+**VERIFIED (bench + tối ưu, M1 §12.4).** Bench `bench/softplc.bench.ts`:
+FB_Motor §13 × 200, ngưỡng ≥ 1000 scan/s, heap < 1 MB/2000 scan. Baseline
+127 scan/s → sau tối ưu **1652–1660 scan/s PASS** (đo ở `/tmp/vcs-p17`,
+trung vị 5×2000 scan; heap +0.17–0.19 MB PASS). Các bước (đo lại sau mỗi
+bước, golden xanh sau mỗi bước — xem STATE §22): (A) index DB theo tên
+(0× — quét DB không phải cổ chai, giữ lại vì đúng đắn); (B) fast path
+`callFb` cho instance dbField + mọi arg scalar + không IN_OUT: resolve
+view/offset/field một lần lúc compile, mỗi scan ghi/đọc trực tiếp qua
+`writeMemValue`/`readMemValue` — bỏ 8 `viewFieldRef` (~9 closure mỗi cái)
+mỗi lần gọi (127 → 618); (C) `createFrame` dùng chung Map rỗng cho section
+không có biến (mọi ghi vào frame map đều qua `byName` — xem `createFrame` +
+`#localRef` + `invokeFc`; vòng lặp reset về mặc định vẫn chạy khi section
+có biến, nên map share không bao giờ giữ giá trị cũ — hồi quy
+`softplc.test.ts` "hai instance cùng FB độc lập", kiểm chứng bằng mutation:
+bỏ vòng reset → test đỏ `[0,5]`) (618 → 760); (E) `viewFieldRef` tính
+trước offset tương đối + field lá lúc compile (canonical layout: fields của
+DB đầu tiên mỗi FB — constructor kiểm chứng mọi DB cùng FB có cùng layout,
+lệch thì loại khỏi map, dùng slow path) (760 → 1652). Không làm Opt D
+(callSys tái dùng Map theo site — không cần vì đã vượt ngưỡng với biên 65%;
+ghi làm cơ hội sau). "set TextDecoder" 21.6% trong profile tsx là artifact
+của tsx (không có `TextDecoder` nào trong code; profile CLI dist không thấy
+nó) — không truy tiếp vì bench A/B đã cho đáp án.
+
+**VERIFIED (server/CLI/web P1.7).** `compileProject` discovery `plc/*.scl`
+rồi `*.lad.json`, sort case-insensitive theo tên, LAD sau SCL; file lạ bỏ
+qua; JSON LAD hỏng → diagnostic LAD-S001; `loadPlcProgram` null khi không có
+file PLC. CLI: `vcs golden run <path>` exit 0/1/2 (0 pass hết, 1 ≥1 golden
+fail, 2 không chạy được — thiếu path/không có file golden); `vcs run
+--scans N` đếm `scanCount` SoftPlc (cap `N*1000+1000` bước, không treo);
+`vcs ir dump <dir>` = compileProject (project có `plc/` → kèm tags; thư mục
+plc trần → không tags). REST: `POST /api/plc/build` compile-check (luôn 200,
+`ok=false` khi lỗi, KHÔNG hot reload) + `POST /api/plc/files` (chỉ trong
+`plc/`, 400 khi thoát ra ngoài) + `GET /api/plc/files?path=` (thêm ngoài
+plan — editor cần ĐỌC file; 404 khi thiếu, 400 khi thoát). WS `plc.watch`
+validate ref ngay (ref sai → error `TAG-E003`, không đăng ký); `plc.values`
+10 Hz LWW theo chỉ số watch; `plc.write`/`force`/`unforce` sai kiểu →
+`TAG-E001`; project không PLC → `SIM-E001`. `sim.state.plc?` additive
+`{scanCount, faultCount}`. Web PLC Workspace: cây file + Monaco (0.57.0,
+worker `monaco-editor/editor/editor.worker.js?worker` — đường dẫn
+`esm/vs/...` KHÔNG resolve dưới Vite 8/Rolldown) + Build/Save + Watch
+(force có badge). Build status: `plcFiles.length === 0` → trống (chưa
+build), có file + không lỗi → "Build OK", có lỗi → "Build lỗi" — sửa bug E6
+phát hiện (trước đây `diagnostics.length === 0` → trống, build sạch không
+hiện gì). E6: Build OK → ghi true khi IDLE → Force → Run → RUN_CMD TRUE →
+Reset → FALSE, scan 0 (6/6 e2e xanh).
+
+**UNVERIFIED (VERIFY, chờ PLCSIM/S1 — xem `docs/verify-experiments-draft.md`).**
+Q đọc lại cùng scan (M1 §14 mục 10 — golden `bitlogic-read-q-same-scan`
+ghim hành vi hiện tại, chưa đối chiếu TIA); TONR ET không clamp trên PT
+(P-S6 ghim ET=1200 khi IN rớt sau khi vượt PT=1000 — §9.3 không có clamp,
+chờ S1/PLCSIM; nếu TIA clamp thì SCR + sửa); `**` kết hợp phải (OQ-092);
+tập `X_TO_Y`/`BOOL_TO_*` (OQ-115); OQ-129 (`#fb.IN :=`); FC trả qua tên
+(OQ-112); lưới scan đều (OQ-130); đánh số DB 1..n (OQ-136); OV/ENO;
+OQ-083/084 layout (chờ PLCSIM E11); ngữ nghĩa std block P1.5; RLO/EN-gating
+LAD (OQ-184/185); LAD instance DB (OQ-188).
