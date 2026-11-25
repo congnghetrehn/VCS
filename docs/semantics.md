@@ -768,3 +768,98 @@ R/LD, CU+CD cùng cạnh (bảng L–N, OQ-167/177); §14.9 R_TRIG — scan đ�
 sau STOP→RUN khi CLK đã true (bảng J5 ghim Q=false vì `_m` giữ —
 OQ-164). Ngoài §14: TONR ET không kẹp PT (P-S6 ghim 1200) và `_m` khởi
 tạo false sau load (bảng J3) cũng chưa đối chiếu.
+
+## 17. LAD — schema JSON, validate, lower → IR chung SCL (M1 §5, P1.6)
+
+Nguồn sự thật duy nhất: `packages/vendor-siemens/src/lad/schema.ts`
+(zod), `validate.ts` (`validateLad`), `lower.ts` (`lowerLad` /
+`compileLad`) + `packages/schemas/src/diagnostics-catalog.ts`
+(`LAD_CATALOG`, 9 mã). Không interpreter riêng: LAD lower về **cùng IR**
+với SCL (M1 §6) và chạy bằng interpreter P1.4 + `callSys` P1.5. IR
+không đổi ở P1.6. Golden: bảng A–L (STATE §21), test
+`lad-golden.test.ts` (12 scan + 2 property fast-check, seed cố định) +
+pipeline `lad/softplc-lad.test.ts` (P-L1…P-L6) — mọi kỳ vọng tính tay,
+`expectedFrom: 'spec'`.
+
+**VERIFIED (hình dạng, M1 §5.1).** `LadBlock {kind, name, number?,
+interface, networks[]}`; `kind` = `'OB' | 'FB' | 'FC'`; mỗi network là
+một rung (mảng element), chạy theo thứ tự mảng; network sau đọc giá trị
+network trước ghi trong cùng scan; hai coil cùng operand trong một
+network → coil sau thắng. Interface JSON cùng hình dạng SCL
+(`{input?, output?, inout?, static?, temp?}`, mỗi khai báo
+`{name, type, init?}`); tên kiểu nguyên thủy không phân biệt hoa
+thường; UDT/FB qua ctx; kiểu std chỉ ở VAR static / DB (luật §16);
+`Array[lo..hi] of T` qua regex (OQ-191; sai cú pháp → LAD-S001).
+FC/OB có VAR static → LAD-S001 (OQ-192, như SCL). `number` chỉ cho OB
+(`obNumber` theo tên — OQ-113); FB/FC có `number` → LAD-S001.
+
+**VERIFIED (operand).** `{sym}` → tag catalog (thiếu → LAD-T001; kiểu
+tag phải bằng kiểu theo độ rộng địa chỉ OQ-110, lệch → LAD-T002);
+`{abs}` → `parseAddress` (sai → LAD-T001) + kiểu theo độ rộng (bit→
+Bool, 8→Byte, 16→Int, 32→DInt); `{local}` → `#name[.member]*` (sai →
+LAD-T005, field ẩn → LAD-T005, OQ-163). Contact/coil/set/reset/pos/
+neg phải Bool, không thì LAD-T002; coil ghi vào VAR_INPUT → LAD-T006.
+Field DB không địa chỉ trực tiếp qua operand (OQ-187) — đọc Q/ET qua
+(a) RLO sau box, (b) box `outputs`, (c) `#tOn.Q` local. Const không
+kiểu: số → Int, bool → Bool; PT phải `type: 'Time'` (OQ-195).
+
+**VERIFIED (RLO, M1 §5.2).** Mỗi network bắt đầu `__lad_<id>_rlo :=
+TRUE` (temp riêng từng network, OQ-189; đụng tên user → LAD-T009).
+Contact NO `rlo = rlo AND v`; NC `rlo = rlo AND NOT v`; `pos` `rlo =
+rlo AND (v AND NOT m)`, rồi `m := v`; `neg` `rlo = rlo AND (NOT v AND
+m)`, rồi `m := v` (m là memBit do user khai, phải Bool, không được là
+VAR_INPUT); `parallel` `rlo = OR(branch_i(rlo_in))`, các nhánh theo
+thứ tự mảng, mỗi nhánh một temp `__lad_<id>_b<n>`; `not` `rlo = NOT
+rlo`; coil thường/phủ định `operand := rlo` / `:= NOT rlo` mỗi scan;
+`set`/`reset` chỉ ghi khi rlo (bọc `if (__rlo)`).
+
+**VERIFIED (box).** Box std (9 block §16) **luôn `callSys`, không bọc
+`if (EN)`**; RLO sau box = Q-like (bảng dưới). Box so sánh `rlo = EN
+AND cmp` (không bọc if — EN=false cho false giống hệt); box
+toán/MOVE/CONVERT/NORM_X/SCALE_X/LIMIT/MIN/MAX **chỉ chạy khi EN**
+(bọc `if (__rlo)`), RLO sau = ENO = EN (không đổi). Instance box:
+`{local}` → biến static của block; `{sym}` → DB toàn cục theo tên
+trong `ctx.dbs`, `fbName` phải khớp fn (sai/thiếu → LAD-T001);
+`{abs}` → LAD-T004; std box thiếu instance → LAD-T004; box toán/so
+sánh/MOVE có `instance` → LAD-T004. Instance DB cho LAD lấy từ
+`ctx.dbs` / SCL `DATA_BLOCK` (OQ-188); LAD không khai DB trong file
+(thiếu → T001 ồn ào, không đoán). Kiểu box toán/so sánh theo SCL
+`binaryResultType` + widening (sai → LAD-T002/T003); DIV 0 → fault
+`DIV_ZERO` ở interpreter (không kiểm ở validate). CONVERT theo bảng
+SCL `X_TO_Y` (OQ-150; `INT_TO_BOOL` **được** — có trong bảng
+`CONVERTIBLE_TYPES`, test ghim chấp nhận); `TIME_TO_INT` không được →
+LAD-T003. Tên key box (OQ-194): TON/TOF/TP/TONR IN, PT → Q, ET;
+CTU CU, PV, R? → QU, CV; CTD CD, PV, LD? → QD, CV; CTUD CU, CD, PV,
+R?, LD? → QU, QD, CV; SR/RS **S1+R / S+R1** → Q1 (tên thật trong
+`defs.ts`, không phải "S, R" như bảng plan §21); R_TRIG/F_TRIG CLK →
+Q; so sánh IN1, IN2 → rlo; toán IN1, IN2 → OUT; MOVE IN → OUT;
+CONVERT IN → OUT; NORM_X/SCALE_X MIN, MAX, VALUE → OUT; LIMIT MN,
+MX, IN → OUT; MIN/MAX IN1, IN2 → OUT. R/LD tùy chọn (`init: false`,
+thiếu = FALSE, OQ-181).
+
+**VERIFIED (RLO sau box std, OQ-184).** TON/TOF/TP/TONR → Q;
+R_TRIG/F_TRIG → Q; SR/RS → Q1; CTU → QU; CTD → QD; CTUD → QU (QD đọc
+qua `outputs`). Instance box std trong lower là `local`/`dbField`
+(theo interpreter `resolveInstance`); riêng ghi chú IR bảng J trong
+plan §21 viết `{k:'static', path:['sT']}` là **sai** — interpreter chỉ
+nhận local/dbField, golden J dùng `local('sT')` (xem STATE §21).
+
+**VERIFIED (diagnostic).** 9 mã LAD (tổng 42 → 51): S001 schema/cấu
+trúc; T001 tên chưa khai; T002 sai kiểu; T003 toán tử không áp dụng;
+T004 lỗi gọi box; T005 member sai/ẩn; T006 ghi sai; T009 trùng tên;
+U001 không hỗ trợ (box ngoài tập M1, kiểu String, mảng lồng). Vị trí
+`line=1, col=1` (JSON không có vị trí nguồn); message luôn nêu network
+id + chỉ số element (OQ-193). `networkMap` = chỉ số body của từng
+network trong `IrBlock.body` (OQ-186). Không có box `call` gọi FB/FC
+từ LAD (nếu cần, SCR/P1.7 thêm).
+
+**UNVERIFIED (VERIFY, chờ PLCSIM/S1 — OQ-183/184/185).** Các mục sau
+theo M1 §5.2 nhưng **chưa đối chiếu TIA/PLCSIM**; nếu S1/PLCSIM cho
+kết quả khác thì SCR đổi spec + sửa bảng/golden (không âm thầm đổi):
+`pos`/`neg` ≡ R_TRIG/F_TRIG (OQ-183, golden D + property 2 ghim);
+bảng RLO-sau-box std, nhất là CTUD→QU là mặc định tùy ý (OQ-184,
+golden G/J ghim); EN-gating — std box luôn chạy, toán chỉ chạy khi EN
+(OQ-185, golden L ghim: TON chạy dù EN=false, Q lên ở scan 400 và
+coil sau TON lên **dù contact trước mở**; ADD không chạy, MW20 giữ 0
+— đúng theo chữ spec nhưng ngược trực giác, nếu TIA chặn timer khi
+EN=false thì SCR sửa OQ-185 + bảng L).

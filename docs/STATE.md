@@ -10,10 +10,10 @@
 
 ## 1. Vị trí hiện tại
 
-- Milestone: **M0** (P0.1 đã merge vào `develop` qua PR #8, merge commit `e8707f2`, CI 6/6 xanh; P0.2 đã merge vào `develop` qua PR #9, merge commit `f3d769a`, CI 6/6 xanh sau sửa lỗi khai báo `workspace:*`)
-- Prompt đang làm / vừa xong: P1.4 — **✔ đã merge PR #23 `ae0bed3` vào `develop` 2026-11-25 10:56 +07** (CI 10 checks passed; STATE §19; OQ-130…160 đóng, OQ-161 mở). Tiếp theo: P1.5 plan-first (STATE §20; X-002/S1 vẫn mở nhưng không chặn P1.5 — làm theo §9, xem §20 OQ-179).
-- Nhánh: `m1/p1.5-std-blocks` (từ `ad1c9cf` = nội dung `develop` sau merge PR #23, develop head `ae0bed3`)
-- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.4 đã merge PR #23; P1.5 plan-first)
+- Milestone: **M1** (M0 đã ký 2026-11-24, trên main `31c7200`; P1.1–P1.5 đã merge vào `develop` qua PR #20–#24)
+- Prompt đang làm / vừa xong: P1.5 — **✔ đã merge PR #24 `02d75ef` vào `develop` 2026-11-25 11:59 +07** (CI 8 successful + 2 skipped; STATE §20; OQ-162…181 đóng, OQ-161 mở). Tiếp theo: P1.6 plan-first (STATE §21; X-002/S1 vẫn mở nhưng không chặn P1.6 — làm theo M1 §5, xem §21 OQ-182).
+- Nhánh: `m1/p1.6-lad` (từ `c60fa9c` = nội dung `develop` sau merge PR #24, develop head `02d75ef`)
+- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.5 đã merge PR #24; P1.6 plan-first)
 
 ## 2. Tiến độ prompt
 
@@ -33,8 +33,8 @@
 | P1.2   | ✔ xong (gate xanh local; đã merge PR #21 `278e3af` vào `develop` 2026-11-25 05:13 +07, CI 8 successful + 2 skipped) | PR #21, nhánh `m1/p1.2-scl-parser` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (746 test, 42 file; 95 test mới) + build xanh + bench guard PASS | xem §17; OQ-092…104 đóng, OQ-105 mở |
 | P1.3   | ✔ xong (gate xanh local; đã merge PR #22 `681e39d` vào `develop` 2026-11-25 07:24 +07, CI 8 successful + 2 skipped) | PR #22, nhánh `m1/p1.3-typecheck-lower` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (1310 test; 564 test mới) + build xanh + bench TagDB 4/4 (49,1M ops/s) + orchestrator 481.809 bước/s | xem §18; OQ-106…129 đóng |
 | P1.4   | ✔ xong (gate xanh local; đã merge PR #23 `ae0bed3` vào `develop` 2026-11-25 10:56 +07, CI 10 checks passed)                                                                                                                                                         |                                                   |                                                                                                                                                                           | X-002/S1 vẫn mở nhưng không chặn (làm theo §7/§8, OQ-152) |
-| P1.5   | ◐ plan-first (STATE §20, nhánh `m1/p1.5-std-blocks`)                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
-| P1.6   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
+| P1.5   | ✔ xong (gate xanh local; đã merge PR #24 `02d75ef` vào `develop` 2026-11-25 11:59 +07, CI 8 successful + 2 skipped) | PR #24, nhánh `m1/p1.5-std-blocks` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-25 (1666 test, 63 file; 100 test mới) + build xanh + bench guard PASS | xem §20; OQ-162…181 đóng, OQ-161 mở |
+| P1.6   | ◐ plan-first (STATE §21, nhánh `m1/p1.6-lad`) |  |  | ⚠ plan-first |
 | P1.7   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | G1     | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | gói nghiệm thu M1                                                 |
 | P2.1   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
@@ -2507,3 +2507,334 @@ Tổng bảng trên = 13+24+15+34+8+2+1 = **97 test mới** (mục tiêu sàn �
   7. **3 test cũ đổi kỳ vọng do chính tính năng P1.5** (không phải sửa để qua gate): `typecheck.test.ts` "TON trong VAR_TEMP → U001" thành T004 (OQ-171), "gọi #sT → U001" thành hợp lệ; `typecheck-coverage.test.ts` "gọi system FB dạng statement → U001" thành T001 (không có DB). Thêm 1 test P1.4 phải đổi setup: `softplc-scan.test.ts` "TON không handler → SYS_UNSUPPORTED" nay truyền `sysCalls: new Map()` tường minh (OQ-170 — SoftPlc mặc định đã có handler); test vẫn ghim đúng hành vi OQ-143 và đồng thời kiểm đường override `cfg.sysCalls?`.
 - **Gate (ĐÃ CHẠY thật ở bản sao `/tmp/vcs-p15`, install thật `--frozen-lockfile`, log `/tmp/p15-*.log`):** lint EXIT=0; typecheck EXIT=0; depcheck EXIT=0 (115 modules, 218 deps, no violations); test **1666/1666** (63 files) EXIT=0; review:cheats **SẠCH** (161 file) EXIT=0; docs:diagnostics --check **khớp, 42 mã** EXIT=0; build EXIT=0; test:e2e **5 passed** EXIT=0; bench TagDB 4/4 PASS (set/get 49,169,293 ops/s ≥ 10M) + orchestrator **491,403 steps/s** (≥ 100k) EXIT=0. Smoke 200 FB_Motor CHƯA CHẠY (đo ở P1.7 theo plan).
 - **Việc tiếp theo:** PR P1.5 qua cloud browser (theo quy trình chuẩn) → CI xanh → merge → P1.6 (LAD).
+
+---
+
+## 21. P1.6 — LAD: schema + validate + lower → IR (plan, 2026-11-25)
+
+**Prompt P1.6 (nguyên văn):** "Làm P1.6 theo AGENTS.md §9. Đọc: … → M1 §5. Nhiệm vụ: LAD: schema zod + validate + lower LAD → IR (dùng chung interpreter, không interpreter riêng). RLO/EN/ENO theo 5.2. Gate: ≥ 8 golden LAD."
+
+**Tóm tắt hiểu biết (5 dòng):** (1) LAD là JSON: `LadBlock {kind, name, number?, interface, networks[]}`, mỗi network là một rung (mảng element) — M1 §5.1. (2) Ngữ nghĩa RLO §5.2: RLO bắt đầu `true` ở thanh nguồn trái; tiếp điểm NO/NC, `parallel` = OR, `not` đảo RLO, coil ghi RLO, set/reset chỉ ghi khi RLO, box lấy RLO làm EN. (3) Lower LAD → **cùng IR với SCL** (§6), chạy bằng interpreter P1.4 — không interpreter riêng; box std (TON…) → `callSys` (P1.5), box toán/so sánh → `binary`/`intrinsic`. (4) Khác SCL: LAD không có tên `"..."` trỏ DB — operand `{sym}` là **tag** (giải qua tag catalog), `{abs}` là địa chỉ tuyệt đối, `{local}` là `#var` của block. (5) Spec để trống nhiều chỗ (tên key input box toán, ngữ nghĩa pos/neg, RLO sau box trừ TON, instance DB cho LAD) — 15 OQ tier B dưới đây, không có tier C.
+
+**Đọc:** M1 §5 (dòng 213–265: schema §5.1 + ngữ nghĩa §5.2), §3.5 (layout DB), §6 (IR), §12.1–12.2 (golden + `expectedFrom`), §14 (mục 5–11: VERIFY), §16–17 (chấp nhận + mặc định); AMENDMENTS — không mục nào chạm §5 (A16 CI, A17 bench, A18 drift, A19 "Ghi thử", A10 server Node); STATE §19–§20; semantics §14–§16; skill `SKILL-siemens-integration` §3 — ghi chú: câu "LAD/FBD = đồ thị Parts/Wires → dataflow, không ép về series/parallel" chỉ áp dụng cho **SimaticML import (S3, P5.x)**, không áp dụng cho P1.6: M1 §5 định nghĩa LAD JSON theo mô hình rung RLO, P1.6 theo spec; RLO chính là giá trị dataflow cho logic tiếp điểm.
+
+**Phạm vi:**
+- Mới: `packages/vendor-siemens/src/lad/{schema.ts, validate.ts, lower.ts}` + test; export ở `packages/vendor-siemens/src/index.ts`; 9 mã diagnostic LAD (`LAD_CATALOG` trong `packages/schemas/src/diagnostics-catalog.ts`, `scripts/gen-diagnostics.ts` thêm vào `CATALOGS` — tiền lệ P1.2; `docs/diagnostics.md` sinh lại bằng script, không sửa tay — AGENTS §11); `docs/semantics.md` §17 mới.
+- Tái dùng (không viết lại): IR `packages/runtime-iec/src/ir.ts` (**không đổi** — không thêm field); interpreter + `callSys` + `getStdBlockDef` (P1.4/P1.5); `parseAddress` (P1.1, OQ-110 độ rộng → kiểu); `interfaceFromSymbols` + `layoutIrFields` + `sclTypeToIrType` (export sẵn từ `typecheck.ts`); `obNumber` (export sẵn từ `lower.ts`, OQ-113); `compileSclProgram`/`CompileContext` để chương trình hỗn hợp SCL+LAD chung một ctx; luật widening + `binaryResultType` của SCL cho box toán/so sánh; `TagAddressMap`/`buildTagAddressMap` (OQ-137/138).
+- KHÔNG thuộc phạm vi: interpreter riêng cho LAD; LAD editor UI (P1.7); golden runner YAML (P1.7); demo/examples mới ngoài golden; CLI mới (`vcs ir dump` cho LAD để P1.7 — dump qua `compileProject` sau); gọi FB/FC người dùng từ LAD (schema §5.1 không có box call — giới hạn, xem mục "Ngoài phạm vi"); STL/GRAPH; S7/PLCSIM/SimaticML (M5); sửa EBNF §4.2 / M1 §5; ADR mới; `docs/facts/` mới; P0.9.
+
+**Thiết kế (6 điểm):**
+1. **Schema (zod) — `lad/schema.ts`:** `LadBlock {kind: 'FC'|'FB'|'OB', name, number?, interface, networks[]}`; `LadNetwork {id, title?, comment?, rung: LadElement[]}`; element: `contact {NO|NC, operand}`, `pos`/`neg {operand, memBit}`, `parallel {branches: LadRung[]}`, `not`, `coil {normal|negated, operand}`, `set`/`reset {operand}`, `box {fn, instance?, inputs, outputs}`. Interface JSON **cùng dạng SCL** — `{input?, output?, inout?, static?, temp?}`, mỗi decl `{name, type, init?}` — validate dựng `BlockSymbols` rồi tái dùng `interfaceFromSymbols` → `IrInterface`. Kiểu trong interface là chuỗi: tên nguyên thủy (không phân biệt hoa/thường, OQ-098), tên UDT/FB trong ctx, tên std block (chỉ VAR static/DB — OQ-171 tái dùng), `Array[lo..hi] of T` (OQ-191). Kind FC/OB → `static` phải rỗng (mirror SCL — OQ-192).
+2. **Validate — `lad/validate.ts`:** `validateLad(block, opts: {tags: TagDef[], ctx?: CompileContext}) → {irInterface, networks: ValidatedNetwork[], diagnostics}`. Operand: `{sym}` → tra tag catalog (kiểu từ catalog; không thấy → LAD-T001); `{abs}` → `parseAddress` + kiểu theo độ rộng OQ-110 (bit→Bool, 8→Byte, 16→Int, 32→DInt); `{local}` → `#name[.member]*`, member theo luật SCL (T005, hidden → T005 — OQ-163). Contact/coil/set/reset/pos/neg operand phải Bool, else LAD-T002. **DB field không địa chỉ trực tiếp qua operand** (schema chỉ có 3 dạng) — đọc Q/ET của std box qua (a) RLO sau box, (b) `outputs` của box, (c) `#tOn.Q` local (OQ-187). Coil ghi VAR_INPUT của chính block → LAD-T006 (mirror OQ-129). Rung rỗng / nhánh parallel rỗng / `branches: []` → LAD-S001. Diagnostic LAD: `line=1, col=1` (JSON không có vị trí nguồn), message luôn ghi network id + chỉ số element (OQ-193).
+3. **Box instance — `validate.ts` (tiếp):** `instance?: Operand` giải theo **namespace riêng theo vị trí**: `{local}` → static var của block (kiểu std, layout §3.5 qua `resolveDb`); `{sym}` → DB toàn cục theo tên trong `ctx.dbs`, `fbName` phải đúng fn (mirror `resolveDb` P1.3 — sai tên/không có DB → LAD-T001); `{abs}` → LAD-T004. Instance DB cho LAD ở OB lấy từ ctx (biên dịch SCL `DATA_BLOCK "T1" "TON"` trước, rồi LAD tham chiếu `{sym: "T1"}`) — P1.6 không thêm cú pháp DATA_BLOCK cho LAD (OQ-188). Box std thiếu instance → LAD-T004. Box toán/so sánh/MOVE: `instance` phải vắng (có → LAD-T004).
+4. **Lower — `lad/lower.ts`:** `lowerLad(validated) → {block: IrBlock, networkMap: Record<networkId, number[]>}`; `compileLad(block, opts, ctx?) → {program, diagnostics}` hợp nhất IrBlock vào ctx chung với SCL (dùng `programFromCtx`, OB binding qua `obNumber` — OQ-113 tái dùng). Temp: **một `__lad_rlo` chung** (mỗi network gán lại `const true` ở đầu — RLO bắt đầu ở thanh nguồn) + temp nhánh `__lad_b<depth>_<idx>` cho parallel; tên temp suy ra từ network id, đụng tên người dùng → LAD-T009 (OQ-189). Temp nằm trong `interface.temp` (tiền lệ synthetic local OQ-112). Map network → chỉ số trong `IrBlock.body` (IR không có node id — OQ-186). Thứ tự: network chạy theo thứ tự mảng; nhiều coil cùng operand trong một network → coil sau thắng (assign tuần tự).
+5. **Quy tắc RLO/EN/ENO (từ §5.2 + OQ):**
+
+   | Element | Công thức RLO / hành vi | IR sinh ra |
+   |---|---|---|
+   | contact NO | `rlo = rlo AND v` | `assign __rlo = binary(and, __rlo, load(v))` |
+   | contact NC | `rlo = rlo AND NOT v` | `... unary(not, load(v))` |
+   | `pos` | `rlo = rlo AND (v AND NOT m)`; sau đó `m := v` | 2 assign (m = memBit) |
+   | `neg` | `rlo = rlo AND (NOT v AND m)`; sau đó `m := v` | 2 assign |
+   | `parallel` | `rlo = OR(nhánh_i(rlo_vào))`, nhánh tính theo thứ tự mảng | temp nhánh + OR |
+   | `not` | `rlo = NOT rlo` | `assign __rlo = unary(not, __rlo)` |
+   | coil normal / negated | `operand := rlo` / `:= NOT rlo` (mọi scan) | 1 assign |
+   | `set` / `reset` | nếu rlo thì `operand := true` / `false`; giữ nguyên khi rlo=false | `if (__rlo) { assign ... }` |
+   | box std (9 khối) | **luôn `callSys`, không bọc `if (EN)`**; rlo sau = Q-like (bảng dưới) | `callSys` + `assign __rlo = load(instance.<Q-like>)` |
+   | box compare | `rlo = EN AND cmp` (không cần bọc if — EN=false cho kết quả false giống hệt) | `assign __rlo = binary(and, __rlo, binary(cmp, in1, in2))` |
+   | box toán/MOVE/CONVERT/NORM_X/SCALE_X/LIMIT/MIN/MAX | **chỉ thực thi khi EN** (bọc `if (__rlo)`); rlo sau = ENO = EN (không đổi) | `if (__rlo) { assign OUT = ... }` |
+
+   Bảng rlo sau box std (OQ-184 — spec chỉ quy ước TON→Q, còn lại là mặc định tier B, VERIFY):
+
+   | Box | rlo sau | Box | rlo sau |
+   |---|---|---|---|
+   | TON / TOF / TP / TONR | Q | CTU | QU |
+   | R_TRIG / F_TRIG | Q | CTD | QD |
+   | SR / RS | Q1 | CTUD | QU (QD đọc qua `outputs`) |
+
+   Chữ ký box (OQ-194 — tên key chưa có trong spec; theo TIA + tên arg intrinsic SCL):
+
+   | Box | inputs (bắt buộc trừ ghi chú) | outputs | rlo sau |
+   |---|---|---|---|
+   | TON / TOF / TP / TONR | IN, PT | Q, ET (tùy chọn, qua `=>`) | Q |
+   | CTU | CU, PV, R? | QU, CV | QU |
+   | CTD | CD, PV, LD? | QD, CV | QD |
+   | CTUD | CU, CD, PV, R?, LD? | QU, QD, CV | QU |
+   | SR / RS | S, R | Q1 | Q1 |
+   | R_TRIG / F_TRIG | CLK | Q | Q |
+   | EQ / NE / LT / LE / GT / GE | IN1, IN2 | — (rlo là kết quả) | EN AND cmp |
+   | ADD / SUB / MUL / DIV | IN1, IN2 | OUT | EN |
+   | MOVE | IN | OUT | EN |
+   | CONVERT | IN | OUT (kiểu đích = kiểu OUT) | EN |
+   | NORM_X / SCALE_X | MIN, MAX, VALUE | OUT | EN |
+   | LIMIT | MN, MX, IN | OUT | EN |
+   | MIN / MAX | IN1, IN2 | OUT | EN |
+
+   R/LD tùy chọn (`init: false` — OQ-181 tái dùng). Kiểu box toán/so sánh theo luật SCL (`binaryResultType`, widening; sai → LAD-T002/T003). `Const` không type: number → Int, bool → Bool; PT kiểu Time bắt buộc `type: 'Time'` (OQ-195). DIV 0 → fault `DIV_ZERO` của interpreter (không kiểm ở validate). CONVERT: mode mặc định như SCL `X_TO_Y` (OQ-150 — range → 0 + `CONV_RANGE`).
+6. **Diagnostics mới — 9 mã LAD** (tiền lệ P1.2; `DIAGNOSTIC_CODE_RE` đã khớp chữ L/T/S/U — không cần nới; tổng 42 → **51 mã**): LAD-S001 schema/cấu trúc (zod fail + rung/parallel rỗng + box có `instance` thừa/thiếu dạng + FC/OB có static); LAD-T001 tên chưa khai báo (sym/local/DB instance); LAD-T002 kiểu không khớp (contact/coil/box in-out/const); LAD-T003 box/toán tử không áp dụng cho kiểu (ADD trên Bool, so sánh struct); LAD-T004 lỗi gọi box (thiếu input bắt buộc, instance sai, output không tồn tại, std trong biểu thức n/a); LAD-T005 member sai (local path, hidden); LAD-T006 gán không hợp lệ (coil ghi VAR_INPUT); LAD-T009 trùng tên (var, network id, temp `__lad_*`); LAD-U001 chưa hỗ trợ (box fn ngoài tập M1, kiểu String, Array lồng nhau). Mỗi mã ≥ 1 test (AGENTS §6).
+
+**Dependencies mới:** **zod 4.6.7** (phát hành 2026-10-12, 44 ngày — thỏa quy tắc ≥14 ngày) thêm làm dependency **trực tiếp** của `packages/vendor-siemens` (`"zod": "4.6.7"`): zod đã là dep của `@vcs/schemas` nhưng không re-export; LAD schema sống ở vendor-siemens theo M1 §2 nên khai báo trực tiếp (không import xuyên package). Lockfile thay đổi **chỉ** thêm importer `vendor-siemens → zod` (tiền lệ P1.1: +18 dòng cho 2 importer) — diff khác là cờ đỏ, dừng kiểm tra. Không dependency mới nào khác. `pnpm install` trong VM vẫn EPERM (OQ-007) — làm ở bản sao `/tmp` như các prompt trước.
+
+**Golden LAD — 12 bảng tính tay (vượt sàn §12.2: ≥ 8 — series/parallel/box/coil phủ định/edge).** Quy ước chung: lưới scan đều 10 ms trừ khi ghi khác (OQ-130: scan đầu ở t=10, không phải 0); `expectedFrom: 'spec'` trong tên test (OQ-174). Mỗi bảng là trace SoftPlc đầy đủ (không sao chép số từ implementation — AGENTS §6).
+
+- **Bảng A — series NO + NC + coil.** OB, rung: `[NO %I0.0] — [NC %I0.1] — (coil %Q0.0)`.
+
+  | scan | I0.0 | I0.1 | RLO sau c1 | RLO sau c2 | Q0.0 |
+  |---|---|---|---|---|---|
+  | 10 | F | T | F | F | F |
+  | 20 | T | F | T | T | T |
+  | 30 | T | T | T | F | F |
+  | 40 | F | F | F | F | F |
+
+  IR tương ứng (OB `Main`, temp `__lad_N1_rlo: Bool`):
+  ```
+  assign __lad_N1_rlo = const Bool true
+  assign __lad_N1_rlo = binary(and, Bool, load(__lad_N1_rlo), load(abs %I0.0 Bool))
+  assign __lad_N1_rlo = binary(and, Bool, load(__lad_N1_rlo), unary(not, Bool, load(abs %I0.1 Bool)))
+  assign abs %Q0.0 Bool = load(__lad_N1_rlo)
+  ```
+  Các golden còn lại dùng cùng mẫu IR (assign/binary/unary/if/callSys) — chỉ ghi trace giá trị + ghi chú IR khác biệt.
+
+- **Bảng B — parallel (OR).** Rung: `parallel[ [NO %I0.0], [NO %I0.1, NO %I0.2] ] — (coil %Q0.0)`. RLO = `I0.0 OR (I0.1 AND I0.2)`.
+
+  | scan | I0.0 | I0.1 | I0.2 | nhánh 1 | nhánh 2 | Q0.0 |
+  |---|---|---|---|---|---|---|
+  | 10 | F | T | T | F | T | T |
+  | 20 | F | T | F | F | F | F |
+  | 30 | T | F | F | T | F | T |
+  | 40 | F | F | T | F | F | F |
+
+- **Bảng C — `not` + coil phủ định (phủ định kép).** Rung 1: `[NO %I0.0] — (not) — (coil negated %Q0.0)`; rung 2: `[NO %I0.0] — (coil %Q0.1)`.
+
+  | scan | I0.0 | RLO sau c1 | RLO sau not | Q0.0 (neg) | Q0.1 |
+  |---|---|---|---|---|---|
+  | 10 | F | F | T | F | F |
+  | 20 | T | T | F | T | T |
+
+- **Bảng D — edge `pos`/`neg` (đối chiếu R_TRIG/F_TRIG P1.5).** Rung 1: `[pos %I0.0 mem %M0.0] — (coil %Q0.0)`; rung 2: `[neg %I0.0 mem %M0.1] — (coil %Q0.1)`. `pos`: Q = v AND NOT m_trước, rồi m := v; `neg`: Q = NOT v AND m_trước, rồi m := v.
+
+  | scan | I0.0 | Q0.0 (pos) | Q0.1 (neg) | M0.0 | M0.1 |
+  |---|---|---|---|---|---|
+  | 10 | F | F | F | F | F |
+  | 20 | F | F | F | F | F |
+  | 30 | T | T | F | T | T |
+  | 40 | T | F | F | T | T |
+  | 50 | F | F | T | F | F |
+  | 60 | T | T | F | T | T |
+  | 70 | F | F | T | F | F |
+
+- **Bảng E — set/reset (SR latch + thứ tự network).** N1: `[NO %I0.0] — (S %M0.0)`; N2: `[NO %I0.1] — (R %M0.0)`; N3: `[NO %M0.0] — (coil %Q0.0)`.
+
+  | scan | I0.0 (set) | I0.1 (reset) | M0.0 sau | Q0.0 |
+  |---|---|---|---|---|
+  | 10 | F | F | F | F |
+  | 20 | T | F | T | T |
+  | 30 | F | F | T (giữ) | T |
+  | 40 | F | T | F | F |
+  | 50 | T | T | F (set rồi reset cùng scan → reset thắng) | F |
+  | 60 | T | F | T | T |
+
+- **Bảng F — TON box + rlo sau = Q.** OB, network: `[NO %I0.0] — [TON instance {sym:"T1"} inputs {IN:%I0.0, PT:T#3s} outputs {Q:%M1.0}] — (coil %Q0.0)`. DB `"T1" "TON"` biên dịch từ SCL trước (ctx chung). Chu kỳ 100 ms; IN: F@100, T@200…3300, F@3400. IR: `callSys TON` không bọc if; sau đó `assign __rlo = load(dbField("T1",["Q"]))`.
+
+  | scan | I0.0 (IN) | EN (=I0.0) | T1.ET | T1.Q | Q0.0 |
+  |---|---|---|---|---|---|
+  | 100 | F | F | 0 | F | F |
+  | 200 | T | T | 0 | F | F |
+  | 300 | T | T | 100 | F | F |
+  | 1100 | T | T | 900 | F | F |
+  | 3100 | T | T | 2900 | F | F |
+  | 3200 | T | T | 3000 | T | T |
+  | 3300 | T | T | 3000 | T | T |
+  | 3400 | F | F | 0 | F | F |
+
+- **Bảng G — CTU box + compare box nối tiếp.** Network: `[CTU instance {sym:"C1"} inputs {CU:%I0.0, R:%I0.1, PV:3} outputs {CV:%MW10}] — [EQ inputs {IN1:%MW10, IN2:3}] — (coil %Q0.0)`. R=F suốt. IR: `callSys CTU` + `assign __rlo = load(dbField("C1",["QU"]))`, rồi `assign __rlo = binary(and, __rlo, binary(eq, Int, load(%MW10), const 3))`.
+
+  | scan | CU | CV sau CTU | QU | EQ (CV==3) | Q0.0 |
+  |---|---|---|---|---|---|
+  | 10 | F | 0 | F | F | F |
+  | 20 | T | 1 | F | F | F |
+  | 30 | F | 1 | F | F | F |
+  | 40 | T | 2 | F | F | F |
+  | 50 | F | 2 | F | F | F |
+  | 60 | F | 2 | F | F | F |
+  | 70 | T | 3 | T | T | T |
+  | 80 | F | 3 | T | T | T |
+  | 90 | T | 4 | T | F | F |
+
+- **Bảng H — math box + MOVE, EN gating.** N1: `[NO %I0.0] — [ADD inputs {IN1:%MW10, IN2:5} outputs {OUT:%MW12}] — (coil %Q0.0)`; N2: `[NO %I0.1] — [MOVE inputs {IN:%MW12} outputs {OUT:%MW14}]`. MW10=10 đặt trước. IR: `if (__rlo) { assign %MW12 = binary(add, Int, %MW10, 5) }`; rlo sau box không đổi (ENO=EN).
+
+  | scan | I0.0 | MW12 sau | Q0.0 | scan | I0.1 | MW14 sau |
+  |---|---|---|---|---|---|---|
+  | 10 | F | 0 (giữ — không thực thi khi EN=false) | F | 50 | T | 15 (MOVE khi EN) |
+  | 20 | T | 15 | T | 60 | F | 15 (giữ) |
+  | 30 | T | 15 | T | | | |
+  | 40 | F | 15 (giữ) | F | | | |
+
+- **Bảng I — multi-network, network sau đọc giá trị network trước ghi cùng scan.** N1: `[NO %I0.0] — (coil %M0.0)`; N2: `[NO %M0.0] — (coil %Q0.0)`.
+
+  | scan | I0.0 | M0.0 sau N1 | Q0.0 sau N2 |
+  |---|---|---|---|---|
+  | 10 | F | F | F |
+  | 20 | T | T | T (cùng scan) |
+  | 30 | F | F | F |
+
+- **Bảng J — FB LAD multi-instance (static TON + local).** FB `FB_Lad`: VAR_INPUT `iStart: Bool`; VAR_OUTPUT `qRun: Bool`; VAR `sT: TON`. Network: `[NO #iStart] — [TON instance {local:"#sT"} inputs {IN:#iStart, PT:T#300ms}] — (coil #qRun)`. Chu kỳ 100 ms; iStart: F@100, T@200…500, F@600. Test qua chương trình hỗn hợp: SCL OB1 gọi `FB_Lad_DB` + LAD FB + SCL `DATA_BLOCK "FB_Lad_DB" "FB_Lad"` trong một ctx (chứng minh ctx chung SCL+LAD). IR: `callSys TON` instance `{k:'static', path:['sT']}`; rlo sau = `load(static ["sT","Q"])`.
+
+  | scan | iStart | sT.ET | sT.Q | qRun |
+  |---|---|---|---|---|
+  | 100 | F | 0 | F | F |
+  | 200 | T | 0 | F | F |
+  | 300 | T | 100 | F | F |
+  | 400 | T | 200 | F | F |
+  | 500 | T | 300 | T | T |
+  | 600 | F | 0 | F | F |
+
+- **Bảng K — parallel lồng nhau.** Rung: `parallel[ [NO %I0.0, NO %I0.1], [parallel[ [NO %I0.2], [NO %I0.3, NO %I0.4] ]] ] — (coil %Q0.0)`. RLO = `(I0.0 AND I0.1) OR (I0.2 OR (I0.3 AND I0.4))`.
+
+  | scan | I0.0 | I0.1 | I0.2 | I0.3 | I0.4 | Q0.0 |
+  |---|---|---|---|---|---|---|
+  | 10 | T | T | F | F | F | T (nhánh 1) |
+  | 20 | T | F | F | F | F | F |
+  | 30 | F | F | T | F | F | T (nhánh 2a) |
+  | 40 | F | F | F | T | T | T (nhánh 2b) |
+  | 50 | F | F | F | T | F | F |
+
+- **Bảng L — EN=false: timer vẫn chạy, math không chạy (ghim lựa chọn OQ-185).** N1: `[NO %I0.0] — [TON instance {sym:"T1"} inputs {IN:%I0.1, PT:T#200ms}] — (coil %Q0.0)`; N2: `[NO %I0.0] — [ADD inputs {IN1:1, IN2:2} outputs {OUT:%MW20}]`. I0.0=F suốt (EN=false); I0.1: F@100, T@200…500. Chu kỳ 100 ms.
+
+  | scan | I0.0 (EN) | I0.1 (IN) | T1.ET | T1.Q | Q0.0 | MW20 |
+  |---|---|---|---|---|---|---|
+  | 100 | F | F | 0 | F | F | 0 |
+  | 200 | F | T | 0 | F | F | 0 |
+  | 300 | F | T | 100 | F | F | 0 |
+  | 400 | F | T | 200 | T | T | 0 |
+  | 500 | F | T | 200 | T | T | 0 |
+
+  Hành vi gây bất ngờ nhưng đúng theo spec-literal: TON chạy dù EN=false (IN lái timer) nên Q lên ở scan 400 và coil sau nó lên **dù contact trước mở**; ADD không bao giờ thực thi nên MW20 giữ 0. Nếu PLCSIM cho thấy TIA chặn timer khi EN=false → SCR + sửa OQ-185 + bảng L (xem rủi ro 1).
+
+**Test target (≥ 60 mới, tổng ≥ 1726):**
+
+| Nhóm | File | Số lượng |
+|---|---|---|
+| schema (12) | `packages/vendor-siemens/src/lad/schema.test.ts` | block hợp lệ; kind sai; thiếu networks; rung rỗng; parallel rỗng; box fn lạ; operand sai dạng; interface trùng tên; Array sai cú pháp; init sai kiểu; network id trùng; `number?` sai kiểu |
+| validate (18) | `packages/vendor-siemens/src/lad/validate.test.ts` | sym không thấy → T001; abs sai → T001; local member sai → T005; hidden → T005; coil VAR_INPUT → T006; contact kiểu Int → T002; ADD Bool → T003; TON thiếu PT → T004; std không instance → T004; instance abs → T004; compare có outputs → S001; box fn ngoài tập → U001; FC có static → S001; CONVERT đích = kiểu OUT; PT const không type → T002; temp `__lad_*` đụng tên → T009; DB instance sai fbName → T001; diagnostics (9 mã, mỗi mã ≥ 1 test) |
+| lower (10) | `packages/vendor-siemens/src/lad/lower.test.ts` | IR bảng A deep-equal; IR box F/G/H (callSys / compare / if); temp allocation + network map (chỉ số body); nested parallel; OB `Main`→1 / `OB35`→35; multi-network thứ tự; rlo sau CTUD = QU |
+| golden scan (12) | `packages/runtime-iec/src/lad-golden.test.ts` | bảng A–L, `expectedFrom: 'spec'` (IR tay qua `ir-testkit` + SoftPlc — tiền lệ P1.4/P1.5) |
+| pipeline (6) | `packages/vendor-siemens/src/lad/softplc-lad.test.ts` | P-L1 LAD OB series (bảng A); P-L2 LAD OB TON qua SCL DB (bảng F); P-L3 hỗn hợp SCL OB1 → LAD FB (bảng J); P-L4 LAD OB CTU+EQ (bảng G); P-L5 LAD OB math/MOVE (bảng H); P-L6 hai block LAD (OB+FB) trong một ctx, `programFromCtx` sắp xếp đúng |
+| property (2) | `packages/runtime-iec/src/lad-golden.test.ts` | (1) rung series/parallel ngẫu nhiên ≡ biểu thức Bool SCL tương đương (fast-check, seed cố định; cùng inputs, so SoftPlc LAD vs SCL `IF`); (2) `pos`/`neg` ≡ R_TRIG/F_TRIG (chuỗi I0.0 ngẫu nhiên → Q/m giống hệt) |
+
+Tổng bảng = 12+18+10+12+6+2 = **60 test mới** (sàn ≥ 8 golden §12.2 → 12; tổng ≥ 1726). Coverage: `packages/vendor-siemens/src/**` lines ≥ 85% (ngưỡng hiện có, OQ-088 — không đổi). Thứ tự triển khai đề xuất: schema → validate (operand/box) → lower (RLO/box) → diagnostics catalog → golden scan → pipeline → semantics §17 (test viết cùng từng bước).
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** vị trí file theo M1 §2 + dep graph (`lad/*` ở vendor-siemens); không đổi IR; temp `__lad_rlo` chung + temp nhánh; nhiều coil cùng operand → coil sau thắng; set/reset giữ nguyên khi rlo=false (spec-literal); `zod` khai báo trực tiếp ở vendor-siemens; thứ tự triển khai (schema → validate → lower → diagnostics → golden → pipeline → semantics §17); test dùng `ir-testkit` ở runtime-iec, `compileSclProgram`/`compileLad` + SoftPlc ở vendor-siemens (tiền lệ P1.4). **Tier B (mặc định + ghi OQ):** OQ-182 (X-002/S1 không chặn P1.6 — làm theo M1 §5, tiền lệ OQ-105/121/152/179); OQ-183 (`pos`/`neg` theo R_TRIG/F_TRIG: pos `rlo AND (v AND NOT m)`, m:=v; neg `rlo AND (NOT v AND m)`, m:=v; nhánh parallel tính theo thứ tự mảng, cập nhật memBit ngay — VERIFY); OQ-184 (bảng rlo sau box std; CTUD→QU là mặc định tùy ý — VERIFY); OQ-185 (box std luôn gọi, box toán/compare/MOVE chỉ khi EN — VERIFY; golden L ghim); OQ-186 (network map = chỉ số body, trả kèm ngoài IrBlock); OQ-187 (DB field không địa chỉ trực tiếp qua operand); OQ-188 (instance DB OB-level từ ctx.dbs/SCL DATA_BLOCK; instance `{sym}` = namespace DB); OQ-189 (temp `__lad_rlo`/`__lad_b…` trong interface.temp; đụng tên → LAD-T009); OQ-190 (export `fbInterfaceStruct` cho kiểu tên UDT/FB trong interface LAD); OQ-191 (`Array[lo..hi] of T` qua parser regex nhỏ); OQ-192 (FC/OB không VAR static — mirror SCL); OQ-193 (diagnostic LAD line=1, col=1, message ghi network id + chỉ số element); OQ-194 (tên key box toán/so sánh: IN1/IN2, OUT, MIN/MAX/VALUE, MN/MX/IN); OQ-195 (Const không type: number→Int, bool→Bool; PT bắt buộc `type:'Time'`); OQ-196 (`local` hỗ trợ đường dẫn `#name.member[.sub]`; `sym` là tên tag thuần, không dấu chấm). **Tier C (không có mục mới):** không mục nào chặn P1.6 — OQ-105 (X-002/S1) vẫn mở từ P1.2, không chặn (OQ-182 ghi rõ lý do); OQ-161 vẫn mở, không chặn (LAD FB dùng layout §3.5 hiện tại; nếu OQ-161 lật, bảng J đổi theo + SCR); nếu khi triển khai phát hiện §5 thiếu quy tắc mà chỉ mã thật/PLCSIM mới quyết được → ghi OQ/SCR, không tự nới lỏng. **Triển khai liên tục (chủ sản phẩm 2026-11-25 12:11 +07):** plan không có tier C → sau plan, triển khai → tự kiểm gate → PR → merge, không dừng chờ.
+
+**Rủi ro + cách kiểm:** (1) RLO sau box / EN-gating lệch TIA (OQ-184/185) — nhất là bảng L (coil sau TON lên dù contact trước mở) và CTUD→QU: giảm thiểu — mọi lựa chọn đều có golden ghim + ghi `UNVERIFIED` ở semantics §17; xác minh bằng PLCSIM khi có (thí nghiệm M5 §10, P5.9) hoặc mẫu LAD thật (S1); nếu sai thì SCR đổi ngữ nghĩa + sửa golden (test là bằng chứng). (2) Instance DB cho LAD (OQ-188): mã LAD thật có thể khai báo DB trong chính file LAD (vd key `dbs` trong `LadBlock`) — P1.6 từ chối ồn ào (T001) thay vì đoán; nếu S1 cho thấy cần thì SCR thêm trường + golden. (3) Tên key box toán/so sánh + kiểu Const (OQ-194/195): spec không đặt tên; nếu S1 dùng tên khác (vd `IN` thay vì `IN1`) thì đổi schema + golden — giảm thiểu: tên theo TIA/intrinsic SCL, test ghim rõ. (4) OQ-161 lật: nếu IN_OUT lồng quyết slot 4 byte thì bảng J (FB DB size) đổi theo — test ghim số hiện tại, đổi kỳ vọng chỉ kèm SCR. (5) Hiệu năng: LAD không tệ hơn SCL (cùng `callSys`, cùng interpreter); mỗi network thêm 1 assign `__rlo=true` + temp — đo lại smoke 200 FB_Motor ở P1.7 (mục tiêu ≥ 1000 scan/s; P1.4/P1.5 ~520 — đã biết, không phải gate P1.6).
+
+**Ngoài phạm vi:** interpreter riêng cho LAD; LAD editor UI (P1.7); golden runner YAML + port ví dụ §12.1 (P1.7); demo `motor-interlock` + CLI `vcs plc run` + Watch + bench M1 §12.4 (P1.7); tối ưu cấp phát `callSys` (P1.7); gọi FB/FC từ LAD (schema không có box call — nếu cần, SCR/P1.7 thêm box `call`); S7/PLCSIM/SimaticML (M5); sửa EBNF §4.2 / M1 §5; đổi `.dependency-cruiser.cjs` / `eslint.config.js` / `vitest.config.ts` / `packages/kernel` / `packages/schemas` (trừ thêm `LAD_CATALOG`) / `apps/*` / `examples/`; ADR mới; mã diagnostic ngoài 9 mã LAD (`docs/diagnostics.md` 42 → 51); `docs/facts/` mới; P0.9 PWA; script spike S1 (chạy khi có mã thật).
+
+**Gate P1.6 (triển khai):** `lint && typecheck && depcheck && test && test:e2e && review:cheats && docs:diagnostics --check` + `build` + bench guard M0 (`pnpm bench`: TagDB 4/4 PASS + orchestrator ≥ 100 000 bước/s; rớt > 20% so với baseline thì dừng điều tra, không hạ ngưỡng) + CI (check + test ubuntu/windows + e2e ubuntu) xanh. Tổng test sau P1.6: **≥ 1726** (≥ 60 mới), trong đó golden LAD 12 (≥ 8 theo §12.2) + 2 property test fast-check (seed cố định). `pnpm-lock.yaml` thay đổi **chỉ** ở importer `vendor-siemens → zod` (diff khác rỗng là cờ đỏ, dừng kiểm tra). `pnpm install` trong VM vẫn EPERM (OQ-007) — triển khai làm ở bản sao `/tmp` như các prompt trước, cài thật `--frozen-lockfile` (dùng `git archive` để copy, không `cp -r` cả cây kèm `node_modules` — bài học ENOSPC ở P0.8), **rsync về `~/workspace/vcs` sau mỗi bước lớn, KHÔNG dùng `--delete` (hoặc luôn `--exclude .git`) — bài học mất `.git` ở P1.4**. **Cần kiểm lại khi triển khai:** root `package.json` không bị ghi đè (bài học P1.2 — kiểm `name: "vcs"` + diff vs HEAD trống trước khi commit); `user-chat/` không trong commit; golden IR JSON cũ không đổi (IR không đổi — kiểm `git status` thư mục `golden/` sạch); `docs/diagnostics.md` sinh lại bằng script (`pnpm docs:diagnostics`), không sửa tay.
+
+**Kết quả triển khai (2026-11-25, commit feat P1.6):** ĐÃ TRIỂN KHAI đúng
+phạm vi §21 — 1 commit `feat(m1): P1.6 LAD` trên nhánh `m1/p1.6-lad`.
+OQ-182…196 đóng (đã áp dụng); OQ-161 vẫn mở. `docs/semantics.md` §17
+mới (OQ-183/184/185 ghi UNVERIFIED). Test mới **83** (schema 15,
+validate 35, lower 13, golden 14 = 12 scan + 2 property, pipeline 6),
+tổng **1749/1749** (68 file) — vượt mục tiêu ≥ 1726 (≥ 60 mới). Coverage
+`packages/vendor-siemens/src/**` lines **87,27% ≥ 85%** (lad/validate.ts
+68,8%, lad/lower.ts 81,2% — riêng thư mục lad thấp hơn nhưng ngưỡng
+tính theo glob toàn package, xem `coverage-summary.json`).
+
+Gate đầy đủ trong bản sao sạch `/tmp/vcs-p16` (git archive + `pnpm
+install --frozen-lockfile`, exit code thật từng lệnh; log
+`/tmp/p16-*.log`): lint exit 0; typecheck exit 0 (cả root + apps/web);
+depcheck exit 0 (118 modules, 233 deps, no violations); test exit 0
+(1749/1749 — lần chạy đầu 1748/1749 do 1 test flaky môi trường, xem
+dưới); test:e2e exit 0 (5/5); review:cheats SẠCH (169 file); docs:
+diagnostics --check exit 0 (khớp; catalog 42 → **51** mã, 9 LAD mới);
+build exit 0 (3 tasks); bench exit 0 — TagDB 4/4 PASS (set/get
+~37–39M ops/s) + orchestrator ~337–357k bước/s ≥ 100 000 PASS.
+`pnpm-lock.yaml` diff **chỉ +3 dòng** (importer vendor-siemens → zod
+4.6.7). Root `package.json` không đổi; `golden/` sạch (IR không đổi).
+
+Lệch so với plan §21 (đã ghi vào semantics §17 + OQ tương ứng):
+1. **SR/RS tên input:** plan viết "S, R" nhưng `StdBlockDef` (single
+   source of truth, P1.5) dùng SR = `S1`+`R`, RS = `S`+`R1`. Code dùng
+   tên thật qua `getStdBlockDef`; bảng plan sai điểm này.
+2. **Tên temp:** plan viết một `__lad_rlo` chung + `__lad_b<depth>_
+   <idx>`, nhưng bảng A ghim `__lad_N1_rlo`. Code dùng temp riêng từng
+   network `__lad_<id>_rlo` và `__lad_<id>_b<n>` (đếm theo thứ tự duyệt,
+   parallel lồng chiếm số sau) — đọc nhất quán với bảng A. OQ-189 đã
+   sửa nội dung theo.
+3. **Trùng tên:** plan xếp "interface trùng tên" + "network id trùng"
+   vào test schema, nhưng mã chẩn đoán là LAD-T009 → kiểm ở validate
+   (T009); rung rỗng/parallel rỗng là S001 ở schema (zod `.min(1)`);
+   "Array sai cú pháp" là S001 ở validate (OQ-191); "box fn lạ" là
+   U001 ở validate. Test nhóm lại theo mã.
+4. **Kiểu tag strict (quyết định tier B):** `{sym}` ngoài kiểu từ
+   catalog còn yêu cầu kiểu tag == kiểu theo độ rộng địa chỉ (OQ-110),
+   lệch → LAD-T002 (catalog mâu thuẫn với độ rộng địa chỉ là lỗi cấu
+   hình; tin nó sẽ sinh abs ref sai kiểu).
+5. **`BoxInput.target`:** input box std mang kiểu tham số từ def để
+   lower convert không cần bảng kiểu thứ hai (bảng `stdParamType`
+   hardcode đã viết rồi xóa vì vi phạm single source of truth).
+6. **CONVERT box:** `mode: undefined` trước đây lẫn "không convert"
+   với "convert không mode" (vd Int→Real); lower nay quyết bằng so
+   sánh `input.type === out.type`, luôn sinh node convert khi kiểu
+   khác.
+7. **Bug thật — `parseAddress` ném:** `parseAddress` THROWS khi đầu
+   vào sai, không trả undefined — các kiểm `=== undefined` trong
+   validate là dead code (lint phát hiện). Đã thêm `tryParseAddress`
+   bọc try/catch; `{abs}` sai hoặc địa chỉ tag sai → LAD-T001, không
+   bao giờ throw. Đây là bug tiềm ẩn trong code P1.1 (mọi caller cũ
+   đều truyền địa chỉ đã validate nên chưa nổ).
+8. **`binary()` helper lower:** nhận kiểu kết quả làm tham số thứ 4
+   tường minh (caller biết: 'Bool' cho logic/so sánh, `resultType`
+   cho toán) thay vì suy từ `a.type` (eslint type-aware báo `a.type`
+   là error type).
+9. **Interface loop validate:** dùng mảng tường minh từng section thay
+   vì index `LadInterface` bằng `Section` (Section có `'const'` mà
+   LadInterface không có); member walk dùng helper `structField`
+   thay vì narrowing trong vòng lặp.
+10. **Ghi chú IR bảng J trong plan sai:** plan viết instance box std
+    là `{k:'static', path:['sT']}` — interpreter `resolveInstance`
+    chỉ nhận `local`/`dbField` (lỗi ồn ào "instance FB phải là local
+    hoặc dbField"). Golden J tay dùng `local('sT')` (như SCL lower
+    `#sT(...)`); lower thật vốn đã đúng (P-L3 xanh trước khi sửa J).
+11. **CONVERT Int→Bool ĐƯỢC (test sai, không phải code sai):**
+    `classifyIntrinsic('INT_TO_BOOL')` trả về convert hợp lệ vì
+    `CONVERTIBLE_TYPES` chứa cả INT và BOOL — SCL chấp nhận
+    `INT_TO_BOOL(...)` nên LAD cũng phải chấp nhận. Test đổi thành:
+    Time→Int (`TIME_TO_INT` ngoài bảng) → LAD-T003; Int→Bool → không
+    lỗi.
+12. **Bug Array (đã sửa):** type string bắt đầu `Array[` nhưng không
+    khớp regex (vd `Array[1..x] of Int`) rơi xuống "kiểu chưa biết"
+    LAD-T001; nay → LAD-S001 (OQ-191).
+
+Sự cố trong quá trình triển khai (bài học):
+- Rsync đầu sang /tmp dùng trailing slash nhiều nguồn (`packages/
+  scripts/...`) làm phẳng cây, 158 lỗi lint là artifact — lệnh đúng:
+  `rsync -a --exclude .git --exclude node_modules --exclude user-chat
+  --exclude docs/acceptance ~/workspace/vcs/ /tmp/vcs-p16/` (một nguồn
+  duy nhất). Bản sao xây lại sạch bằng `git archive` + install.
+- `pnpm install` chạy trước khi sync lockfile → zod chưa link, 111
+  lỗi TS5012 — chạy lại install sau sync thì hết.
+- Typecheck lần đầu (trên cây polluted) exit 0 là **giả**: `lad/` nằm
+  ngoài `packages/` nên tsc không thấy code mới. Typecheck thật sau
+  đó bắt 11 lỗi type (exactOptionalPropertyTypes: `| undefined` ở
+  options + `instance` của zod; map cmp/math bị widen thành string;
+  `sclTypeToIrType` trả `IrType | undefined`; helper test hẹp kiểu)
+  — đã sửa hết, typecheck cuối exit 0.
+- Golden A–L + property 1 fail loạt lần đầu: program tay `prog()`
+  không có `organization` nên SoftPlc không chạy OB nào — đã thêm
+  helper `mainProg` (organization `[{ob:1, block:'Main'}]`). Không
+  phải lỗi lower.
+- Full test lần 1: 1748/1749 — `sim-service.test.ts` "timeScale 'max'"
+  được 91 bước (cần >100) do tải VM; chạy riêng 12/12 xanh; lần 2
+  full 1749/1749. Đây là test nhạy thời gian đã biết từ P1.4, không
+  phải hồi quy P1.6.
+- Bench: orchestrator ~337–357k bước/s (P1.5: 511k) — thấp hơn nhưng
+  vẫn PASS với biên 3,4×. SUY ĐOÁN: tải VM (cùng cửa sổ sim-service
+  cũng thiếu bước); không có đường nhân quả từ P1.6 (bench không
+  import lad/schemas mới; orchestrator/TagDB không đụng). Cách kiểm:
+  chạy bench trên máy rảnh / so với develop cùng thời điểm.
+
+CHƯA CHẠY: CI trên GitHub (chạy sau khi PR mở — parent mở PR qua
+cloud browser, chờ CI xanh rồi merge). SUY ĐOÁN: không có.

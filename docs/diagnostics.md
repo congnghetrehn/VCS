@@ -4,6 +4,15 @@
 
 | Mã | Mức | Tiêu đề | Gợi ý |
 | --- | --- | --- | --- |
+| `LAD-S001` | error | Schema/cấu trúc LAD không hợp lệ | Kiểm tra JSON theo M1 §5.1: rung/parallel không rỗng, key đúng tên, FC/OB không có VAR (static). |
+| `LAD-T001` | error | Tên chưa khai báo | Khai báo tag/biến/DB trước khi dùng, kiểm tra chính tả. |
+| `LAD-T002` | error | Kiểu không khớp | Đổi kiểu operand hoặc giá trị cho khớp; thu hẹp phải dùng box CONVERT. |
+| `LAD-T003` | error | Toán tử không áp dụng cho kiểu | Phép số học chỉ dùng cho số; so sánh không dùng cho Bool/struct. |
+| `LAD-T004` | error | Lỗi gọi box | Kiểm tra instance, tên và kiểu input/output của box theo bảng chữ ký (STATE §21). |
+| `LAD-T005` | error | Truy cập member/index sai | Kiểm tra tên field; field ẩn (hidden) không truy cập được. |
+| `LAD-T006` | error | Gán không hợp lệ | VAR_INPUT chỉ đọc; không ghi vào VAR_INPUT. |
+| `LAD-T009` | error | Trùng tên | Đổi tên một trong các khai báo trùng (biến, network, temp __lad_*). |
+| `LAD-U001` | error | Box/kiểu chưa hỗ trợ | Dùng box/kiểu trong phạm vi M1 §5; String và mảng lồng nhau chưa hỗ trợ. |
 | `PRJ-E001` | error | Thiếu file bắt buộc | Tạo vcs.project.yaml ở thư mục gốc của dự án. |
 | `PRJ-E002` | error | Cú pháp YAML sai | Sửa cú pháp YAML tại dòng/cột đã báo (chú ý thụt đầu dòng bằng khoảng trắng, không dùng tab). |
 | `PRJ-E003` | error | Vi phạm schema | Sửa giá trị theo schema tại vị trí đã báo. |

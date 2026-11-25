@@ -298,6 +298,16 @@ function binaryResult(op: string, lt: IrType, rt: IrType): BinCheck {
   return { code: 'SCL-T003' };
 }
 
+/** Kiểu kết quả nhị phân — dạng đầy đủ (T002/T003) cho callers cần
+ * phân biệt mã lỗi (LAD ánh xạ sang LAD-T002/LAD-T003). */
+export function binaryResultDetail(
+  op: string,
+  lt: IrType,
+  rt: IrType,
+): { type: IrType } | { code: 'SCL-T002' | 'SCL-T003' } {
+  return binaryResult(op, lt, rt);
+}
+
 /** Kiểu kết quả nhị phân (bản export theo plan §18); undefined = lỗi
  * (xem `binaryResult` nội bộ để biết mã T002/T003). */
 export function binaryResultType(op: string, lt: IrType, rt: IrType): IrType | undefined {
@@ -583,8 +593,9 @@ export function layoutIrFields(decls: readonly LayoutFieldDecl[]): { fields: IrF
   return { fields, size: layout.size };
 }
 
-/** Struct type của interface một FB (input+output+inout+static, theo §3.5). */
-function fbInterfaceStruct(iface: IrInterface): IrType {
+/** Struct type của interface một FB (input+output+inout+static, theo §3.5).
+ * Được xuất cho LAD (OQ-190). */
+export function fbInterfaceStruct(iface: IrInterface): IrType {
   const decls: LayoutFieldDecl[] = [
     ...iface.input,
     ...iface.output,

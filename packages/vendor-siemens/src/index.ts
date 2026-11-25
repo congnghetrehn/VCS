@@ -12,6 +12,7 @@ export {
   widen,
   commonType,
   binaryResultType,
+  binaryResultDetail,
   unaryResultType,
   evalConst,
   classifyIntrinsic,
@@ -21,6 +22,7 @@ export {
   interfaceFromSymbols,
   irTypeToFieldType,
   layoutIrFields,
+  fbInterfaceStruct,
   isPrimitive,
   irTypeEquals,
   isStrictInteger,
@@ -35,7 +37,7 @@ export type {
   LayoutFieldDecl,
 } from './scl/typecheck.js';
 export { lowerFile, obNumber } from './scl/lower.js';
-export { compileScl, compileSclProgram, createCompileContext, irToJson } from './scl/compile.js';
+export { compileScl, compileSclProgram, createCompileContext, irToJson, programFromCtx } from './scl/compile.js';
 export type { CompileContext } from './scl/compile.js';
 export type {
   IrProgram,
@@ -93,3 +95,10 @@ export type {
   SclLiteral,
 } from './scl/ast.js';
 export { locFrom } from './scl/ast.js';
+// LAD (M1 §5, P1.6): schema JSON + validate + lower → IR chung với SCL.
+export { parseLadBlock, ladBlockSchema, BOX_FNS } from './lad/schema.js';
+export type { LadBlock, LadNetwork, LadElement, LadOperand, LadConst, LadInterface, LadInterfaceDecl, BoxFn } from './lad/schema.js';
+export { validateLad } from './lad/validate.js';
+export type { ValidatedLad, ValidatedNetwork, ValidatedElement, ValidatedBox, ResolvedOperand, BoxInput, BoxOutput, ValidateLadOptions } from './lad/validate.js';
+export { lowerLad, compileLad, compileLadBlock } from './lad/lower.js';
+export type { CompileLadOptions, CompileLadResult } from './lad/lower.js';

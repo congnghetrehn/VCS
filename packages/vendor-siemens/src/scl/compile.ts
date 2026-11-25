@@ -22,7 +22,7 @@ export function createCompileContext(): CompileContext {
   return emptyCrossFileTables();
 }
 
-function programFromCtx(ctx: CompileContext): IrProgram {
+export function programFromCtx(ctx: CompileContext): IrProgram {
   const byId = (a: { id: string }, b: { id: string }): number =>
     a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
   const blocks = [...ctx.blocks.values()].sort(byId);
