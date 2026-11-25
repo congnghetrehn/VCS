@@ -296,6 +296,45 @@ export const LAD_CATALOG: DiagnosticCatalog = defineDiagnostics({
   },
 });
 
+/** Danh mục mã plant (M2 §2.5, P2.1). */
+export const PL_CATALOG: DiagnosticCatalog = defineDiagnostics({
+  'PL-E001': {
+    severity: 'error',
+    title: 'Model không tồn tại trong registry',
+    hint: 'Kiểm tra tên model trong cấu hình; model phải được đăng ký trước khi dùng.',
+  },
+  'PL-E002': {
+    severity: 'error',
+    title: 'Tag không khớp kind của role',
+    hint: 'Gán tag có signal.kind khớp role (DI/DO/AI/AO).',
+  },
+  'PL-E003': {
+    severity: 'error',
+    title: 'Thiếu tag bắt buộc cho role',
+    hint: 'Gán tag cho role bắt buộc, hoặc khai báo role là optional trong model.',
+  },
+  'PL-E012': {
+    severity: 'error',
+    title: 'Không xác định được dải đo cho role analog',
+    hint: 'Khai báo engMin/engMax trong params, hoặc scaling trong tag, hoặc unit "%" cho role.',
+  },
+  'PL-E020': {
+    severity: 'error',
+    title: 'Chu trình link giữa các thiết bị',
+    hint: 'Bỏ một liên kết link để phá chu trình (thứ tự topo phải không có chu trình).',
+  },
+  'PL-W001': {
+    severity: 'warning',
+    title: 'Cảnh báo cấu hình plant',
+    hint: 'Kiểm tra cấu hình plant: gán tag cho role; plcScanMs (nếu có) phải là số nguyên ≥ stepMs.',
+  },
+  'PL-W020': {
+    severity: 'warning',
+    title: 'Hành vi chưa kiểm chứng',
+    hint: 'Hành vi này chưa được kiểm chứng với PLC thật; xem docs/semantics.md.',
+  },
+});
+
 /** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E/-W/-L/-P/-S/-T/-U, rồi 3 chữ số.
  * Mở rộng cho SCL (L/P/U) để `gen-diagnostics --check` kiểm được mã SCL dùng
  * trong parser (không thì mã lạ lọt qua im lặng); P1.3 thêm T/S cho typecheck
