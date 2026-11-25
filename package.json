@@ -32,7 +32,7 @@
   "packageManager": "pnpm@10.15.0",
   "private": true,
   "scripts": {
-    "bench": "cross-env NODE_OPTIONS=--expose-gc tsx bench/tagdb.bench.ts && cross-env NODE_OPTIONS=--expose-gc tsx bench/orchestrator.bench.ts",
+    "bench": "cross-env NODE_OPTIONS=--expose-gc tsx bench/tagdb.bench.ts && cross-env NODE_OPTIONS=--expose-gc tsx bench/orchestrator.bench.ts && cross-env NODE_OPTIONS=--expose-gc tsx bench/softplc.bench.ts",
     "build": "turbo run build",
     "depcheck": "depcruise --validate .dependency-cruiser.cjs packages apps",
     "dev": "turbo run dev",
