@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Icon PWA nguồn — @vcs/web (P0.9, OQ-224).
+       Nền tràn viền (#111827 = theme_color); tia sét trắng nằm trong vùng
+       an toàn maskable (x 170–360, y 60–440, trong hình tròn 80% tâm).
+       PNG 192/512 + maskable 512 + apple-touch-icon 180 sinh bằng
+       scripts/gen-pwa-icons.mjs — sửa SVG rồi chạy lại script. -->
+  <rect width="512" height="512" fill="#111827"/>
+  <polygon fill="#ffffff" points="320,60 170,270 255,270 225,440 360,240 280,240"/>
+</svg>

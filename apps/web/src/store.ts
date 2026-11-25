@@ -74,6 +74,18 @@ export interface SimStoreState {
   plcWatchValues: Map<number, TagValue>;
   /** Ref đang bị force (đặt qua UI — badge; server không gửi trạng thái này). */
   plcForced: Set<string>;
+  /** P0.9 — PWA: true khi SW mới đang chờ (banner cập nhật). */
+  updateAvailable: boolean;
+  /** P0.9 — PWA: chế độ kiosk (?kiosk=1). */
+  kiosk: boolean;
+  /** P0.9 — PWA: thiết bị có Wake Lock API không. */
+  wakeLockSupported: boolean;
+  /** P0.9 — PWA: Wake Lock đang giữ không. */
+  wakeLockHeld: boolean;
+
+  setUpdateAvailable(value: boolean): void;
+  setKiosk(value: boolean): void;
+  setWakeLock(supported: boolean, held: boolean): void;
 
   applySnapshot(msg: SnapshotMessage): void;
   applyDelta(msg: DeltaMessage): void;
@@ -149,6 +161,10 @@ export const useSimStore = create<SimStoreState>()((set) => ({
   plcWatchRefs: [],
   plcWatchValues: new Map(),
   plcForced: new Set(),
+  updateAvailable: false,
+  kiosk: false,
+  wakeLockSupported: false,
+  wakeLockHeld: false,
 
   applySnapshot(msg) {
     const values = new Map<number, TagValue>();
@@ -274,6 +290,22 @@ export const useSimStore = create<SimStoreState>()((set) => ({
     if (forced) next.add(ref);
     else next.delete(ref);
     set({ plcForced: next });
+    scheduleRender();
+  },
+
+  // P0.9 — PWA (state thuần, không gọi mạng ở đây).
+  setUpdateAvailable(value) {
+    set({ updateAvailable: value });
+    scheduleRender();
+  },
+
+  setKiosk(value) {
+    set({ kiosk: value });
+    scheduleRender();
+  },
+
+  setWakeLock(supported, held) {
+    set({ wakeLockSupported: supported, wakeLockHeld: held });
     scheduleRender();
   },
 }));

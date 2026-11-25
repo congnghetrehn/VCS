@@ -229,6 +229,60 @@ merge). Anh không cần tự sửa file.
 
 ---
 
+## P0.9 — Kiosk trên tablet thật + HTTPS cho LAN (D-007)
+
+PWA đã xong và xanh ở CI (E7.1–E7.5 + E7.6 opt-in), nhưng có 2 việc chỉ kiểm
+được trên thiết bị thật của anh — AI không làm hộ được bằng desktop Chromium.
+
+### 1. Kiosk trên tablet thật
+
+**Mục đích:** kiểm chế độ kiosk (`?kiosk=1`) chạy đúng trên tablet ở hiện
+trường: cảm ứng, Fullscreen, Wake Lock (màn hình không tắt), chặn
+pull-to-refresh/zoom.
+
+**Làm gì:**
+1. Trên máy server, chạy như bình thường: `pnpm vcs serve examples/hello-tags`
+   (hoặc demo motor-interlock), mở trên tablet cùng mạng LAN… **nhưng** lưu ý:
+   PWA qua HTTP trên LAN **không** đăng ký được service worker (mục 2 dưới)
+   — để kiểm kiosk đầy đủ (offline + cài đặt), mở trên chính máy server
+   (`http://127.0.0.1:4170/?kiosk=1`) hoặc chờ D-007 (HTTPS) xong.
+2. Mở `http://127.0.0.1:4170/?kiosk=1` trên tablet (hoặc trình duyệt máy anh
+   giả lập): header (chọn ngôn ngữ, đổi theme, tab Tags/PLC) phải **ẩn**;
+   chỉ còn thanh kiosk với nút Fullscreen/Thoát.
+3. Bấm Fullscreen → app chiếm toàn màn hình; bấm Thoát → về giao diện thường
+   (URL mất `?kiosk=1`, reload lại không tự vào kiosk nữa).
+4. Để tablet ở trang kiosk 5 phút, không chạm: màn hình **không** tự tắt
+   (Wake Lock). Tắt tab → mở lại: Wake Lock xin lại khi tab hiện.
+5. Kéo từ trên xuống (pull-to-refresh) và pinch-zoom: trang **không** reload/
+   zoom trong kiosk; ngoài kiosk vẫn zoom bình thường.
+
+**Kỳ vọng:** 5 điểm trên đều đạt. Nếu Wake Lock không giữ (màn hình vẫn tắt):
+báo lại model tablet + trình duyệt — có thể trình duyệt đó không hỗ trợ
+Wake Lock, khi đó ghi UNVERIFIED cho thiết bị đó (không sửa code để "cho
+qua"). Nếu Fullscreen không vào được: kiểm xem trình duyệt có chặn
+Fullscreen khi không có tương tác người dùng không (P0.9 chỉ gọi Fullscreen
+từ nút bấm nên phải vào được).
+
+**Báo lại:** "Kiosk tablet: đạt / lỗi ở bước X (máy + trình duyệt)".
+
+### 2. Quyết D-007 — HTTPS cho truy cập LAN
+
+**Mục đích:** chọn cách đưa PWA lên LAN để tablet ở hiện trường dùng được
+offline + cài đặt (service worker chỉ chạy trên HTTPS/localhost).
+
+**Lựa chọn (ADR-0009):**
+- **A (AI đề xuất): mkcert** — chứng chỉ local tin cậy được, trình duyệt
+  không cảnh báo; server chỉ thêm cert/key qua env, mặc định vẫn HTTP
+  localhost. Mỗi máy client cài root CA của mkcert một lần.
+- **B: Reverse proxy (Caddy/nginx + TLS)** — không sửa server VCS, nhưng
+  thêm một thành phần vận hành riêng cho mỗi site.
+- **C: Chỉ localhost** — không làm gì thêm; tablet LAN không dùng được PWA.
+
+**Báo lại:** "D-007: A / B / C". Không chặn P0.9 — PWA đã đầy đủ trên
+localhost; quyết xong mới triển khai ở phase sau.
+
+---
+
 ## Các mục verify sau này
 
 Mỗi khi có việc mới chỉ chủ sản phẩm làm được (M2: I/O list thật, C&E thật;
