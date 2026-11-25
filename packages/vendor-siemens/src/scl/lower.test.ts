@@ -463,3 +463,45 @@ describe('lvalue: abs / index / member', () => {
     });
   });
 });
+
+describe('std blocks — lower callSys (P1.5, OQ-162)', () => {
+  it('#tOn(IN := ..., PT := ..., Q => ...) → callSys local', () => {
+    const src = `FUNCTION_BLOCK "FB_T"\nVAR\n  tOn : TON;\nEND_VAR\nVAR_TEMP\n  x : Bool;\n  y : Bool;\nEND_VAR\nBEGIN\n  #tOn(IN := #x, PT := T#1s, Q => #y);\nEND_FUNCTION_BLOCK`;
+    const { program } = lowerOk(src);
+    const fb = blockByName(program, 'FB_T');
+    expect(fb.body).toHaveLength(1);
+    const stmt = fb.body[0] as Extract<IrStmt, { op: 'callSys' }>;
+    expect(stmt).toMatchObject({
+      op: 'callSys',
+      fn: 'TON',
+      instance: { k: 'local', name: 'tOn' },
+      inArgs: [
+        ['IN', { op: 'load', type: 'Bool', ref: { k: 'local', name: 'x' } }],
+        ['PT', { op: 'const', type: 'Time', value: 1000 }],
+      ],
+      outArgs: [['Q', { k: 'local', name: 'y' }]],
+    });
+  });
+
+  it('"T1"(IN := ..., PT := ...) → callSys global + DB T1 size 18', () => {
+    const src = `DATA_BLOCK "T1" "TON"\nBEGIN\nEND_DATA_BLOCK\nORGANIZATION_BLOCK "Main"\nVAR_TEMP\n  x : Bool;\nEND_VAR\nBEGIN\n  "T1"(IN := #x, PT := T#1s);\nEND_ORGANIZATION_BLOCK`;
+    const { program } = lowerOk(src);
+    const ob = blockByName(program, 'Main');
+    expect(ob.body).toHaveLength(1);
+    const stmt = ob.body[0] as Extract<IrStmt, { op: 'callSys' }>;
+    expect(stmt).toMatchObject({
+      op: 'callSys',
+      fn: 'TON',
+      instance: { k: 'dbField', db: 'T1', path: [] },
+      inArgs: [
+        ['IN', { op: 'load', type: 'Bool', ref: { k: 'local', name: 'x' } }],
+        ['PT', { op: 'const', type: 'Time', value: 1000 }],
+      ],
+      outArgs: [],
+    });
+    expect(program.dbs).toHaveLength(1);
+    expect(program.dbs[0]?.name).toBe('T1');
+    expect(program.dbs[0]?.fbName).toBe('TON');
+    expect(program.dbs[0]?.size).toBe(18);
+  });
+});

@@ -187,10 +187,10 @@ describe('checkCallStmt — các dạng callee', () => {
     expectDiag(result, 'SCL-T004', "OB 'Main' không gọi được");
   });
 
-  it('gọi system FB dạng statement → SCL-U001', () => {
+  it('gọi system FB dạng statement không có DB → SCL-T001 (P1.5)', () => {
     const src = obWith('  t : Bool;', '  "TON"(IN := #t);');
     const { result } = checkSrc(src);
-    expectDiag(result, 'SCL-U001', "system block 'TON' chưa hỗ trợ");
+    expectDiag(result, 'SCL-T001', 'tên chưa khai báo: "TON"');
   });
 
   it('gọi tên không biết dạng statement → SCL-T001', () => {

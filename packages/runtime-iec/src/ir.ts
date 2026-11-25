@@ -29,6 +29,9 @@ export interface IrField {
   size: number;
   /** Chỉ dùng cho field DB có giá trị khởi tạo (bảng D-c). */
   init?: number | boolean;
+  /** Field nội bộ của system block (M1 §9, P1.5 — OQ-163): có trong layout
+   * (chiếm byte) nhưng không truy cập được từ SCL (`"T1"._start` → SCL-T005). */
+  hidden?: boolean;
 }
 
 export interface IrVar {

@@ -51,3 +51,6 @@ export type {
 export { SoftPlc } from './softplc.js';
 export type { SoftPlcConfig, ScanInfo, SoftPlcSnapshot } from './softplc.js';
 export { softPlcExtension } from './extension.js';
+// P1.5 — system block (M1 §9).
+export { getStdBlockDef, stdBlockInterface, STD_BLOCKS, createStdSysCalls } from './std/index.js';
+export type { StdBlockDef, StdBlockKind, StdBlockName, StdFieldDecl } from './std/index.js';

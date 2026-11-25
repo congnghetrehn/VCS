@@ -348,16 +348,18 @@ describe('đệ quy gián tiếp + system FB', () => {
     expect(d?.message).toContain('FC_B');
   });
 
-  it('kiểu TON trong VAR → SCL-U001', () => {
+  it('kiểu TON trong VAR_TEMP → SCL-T004 (P1.5, OQ-171)', () => {
     const src = obWith('  sT : TON;', '  #sT := #sT;');
     const { result } = checkSrc(src);
-    expect(firstDiag(result, 'SCL-U001')).toBeDefined();
+    expect(firstDiag(result, 'SCL-T004')).toBeDefined();
+    expect(firstDiag(result, 'SCL-U001')).toBeUndefined();
   });
 
-  it('gọi #sT(IN := ...) khi sT : TON → SCL-U001', () => {
-    const src = `FUNCTION_BLOCK "FB_X"\nVAR\n  sT : TON;\nEND_VAR\nBEGIN\n  #sT(IN := TRUE);\nEND_FUNCTION_BLOCK`;
+  it('gọi #sT(IN := ..., PT := ...) khi sT : TON → hợp lệ (P1.5)', () => {
+    const src = `FUNCTION_BLOCK "FB_X"\nVAR\n  sT : TON;\nEND_VAR\nBEGIN\n  #sT(IN := TRUE, PT := T#1s);\nEND_FUNCTION_BLOCK`;
     const { result } = checkSrc(src);
-    expect(firstDiag(result, 'SCL-U001')).toBeDefined();
+    const errors = result.diagnostics.filter((d) => d.severity === 'error');
+    expect(errors, JSON.stringify(result.diagnostics)).toEqual([]);
   });
 
   it('OQ-127: tham số OUT của FC (không phải Q) → SCL-T004', () => {
@@ -385,5 +387,117 @@ describe('đệ quy gián tiếp + system FB', () => {
     expect(firstDiag(checkSrc(badField).result, 'SCL-T005')).toBeDefined();
     const dupField = `DATA_BLOCK "DB_Motor"\nSTRUCT\n  speed : Int;\nEND_STRUCT;\nBEGIN\n  "DB_Motor".speed := 1;\n  "DB_Motor".speed := 2;\nEND_DATA_BLOCK`;
     expect(firstDiag(checkSrc(dupField).result, 'SCL-T009')).toBeDefined();
+  });
+});
+
+describe('std blocks — typecheck (P1.5, OQ-162/163/171/175/181)', () => {
+  const FB_TON = `FUNCTION_BLOCK "FB_T"\nVAR\n  sT : TON;\nEND_VAR\nBEGIN\n  #sT(IN := TRUE, PT := T#1s);\nEND_FUNCTION_BLOCK`;
+  const DB_T1_TON = `DATA_BLOCK "T1" "TON"\nBEGIN\nEND_DATA_BLOCK`;
+
+  it('VAR sT : TON + gọi đầy đủ → hợp lệ (OQ-171)', () => {
+    const { result } = checkSrc(FB_TON);
+    const errors = result.diagnostics.filter((d) => d.severity === 'error');
+    expect(errors, JSON.stringify(result.diagnostics)).toEqual([]);
+  });
+
+  it('DATA_BLOCK "T1" "TON" → IrDb theo bảng O: field public + size 18', () => {
+    const { result } = checkSrc(DB_T1_TON);
+    const db = result.dbs.get('t1');
+    expect(db).toBeDefined();
+    expect(db?.fbName).toBe('TON');
+    expect(db?.size).toBe(18);
+    expect(db?.fields.map((f) => [f.name, f.byteOffset, f.bitOffset, f.size])).toEqual([
+      ['IN', 0, 0, 1],
+      ['PT', 2, undefined, 4],
+      ['Q', 6, 0, 1],
+      ['ET', 8, undefined, 4],
+    ]);
+  });
+
+  it('DATA_BLOCK "C1" "CTU": PV/CV là Int, không có DInt (OQ-168)', () => {
+    const { result } = checkSrc(`DATA_BLOCK "C1" "CTU"\nBEGIN\nEND_DATA_BLOCK`);
+    const db = result.dbs.get('c1');
+    expect(db?.fbName).toBe('CTU');
+    expect(db?.size).toBe(10);
+    expect(db?.fields.map((f) => [f.name, f.type])).toEqual([
+      ['CU', 'Bool'],
+      ['R', 'Bool'],
+      ['PV', 'Int'],
+      ['QU', 'Bool'],
+      ['CV', 'Int'],
+    ]);
+  });
+
+  it('thiếu PT → SCL-T004 "thiếu tham số bắt buộc: PT" (OQ-181)', () => {
+    const src = `FUNCTION_BLOCK "FB_T"\nVAR\n  sT : TON;\nEND_VAR\nBEGIN\n  #sT(IN := TRUE);\nEND_FUNCTION_BLOCK`;
+    const { result } = checkSrc(src);
+    const d = firstDiag(result, 'SCL-T004');
+    expect(d, JSON.stringify(result.diagnostics)).toBeDefined();
+    expect(d?.message).toContain('thiếu tham số bắt buộc: PT');
+  });
+
+  it('tham số không tồn tại → SCL-T004', () => {
+    const src = `FUNCTION_BLOCK "FB_T"\nVAR\n  sT : TON;\nEND_VAR\nBEGIN\n  #sT(IN := TRUE, PT := T#1s, XX := TRUE);\nEND_FUNCTION_BLOCK`;
+    const { result } = checkSrc(src);
+    const d = firstDiag(result, 'SCL-T004');
+    expect(d, JSON.stringify(result.diagnostics)).toBeDefined();
+    expect(d?.message).toContain('tham số không tồn tại: XX');
+  });
+
+  it('out-arg Q => %M1.0 được chấp nhận (OQ-175)', () => {
+    const src = `FUNCTION_BLOCK "FB_T"\nVAR\n  sT : TON;\nEND_VAR\nBEGIN\n  #sT(IN := TRUE, PT := T#1s, Q => %M1.0);\nEND_FUNCTION_BLOCK`;
+    const { result } = checkSrc(src);
+    const errors = result.diagnostics.filter((d) => d.severity === 'error');
+    expect(errors, JSON.stringify(result.diagnostics)).toEqual([]);
+  });
+
+  it('tham số OUT dùng := cho std → SCL-T004 (std không có IN_OUT)', () => {
+    const src = `FUNCTION_BLOCK "FB_T"\nVAR\n  sT : TON;\nEND_VAR\nBEGIN\n  #sT(IN := TRUE, PT := T#1s, Q := TRUE);\nEND_FUNCTION_BLOCK`;
+    const { result } = checkSrc(src);
+    const d = firstDiag(result, 'SCL-T004');
+    expect(d, JSON.stringify(result.diagnostics)).toBeDefined();
+    expect(d?.message).toContain("tham số OUT 'Q' dùng '=>'");
+  });
+
+  it('CTU không truyền R → hợp lệ (R có init: false, OQ-181)', () => {
+    const src = `FUNCTION_BLOCK "FB_T"\nVAR\n  c : CTU;\nEND_VAR\nBEGIN\n  #c(CU := TRUE, PV := 3);\nEND_FUNCTION_BLOCK`;
+    const { result } = checkSrc(src);
+    const errors = result.diagnostics.filter((d) => d.severity === 'error');
+    expect(errors, JSON.stringify(result.diagnostics)).toEqual([]);
+  });
+
+  it('std trong biểu thức → SCL-T004 (chỉ dùng dạng statement, OQ-175)', () => {
+    // #sT(...) trong biểu thức không parse được (FB không trả giá trị —
+    // parser chỉ chấp nhận call dạng "tên"(...) ở vị trí biểu thức, như FC);
+    // dạng "TON"(...) parse được rồi typecheck chặn bằng T004.
+    const src = obWith('  q : Bool;', '  #q := "TON"(IN := TRUE, PT := T#1s);');
+    const { result } = checkSrc(src);
+    expect(firstDiag(result, 'SCL-T004')).toBeDefined();
+  });
+
+  it('std làm kiểu trả FC → SCL-T004 (OQ-171)', () => {
+    const src = `FUNCTION "FC_T" : TON\nBEGIN\nEND_FUNCTION`;
+    const { result } = checkSrc(src);
+    expect(firstDiag(result, 'SCL-T004')).toBeDefined();
+  });
+
+  it('"T1"._start → SCL-T005 (field hidden, OQ-163)', () => {
+    const src = `${DB_T1_TON}\n${obWith('  et : Time;', '  #et := "T1"._start;')}`;
+    const { result } = checkSrc(src);
+    const d = firstDiag(result, 'SCL-T005');
+    expect(d, JSON.stringify(result.diagnostics)).toBeDefined();
+    expect(d?.message).toContain('_start');
+  });
+
+  it('"T1".Q là Bool, "T1".ET là Time', () => {
+    // blocks[0] là DATA_BLOCK — tìm OB thay vì dùng typeOfFirstAssign.
+    const checkType = (temp: string, body: string): IrType | undefined => {
+      const { ast, result } = checkSrc(`${DB_T1_TON}\n${obWith(temp, body)}`);
+      const ob = ast.blocks.find((b) => b.kind === 'OB') as ObBlock;
+      const stmt = ob.body[0] as Extract<SclStmt, { kind: 'assign' }>;
+      return result.types.get(stmt.value);
+    };
+    expect(checkType('  q : Bool;', '  #q := "T1".Q;')).toBe('Bool');
+    expect(checkType('  et : Time;', '  #et := "T1".ET;')).toBe('Time');
   });
 });

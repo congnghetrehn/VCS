@@ -37,6 +37,7 @@ import type {
   IrUdt,
   SrcRef,
 } from '@vcs/runtime-iec';
+import { stdBlockInterface } from '@vcs/runtime-iec';
 import {
   classifyIntrinsic,
   commonType,
@@ -343,7 +344,7 @@ class Lowerer {
   }
 
   /** Hạ một call trong biểu thức: intrinsic hoặc FC. FB/OB/system FB đã bị
-   * typecheck chặn (T004/U001) nên tới đây là lỗi nội bộ → throw. */
+   * typecheck chặn (T004) nên tới đây là lỗi nội bộ → throw. */
   private lowerCallExpr(expr: CallExpr, block: ObBlock | FcBlock | FbBlock, syms: BlockSymbols): IrExpr {
     const callee = expr.callee;
     if (callee.kind === 'abs') {
@@ -556,8 +557,9 @@ class Lowerer {
     return { inArgs, outArgs, inoutArgs };
   }
 
-  /** Hạ call dạng statement → callFb / callFc. Intrinsic, system FB, OB,
-   * gọi FB bằng tên kiểu đã bị typecheck chặn nên tới đây là lỗi nội bộ. */
+  /** Hạ call dạng statement → callFb / callFc / callSys (std block, P1.5).
+   * Intrinsic, OB, gọi FB bằng tên kiểu đã bị typecheck chặn nên tới đây
+   * là lỗi nội bộ. */
   private lowerCallStmt(stmt: CallStmt, block: ObBlock | FcBlock | FbBlock, syms: BlockSymbols): IrStmt {
     const callee = stmt.callee;
     const src = this.src(stmt.loc);
@@ -582,6 +584,23 @@ class Lowerer {
       if (sym === undefined || sym.fbType === undefined) {
         throw new Error(`lower: '#${callee.name}' không phải instance FB — typecheck phải chặn (T004)`);
       }
+      const stdIface = stdBlockInterface(sym.fbType);
+      if (stdIface !== undefined) {
+        // System block local (#sT(...)) → callSys (P1.5); std không có
+        // IN_OUT nên inoutArgs gặp phải là lỗi nội bộ (typecheck đã chặn).
+        const { inArgs, outArgs, inoutArgs } = this.lowerFbArgs(stmt.args, stdIface, block, syms);
+        if (inoutArgs.length > 0) {
+          throw new Error('lower: system block không có IN_OUT — typecheck phải chặn (T004)');
+        }
+        return {
+          op: 'callSys',
+          fn: sym.fbType.toUpperCase(),
+          instance: { k: 'local', name: callee.name },
+          inArgs,
+          outArgs,
+          src,
+        };
+      }
       const fbSyms = this.symbolsOf(sym.fbType);
       const iface = interfaceFromSymbols(fbSyms);
       const { inArgs, outArgs, inoutArgs } = this.lowerFbArgs(stmt.args, iface, block, syms);
@@ -600,6 +619,22 @@ class Lowerer {
     if (db !== undefined) {
       if (db.fbName === undefined) {
         throw new Error(`lower: DB '${callee.name}' không phải instance FB — typecheck phải chặn (T004)`);
+      }
+      const stdIface = stdBlockInterface(db.fbName);
+      if (stdIface !== undefined) {
+        // System block global ("T1"(...)) → callSys (P1.5).
+        const { inArgs, outArgs, inoutArgs } = this.lowerFbArgs(stmt.args, stdIface, block, syms);
+        if (inoutArgs.length > 0) {
+          throw new Error('lower: system block không có IN_OUT — typecheck phải chặn (T004)');
+        }
+        return {
+          op: 'callSys',
+          fn: db.fbName.toUpperCase(),
+          instance: { k: 'dbField', db: callee.name, path: [] },
+          inArgs,
+          outArgs,
+          src,
+        };
       }
       const iface = this.fbInterface(db.fbName);
       const { inArgs, outArgs, inoutArgs } = this.lowerFbArgs(stmt.args, iface, block, syms);
