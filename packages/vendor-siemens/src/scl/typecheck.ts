@@ -1073,12 +1073,21 @@ class Typechecker {
       }
       const iface = this.lookupInterface(block.fbName, false);
       if (iface === undefined) return undefined;
-      // Layout instance DB (§3.5, OQ-125): 4 byte nội bộ (không lộ) + VAR(static).
-      const decls: LayoutFieldDecl[] = iface.static.map((v) => ({
+      // Layout instance DB (§3.5, OQ-125): VAR_INPUT + VAR_OUTPUT +
+      // VAR_IN_OUT (tham chiếu — 4 byte nội bộ, không lộ) + VAR(static),
+      // theo thứ tự khai báo. IN_OUT chiếm chỗ bằng DInt rồi loại khỏi
+      // fields (không lộ ra ngoài: truy cập field IN_OUT → T005).
+      const toDecl = (v: IrVar): LayoutFieldDecl => ({
         name: v.name,
         type: v.type,
         ...(v.init !== undefined ? { init: v.init } : {}),
-      }));
+      });
+      const decls: LayoutFieldDecl[] = [
+        ...iface.input.map(toDecl),
+        ...iface.output.map(toDecl),
+        ...iface.inout.map((v): LayoutFieldDecl => ({ name: v.name, type: 'DInt' })),
+        ...iface.static.map(toDecl),
+      ];
       let laid: { fields: IrField[]; size: number };
       try {
         laid = layoutIrFields(decls);
@@ -1090,8 +1099,9 @@ class Typechecker {
         );
         return undefined;
       }
-      const fields = laid.fields.map((f) => ({ ...f, byteOffset: f.byteOffset + 4 }));
-      const db: IrDb = { id: block.name, name: block.name, fbName: fb.name, fields, size: 4 + laid.size };
+      const inoutNames = new Set(iface.inout.map((v) => v.name.toLowerCase()));
+      const fields = laid.fields.filter((f) => !inoutNames.has(f.name.toLowerCase()));
+      const db: IrDb = { id: block.name, name: block.name, fbName: fb.name, fields, size: laid.size };
       this.dbs.set(key, db);
       return db;
     }

@@ -314,12 +314,18 @@ describe('lowerFile — OB số + DB/UDT trực tiếp', () => {
     expect(program.dbs[0]?.fields.find((f) => f.name === 'speed')?.init).toBe(1500);
   });
 
-  it('DB dạng "fbname" qua lowerFile → IrDb có fbName + layout VAR(static)', () => {
+  it('DB dạng "fbname" qua lowerFile → IrDb có fbName + layout INPUT+OUTPUT+STATIC (§3.5)', () => {
     const src = `${FB_X}\nDATA_BLOCK "DB_X" "FB_X"\nBEGIN\nEND_DATA_BLOCK`;
     const { program } = lowerOk(src);
     expect(program.blocks.map((b) => b.name)).toEqual(['FB_X']);
     expect(program.dbs).toHaveLength(1);
     expect(program.dbs[0]?.fbName).toBe('FB_X');
+    // IN: Bool byte 0 bit 0; Q: Bool byte 0 bit 1; IO: slot DInt byte 2..5 (không lộ) → size 6.
+    expect(program.dbs[0]?.fields.map((f) => [f.name, f.byteOffset, f.size])).toEqual([
+      ['IN', 0, 1],
+      ['Q', 0, 1],
+    ]);
+    expect(program.dbs[0]?.size).toBe(6);
   });
 });
 
