@@ -1,0 +1,1 @@
+{"dependencies":{"@vcs/kernel":"workspace:*","@vcs/schemas":"workspace:*","zod":"4.6.7"},"exports":{".":"./src/index.ts"},"name":"@vcs/plant","private":true,"scripts":{"lint":"eslint src","test":"vitest run","typecheck":"tsc --noEmit -p tsconfig.json"},"type":"module","version":"0.1.0"}

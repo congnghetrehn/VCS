@@ -20,6 +20,8 @@ export default defineConfig({
         // P1.1, OQ-088: 2 package mới, bằng kernel/schemas.
         'packages/runtime-iec/src/**': { lines: 85 },
         'packages/vendor-siemens/src/**': { lines: 85 },
+        // P2.1, OQ-251: package plant mới, bằng kernel/schemas.
+        'packages/plant/src/**': { lines: 85 },
       },
     },
   },

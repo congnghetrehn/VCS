@@ -207,6 +207,18 @@ importers:
         specifier: workspace:*
         version: link:../schemas
 
+  packages/plant:
+    dependencies:
+      '@vcs/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@vcs/schemas':
+        specifier: workspace:*
+        version: link:../schemas
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+
   packages/project:
     dependencies:
       '@vcs/schemas':

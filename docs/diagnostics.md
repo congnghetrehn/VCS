@@ -13,6 +13,13 @@
 | `LAD-T006` | error | Gán không hợp lệ | VAR_INPUT chỉ đọc; không ghi vào VAR_INPUT. |
 | `LAD-T009` | error | Trùng tên | Đổi tên một trong các khai báo trùng (biến, network, temp __lad_*). |
 | `LAD-U001` | error | Box/kiểu chưa hỗ trợ | Dùng box/kiểu trong phạm vi M1 §5; String và mảng lồng nhau chưa hỗ trợ. |
+| `PL-E001` | error | Model không tồn tại trong registry | Kiểm tra tên model trong cấu hình; model phải được đăng ký trước khi dùng. |
+| `PL-E002` | error | Tag không khớp kind của role | Gán tag có signal.kind khớp role (DI/DO/AI/AO). |
+| `PL-E003` | error | Thiếu tag bắt buộc cho role | Gán tag cho role bắt buộc, hoặc khai báo role là optional trong model. |
+| `PL-E012` | error | Không xác định được dải đo cho role analog | Khai báo engMin/engMax trong params, hoặc scaling trong tag, hoặc unit "%" cho role. |
+| `PL-E020` | error | Chu trình link giữa các thiết bị | Bỏ một liên kết link để phá chu trình (thứ tự topo phải không có chu trình). |
+| `PL-W001` | warning | Cảnh báo cấu hình plant | Kiểm tra cấu hình plant: gán tag cho role; plcScanMs (nếu có) phải là số nguyên ≥ stepMs. |
+| `PL-W020` | warning | Hành vi chưa kiểm chứng | Hành vi này chưa được kiểm chứng với PLC thật; xem docs/semantics.md. |
 | `PRJ-E001` | error | Thiếu file bắt buộc | Tạo vcs.project.yaml ở thư mục gốc của dự án. |
 | `PRJ-E002` | error | Cú pháp YAML sai | Sửa cú pháp YAML tại dòng/cột đã báo (chú ý thụt đầu dòng bằng khoảng trắng, không dùng tab). |
 | `PRJ-E003` | error | Vi phạm schema | Sửa giá trị theo schema tại vị trí đã báo. |

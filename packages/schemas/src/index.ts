@@ -28,8 +28,21 @@ export {
   formatDuration,
   durationSchema,
 } from './duration.js';
-export { defineDiagnostics, PRJ_CATALOG, SCL_CATALOG, LAD_CATALOG, DIAGNOSTIC_CODE_RE } from './diagnostics-catalog.js';
+export { defineDiagnostics, PRJ_CATALOG, SCL_CATALOG, LAD_CATALOG, PL_CATALOG, DIAGNOSTIC_CODE_RE } from './diagnostics-catalog.js';
 export type { DiagnosticInfo, DiagnosticCatalog } from './diagnostics-catalog.js';
+export { equipmentInstanceSchema, sourceSpecSchema } from './equipment.js';
+export type { EquipmentInstance, SourceSpec } from './equipment.js';
+export {
+  signalFaultTypeSchema,
+  faultTimingSchema,
+  faultRequestSchema,
+  faultInfoSchema,
+} from './fault.js';
+export type { SignalFaultType, FaultTarget, FaultTiming, FaultRequest, FaultInfo } from './fault.js';
+export { importProfileSchema } from './import-profile.js';
+export type { ImportProfile } from './import-profile.js';
+export { namingConfigSchema } from './naming.js';
+export type { NamingConfig } from './naming.js';
 export { parseYamlWithSchema, levenshtein, zodIssueParams } from './yaml.js';
 export type { YamlShape, ParseYamlResult } from './yaml.js';
 export { controllerIdSchema, controllerSchema, projectSchema, PROJECT_SHAPE } from './project.js';

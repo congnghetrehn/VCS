@@ -10,9 +10,9 @@
 
 ## 1. Vị trí hiện tại
 
-- Milestone: **M1 — ĐÃ KÝ 2026-11-25** (M0 đã ký 2026-11-24, trên main `31c7200`; P1.1–P1.7 + G1 đã merge vào `develop` qua PR #20–#27)
-- Prompt đang làm / vừa xong: G1 — **✔ đã merge PR #27 `85ab770` vào `develop` 2026-11-25 16:48 +07**; **M1 ĐÃ KÝ 2026-11-25** (STATE §8). Tiếp theo: đẩy main per D-001, rồi P0.9 (chủ sản phẩm chọn làm, D-005: B).
-- Nhánh: `m0/p0.9-pwa` (từ `3ca09d6` = M1 đã ký trên `develop` `b7cb601`, đã đẩy main `1a2beed3`)
+- Milestone: **M1 — ĐÃ KÝ 2026-11-25** (M0 đã ký 2026-11-24, trên main `31c7200`; P1.1–P1.7 + G1 đã merge vào `develop` qua PR #20–#27; M1 đã đẩy main PR #29 `1a2beed3`; P0.9 đã merge PR #30 `6a9d083` vào `develop`)
+- Prompt đang làm / vừa xong: P0.9 — **✔ đã merge PR #30 `6a9d083` vào `develop` 2026-11-26 01:33 +07**. Tiếp theo: M2, bắt đầu P2.1 (plan §24).
+- Nhánh: `m2/p2.1-plant-foundation` (từ `878401e` = P0.9 trên `develop` `6a9d083`)
 - Cập nhật lần cuối: 2026-11-25 bởi AI (M1 đã ký; đẩy main + P0.9 tiếp theo)
 
 ## 2. Tiến độ prompt
@@ -27,7 +27,7 @@
 | P0.6   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p06` install thật lẫn bản sao chính; vitest 438/438, e2e 5/5 local; bench guard PASS; kiểm cuộn 20 000 dòng: probe PASS 1 lần, đo tay 45,7–60,0 FPS — xem §13; OQ-062 đã quyết (a), A19)                                                                                         | PR #13, nhánh `m0/p0.6-web` (đã merge `471a2ec` 2026-11-24 16:48 +07, CI 8/8 xanh) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (438 test vitest, 35 file; 17 test unit mới + 5 e2e) + build xanh + smoke `GET /` | xem §13 |
 | P0.7   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p07` install thật lẫn bản sao chính; test 439/439 + coverage §13 PASS + e2e 5/5; bench baseline + hồi quy; đã merge PR #14 `0188cf8` vào `develop` 2026-11-24 17:24 +07, CI 8 successful + 2 skipped) | PR #14, nhánh `m0/p0.7-docs` (đã merge) | lint/typecheck/depcheck/test (+coverage)/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (439 test vitest, 35 file; 1 test ghim hash mới) + build xanh + bench PASS | xem §14 |
 | P0.8   | ✔ xong (gate xanh local; đã merge PR #19 `aecb372` vào `develop` 2026-11-25 00:31 +07, CI 8 successful + 2 skipped) | PR #19, nhánh `m0/p0.8-interfaces` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` + build xanh 2026-11-24 (507 test, 36 file; 68 test mới) + bench TagDB 4/4 + orchestrator 443.627 bước/s | xem §15; OQ-075…081 đóng |
-| P0.9   | ◐ đang làm (chủ sản phẩm chọn B ở D-005 ngày 2026-11-25, sau khi ký M1; plan ở §23, 2026-11-25)                                                                                          | nhánh `m0/p0.9-pwa` (plan) |                                                                                                                                                                           | plan-first; HTTPS cho LAN ghi ADR-0009, D-007 chờ owner quyết, không tự đổi bind              |
+| P0.9   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #30 `6a9d083` vào `develop` 2026-11-26 01:33 +07, CI 8 successful + 2 skipped) | nhánh `m0/p0.9-pwa` | test 1946/1946, e2e 11/11 + E7.6 | plan-first; HTTPS cho LAN ghi ADR-0009, D-007 chờ owner quyết, không tự đổi bind              |
 | G0     | ✔ đã ký 2026-11-24 (gói bằng chứng `docs/acceptance/M0.md`, 12/12 §15 ĐẠT; probe bổ sung 3/3 PASS; Windows 439/439 sau fix OQ-074) | nhánh `m0/g0-acceptance` (đã merge PR #15) | gate xanh 2026-11-24 ở bản sao sạch (439 test + coverage PASS, e2e 5/5, bench PASS, hash ghim khớp 2 lần chạy) | gói nghiệm thu M0 |
 | P1.1   | ✔ xong (gate xanh local; đã merge PR #20 `8b3dbb6` vào `develop` 2026-11-25 01:13 +07, CI xanh) | PR #20, nhánh `m1/p1.1-runtime-iec` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (651 test, 40 file; 144 test mới) + build xanh + bench guard PASS | xem §16; OQ-082…091 đóng |
 | P1.2   | ✔ xong (gate xanh local; đã merge PR #21 `278e3af` vào `develop` 2026-11-25 05:13 +07, CI 8 successful + 2 skipped) | PR #21, nhánh `m1/p1.2-scl-parser` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (746 test, 42 file; 95 test mới) + build xanh + bench guard PASS | xem §17; OQ-092…104 đóng, OQ-105 mở |
@@ -37,7 +37,7 @@
 | P1.6   | ✔ xong (gate xanh local; đã merge PR #25 `0f58e15` vào `develop` 2026-11-25 13:28 +07, CI 8 successful + 2 skipped) | PR #25, nhánh `m1/p1.6-lad` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-25 (1749 test, 68 file; 83 test mới) + build xanh + bench guard PASS | xem §21; OQ-182…196 đóng, OQ-161 mở |
 | P1.7   | ✔ xong (gate xanh local; đã merge PR #26 `7a927e1` vào `develop` 2026-11-25 16:23 +07, CI 8 successful + 2 skipped) | PR #26, nhánh `m1/p1.7-golden-runner` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-25 (1927 test, 76 file; 178 test mới) + build xanh + bench softplc 1738 scan/s (parent) / 1664 scan/s (G1) | xem §22; OQ-197…216 đóng, OQ-217 mới, OQ-161 mở |
 | G1     | ✔ đã ký 2026-11-25 (gói nghiệm thu `docs/acceptance/M1.md`, 9/9 §16 ĐẠT; probe bổ sung 4/4 PASS; §16.5 + OQ-161 chưa quyết, giữ mặc định) | nhánh `m1/g1-acceptance` (đã merge PR #27 `85ab770`) | gate xanh 2026-11-25 ở bản sao sạch `/tmp/vcs-g1` (1927 test + coverage PASS, e2e 6/6, bench softplc 1664 scan/s) | gói nghiệm thu M1; ký là tier C |
-| P2.1   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
+| P2.1   | ◐ đang làm (plan §24, 2026-11-26; 18 OQ tier B OQ-235…252, không có tier C chặn) | nhánh `m2/p2.1-plant-foundation` (plan) |                                                                                                                                                                           | ⚠ plan-first; X-003 không chặn P2.1 (chỉ chặn P2.7) |
 | P2.2   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P2.3   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | P2.4   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
@@ -3203,3 +3203,158 @@ softplc 1,684 scan/s ≥ 1000; heap +0.22 MB).
 D-007 vẫn mở (không chặn P0.9).** ADR-0009 đã viết (đề xuất A mkcert, chưa
 quyết); `docs/semantics.md` §19 mới (kiosk tablet thật = UNVERIFIED);
 `docs/verify-owner-guide.md` thêm mục P0.9 (kiosk tablet + D-007).
+
+## 24. P2.1 — Nền plant: schemas, rng, adapter, source, FaultManager, PlantEngine, EventLog (plan, 2026-11-26)
+
+**M2 gồm (PROMPTS.md, thứ tự):** P2.1 nền plant (§3–6) → P2.2 `motor_dol` (§7.1) → P2.3 các model còn lại (§7.2–7.8) → P2.4 vòng kín + CLI `plant run` (§5.1, 11.4) → P2.5 đọc CSV/XLSX + mapping (§8.1–8.4) → P2.6 địa chỉ + validate + diff/commit (§8.5–8.8) → P2.7 auto-suggest (§9, cần X-003) → P2.8 UI import wizard + Plant Designer (§10) → G2 gói nghiệm thu M2 (§14). **X-003 (I/O list thật) KHÔNG chặn P2.1** — P2.1 chỉ dùng model giả + tag tổng hợp; X-003 chỉ chặn P2.7 (đã có sẵn trong OWNER-INBOX §3, không tạo mục mới). OQ-161/D-006 không chạm P2.1 (không có FB lồng IN_OUT).
+
+**Phạm vi (M2 §3–6 + PROMPTS P2.1):** schemas `equipment/naming/profile/fault` (zod); `rng` (mulberry32); `delay` + helper lag/rate-limit/hysteresis/on-off-delay; `adapter` scaling (M2 §3.2); `source` (manual/const/ramp/sine/link + topo); `FaultManager` (equipment + signal fault); `PlantEngine` (step tất định, snapshot/restore); `EventLog`. Cấm `Math.random`/`Date.now`/`performance.now`/`new Date()` trong `plant` (lint đã có sẵn rule cho `packages/plant/src/**` — eslint.config.js `CORE_FILES`, không sửa config). Chỉ dùng **model giả để test engine** (model thật ở P2.2–P2.3).
+
+**Thiết kế (10 điểm):**
+1. **Package mới `packages/plant`** (`package.json` `@vcs/plant`, exports → `src/index.ts`; deps `workspace:*` tới `@vcs/schemas` + `@vcs/kernel` — đúng rule dep-cruiser `plant-deps` đã có sẵn, không sửa config). **Không dep ngoài mới** (zod 4.6.7 + yaml 2.9.1 đã có ở schemas; fast-check 4.10.2 đã có ở root devDeps; mulberry32/delay viết tay).
+2. **Schemas mới trong `packages/schemas/src/`:** `equipment.ts` (zod `EquipmentInstance` theo M2 §4.2: id/model/params/signals/initial + `controller`), `naming.ts` (M2 §4.3: `tagPattern`, `equipmentIdTemplate`, `equipmentCodeToModel`, `roleOverrides`), `import-profile.ts` (M2 §4.4 — chỉ schema, loader ở P2.5), `fault.ts` (`SignalFaultType` 14 loại §6.2, `FaultRequest`, `FaultInfo`). `tags.ts` đã có sẵn dạng cuối M2 §4.1 (A9: `signal`/`scaling`/`equipment`/`role`/`provenance`/`origin`).
+3. **`rng.ts`:** `mulberry32(seed)` + `hash32` (FNV-1a, OQ-235); mỗi thiết bị một PRNG `seed_i = hash32(globalSeed, equipmentId)` (OQ-236); helper Box–Muller dùng PRNG của thiết bị, spare cache trong state để tất định (OQ-243).
+4. **`delay.ts`:** `DelayLine` (ring buffer, `n = round(delayMs/dt)`); helper `lag` (công thức bước chính xác §5.4: `y += (target−y)×(1−exp(−dt/τ))`, `τ≤0 → y=target`), `rateLimit`, `hysteresis`, `onDelay`/`offDelay`.
+5. **`adapter.ts`:** `engToRaw`/`rawToEng` theo §3.2, kẹp raw trong `[−4864, 32511]`; tag `Real` ghi trực tiếp eng sau `Math.fround` (E5) + cảnh báo `PL-W020` 1 lần ở validate (OQ-239); khoảng ngược (`engMin > engMax`) công thức xử lý tự nhiên, không hoán đổi (OQ-238, bảng A); nguồn thông số ưu tiên `params` → `tag.signal.scaling` → mặc định theo role; không xác định được khoảng → `PL-E012` ở validate; đọc raw→eng **không kẹp** (over-range đọc lại thành eng vượt khoảng — đó là cách thấy over-range, test ghim).
+6. **`source.ts`:** resolve `manual | const | ramp | sine | link`; topo sort (Kahn, hòa bằng id tăng dần); link vòng/thiếu đích/tự link → `PL-E020` ở validate; link áp `eng = obs × scale + offset` (OQ-249).
+7. **`registry.ts`:** `registerModel`/`getModel`/`listModels`; shape `EquipmentModel` theo §4.5 (roles/paramsSchema/observables/faults/presets/init/step); state `S` JSON-serializable (không Map/Set/hàm); `deriveModel` (composition) để P2.3 dùng cho `damper` — khai báo sẵn, chưa dùng.
+8. **`faults.ts` (FaultManager):** vòng đời `pending → active → cleared`, id `F-0001…`; `at` (`now`/`timeMs`/`afterMs`) + `durationMs` (tự gỡ); `repeat`/`random` là P1 tùy chọn theo §6.1 → **không làm ở P2.1**; `ctx.fault(id)` cho model; signal fault áp theo thứ tự cố định §6.2 (`delay → gain → offset → drift → noise → spike → stuck/freeze/invert/chatter/outOfRange/wireBreak`, sau thắng trước — terminal `wireBreak` thắng `stuck`, OQ-241); `applyPreset` map preset → signal/equipment fault.
+9. **`engine.ts` (PlantEngine, API §5.2):** `step(T, dt)`: `faults.advance(T)` (D1 — orchestrator không có pha faults riêng) → resolve source theo topo → step model theo topo → emit qua adapter + signal fault → ghi DI/AI vào TagDB. Ownership: `setOwner(handle, 'plant')` cho role DI/AI đã gán (D5); DO/AO do controller sở hữu, engine chỉ đọc; tag chưa gán = virtual input, không bị ghi (test ghim). Tag handle resolve 1 lần ở init (không tra `Map<string>` mỗi bước, §5.6). `validate()` = hàm thuần `validatePlantConfig(cfg, tags): Diagnostic[]` (dùng chung cho UI P2.8); constructor fail-fast: ném `Error` kèm mã diagnostic đầu tiên nếu có lỗi mức error, warning không chặn (OQ-248). `snapshot()`/`restore()`: state JSON (gồm cả state int32 của PRNG + spare flag) — restore giữa chừng cho trace hash giống hệt (gate). `reset()` về init cùng seed. `step()` khớp chữ ký `SimComponent.step` để P2.4 bọc thành pha `'plant'` (pha đã có sẵn trong kernel `Phase`).
+10. **`events.ts` (EventLog):** ring buffer N=100 000, entry `{t, type, equipment, key, from, to, msg}`; model gọi `ctx.log`; engine tự ghi khi fault bật/tắt + cảnh báo cấu hình; tràn thì bỏ cũ nhất im lặng (OQ-247).
+
+**Mã chẩn đoán mới (PL_CATALOG, D6):** `PL-E001` (thiếu role bắt buộc), `PL-E002` (role trỏ tag không tồn tại), `PL-E003` (1 tag gán nhiều role/thiết bị), `PL-E012` (analog không xác định được khoảng), `PL-E020` (link vòng/thiếu), `PL-W001` (stepMs/plcScanMs, chỉ khi `plcScanMs` có trong config — OQ-244), `PL-W020` (tag Real ghi trực tiếp eng). Tổng 7 mã mới (51 → 58); `PL-W010` (tham chiếu treo sau re-import) để P2.6. `gen-diagnostics.ts` hợp nhất catalog theo tiền lệ SCL/LAD; `DIAGNOSTIC_CODE_RE` đã khớp `PL` (không sửa). `docs/semantics.md` §20 mới ở triển khai (ghi VERIFY: kẹp raw §3.2, `wireBreakRaw` mặc định 32767).
+
+**Bảng tính tay (tính trước khi code, AGENTS §6):**
+
+*Bảng A — adapter scaling (engMin=0, engMax=100, rawMin=0, rawMax=27648; `raw = round((eng−engMin)/(engMax−engMin)×(rawMax−rawMin))+rawMin`, kẹp [−4864, 32511]):*
+
+| eng | tính | raw |
+|---|---|---|
+| 0 | 0 | 0 |
+| 50 | 0.5×27648 | 13824 |
+| 100 | 27648 | 27648 |
+| 110 | 1.1×27648 = 30412.8 → 30413 | 30413 (trong vùng kẹp) |
+| 125 | 1.25×27648 = 34560 → kẹp | 32511 |
+| −10 | −0.1×27648 = −2764.8 → −2765 | −2765 |
+| −20 | −0.2×27648 = −5529.6 → −5530 → kẹp | −4864 |
+| ngược (engMin=100, engMax=0): eng=0 → 27648; eng=100 → 0 | theo công thức, không hoán đổi | — |
+| Real eng=50.5 | ghi trực tiếp sau fround | 50.5 (không scale) |
+| đọc ngược raw=13824 → eng 50.0; raw=32511 → eng ≈ 117.58 (over-range, không kẹp chiều đọc) | | |
+
+*Bảng B — signal fault chồng lớp (base pv=50.0 eng, AI, 0..100%):*
+
+| faults (theo thứ tự §6.2) | tính | eng cuối → raw |
+|---|---|---|
+| gain 1.1, offset +10, drift +2 (7200 eng/h × 1 s) | 50×1.1=55 → +10=65 → +2=67 | 67.0 → round(0.67×27648)=18524 |
+| gain 1.1, stuck(42) | stuck terminal thắng | 42.0 → 11612 |
+| stuck(42), wireBreak | wireBreak cuối cùng thắng | raw 32767 (mặc định) |
+| delay 25 ms, dt=10 | n = round(25/10) = 3 bước | đổi ở T=0 → thấy ở T=30 |
+| DI base false, invert | — | true |
+
+*Bảng C — RNG golden vector (tính từ định nghĩa thuật toán mulberry32 + FNV-1a, bằng script tham chiếu độc lập — không lấy từ implementation; implementer kiểm lại bằng test):*
+
+| đầu vào | ra |
+|---|---|
+| mulberry32(0), 3 giá trị đầu | 0.2664292087, 0.0003297457, 0.2232720274 |
+| mulberry32(1), 3 giá trị đầu | 0.6270739406, 0.0027357212, 0.5274470400 |
+| mulberry32(42), 3 giá trị đầu | 0.6011037519, 0.4482905590, 0.8524657935 |
+| hash32 FNV-1a `42:CR01_M01` / `42:CR01_M02` / `7:CR01_M01` | 1296374874 / 1279597255 / 1292621609 (khác equipmentId → khác seed; khác global seed → khác seed) |
+
+*Bảng D — determinism (model giả `fake_motor`: roles runCmd DO Bool, runFb DI Bool, currentFb AI Int opt; params startDelayMs=500; hành vi tối thiểu: runCmd=1 → sau 500 ms runFb=1, currentFb eng = running ? 42.0 : 0):*
+
+| T (ms) | tác động (giữa các bước) | kỳ vọng sau step |
+|---|---|---|
+| 100 | ghi runCmd=1 vào TagDB | STARTING (t0=100), runFb=0 |
+| 590 | — | runFb=0 (490 < 500) |
+| 600 | — | runFb=1, currentFb raw = round(42/100×27648) = 11612 |
+| trace hash | chạy 2 lần + 1 lần snapshot ở T=300 → restore → chạy tiếp | SHA-256 trace (mọi tag plant mỗi bước + event) giống hệt 3 lần |
+| thứ tự khai báo | đảo thứ tự equipment trong config | hash không đổi (topo + id) |
+
+**Test target:** ≥ 100 test mới, tổng ≥ 2046 (từ 1946).
+
+| Nhóm | File test | Nội dung |
+|---|---|---|
+| schemas (~28) | `packages/schemas/src/{equipment,naming,import-profile,fault}.test.ts` | zod chấp/nhận đúng: equipment.yaml §4.2 (thiếu role, sai model), naming.yaml §4.3, import-profile §4.4, FaultRequest §6.1 (14 loại signal fault, `at`/`durationMs`) |
+| rng (~6) | `packages/plant/src/rng.test.ts` | bảng C (golden vector 3 seed); 2 run cùng seed → dãy giống hệt; seed khác → dãy khác; hash32 bảng C; fast-check: mọi seed cho giá trị trong [0,1) |
+| delay/lag/rate (~13) | `packages/plant/src/delay.test.ts` | delay line n=3 (bảng B); lag τ=500 dt=10: y sau 1 bước = target×(1−e^(−0.02)) ≈ 0.0198×target (tính: 1−e^(−0.02)=0.019801); τ≤0 → y=target; rate limiter clamp up/down; hysteresis + on/off-delay |
+| adapter (~16) | `packages/plant/src/adapter.test.ts` | bảng A đủ 9 dòng (gồm khoảng ngược + Real fround + đọc ngược over-range); thiếu range → PL-E012 (qua validate); priority params > tag.scaling > mặc định role |
+| source (~14) | `packages/plant/src/source.test.ts` | manual/const/ramp (from→to trong durationMs, tuyến tính)/sine (mean/amp/periodMs — kiểm tại t=0, T/4, T/2)/link (scale/offset); topo: sensor sau motor; vòng link → PL-E020; link thiếu đích → PL-E020 |
+| faults (~18) | `packages/plant/src/faults.test.ts` | bảng B đủ 5 dòng; vòng đời pending→active→cleared (at + durationMs); equipment fault qua ctx.fault; preset map (noRunFeedback = stuck(false) trên runFb — test bằng model giả khai preset); chồng 2 signal fault cùng role |
+| engine (~22) | `packages/plant/src/engine.test.ts` | bảng D; validate: PL-E001/E002/E003/E012/E020 mỗi mã ≥ 1 test; constructor fail-fast khi có error; ownership: tag DI chưa gán không bị ghi; 2 role cùng tag → PL-E003; snapshot/restore giữa STARTING chạy tiếp đúng; reset về init cùng seed; event log ghi fault bật/tắt + cap ring |
+| registry (~5) | `packages/plant/src/registry.test.ts` | register/get/list; trùng tên → throw; model thiếu roles → throw ở register |
+| determinism (~4) | `packages/plant/src/determinism.test.ts` | hash trace 3 lần giống hệt (2 run + restore); đảo thứ tự khai báo; seed khác → hash khác |
+| hồi quy | toàn suite | M1 không hồi quy; `pnpm test` ≥ 2046 |
+
+Tổng bảng ≈ 126 test (mục tiêu ≥ 100 để có biên). Coverage: thêm ngưỡng `packages/plant/src/**: { lines: 85 }` vào `vitest.config.ts` (tiền lệ OQ-088, OQ-251). Thứ tự triển khai đề xuất: schemas → rng/delay/helper → registry → adapter → source (+topo) → faults → engine → events → PL_CATALOG + diagnostics regen → semantics §20.
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** vị trí file theo M2 §2 + dep graph (mọi thứ plant ở `packages/plant`, schemas ở `packages/schemas`); `mulberry32` viết tay (không dep); thứ tự triển khai trên; fake model chỉ trong test file; `EventLog` ring buffer; `F-0001…` đánh số tăng dần. **Tier B (mặc định + ghi OQ + R-006):** OQ-235 (hash32 = FNV-1a của `${seed}:${equipmentId}`); OQ-236 (seed_i = hash32 dùng thẳng làm seed mulberry32); OQ-237 (golden vector bảng C, tính từ định nghĩa thuật toán); OQ-238 (khoảng ngược: công thức tự xử lý, không hoán đổi); OQ-239 (Real: ghi trực tiếp sau fround, PL-W020 1 lần ở validate); OQ-240 (delay ring buffer cấp phát lúc inject, n = round(delayMs/dt), < dt/2 → n=0); OQ-241 (terminal fault: áp theo thứ tự liệt kê, sau thắng trước — wireBreak thắng stuck); OQ-242 (drift tích từ sinceMs theo simTime); OQ-243 (Box–Muller: spare cache trong state, serialize được); OQ-244 (PL-W001 chỉ khi `plcScanMs` có trong PlantConfig; P2.4 kiểm ở wiring); OQ-245 (bench plant §12 hoãn tới P2.3 (engine-alone) + P2.4 (vòng kín) — P2.1 không có file bench); OQ-246 (fake model chỉ trong test file, registry là seam); OQ-247 (EventLog tràn bỏ cũ nhất im lặng); OQ-248 (validate thuần + constructor fail-fast khi có error, warning không chặn); OQ-249 (link: eng = obs × scale + offset; tự link → PL-E020); OQ-250 (setManual/setSource thấy từ step() kế tiếp); OQ-251 (coverage plant 85 lines); OQ-252 (load file plant/equipment.yaml + naming.yaml hoãn tới P2.4 — P2.1 test dựng instance bằng code). **Tier C (không có mục chặn P2.1):** không đổi spec/kiến trúc lõi; không dep ngoài mới; không hạ ngưỡng (thêm ngưỡng plant 85 = ngang kernel/schemas, không nới); không dữ liệu thật (X-003 chỉ chặn P2.7); không kiểm thật. Nếu khi triển khai phát hiện `PlantEngine` cần sửa interface lõi kernel (orchestrator/IoBus) → dừng, ghi SCR + báo (không tự sửa lõi).
+
+**Rủi ro top-3:**
+1. **Adapter scaling sai dấu/kẹp ở biên** (AI/AO là đường duy nhất giữa plant và PLC — sai là sai cả vòng kín P2.4). Giảm: bảng A ghim 9 dòng + property test round-trip `engToRaw(rawToEng(x)) ≈ x` (fast-check, seed cố định) + test khoảng ngược.
+2. **Mất tất định do PRNG/state không serialize hết** (restore giữa chừng cho hash khác — lỗi im lặng nguy hiểm nhất của engine). Giảm: state PRNG là int32 + spare flag, snapshot test ghim hash 3 lần (bảng D); lint cấm Math.random/Date.now đã bao `packages/plant`.
+3. **Topo sort sai khi link chéo nhiều tầng** (sensor link motor, silo link conveyor — sai thứ tự là sai giá trị 1 bước). Giảm: test topo 3 tầng + vòng link → PL-E020 + đảo thứ tự khai báo cho hash không đổi.
+
+**Kết quả triển khai (2026-11-26, commit feat sau plan — xem git log):** 175 test mới
+(plant 147: engine 45, faults 27, delay 16, adapter 16, source 15, registry 10,
+rng 11, events 4, determinism 3; schemas `equipment.test.ts` 28), **tổng 2121/2121
+(87 files)**. Coverage plant **91.84% lines** (ngưỡng 85, OQ-251). PL_CATALOG
+**58 mã** (51 → 58). `docs/semantics.md` §20 viết xong (raw clamp + wireBreakRaw
+32767 + Real fround = UNVERIFIED). Gate chạy thật trên bản copy sạch
+`~/.cache/vcs-p21` (real `pnpm install`, không symlink node_modules tay):
+lint 0 (cần `NODE_OPTIONS=--max-old-space-size=4096` — lint OOM ở heap mặc
+định ~2 GB); typecheck 0; depcheck 0 (141 modules, 291 deps); test 2121/2121;
+review:cheats SẠCH (217 files); diagnostics --check khớp (58 mã); build OK
+(3 tasks); bench PASS (TagDB 48,011,265 ops/s ≥ 10M; orchestrator 512,543
+steps/s ≥ 100k; softplc 1,622 scan/s ≥ 1000); e2e 11/11 + 1 skipped (E7.6
+opt-in). OQ-235…252 đóng hết (18/18, đã áp dụng ở P2.1).
+
+**Lệch plan + lý do (đều là tier B, ghi lại, không đổi spec):**
+- Plan ghi catalog dạng `{severity, message}` + gen-diagnostics CATALOGS
+  `{importPath, member}` — không khớp code thực tế. Làm theo code thực tế:
+  `defineDiagnostics` + `title`/`hint`, CATALOGS là mảng catalog object.
+- Repo không dùng `.strict()` ở đâu — bỏ `.strict()` khỏi 4 schema mới
+  (unknown keys bị strip, khớp quyết định FaultRequest).
+- Bảng A read-back: plan ghi "≈ 117.58" là sai làm tròn; đúng là
+  **117.58897569… (≈ 117.589)** — test ghim `toFixed(4) === '117.5890'`.
+- Bug thật bắt được bằng test: `engToRaw` bản đầu kẹp eng vào [engMin,
+  engMax], nhưng bảng A (110 → 30413, 125 → 32511 kẹp, −20 → −4864) chứng
+  minh chỉ RAW bị kẹp — eng KHÔNG kẹp. Sửa: `engToRaw = clampRaw(round(scale(eng)))`.
+- `SIGNAL_FAULT_ORDER` chỉ 12 loại emit-side; `lost`/`stuckCmd` là cmd-side
+  (order 99 ở fallback sort).
+- `setObs` lần gán đầu (prev `undefined`) là baseline, không phải change event.
+- Determinism: `tags.flush()` phải chạy sau `TagDB.restore()` và trước khi tạo
+  TraceHasher thứ hai (restore giữ flush baseline cũ → flush sau restore phát
+  thay đổi giả — đã ghi chú trong `TraceHasher.reset()`).
+- `deriveModel`: `P extends Record<string, unknown>` → `P extends object`
+  (object literal type không có index signature).
+- Engine coi model params là record không type ở ranh giới (`model.defaultParams
+  as Record<string, unknown>`, validate bằng zod schema của model) — sửa lỗi
+  TS2698 spread-of-unknown.
+- `FaultManagerOptions.wireBreakRaw` explicit-undefined sửa bằng helper
+  `#makeFaultManager()` (exactOptionalPropertyTypes); `resolveRange` dựng
+  Range không gán `unit: undefined` (cùng lý do).
+- PL-E001 dùng làm mã lỗi cấu hình plant chung (trùng id, model/link-target/
+  role lạ, params sai); tag thiếu → TAG-E003; stepMs sai → PRJ-E007.
+- **PL-W020 chỉ đăng ký, chưa phát ở bản đầu** — đã bổ sung sau đối chiếu
+  OQ-239: validate phát PL-W020 1 lần/tag Real (test ghim).
+- **OQ-244:** `PlantConfig` có thêm `plcScanMs?` (tùy chọn); validate phát
+  PL-W001 khi có giá trị mà không phải số nguyên ≥ stepMs (quy tắc PRJ-E007,
+  mức warning). PL-W001 vì thế là cảnh báo cấu hình plant chung (role chưa
+  gán + plcScanMs) — title catalog đổi thành "Cảnh báo cấu hình plant".
+- **OQ-249:** `SourceSpec` có thêm `scale?` (link: eng = obs × scale +
+  offset); tự link → PL-E020 (test ghim, cùng chu trình A↔B).
+- **2 role cùng tag → PL-E001, không phải PL-E003 như bảng test của plan:**
+  PL-E003 nghĩa là "thiếu tag bắt buộc"; trùng gán là lỗi cấu hình chung
+  (cùng nhóm PL-E001). Test ghim PL-E001.
+- Test schema gộp 1 file `packages/schemas/src/equipment.test.ts` (28 test
+  cho cả 4 module) thay vì 4 file như bảng plan — chỉ khác tổ chức file.
+- Fake model (`fake_motor`, `fake_sensor`) đặt trong
+  `packages/plant/src/test-helpers.ts` (test support, không export khỏi
+  package, không nằm trong `src/models/`) — thỏa OQ-246.
+- OQ-239/244/249 ban đầu chưa làm trong bản triển khai đầu, đã bổ sung sau
+  khi đối chiếu lại plan §24 + OQ (thêm 14 test, 2107 → 2121).
+
+**Vẫn mở sau P2.1:** OQ-161, D-006 (§16.5), D-007 (HTTPS cho LAN), X-003
+(chỉ chặn P2.7). PL-W020 phát ở validate (đã làm); `wireBreakRaw` mặc định
+32767 + raw clamp + Real fround ghi UNVERIFIED ở semantics §20. P2.2 tiếp
+theo: `motor_dol` (model thật đầu tiên).

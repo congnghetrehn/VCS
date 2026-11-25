@@ -1056,3 +1056,34 @@ Kiosk trên tablet thật (cảm ứng, Fullscreen, Wake Lock, pull-to-refresh/
 zoom) chưa kiểm được bằng desktop Chromium; HTTPS cho LAN chưa quyết
 (D-007, ADR-0009 đề xuất A mkcert) nên PWA trên LAN qua HTTP vẫn không
 đăng ký được service worker — chỉ localhost đầy đủ.
+
+## 20. Plant — model, adapter, nguồn, lỗi tín hiệu (M2 §3–§6, P2.1)
+
+**VERIFIED (bảng tính tay A–D, ghim bằng test).** Adapter raw↔eng tuyến tính
+(§3.2): `raw = clampRaw(round((eng − engMin) × (rawMax − rawMin)/(engMax − engMin) + rawMin))`,
+chỉ RAW bị kẹp [−4864, 32511], eng KHÔNG kẹp (bảng A: 110 → 30413,
+125 → 32511, −20 → −4864; dải ngược 0..100 → 27648..0). Dải đo resolve theo
+thứ tự `params.engMin/engMax` → `tag.signal.scaling` → mặc định 0..100
+chỉ khi unit `%`, còn lại PL-E012. Nguồn: `manual` (giá trị đặt tay, hiệu
+lực từ bước kế), `const`, `ramp` tuyến tính from→to trong durationMs,
+`sine` mean/amp/periodMs (pha từ `setAtMs`), `link` đọc observable thiết bị
+khác theo topo (Kahn, id tăng dần khi hòa) — `eng = obs × scale + offset`
+(mặc định scale=1, offset=0, OQ-249). Delay line: trễ n = round(delayMs/stepMs)
+bước; lag τ, rate-limit, hysteresis (OQ-240: delay cấp phát 1 lần lúc inject).
+PRNG mulberry32 + FNV-1a (bảng C): `seed_i = hash32(seed + ':' + id)`,
+spare Box–Muller nằm trong state nên snapshot/restore giữ dãy Gauss.
+Lỗi tín hiệu (§6.2): áp theo thứ tự delay → gain → offset → drift → noise →
+spike → stuck → freeze → invert → outOfRange → wireBreak — terminal thắng
+(wireBreak/outOfRange thắng stuck, OQ-241); cmd: stuckCmd → stuck → freeze →
+invert (DO) → lost thắng cuối. PlantEngine tất định: cùng seed/config/đầu
+vào → TraceHasher giống hệt (2 run độc lập, đảo thứ tự khai báo, restore
+tại T=300 — bảng D); event log là ring 100000, ghi đè im lặng (OQ-247),
+không vào snapshot.
+
+**UNVERIFIED (chờ kiểm tay — xem `docs/verify-owner-guide.md` mục P2.1).**
+Raw clamp §3.2 (rawMin −4864/rawMax 32511) và `wireBreakRaw` mặc định 32767
+là giá trị spec chọn, chưa đối chiếu với S7 thật; tag Real ghi eng trực
+tiếp sau `Math.fround` (PL-W020 ở validate, OQ-239) chưa kiểm chứng với
+PLC thật; lag/rate-limit/hysteresis và delay line chưa đối chiếu với hành vi
+thiết bị thật (chỉ có bảng tính tay nội bộ). Model thật đầu tiên là
+`motor_dol` ở P2.2 (OQ-246); `fake_motor`/`fake_sensor` chỉ phục vụ test.
