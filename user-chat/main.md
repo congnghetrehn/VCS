@@ -1655,3 +1655,101 @@ Quy tắc backup thì cứ để vậy như anh nói.
 ---
 Log tới thời điểm 2026-11-25 19:35 +07.
 ---
+
+## 2026-11-25 22:51 +07 — Anh Tiến
+
+chỉ dẫn cụ thể cho a các việc chỉ a làm được:
+bench trên máy anh, rà semantics §15–§16, VERIFY §14 với PLCSIM + mã thật, gate Windows thật, quyết OQ-161, phán §16.5, ký M1. Quan sát thêm (không phải lỗi): cột Ghi/Force trong bảng Watch hơi chật ở 1280px, chữ dính nhau — chỉ trình bày, giá trị vẫn đọc được.
+
+## 2026-11-25 22:51 +07 — TraMuse
+
+TraMuse đã đọc lại đúng các file gốc để viết hướng dẫn này: `docs/acceptance/M1.md`, `docs/semantics.md` §15–§16, `docs/verify-experiments-draft.md`, `docs/REVIEW-CHECKLISTS.md`, `docs/STATE.md` §8, OQ-161. 7 việc dưới đây, làm theo thứ tự nào cũng được, trừ ký M1 là cuối cùng.
+
+**1. Bench trên máy anh**
+Trên máy anh, vào thư mục repo, checkout `develop` và pull mới nhất, rồi chạy lúc máy rảnh (không chạy thêm gì nặng):
+`pnpm install --frozen-lockfile`
+`pnpm bench`
+Con số quyết định là **softplc scan/s với 200 FB_Motor, ngưỡng ≥ 1000** (VM đo 1664 ở G1 và 1738 ở P1.7, heap +0.22 MB, ngưỡng heap < 1 MB/2000 scan). Báo lại cho em My con số anh đo được; nếu dưới 1000 thì đó là tier C, dừng lại bàn, không hạ ngưỡng.
+
+**2. Rà semantics §15–§16**
+File `docs/semantics.md`, §15 từ dòng 575 (interpreter + SoftPlc) và §16 từ dòng 681 (11 std block). Phần VERIFIED đã có test ghim, anh chỉ cần rà phần **UNVERIFIED** và xem mặc định có hợp lý với kinh nghiệm hiện trường không:
+- §15: lưới scan đều, scan đầu ở 10 ms chứ không ở 0 (OQ-130); số DB 1..n theo tên sort (OQ-136); OV/ENO không quan sát được từ SCL (OQ-135); `NORM_X`/`SCALE_X` ngoài [0..1] không kẹp; OQ-161 (xem mục 5).
+- §16: TONR ET **không kẹp PT** — P-S6 ghim ET=1200 khi IN rớt sau khi vượt PT=1000; TP giữ IN=true sau khi hết xung thì không kích lại, ET giữ = PT (OQ-165); timer trong nhánh IF không được gọi vài scan rồi gọi lại thì ET "nhảy" theo timestamp (OQ-169); TOF retrigger hủy đếm; counter kẹp 32767/−32768, R thắng LD thắng đếm, CU+CD cùng cạnh thì giữ nguyên; R_TRIG scan đầu sau STOP→RUN.
+- Theo checklist 3.1: tự chọn 3 kịch bản timer/counter, tính tay từng scan rồi đối chiếu golden; xem logic demo có "giống thực tế" không (seal-in, timeout feedback, latch fault + reset).
+Anh chỉ cần nhắn lại mục nào anh **biết chắc** khác (kèm hành vi thật), mục nào anh đồng ý. Mục nào khác → SCR, sửa sau khi ký, không sửa lặng trong M1.
+
+**3. VERIFY §14 với PLCSIM + mã thật**
+File `docs/verify-experiments-draft.md`: 14 mục §14 + 13 mục ngoài (27 mục). Cách làm cho mỗi mục: dựng project TIA nhỏ (S7-1500, PLCSIM Advanced), một OB/FB ngắn cho mục đó, quan sát bằng Watch table của TIA, so với cột "Hành vi hiện tại (mặc định)" trong file. Mục nào khác → SCR. Mục nào khớp → em My đổi nhãn thành VERIFIED.
+Riêng mã thật (X-002/S1): export ≥ 10 block SCL/LAD từ TIA, ẩn danh tên tag/block rồi đưa file cho em My; em My chạy đối chiếu và báo lệch. Đây là việc lớn nhất còn lại của M1, **không chặn ký** — M1.md đã ghi các mục này là UNVERIFIED chứ không phải CHƯA ĐẠT, nên anh có thể làm sau khi ký, trước M2.
+
+**4. Gate trên máy Windows thật**
+Cũng trong repo, nhánh `develop`, sau `pnpm install --frozen-lockfile`:
+`pnpm lint` → kỳ vọng 0 lỗi
+`pnpm typecheck` → sạch
+`pnpm test` → kỳ vọng **1927/1927 (76 file)**
+`pnpm test:e2e` → kỳ vọng **6/6**
+`pnpm bench` → như mục 1
+Tiền lệ M0: máy anh chạy 439/439 sau fix OQ-074 (lỗi path có dấu cách đã sửa). Nếu test Windows đỏ, chụp log gửi em My, đừng sửa test để cho xanh.
+
+**5. Quyết OQ-161**
+Vấn đề: DB top-level dùng slot DInt 4 byte **không lộ** cho IN_OUT (đọc field IN_OUT trong DB → T005), nhưng `fbInterfaceStruct` — layout cho FB con lồng trong static của FB cha — lại layout IN_OUT theo kích thước tự nhiên. Hai chỗ không nhất quán. Hiện tại P1.4/P1.5 giữ nguyên cả hai; test bảng P ghim FB_Motor DB **38 byte**. Nếu lật sang "IN_OUT lồng cũng là tham chiếu 4 byte" thì DB thành 40 byte + SCR + sửa `fbInterfaceStruct` + sửa test.
+- **A (đề xuất): hoãn tới khi có bằng chứng PLCSIM/S1**, không chặn ký M1, nhưng phải quyết trước M2 nếu chạm FB lồng có IN_OUT.
+- **B: quyết ngay theo kinh nghiệm hiện trường của anh** — IN_OUT lồng là tham chiếu 4 byte → em My sửa ngay trong phase sau.
+Anh chỉ cần trả lời "OQ-161: A hay B".
+
+**6. Phán §16.5**
+Chữ spec viết "SCL-U001 cho mọi lệnh chưa hỗ trợ", nhưng thực tế đã kiểm chứng bằng probe (exit 2, có vị trí, không gì chạy sai im lặng): `String` → SCL-U001 (3:7); `POINTER`/`ANY` → SCL-T001 "kiểu chưa biết"; mảng nhiều chiều/`GOTO` → SCL-P002. Chỉ M1 §17 quy định String → U001; các trường hợp còn lại rơi vào nhánh lỗi kiểu/cú pháp trước khi tới U001.
+- **A (đề xuất): giữ nguyên**, chỉ ghi anh chấp nhận phạm vi mã này, không sửa code.
+- **B: SCR gom mọi cấu trúc ngoài EBNF về một mã U001** — đổi spec + sửa parser, làm ở phase sau.
+Anh chỉ cần trả lời "§16.5: A hay B".
+
+**7. Ký M1**
+Sau khi anh duyệt xong `docs/acceptance/M1.md` (9/9 tiêu chí §16 ĐẠT, 0 CHƯA ĐẠT) và làm xong các mục anh chọn ở trên, anh chỉ cần nhắn "ký M1" như lần M0. Em My sẽ ghi chữ ký vào `docs/STATE.md` §8 (ngày ký, người ký, ghi chú), mở PR → develop, chờ CI xanh rồi merge, sau đó đẩy main theo D-001 (PR develop → main, CI xanh, merge). Anh không cần tự sửa file.
+
+**Quan sát Watch (không phải lỗi):** cột Ghi/Force chật ở 1280px, chữ dính nhau ("GhiForce"), giá trị vẫn đọc được. Em My đã ghi vào báo cáo probe M1, chưa sửa — sẽ sửa khi chạm lại bảng Watch (M2), trừ khi anh muốn sửa ngay.
+
+---
+Log tới thời điểm 2026-11-25 22:51 +07.
+---
+
+## 2026-11-25 22:58 +07 — Anh Tiến
+
+ghi lại hướng dẫn chi tiết này vào file docs/verify-owner-guide.md . Các mục sau nếu cần verify em cũng hướng dẫn thật chi tiết và ghi vào file này nhé.
+Còn bây giờ anh ký M1. Em chuyển qua làm bước tiếp theo đi. 
+ah P0.9 còn chưa làm. Em cho làm đi
+
+## 2026-11-25 23:04 +07 — Em My
+
+Xong phần ghi chép, anh Tiến ạ. Em My báo tiến độ:
+
+**M1 đã ký.** Chữ ký ghi ở `STATE.md` §8 (ngày 2026-11-25, người ký Tiến): 9/9 §16 ĐẠT (G1, PR #27), probe bổ sung 4/4 PASS. §16.5 và OQ-161 chưa quyết nên em My ghi rõ là giữ mặc định hiện tại, quyết sau (OQ-161 trước M2 nếu chạm FB lồng có IN_OUT).
+
+**File hướng dẫn đã viết:** `docs/verify-owner-guide.md` — đủ 7 việc chỉ anh làm được, chi tiết lệnh + số kỳ vọng + cách báo lại, kèm mục verify sau này. Từ giờ mục verify nào mới em My cũng viết chi tiết vào file này.
+
+**OWNER-INBOX đã cập nhật:** D-005 chọn B (làm P0.9 ngay sau khi ký M1); thêm D-006 (§16.5, đang mở); bảng ký duyệt sửa lại cho đúng (M0 từng để "chưa yêu cầu" dù đã ký).
+
+Commit local `3ca09d6` (3 file, +260/−13) trên nhánh `m1/sign-m1`. Trình duyệt cloud đang đẩy PR → develop, chờ CI xanh rồi merge. Xong PR này em My đẩy main theo D-001, rồi làm P0.9 plan-first luôn, không dừng chờ anh.
+
+---
+Log tới thời điểm 2026-11-25 23:04 +07.
+---
+
+## 2026-11-25 23:04 +07 — Anh Tiến
+
+em viết lại prompt về lên lịch backup cây làm việc dự án hiện tại và chat log để anh áp dụng với tài khoản ai của bạn anh tương tự nhé. Đề xuất thêm cách làm để đảm bảo tính liên tục công việc và Muse AI training khi anh phải chuyển từ làm việc với acc này sang một acc mới
+
+## 2026-11-25 23:04 +07 — TraMuse
+
+TraMuse viết xong rồi, anh Tiến ạ. File gồm 2 phần:
+
+**Phần A — prompt dán cho AI mới**, viết lại đúng setup đang chạy thật ở đây: script backup tar.gz gồm `.git`, chỉ snapshot khi hash nội dung đổi, giữ 12 bản, cron 30 phút, im lặng khi ổn, luật cứng bảo vệ `.git`/rsync; và chat log lưu mọi trao đổi, append ngay sau mỗi lượt, đẩy GitHub 30 phút chỉ khi đổi lên nhánh riêng `chat-logs`, không bao giờ lên develop/main, kèm checklist 5 phút để anh tự kiểm acc mới làm đúng không. Bạn anh chỉ cần thay các chỗ `<...>` cho đúng dự án của mình.
+
+**Phần B — đề xuất thêm cho việc chuyển acc**, có 1 điểm quan trọng cần nói rõ: Muse không fine-tune riêng theo từng tài khoản từ chat, nên đừng trông chờ "AI mới tự nhớ" — mọi thứ cần chuyển phải nằm trong file. TraMuse đề xuất gói bàn giao (MEMORY, STATE, OWNER-INBOX, AMENDMENTS, open-questions, transcript chat-log…), nguyên tắc "nguồn sự thật nằm ở repo, không nằm ở trí nhớ AI", prompt khởi động bắt acc mới tóm tắt lại 10 dòng để anh kiểm tra trước khi cho làm việc, kết nối lại GitHub/Gmail/Calendar + tạo token mới (không copy secret), và giai đoạn chồng lấn 1–2 tuần chạy shadow so gate rồi mới cắt.
+
+[Prompt backup + chat log, chuyển tài khoản](sandbox://workspace/your_files/prompt-backup-va-chatlog-chuyen-tai-khoan.md)
+
+Lưu ý nhỏ: PR ký M1 vẫn đang chạy trên trình duyệt cloud, chưa có kết quả về — xong em My báo anh, rồi mới đẩy main và làm P0.9.
+
+---
+Log tới thời điểm 2026-11-25 23:04 +07.
+---
