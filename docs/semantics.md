@@ -1026,3 +1026,33 @@ tập `X_TO_Y`/`BOOL_TO_*` (OQ-115); OQ-129 (`#fb.IN :=`); FC trả qua tên
 (OQ-112); lưới scan đều (OQ-130); đánh số DB 1..n (OQ-136); OV/ENO;
 OQ-083/084 layout (chờ PLCSIM E11); ngữ nghĩa std block P1.5; RLO/EN-gating
 LAD (OQ-184/185); LAD instance DB (OQ-188).
+
+## 19. PWA shell + kiosk (M0 §8.2–8.3, P0.9)
+
+**VERIFIED.** Manifest `manifest.webmanifest` (name "Virtual Commissioning
+Studio", short_name "VCS", display standalone, lang vi, theme #111827;
+icon 192/512 + 512 maskable + apple-touch 180 — PNG vẽ từ SVG bằng
+Playwright screenshot, không thêm dep). Service worker `sw.ts`
+(injectManifest — xem OQ-234): precache toàn bộ dist (107 entries,
+~13.9 MiB, `maximumFileSizeToCacheInBytes` 8 MiB vì chunk ts.worker của
+Monaco 6.93 MB); `directoryIndex: ''` — request "/" KHÔNG map sang
+precached index.html (nếu không, lúc online trả shell cũ trong cache thay
+vì index.html mới, lúc offline trả app nửa chết thay vì trang offline —
+trái OQ-219). Navigation NetworkOnly + `setCatchHandler` → precached
+`/offline.html` (trang tĩnh song ngữ vi/en); `/api` NetworkOnly, `/ws`
+không qua SW, POST không bao giờ cache. Server: `Cache-Control: no-cache`
+cho `/sw.js` + manifest (OQ-223). Cập nhật: banner "Có bản mới" khi SW mới
+chờ (workbox `waiting` → `onNeedRefresh`), không tự reload; editor bẩn
+(dirty) → `window.confirm` trước khi reload (OQ-222). Kiosk `?kiosk=1`:
+ẩn header controls + tab PLC Workspace, thanh kiosk (Fullscreen/Thoát),
+viewport `maximum-scale=1, user-scalable=no` chỉ trong kiosk; Wake Lock
+acquire khi vào kiosk + acquire lại khi tab hiện lại, release khi thoát
+(OQ-226/227/228; Fullscreen chỉ từ nút bấm — trình duyệt cấm tự động).
+Không có SW ở `vite dev` (OQ-231). E7.1–E7.5 xanh ở CI, E7.6 opt-in
+(`VCS_RUN_PWA_UPDATE=1`) xanh thủ công.
+
+**UNVERIFIED (chờ kiểm tay — xem `docs/verify-owner-guide.md` mục P0.9).**
+Kiosk trên tablet thật (cảm ứng, Fullscreen, Wake Lock, pull-to-refresh/
+zoom) chưa kiểm được bằng desktop Chromium; HTTPS cho LAN chưa quyết
+(D-007, ADR-0009 đề xuất A mkcert) nên PWA trên LAN qua HTTP vẫn không
+đăng ký được service worker — chỉ localhost đầy đủ.

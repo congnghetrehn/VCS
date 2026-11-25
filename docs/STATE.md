@@ -12,7 +12,7 @@
 
 - Milestone: **M1 — ĐÃ KÝ 2026-11-25** (M0 đã ký 2026-11-24, trên main `31c7200`; P1.1–P1.7 + G1 đã merge vào `develop` qua PR #20–#27)
 - Prompt đang làm / vừa xong: G1 — **✔ đã merge PR #27 `85ab770` vào `develop` 2026-11-25 16:48 +07**; **M1 ĐÃ KÝ 2026-11-25** (STATE §8). Tiếp theo: đẩy main per D-001, rồi P0.9 (chủ sản phẩm chọn làm, D-005: B).
-- Nhánh: `m1/sign-m1` (từ `8f11339` = G1 trên `develop` `85ab770`)
+- Nhánh: `m0/p0.9-pwa` (từ `3ca09d6` = M1 đã ký trên `develop` `b7cb601`, đã đẩy main `1a2beed3`)
 - Cập nhật lần cuối: 2026-11-25 bởi AI (M1 đã ký; đẩy main + P0.9 tiếp theo)
 
 ## 2. Tiến độ prompt
@@ -27,7 +27,7 @@
 | P0.6   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p06` install thật lẫn bản sao chính; vitest 438/438, e2e 5/5 local; bench guard PASS; kiểm cuộn 20 000 dòng: probe PASS 1 lần, đo tay 45,7–60,0 FPS — xem §13; OQ-062 đã quyết (a), A19)                                                                                         | PR #13, nhánh `m0/p0.6-web` (đã merge `471a2ec` 2026-11-24 16:48 +07, CI 8/8 xanh) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (438 test vitest, 35 file; 17 test unit mới + 5 e2e) + build xanh + smoke `GET /` | xem §13 |
 | P0.7   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p07` install thật lẫn bản sao chính; test 439/439 + coverage §13 PASS + e2e 5/5; bench baseline + hồi quy; đã merge PR #14 `0188cf8` vào `develop` 2026-11-24 17:24 +07, CI 8 successful + 2 skipped) | PR #14, nhánh `m0/p0.7-docs` (đã merge) | lint/typecheck/depcheck/test (+coverage)/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (439 test vitest, 35 file; 1 test ghim hash mới) + build xanh + bench PASS | xem §14 |
 | P0.8   | ✔ xong (gate xanh local; đã merge PR #19 `aecb372` vào `develop` 2026-11-25 00:31 +07, CI 8 successful + 2 skipped) | PR #19, nhánh `m0/p0.8-interfaces` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` + build xanh 2026-11-24 (507 test, 36 file; 68 test mới) + bench TagDB 4/4 + orchestrator 443.627 bước/s | xem §15; OQ-075…081 đóng |
-| P0.9   | ◐ đang làm (chủ sản phẩm chọn B ở D-005 ngày 2026-11-25, sau khi ký M1)                                                                                          |                                                   |                                                                                                                                                                           | plan-first; HTTPS cho LAN ghi ADR, không tự đổi bind              |
+| P0.9   | ◐ đang làm (chủ sản phẩm chọn B ở D-005 ngày 2026-11-25, sau khi ký M1; plan ở §23, 2026-11-25)                                                                                          | nhánh `m0/p0.9-pwa` (plan) |                                                                                                                                                                           | plan-first; HTTPS cho LAN ghi ADR-0009, D-007 chờ owner quyết, không tự đổi bind              |
 | G0     | ✔ đã ký 2026-11-24 (gói bằng chứng `docs/acceptance/M0.md`, 12/12 §15 ĐẠT; probe bổ sung 3/3 PASS; Windows 439/439 sau fix OQ-074) | nhánh `m0/g0-acceptance` (đã merge PR #15) | gate xanh 2026-11-24 ở bản sao sạch (439 test + coverage PASS, e2e 5/5, bench PASS, hash ghim khớp 2 lần chạy) | gói nghiệm thu M0 |
 | P1.1   | ✔ xong (gate xanh local; đã merge PR #20 `8b3dbb6` vào `develop` 2026-11-25 01:13 +07, CI xanh) | PR #20, nhánh `m1/p1.1-runtime-iec` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (651 test, 40 file; 144 test mới) + build xanh + bench guard PASS | xem §16; OQ-082…091 đóng |
 | P1.2   | ✔ xong (gate xanh local; đã merge PR #21 `278e3af` vào `develop` 2026-11-25 05:13 +07, CI 8 successful + 2 skipped) | PR #21, nhánh `m1/p1.2-scl-parser` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (746 test, 42 file; 95 test mới) + build xanh + bench guard PASS | xem §17; OQ-092…104 đóng, OQ-105 mở |
@@ -3042,3 +3042,164 @@ sau mỗi bước; baseline 127 scan/s, heap PASS):**
 - **Rủi ro còn lại:** bench đo trên VM share 1.5 CPU — số tuyệt đối dao động
   theo tải (1652 vs 1660 giữa 2 lần chạy); biên 66% đủ lớn. CI bench job
   là manual/nightly (skipped ở PR) nên gate bench là local.
+
+## 23. P0.9 — PWA shell + ADR HTTPS cho LAN (plan, 2026-11-25)
+
+**Prompt P0.9 (nguyên văn):** "Làm P0.9 theo AGENTS.md §9. Đọc: … → docs/skills/SKILL-ui-pwa-hmi.md §9 (PWA) + M0 §8.2–8.3. Nhiệm vụ: PWA tối thiểu cho apps/web: manifest, service worker (precache tài nguyên tĩnh; KHÔNG cache /api và WebSocket), trang offline, thông báo bản cập nhật, chế độ kiosk (?kiosk=1, Fullscreen, Wake Lock có kiểm tính khả dụng). Ghi ADR về HTTPS cho truy cập LAN (service worker chỉ chạy trên HTTPS/localhost) — đề xuất phương án (mkcert/reverse proxy) vào OWNER-INBOX mục D, KHÔNG tự đổi bind mặc định. Gate: Playwright: manifest hợp lệ, service worker đăng ký trên localhost, offline fallback hiện khi server tắt, /api không bị cache."
+
+**Tóm tắt hiểu biết (7 dòng):** (1) P0.9 là prompt tùy chọn ngoài M0–M5 (skill UI §9): PWA tối thiểu cho `apps/web` — cài đặt như ứng dụng, kiosk cho tablet witness, trang offline — nhưng **không** phải chạy mô phỏng offline (mô phỏng chạy trên server Node, A10/E6). (2) Hiện trạng web: React 19 + Vite 8.3.7 + Tailwind 4 + Monaco 0.57.0, **chưa có** manifest/SW/kiosk (grep `kiosk|serviceWorker|manifest` trong `apps/web/src` + `apps/server/src`: 0 kết quả); `index.html` chỉ có viewport + title. (3) Server phục vụ `apps/web/dist` qua `@fastify/static` (prefix `/`, không header cache riêng, **không** SPA fallback — OQ-057) — SW/manifest/offline.html nằm trong dist là phục vụ được, nhưng cần header `no-cache` riêng cho `sw.js` + manifest (OQ-223). (4) SW chỉ sống trên secure context: `localhost` OK, `http://192.168.x.x` KHÔNG — quyết HTTPS cho LAN là việc của owner (D-007), P0.9 chỉ viết ADR đề xuất, không đổi bind, không thêm TLS vào server. (5) Cập nhật: banner "Có bản mới — tải lại", **không** tự reload giữa lúc đang chạy/chỉnh sửa (skill §9). (6) Kiosk `?kiosk=1`: Fullscreen cần user gesture, Wake Lock xin lại khi tab hiện lại, chặn pull-to-refresh/zoom ngoài ý muốn. (7) Gate P0.9 = Playwright E7 (manifest, SW đăng ký, offline fallback, /api không cache) + full gate hiện có giữ xanh.
+
+**Đọc:** PROMPTS P0.9 (dòng 192); skill UI §9 (toàn bộ) + §10 (lỗi hay gặp: "cache nhầm `/api`", "PWA trên HTTP LAN không chạy") + §11 checklist PWA; M0 §8.2 (server: bind 127.0.0.1, `--host 0.0.0.0` in cảnh báo; static `@fastify/static` fallback `index.html`) + §8.3 (web: khung, Sim bar, Tags, Zustand, WS tự nối lại, i18n vi/en, a11y); AMENDMENTS A10/E6 (server Node, không Worker), D6 (mã diagnostic — P0.9 không thêm mã mới), D8 (file sinh tay); STATE §13 (P0.6: web unit test pure logic node, không jsdom; e2e workers: 1, webServer `vcs serve examples/hello-tags` port 4170) + §22 (P1.7: Monaco worker qua `?worker`; depcheck loại `/dist/`); `apps/web/vite.config.ts` (proxy /api + /ws → 127.0.0.1:4170, build ra dist); `apps/server/src/server.ts:112` (fastifyStatic, không setHeaders); `apps/web/src/App.tsx` (`wsUrl()` đã chọn `wss:` khi `https:` — WSS không cần sửa code khi lên HTTPS); `apps/web/src/main.tsx` (StrictMode — đăng ký SW phải idempotent); OWNER-INBOX D-005 (đã quyết B: làm P0.9 ngay; ADR đề xuất phương án, không đổi bind).
+
+**Phát hiện quan trọng (quyết định thiết kế):**
+1. **Plugin: `vite-plugin-pwa@2.0.0` (generateSW, Workbox 7.4.1)** — đã kiểm bằng `npm view`: bản 2.0.0 phát hành **2026-10-03** (53 ngày tuổi, thỏa quy tắc ≥ 14 ngày); peer `vite ^3–^8` khớp Vite 8.3.7; là **devDependency build-time** (SW sinh ra ở `vite build`, không phải runtime dep của app) nên không cần ADR riêng cho plugin (tiền lệ P0.5 tsup; khác P1.7 Monaco là dep runtime lớn → ADR-0008). Ghim chính xác `2.0.0`, lockfile. Phương án SW viết tay bị loại: phải tự sinh precache manifest theo hash build + tự quản lifecycle — đúng việc plugin đã làm, viết tay là phát minh lại Workbox.
+2. **Navigation fallback = trang offline riêng, không fallback về shell đã cache (OQ-219).** Shell không server là app nửa chết (tags rỗng, nút sim chết, WS reconnect chạy vô ích); `offline.html` nói rõ "không kết nối được server" + nút "Thử lại" mới là trạng thái thật. Workbox: navigation `NetworkFirst` → fallback `createHandlerBoundToURL('/offline.html')`.
+3. **`/api` và `/ws` không bao giờ qua cache (OQ-220).** Workbox chỉ cache GET theo rule mình khai; runtimeCaching = `networkOnly` cho `/api/*`; `/ws` là upgrade WebSocket, không phải fetch event nên SW không chạm được — ghi rõ trong semantics để không ai "sửa" sau này. POST/PUT không cache (Workbox mặc định GET-only).
+4. **Server phải set header cho `sw.js` + manifest (OQ-223).** `@fastify/static` mặc định không set `Cache-Control`; SW/manifest bị HTTP cache giữ sẽ làm cập nhật chậm/mất. Sửa nhỏ ở `server.ts` (`setHeaders` khi path là `/sw.js` hoặc `/manifest.webmanifest` → `no-cache`); asset khác giữ mặc định. Đây là thay đổi server duy nhất của P0.9.
+5. **Icon không cần dep mới (OQ-224).** Nguồn SVG vẽ tay `apps/web/public/icons/icon.svg`; PNG 192/512 + maskable 512 + apple-touch-icon 180 sinh bằng script `scripts/gen-pwa-icons.mjs` dùng Playwright chromium screenshot (`@playwright/test` đã có ở root, không thêm dep); PNG commit vào repo, script ghi cách sinh lại.
+6. **Kiosk là lớp phủ UI, không phải trang riêng.** `?kiosk=1` đọc ở `main.tsx` → store slice `pwa.kiosk`; App ẩn header controls + tab PLC Workspace (chỉ xem Tags + Sim bar + diagnostics — OQ-226); Fullscreen/Wake Lock là hàm trong `pwa.ts`, gọi từ nút bấm (không tự chạy khi load — trình duyệt chặn + gây bất ngờ). Thoát kiosk = nút bấm, không khóa hẳn.
+
+**Phạm vi:**
+- Mới: `apps/web/public/manifest.webmanifest` + `apps/web/public/icons/*` (SVG nguồn + PNG sinh) + `apps/web/public/offline.html` (tĩnh, song ngữ — OQ-232); `apps/web/src/pwa.ts` (đăng ký SW qua `virtual:pwa-register`, state cập nhật, helper kiosk/fullscreen/wake-lock, hàm thuần để unit test); `apps/web/vite.config.ts` (+ plugin `VitePWA`); `apps/web/package.json` (+ `vite-plugin-pwa@2.0.0` devDep); `apps/web/index.html` (link manifest, `theme-color`, `apple-touch-icon`); `apps/web/src/main.tsx` (đăng ký SW + đọc `?kiosk=1`); `apps/web/src/App.tsx` + `apps/web/src/store.ts` (slice `pwa`: `updateAvailable`, `kiosk`, `wakeLockSupported/held`; banner cập nhật + kiosk bar); `apps/web/src/i18n/{vi,en}.ts` (key `pwa.*`, `kiosk.*`); `apps/server/src/server.ts` (header `no-cache` cho `sw.js` + manifest — OQ-223); `scripts/gen-pwa-icons.mjs`; `apps/web/e2e/e7.spec.ts` (E7 — xem Test target); `docs/adr/0009-https-lan.md` (ADR HTTPS cho LAN — xem dưới); `docs/semantics.md` §19 (mới); `docs/verify-owner-guide.md` thêm mục kiểm tay kiosk trên tablet thật (xem Rủi ro 3).
+- Tái dùng (không viết lại): WS client + reconnect + banner `lastError` (P0.6 — trạng thái mất kết nối đã có; offline là tầng SW, không sửa WS); `wsUrl()` (đã chọn `wss:` khi `https:`); i18n vi/en; e2e helpers (`gotoTags`, `resetSim`); `scripts/ensure-web-dist.mjs` (E7 chạy trên dist đã build như E1–E6); `test:e2e` (không đổi script).
+- KHÔNG thuộc phạm vi: TLS trong server / đổi bind mặc định (D-005, D-007 quyết sau); push notification, background sync (skill §9: chưa có yêu cầu); SW ở `vite dev` (OQ-231); PWA cho `examples/` khác ngoài web chính; sửa E1–E6; sửa M0 §8.2–8.3 (P0.9 ngoài spec, không sửa spec); ADR khác ngoài 0009; `docs/facts/` mới; thay icon "đẹp" (cosmetic, thay sau).
+
+**Thiết kế (7 điểm):**
+1. **Manifest** (`public/manifest.webmanifest`, OQ-225): `name` "Virtual Commissioning Studio", `short_name` "VCS", `start_url` "/", `scope` "/", `display` "standalone", `lang` "vi" (cố định), `theme_color` "#111827" (khớp header dark `dark:bg-gray-900` ở App.tsx:113), `background_color` "#ffffff", icons 192/512 `any` + 512 `maskable`. `index.html` thêm `<link rel="manifest">` + `<meta name="theme-color">` + `<link rel="apple-touch-icon">`.
+2. **Service worker** (`vite.config.ts` → `VitePWA({ registerType: 'prompt', injectRegister: false, workbox: {...} })`, OQ-218/220/221): `globPatterns` toàn bộ dist assets; `maximumFileSizeToCacheInBytes: 5 MB` (mặc định Workbox 2 MB sẽ bỏ qua chunk Monaco lớn — build phải warn nếu file bị bỏ qua, ghi tổng precache vào log build); `runtimeCaching: [{ urlPattern: /^\/api\//, handler: 'NetworkOnly' }]`; `navigateFallback: '/offline.html'` (navigation NetworkFirst — OQ-219); `cleanupOutdatedCaches: true`; `skipWaiting: false`, `clientsClaim: false` (prompt model — OQ-222). Đăng ký ở `main.tsx` qua `registerSW` từ `virtual:pwa-register` (OQ-233: kiểm depcheck xanh; module ảo không thuộc rule `web-deps`).
+3. **Cập nhật** (OQ-222): SW mới → `onNeedRefresh` → store `updateAvailable = true` → banner "Có bản mới — tải lại" (i18n, có `data-testid="pwa-update-banner"` + nút `pwa-update-reload`); **không** tự reload. Bấm tải lại: nếu editor PLC đang dirty → hộp xác nhận ("Còn thay đổi chưa lưu — tải lại sẽ mất?"); sim đang RUNNING vẫn cho reload (state ở server, reload chỉ subscribe lại). `updateSW(true)` rồi `location.reload()` do plugin lo.
+4. **Trang offline** (`public/offline.html`, OQ-232): file tĩnh, không JS ngoài nút "Thử lại" (`location.reload()`), song ngữ vi (chính) + en (phụ), precache; không dùng i18n runtime. Hiển thị khi: SW đã đăng ký + server tắt + reload/điều hướng (navigation fallback).
+5. **Kiosk** (`pwa.ts` + App/store, OQ-226…229): `?kiosk=1` → `pwa.kiosk = true` (đọc 1 lần ở khởi động; đổi param cần reload — ghi rõ). Layout kiosk: ẩn nút đổi ngôn ngữ/dark mode + tab PLC Workspace; giữ tên project, badge kết nối, Sim bar, Tags, Diagnostics; kiosk bar có nút "Toàn màn hình" + "Thoát kiosk" + ghi chú Wake Lock khi không hỗ trợ. Fullscreen: `document.documentElement.requestFullscreen()` chỉ từ nút bấm, fail → bắt lỗi, kiosk chạy tiếp không fullscreen. Wake Lock: `navigator.wakeLock?.request('screen')` khi vào kiosk, xin lại ở `visibilitychange` → visible, release khi thoát; không hỗ trợ → ghi chú 1 dòng trong kiosk bar. Chống vuốt/zoom: CSS kiosk `overscroll-behavior: none` + `touch-action: manipulation` trên root; viewport `maximum-scale=1, user-scalable=no` **chỉ** khi kiosk (đổi meta động), chế độ thường giữ zoom (a11y P0.6).
+6. **Server header** (OQ-223): `fastifyStatic` thêm `setHeaders`: path `/sw.js` hoặc `/manifest.webmanifest` → `Cache-Control: no-cache`; còn lại mặc định. Không chạm route `/api` hay WS. Test: E7 đọc header response của `/sw.js`.
+7. **ADR-0009 HTTPS cho LAN** (xem bảng dưới — nội dung đầy đủ để triển khai chỉ việc chuyển thành file `docs/adr/0009-https-lan.md`): vấn đề là SW chỉ chạy trên secure context; `vcs serve` mặc định bind `127.0.0.1` → localhost OK; tablet FAT qua `http://192.168.x.x` → không secure → SW không đăng ký, không cài PWA. **Không** đổi bind, **không** thêm TLS vào server trong P0.9. Quyết định chọn phương án là **D-007 (owner)**.
+
+**Bảng A — ADR-0009: phương án HTTPS cho LAN (để triển khai viết thành file ADR):**
+
+| Phương án | Cách làm | Ưu | Nhược | Ghi chú |
+|---|---|---|---|---|
+| **A — mkcert (đề xuất)** | `mkcert -install` 1 lần trên máy chủ (tạo CA nội bộ tin cậy local) + `mkcert <tên-máy/IP-LAN>` tạo cert; server dùng cert qua TLS (cần thêm TLS vào Fastify — việc riêng sau khi D-007 quyết, không trong P0.9); cài CA root mkcert lên từng tablet (1 lần/tablet) | 1 lệnh, không thêm service chạy thường trực; cert tin cậy nội bộ, trình duyệt không cảnh báo sau khi cài CA | CA phải cài tay trên mỗi tablet; cert có hạn, cần gia hạn theo chu kỳ mkcert; cần cấu hình TLS ở server (chưa có) | `wsUrl()` đã chọn `wss:` khi `https:` nên WS theo tự động, không sửa code web |
+| B — Reverse proxy TLS (Caddy/nginx) | Proxy đứng trước server, terminate TLS bằng cert nội bộ/self-signed (trust trên tablet) hoặc cert từ CA nội bộ sẵn có; passthrough `wss://` | Không sửa code server; tách bạch TLS khỏi app | Thêm 1 service cần vận hành + cấu hình proxy (đặc biệt passthrough WebSocket) | Cân nhắc nếu đã có hạ tầng proxy |
+| C — Chỉ localhost (không LAN PWA) | Không làm gì: tablet dùng trình duyệt thường qua http, không cài PWA, không SW; witness xem qua máy chủ hoặc remote desktop | Không việc thêm | Mất offline/update/kiosk trên tablet | Phương án dự phòng nếu A/B đều không muốn làm |
+
+**Bảng B — SW xử lý từng loại request (tính tay từ thiết kế điểm 2, dùng làm kỳ vọng test):**
+
+| Request | SW làm gì | Vì sao |
+|---|---|---|
+| GET `/` (navigation, server chạy) | NetworkFirst → trả `index.html` mới từ server | Luôn lấy shell mới nhất khi có mạng |
+| GET `/` (navigation, server tắt) | Network fail → trả precached `/offline.html` | Trạng thái thật là offline, không đưa app nửa chết |
+| GET `/assets/*`, `/manifest.webmanifest`, `/icons/*` (đã precache) | Trả từ precache | Tài nguyên tĩnh có hash, không đổi theo bản |
+| GET `/sw.js` | Trình duyệt tự fetch với `no-cache` (header server OQ-223); không nằm trong precache | SW mới phải được kiểm tra mỗi lần load |
+| GET `/api/*` | NetworkOnly — không đọc/không ghi cache | Dữ liệu live; cache là sai (lỗi hay gặp skill §10) |
+| `/ws` (WebSocket upgrade) | SW không chạm (không phải fetch event) | WS không đi qua Cache Storage |
+| POST/PUT bất kỳ | Không cache (Workbox mặc định chỉ GET) | Ghi không được cache |
+
+**Bảng C — Ma trận kiosk theo khả năng thiết bị (tính tay, dùng làm kỳ vọng test + kiểm tay):**
+
+| Khả năng | Có | Không có |
+|---|---|---|
+| Fullscreen API | Kiosk toàn màn hình | Kiosk vẫn chạy trong cửa sổ trình duyệt, ghi chú trong kiosk bar |
+| Wake Lock | Màn hình thức trong kiosk | Ghi chú "thiết bị không hỗ trợ Wake Lock", màn hình tắt theo hệ thống |
+| Secure context (localhost) | PWA đầy đủ (SW + cài đặt) | http LAN → không SW/không cài được, cần D-007 |
+| `?kiosk=1` | Layout kiosk | Layout thường |
+
+**Dependencies mới:**
+- `apps/web`: **`vite-plugin-pwa@2.0.0`** (devDependency, build-time; đã kiểm `npm view`: 2.0.0 phát hành 2026-10-03, 53 ngày tuổi — thỏa ≥ 14 ngày; peer `vite ^3–^8` khớp 8.3.7, `workbox-build`/`workbox-window ^7.4.1` đi kèm). Ghim chính xác; lockfile thêm importer + workbox. Không dep runtime mới cho app (Workbox runtime chỉ nằm trong `sw.js` sinh ra, không import vào bundle). Không ADR riêng cho plugin (devDep build-time, tiền lệ tsup P0.5; khác Monaco runtime → ADR-0008).
+- Không dep mới cho server (chỉ `setHeaders`, API sẵn của `@fastify/static`), không dep mới cho icon (script dùng `@playwright/test` đã có).
+- Lockfile: chỉ thêm importer `vite-plugin-pwa` + `workbox-*` ở `apps/web`; `pnpm-lock.yaml` sinh bằng `pnpm install` thật trong `/tmp` rồi chép về (tiền lệ OQ-007 — không `pnpm add` tại chỗ trong `~/workspace/vcs`).
+
+**Test target (≥ 17 mới, tổng ≥ 1944):**
+
+| Nhóm | File | Số lượng |
+|---|---|---|
+| web unit (12) | `apps/web/src/pwa.test.ts` (mới) | `parseKioskParam` (?kiosk=1/0/thiếu/sai → true/false); `isCacheableRequest` (bảng B: /api → false, /ws → false, POST → false, /assets → true, / → navigation); `shouldShowUpdateBanner` (waiting + !dirty → true; dirty → confirm); `wakeLockAvailable` (navigator-like giả); `offlinePage` content check (chuỗi vi/en có mặt); manifest object validate (field bắt buộc, icon đủ size) |
+| e2e E7 (5) | `apps/web/e2e/e7.spec.ts` (mới) | E7.1 manifest hợp lệ (fetch `/manifest.webmanifest`: name/short_name/start_url/display/icons + từng icon 200); E7.2 SW đăng ký trên localhost (`navigator.serviceWorker.ready` + `registration.active` sau `gotoTags`); E7.3 offline fallback (load app → SW active → `context.setOffline(true)` → reload → trang offline hiện, có nút "Thử lại"); E7.4 `/api` không bị cache (offline → `fetch('/api/health')` phải lỗi, không trả từ cache); E7.5 header `/sw.js` có `Cache-Control: no-cache` |
+| e2e update (1, opt-in) | `apps/web/e2e/e7.spec.ts` (cùng file, skip mặc định) | E7.6 banner cập nhật: chỉ chạy khi `VCS_RUN_PWA_UPDATE=1` (tiền lệ perf-scroll — OQ-230): sửa comment trong source → `vite build` → `registration.update()` → banner "Có bản mới" hiện; cleanup try/finally (`git checkout` file + build lại). Implementer chạy tay với flag trước merge, dán kết quả |
+| hồi quy | E1–E6 (cũ) | Phải xanh nguyên — SW không được phục vụ shell cũ làm sai E1–E6 (Playwright dùng profile mới mỗi lần chạy nên không dính SW cũ; ghi rõ nếu E1–E6 đỏ sau khi thêm SW thì lỗi ở SW, không sửa kỳ vọng cũ) |
+
+Tổng bảng = 12 + 5 + 1 = **18 test mới** (tổng ≥ 1945). Coverage: web không có ngưỡng coverage (tiền lệ P0.6); `pwa.ts` hàm thuần phải có test cho mọi nhánh (không `any`, không chuỗi cứng — qua i18n). Thứ tự triển khai đề xuất: manifest + icons + offline.html → vite config + SW đăng ký → server header → banner cập nhật → kiosk → E7 (E7.1–E7.5 trước, E7.6 chạy tay cuối) → ADR-0009 + semantics §19.
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** vị trí file theo M0 §8.2–8.3 + dep graph (mọi thứ PWA ở `apps/web`, trừ header ở `apps/server/src/server.ts`); `vite-plugin-pwa@2.0.0` generateSW (đã kiểm ngày phát hành, devDep, không ADR riêng); icon SVG vẽ tay + PNG sinh bằng Playwright (không dep mới); thứ tự triển khai trên; offline page không dùng i18n runtime; `start_url` "/" (không kiosk). **Tier B (mặc định + ghi OQ + R-005):** OQ-218 (plugin generateSW vs SW viết tay); OQ-219 (navigation fallback → offline.html riêng, không về shell cache); OQ-220 (NetworkOnly cho /api, /ws không chạm, POST không cache); OQ-221 (precache toàn dist, `maximumFileSizeToCacheInBytes` 5 MB, đo tổng precache ở build); OQ-222 (prompt update, không tự reload; dirty editor → confirm; RUNNING vẫn cho reload); OQ-223 (header `no-cache` cho sw.js + manifest); OQ-224 (icon SVG nguồn + PNG sinh bằng script Playwright); OQ-225 (manifest: name/short_name/display/lang vi cố định/theme #111827); OQ-226 (kiosk ẩn header controls + tab PLC Workspace); OQ-227 (Fullscreen chỉ từ nút bấm, fail thì chạy tiếp); OQ-228 (Wake Lock xin lại khi visible, không hỗ trợ thì ghi chú); OQ-229 (chặn pull-to-refresh/zoom: CSS kiosk + viewport maximum-scale chỉ khi kiosk); OQ-230 (E7.6 update chỉ chạy với `VCS_RUN_PWA_UPDATE=1`); OQ-231 (không bật SW ở `vite dev`); OQ-232 (offline.html tĩnh song ngữ); OQ-233 (`virtual:pwa-register` kiểm depcheck xanh). **Tier C (không có mục chặn P0.9):** D-007 (chọn phương án HTTPS cho LAN: A mkcert / B reverse proxy / C chỉ localhost) — là quyết định của owner, nhưng **không chặn** P0.9 vì PWA chạy đủ trên localhost; ADR-0009 chỉ đề xuất, không quyết. Không đổi bind mặc định (D-005), không thêm TLS vào server, không hạ ngưỡng, không thêm dep runtime lớn. Nếu khi triển khai phát hiện `vite-plugin-pwa` 2.0.0 không tương thích Vite 8.3.7 (dù peer khai ^8) → dừng, báo + đề xuất (không tự hạ Vite hay đổi plugin). **Triển khai liên tục (chủ sản phẩm 2026-11-25 12:11 +07):** plan không có tier C chặn → sau plan, triển khai → tự kiểm gate → PR → merge, không dừng chờ.
+
+**Rủi ro top-3:**
+1. **SW phục vụ shell cũ** (sau deploy user thấy bản cũ; E1–E6 sai vì cache). Giảm: prompt-update (không auto), SW update check mỗi lần load, e2e profile mới mỗi lần chạy. Nếu E1–E6 đỏ sau khi thêm SW → lỗi ở SW, không sửa kỳ vọng cũ.
+2. **Precache bỏ qua chunk Monaco lớn** (Workbox mặc định 2 MB/file) → offline thiếu editor. Giảm: `maximumFileSizeToCacheInBytes` 5 MB + build warn nếu file bị bỏ qua + đo tổng precache. Lưu ý: editor offline không phải yêu cầu (không server thì không mô phỏng được) — chỉ shell + offline page mới bắt buộc.
+3. **Kiosk trên tablet thật chưa kiểm được ở P0.9** (gate chỉ có Chromium desktop qua Playwright; iPad/Android: Fullscreen API, Wake Lock, cài PWA hành vi khác nhau theo hãng — SUY ĐOÁN, chưa có mẫu thật). Giảm: ghi rõ trong `docs/semantics.md` §19 là UNVERIFIED + thêm mục kiểm tay vào `docs/verify-owner-guide.md` ở triển khai (mở app trên tablet thật với `?kiosk=1`, kiểm fullscreen/wake lock/cài đặt); không chặn merge P0.9.
+
+**Kết quả triển khai (2026-11-26):** 1 commit feat (sau plan `66607f9`). **19 test
+mới (18 unit `pwa.test.ts` + E7.6 opt-in), tổng 1946/1946 (77 files)** — vượt
+mục tiêu ≥ 18/≥ 1945 (plan tính 12 unit, thực tế 19: parseKioskParam 4,
+classifyRequest 7, banner/confirm 4, wakeLock 2, offline 1, manifest 1).
+E2E: **E1–E7.5 11/11 xanh** (E7.6 skip mặc định) + **E7.6 xanh thủ công với
+`VCS_RUN_PWA_UPDATE=1`** (24.2s). Gate trên bản copy sạch (real install):
+lint 0, typecheck 0, depcheck 0 (126 modules), test 1946/1946, review:cheats
+SẠCH, diagnostics --check khớp (51 codes), build OK (precache 107 entries,
+13.9 MiB), bench PASS (TagDB 51.1M ops/s; orchestrator 520,108 steps/s;
+softplc 1,684 scan/s ≥ 1000; heap +0.22 MB).
+
+**Lệch plan (ghi OQ-234 + cập nhật OQ-221/230/218):**
+1. **OQ-218 — generateSW → injectManifest (OQ-234 mới).** `generateSW` +
+   `navigateFallback` không làm được bảng B: Workbox `navigateFallback`
+   đăng ký NavigationRoute trả precached fallback cho MỌI navigation, không
+   bao giờ chạm network (đọc `workbox-build@7.4.1` templates/sw-template.js
+   + docs vite-pwa injectManifest). Với `navigateFallback: '/offline.html'`,
+   navigation lúc online sẽ trả offline.html thay vì index.html mới — trái
+   bảng B. Đổi sang **injectManifest** (cùng plugin 2.0.0, plugin vẫn sinh
+   precache manifest; chỉ routing viết tay trong `src/sw.ts`): NavigationRoute
+   NetworkOnly + `setCatchHandler` → precached `/offline.html`;
+   `precacheAndRoute(manifest, { directoryIndex: '' })` (chuỗi rỗng = tắt
+   map "/" → "/index.html"; type workbox chỉ nhận string, `null` không qua
+   typecheck nhưng runtime cần falsy). Cùng plugin, cùng gate, cùng file —
+   sửa cơ chế, không phải tier C.
+2. **OQ-221 — `maximumFileSizeToCacheInBytes` 5 MB → 8 MiB.** Build đầu lỗi
+   ở hook PWA: chunk `ts.worker` của Monaco 6,927,783 bytes (> 5 MB);
+   vite-plugin-pwa 2.0.0 biến asset quá giới hạn thành **lỗi build** (không
+   chỉ warn). Đặt 8 MiB, có comment ghi số đo.
+3. **`workbox-window@7.4.1` thêm làm devDep trực tiếp của `@vcs/web`.**
+   Build 2 lỗi Rolldown: không resolve được `workbox-window` từ
+   `virtual:pwa-register` (pnpm strict node_modules không expose dep của
+   plugin cho app). Guide React của vite-plugin-pwa yêu cầu dep này.
+4. **`pwa.ts` helper tên `classifyRequest`** (trả 3 giá trị
+   `'precache' | 'navigation' | 'network-only'`) thay cho `isCacheableRequest`
+   của plan — `/` cần kết quả thứ ba 'navigation'.
+5. **`shouldShowUpdateBanner(waiting)` + `reloadNeedsConfirm(dirty)` tách
+   riêng** thay cho 1 hàm 2 tham số (banner hiện khi có update chờ; dirty
+   chỉ đổi hành động reload).
+6. **Đăng ký SW tách:** `pwa.ts` thuần (test node) vs `pwa-register.ts`
+   (import `virtual:pwa-register`, chỉ browser, chỉ main.tsx import) — plan
+   đặt đăng ký trong pwa.ts sẽ làm vỡ unit test node.
+7. **Thoát kiosk xóa `?kiosk=1` khỏi URL** (replaceState) để reload sau không
+   tự vào lại kiosk.
+8. **E7.6 probe đổi từ comment sang câu lệnh thật.** Comment trong source bị
+   Vite production build strip → bundle không đổi hash → SW không thấy bản
+   mới → banner không hiện (E7.6 đỏ lần đầu, 41.7s). Probe mới gán
+   `window.__e76probe = 1` (side effect, minifier giữ lại); finally khôi
+   phục source nguyên văn + build lại (đã kiểm: App.tsx giống hệt cây live,
+   dist về đúng hash bundle gốc).
+9. **`server.ts` setHeaders dùng `reply.header(...)`** (FastifyReply), không
+   phải `res.setHeader(...)` — type `@fastify/static@10` là FastifyReply;
+   lint + typecheck bắt, đã sửa.
+10. **`sw.ts` catch handler dùng `request` riêng** (RouteHandlerCallbackOptions
+    có `request` ngang hàng `event`, không nằm trong `event`); `getCacheKeyForURL`
+    là đồng bộ (`string | undefined`), không `await`.
+11. **Test `classifyRequest(':::', ...)` sai kỳ vọng:** `':::'` parse được
+    (pathname `/:::`) nên implementation trả 'precache' là đúng; test sửa
+    sang URL tuyệt đối sai cú pháp `'http://[::1'` (ném thật) — lỗi test-code,
+    không sửa kỳ vọng để cho xanh.
+12. **E7.6 skip vào allow-list** `scripts/check-cheats.allow.json`
+    (`test-skip`, max 1, lý do OQ-230) — cơ chế allow-list của gate
+    (AGENTS §6), không nới rule.
+13. **Sự cố dist cũ (bug quy trình, không phải code P0.9):** e2e lần đầu đỏ
+    4 test (E6, E7.2–E7.4) — nguyên nhân: cây live còn `apps/web/dist/` từ
+    thời M1 (pre-P1.7, 2026-11-24 23:50, gitignored) và rsync live→/tmp
+    (không --delete) đã chép đè `index.html` cũ lên bản build mới trong bản
+    copy gate → app phục vụ là bundle pre-P1.7 (không có PLC Workspace, không
+    có code đăng ký SW); `ensure-web-dist.mjs` chỉ build khi thiếu index.html
+    nên không phát hiện. Sửa: xóa `apps/*/dist` khỏi cây live (build output,
+    gitignored), build lại mới trong bản copy gate → e2e 11/11 xanh. Bài học:
+    rsync về sau loại trừ cả `dist` (đã thêm vào lệnh rsync); không giữ dist
+    trong cây live.
+
+**OQ-218…233 đóng (applied); OQ-234 mới (tier B, applied). OQ-161, D-006,
+D-007 vẫn mở (không chặn P0.9).** ADR-0009 đã viết (đề xuất A mkcert, chưa
+quyết); `docs/semantics.md` §19 mới (kiosk tablet thật = UNVERIFIED);
+`docs/verify-owner-guide.md` thêm mục P0.9 (kiosk tablet + D-007).
