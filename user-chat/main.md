@@ -1613,3 +1613,25 @@ Một điểm cần anh phán (§16.5, đã ghi trong M1.md): POINTER/ANY ra SCL
 ---
 Log tới thời điểm 2026-11-25 16:48 +07.
 ---
+
+## 2026-11-25 18:57 +07 — Anh Tiến
+
+Nghiệm thu M1 cần những kiểm tay gì? Em làm hộ anh luôn nếu có thể. Sau đó báo kết quả kèm ảnh chụp, như nghiệm thu M0
+A chỉ check kết quả và làm tay phần e ko thể test
+
+## 2026-11-25 19:08 +07 — TraMuse
+
+Probe kiểm tay M1 xong, anh Tiến ạ. TraMuse chạy hộ phần làm được trên VM: **4/4 probe PASS, 0 FAIL**. Báo cáo đầy đủ: `~/workspace/vcs-probe-results-m1/PROBE-REPORT.md` (17 ảnh trong `shots/`).
+
+- Probe 1 — Demo A–D qua UI (Watch + force + Step): **24/24 check**, chạy 3 lần đều xanh. Tính tay độc lập kịch bản B khớp UI ở cả 5 mốc: ET=0 @200, 2900 @3100, 3000 @3200 → RUN=0/FAULT=1, ET=0 @3300. Lần chạy 1 bị 23/24 do đọc Watch trước kỳ đẩy 10 Hz (giá trị cũ) — đã chờ 400 ms sau mỗi Step rồi chạy lại, 2 lần sau 24/24.
+- Probe 2 — 5 lỗi cú pháp/kiểu mới: **5/5 vị trí chính xác từng ký tự** (P001 3:16, T001 9:9, T002 9:9, T004 3:3, T005 11:5; exit 2). Lưu ý E3: TraMuse đoán T010, compiler báo T002 — đối chiếu catalog thì T002 mới đúng (Int→Bool là mismatch, không phải narrowing).
+- Probe 3 — STRING → SCL-U001 (3,7), POINTER → SCL-T001 (3,7), exit 2, có vị trí + hint. Không cấu trúc nào chạy sai im lặng.
+- Probe 4 — Snapshot → chạy → restore → chạy lại qua API SoftPlc: trace 4 scan sau restore **giống hệt từng byte**, scanCount quay về 3 rồi đếm lại 4–7.
+
+Ảnh đính kèm: workspace/Build OK, Watch kịch bản B lúc t=3200 (ET=3000, RUN=0, FAULT=1) và t=3300 (ET=0), output CLI probe 2+3.
+
+Phần chỉ anh làm được (đã liệt kê cuối báo cáo): bench trên máy anh, rà semantics §15–§16, VERIFY §14 với PLCSIM + mã thật, gate Windows thật, quyết OQ-161, phán §16.5, ký M1. Quan sát thêm (không phải lỗi): cột Ghi/Force trong bảng Watch hơi chật ở 1280px, chữ dính nhau — chỉ trình bày, giá trị vẫn đọc được.
+
+---
+Log tới thời điểm 2026-11-25 19:08 +07.
+---
