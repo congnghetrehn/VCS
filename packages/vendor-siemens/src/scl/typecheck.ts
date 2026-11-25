@@ -9,7 +9,7 @@
 import type { Diagnostic } from '@vcs/schemas';
 import { diag, SCL_CATALOG, sortDiagnostics } from '@vcs/schemas';
 import type { IrBlock, IrDb, IrExpr, IrField, IrInterface, IrLValue, IrStmt, IrType, IrUdt, IrVar, PrimitiveType, SrcRef } from '@vcs/runtime-iec';
-import { isBitStringType, isFloatType, isIntegerType, layoutStruct } from '@vcs/runtime-iec';
+import { isBitStringType, isFloatType, isIntegerType, layoutStruct, stdBlockInterface, getStdBlockDef } from '@vcs/runtime-iec';
 import type { FieldDecl, FieldType } from '@vcs/runtime-iec';
 import type {
   CallExpr,
@@ -92,7 +92,8 @@ const CANONICAL_ELEM: Record<string, PrimitiveType> = {
   time: 'Time',
 };
 
-/** System FB (M1 §9, P1.5) — ở P1.3 chưa có layout std → SCL-U001 (OQ-111). */
+/** System FB (M1 §9, P1.5) — layout + handler std ở `runtime-iec/std`
+ * (OQ-111 đã áp dụng ở P1.5; OQ-162 một nguồn sự thật ở runtime-iec). */
 export const SYSTEM_FB_NAMES: ReadonlySet<string> = new Set([
   'TON',
   'TOF',
@@ -550,6 +551,9 @@ export interface LayoutFieldDecl {
   name: string;
   type: IrType;
   init?: number | boolean;
+  /** Field nội bộ của system block (OQ-163): có trong layout, không truy
+   * cập được từ SCL — `layoutIrFields` chép sang IrField. */
+  hidden?: boolean;
 }
 
 /**
@@ -573,6 +577,7 @@ export function layoutIrFields(decls: readonly LayoutFieldDecl[]): { fields: IrF
     };
     if (info.bitOffset !== undefined) f.bitOffset = info.bitOffset;
     if (decl.init !== undefined) f.init = decl.init;
+    if (decl.hidden === true) f.hidden = true;
     return f;
   });
   return { fields, size: layout.size };
@@ -752,8 +757,12 @@ class Typechecker {
     return undefined;
   }
 
-  /** Interface IrInterface của một block (file hoặc ctx), theo tên. */
+  /** Interface IrInterface của một block (file hoặc ctx), theo tên.
+   * Tên std → interface từ `runtime-iec/std` (OQ-162 — không duplicate
+   * bảng interface ở vendor-siemens). */
   private lookupInterface(name: string, ident: boolean): IrInterface | undefined {
+    const std = stdBlockInterface(name);
+    if (std !== undefined) return std;
     const block = this.findBlock(name, ident);
     if (block === undefined) return undefined;
     if ('interface' in block) {
@@ -773,10 +782,18 @@ class Typechecker {
 
   // ---------------------------------------------------------- phân giải kiểu
 
-  /** Phân giải SclType → IrType (+ fbType nếu là instance FB). */
+  /**
+   * Phân giải SclType → IrType (+ fbType nếu là instance FB).
+   * `placement`: kiểu std chỉ chấp nhận ở VAR (static) của block hoặc
+   * DATA_BLOCK (OQ-171) — ở vị trí khác (VAR_TEMP, VAR_INPUT/OUTPUT/
+   * IN_OUT, kiểu trả FC, phần tử mảng, field struct/UDT/DB) → SCL-T004.
+   * Đệ quy vào struct/mảng luôn dùng 'other' (struct/mảng không chứa
+   * được instance — quy tắc T005 cũ vẫn giữ cho FB người dùng).
+   */
   private resolveTypeNode(
     type: SclType,
     scope: BlockSymbols,
+    placement: 'static' | 'other' = 'other',
   ): { type: IrType; fbType?: string } | undefined {
     switch (type.kind) {
       case 'elementary': {
@@ -789,7 +806,7 @@ class Typechecker {
           this.err('SCL-T005', type.loc, `mảng [${String(type.lo)}..${String(type.hi)}]: lo > hi`);
           return undefined;
         }
-        const elem = this.resolveTypeNode(type.elem, scope);
+        const elem = this.resolveTypeNode(type.elem, scope, 'other');
         if (elem === undefined) return undefined;
         if (elem.fbType !== undefined) {
           this.err('SCL-T005', type.loc, 'mảng không chứa được instance FB');
@@ -811,7 +828,7 @@ class Typechecker {
             continue;
           }
           seen.add(lower);
-          const resolved = this.resolveTypeNode(field.type, scope);
+          const resolved = this.resolveTypeNode(field.type, scope, 'other');
           if (resolved === undefined) continue;
           if (resolved.fbType !== undefined) {
             this.err('SCL-T005', field.type.loc, `struct không chứa được instance FB '${field.name}'`);
@@ -845,7 +862,18 @@ class Typechecker {
         const lower = type.name.toLowerCase();
         if (lower === 'string' || lower === 'wstring') return undefined; // parser đã báo SCL-U001
         if (SYSTEM_FB_NAMES.has(type.name.toUpperCase())) {
-          this.err('SCL-U001', type.loc, `kiểu '${type.name}' là system block, chưa hỗ trợ (P1.5)`);
+          if (placement === 'static') {
+            const def = getStdBlockDef(type.name);
+            if (def === undefined) return undefined; // không tới được (tên đã trong SYSTEM_FB_NAMES)
+            // Struct layout ĐẦY ĐỦ gồm hidden (dùng cho layout lồng — mục 6
+            // thiết kế §20); member ẩn bị chặn ở resolveLValue (OQ-163).
+            return { type: { kind: 'struct', fields: def.layout }, fbType: def.name };
+          }
+          this.err(
+            'SCL-T004',
+            type.loc,
+            `kiểu '${type.name}' là system block, chỉ dùng ở VAR (static) hoặc DATA_BLOCK`,
+          );
           return undefined;
         }
         const udt = this.getUdt(lower, type.loc);
@@ -955,7 +983,11 @@ class Typechecker {
             this.err('SCL-T009', nameLoc(decl), `tên đã khai báo: ${decl.name} (trùng tên FC)`);
             continue;
           }
-          const resolved = this.resolveTypeNode(decl.type, syms);
+          const resolved = this.resolveTypeNode(
+            decl.type,
+            syms,
+            sec === 'static' ? 'static' : 'other',
+          );
           if (resolved === undefined) {
             // Kiểu lỗi đã báo — đăng ký dummy để tránh lỗi dây chuyền.
             syms.vars.set(lower, { name: decl.name, section: sec, type: 'Int' });
@@ -1043,7 +1075,7 @@ class Typechecker {
       }
       // Kiểu trả của FC (để lower + kiểm tra call dùng).
       if (block.kind === 'FC' && block.returnType !== undefined) {
-        const rt = this.resolveTypeNode(block.returnType, syms);
+        const rt = this.resolveTypeNode(block.returnType, syms, 'other');
         if (rt !== undefined) {
           if (rt.fbType !== undefined) {
             this.err('SCL-T001', block.returnType.loc, 'FC không trả về instance FB');
@@ -1066,6 +1098,35 @@ class Typechecker {
     const done = this.dbs.get(key) ?? this.ctx.dbs.get(key);
     if (done !== undefined) return done;
     if (block.fbName !== undefined) {
+      const stdDef = getStdBlockDef(block.fbName);
+      if (stdDef !== undefined) {
+        // Instance DB của system block (OQ-163): layout trên toàn bộ field
+        // (public + hidden) qua layoutIrFields; `fields` chỉ public (lọc
+        // hidden như tiền lệ lọc IN_OUT ở OQ-125); `size` gồm hidden;
+        // `fbName` giữ tên std (lower phân biệt bằng SYSTEM_FB_NAMES).
+        const decls: LayoutFieldDecl[] = [...stdDef.input, ...stdDef.output, ...stdDef.hidden].map(
+          (f): LayoutFieldDecl => ({
+            name: f.name,
+            type: f.type,
+            ...(f.hidden === true ? { hidden: true } : {}),
+          }),
+        );
+        let laid: { fields: IrField[]; size: number };
+        try {
+          laid = layoutIrFields(decls);
+        } catch (e) {
+          this.err(
+            'SCL-T005',
+            block.loc,
+            `không tính được layout DB '${block.name}': ${e instanceof Error ? e.message : 'lỗi layout'}`,
+          );
+          return undefined;
+        }
+        const fields = laid.fields.filter((f) => f.hidden !== true);
+        const db: IrDb = { id: block.name, name: block.name, fbName: stdDef.name, fields, size: laid.size };
+        this.dbs.set(key, db);
+        return db;
+      }
       const fb = this.findBlock(block.fbName, false);
       if (fb === undefined || fb.kind !== 'FB') {
         this.err('SCL-T001', block.loc, `FB chưa biết: ${block.fbName}`);
@@ -1375,6 +1436,16 @@ class Typechecker {
             this.err('SCL-T005', elem.loc, `không có field '${elem.name}'`);
             return undefined;
           }
+          if (field.hidden === true) {
+            // Field nội bộ của system block (OQ-163): có trong layout
+            // nhưng không truy cập được từ SCL, ở mọi cấp (kể cả lồng).
+            this.err(
+              'SCL-T005',
+              elem.loc,
+              `field '${elem.name}' là trường nội bộ của system block, không truy cập được từ SCL`,
+            );
+            return undefined;
+          }
           current = field.type;
         } else if (typeof current !== 'string') {
           this.err('SCL-T005', elem.loc, `mảng không có member '${elem.name}'`);
@@ -1515,7 +1586,12 @@ class Typechecker {
     const block = this.findBlock(name, isIdent);
     if (block === undefined) {
       if (SYSTEM_FB_NAMES.has(name.toUpperCase())) {
-        this.err('SCL-U001', callee.loc, `system block '${name}' chưa hỗ trợ (P1.5)`);
+        // System block trong biểu thức → T004 (statement-only, OQ-175).
+        this.err(
+          'SCL-T004',
+          callee.loc,
+          `system block '${name}' chỉ gọi được dạng statement với instance (#tOn hoặc "DB")`,
+        );
       } else {
         this.err('SCL-T001', callee.loc, `tên chưa khai báo: ${isIdent ? name : `"${name}"`}`);
       }
@@ -2172,7 +2248,11 @@ class Typechecker {
         scope,
         assigned,
       );
-      this.recordEdge(sym.fbType.toLowerCase(), callee.loc);
+      // System block là lá, không đệ quy — `callSys` không có trong call
+      // graph (không sinh cạnh S020).
+      if (!SYSTEM_FB_NAMES.has(sym.fbType.toUpperCase())) {
+        this.recordEdge(sym.fbType.toLowerCase(), callee.loc);
+      }
       return;
     }
     if (callee.kind === 'global') {
@@ -2207,16 +2287,17 @@ class Typechecker {
           scope,
           assigned,
         );
-        this.recordEdge(db.fbName.toLowerCase(), callee.loc);
+        // System block là lá — `callSys` không có trong call graph.
+        if (!SYSTEM_FB_NAMES.has(db.fbName.toUpperCase())) {
+          this.recordEdge(db.fbName.toLowerCase(), callee.loc);
+        }
         return;
       }
       const block = this.findBlock(callee.name, false);
       if (block === undefined) {
-        if (SYSTEM_FB_NAMES.has(callee.name.toUpperCase())) {
-          this.err('SCL-U001', callee.loc, `system block '${callee.name}' chưa hỗ trợ (P1.5)`);
-        } else {
-          this.err('SCL-T001', callee.loc, `tên chưa khai báo: "${callee.name}"`);
-        }
+        // Tên std nhưng không có DB cùng tên: lỗi "chưa khai báo" (không
+        // phải "chưa hỗ trợ" — std đã hỗ trợ từ P1.5, chỉ thiếu instance DB).
+        this.err('SCL-T001', callee.loc, `tên chưa khai báo: "${callee.name}"`);
         return;
       }
       if (block.kind === 'FB') {
@@ -2258,7 +2339,9 @@ class Typechecker {
       return;
     }
     if (SYSTEM_FB_NAMES.has(name.toUpperCase())) {
-      this.err('SCL-U001', loc, `system block '${name}' chưa hỗ trợ (P1.5)`);
+      // Gọi system block không có instance (ident trần) → T004: đây là lỗi
+      // dùng sai, không phải "chưa hỗ trợ" (cùng thông điệp như FB thường).
+      this.err('SCL-T004', loc, `gọi system block '${name}' cần instance (#tOn hoặc "DB")`);
       return;
     }
     const block = this.findBlock(name, true);
@@ -2305,7 +2388,7 @@ class Typechecker {
    * Bỏ qua block cũng có trong file hiện tại — bản trong file mới hơn nên
    * cạnh từ ctx của chính block đó đã cũ (re-compile bỏ call → cạnh cũ phải
    * mất, nếu không sẽ báo đệ quy giả). `callSys` không có trong graph
-   * (system block chưa hỗ trợ, đã bị U001 chặn trước khi lower). */
+   * (system block là lá, typecheck không ghi cạnh — xem checkCallStmt). */
   private ctxCallEdges(): CallEdge[] {
     const out: CallEdge[] = [];
     const toLoc = (src: SrcRef | undefined): SrcLoc =>
