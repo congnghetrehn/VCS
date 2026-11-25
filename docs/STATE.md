@@ -11,9 +11,9 @@
 ## 1. Vị trí hiện tại
 
 - Milestone: **M0** (P0.1 đã merge vào `develop` qua PR #8, merge commit `e8707f2`, CI 6/6 xanh; P0.2 đã merge vào `develop` qua PR #9, merge commit `f3d769a`, CI 6/6 xanh sau sửa lỗi khai báo `workspace:*`)
-- Prompt đang làm / vừa xong: P1.2 — **✔ đã merge PR #21 `278e3af` vào `develop` 2026-11-25 05:13 +07** (CI xanh; STATE §17; OQ-092…104 đóng, OQ-105 mở). Tiếp theo: P1.3 plan-first (STATE §18; X-002/S1 vẫn mở nhưng không chặn P1.3 — làm theo §4.4/§6, xem §18 OQ-121).
-- Nhánh: `m1/p1.3-typecheck-lower` (từ `aa072ce` = nội dung `develop` sau merge PR #21, develop head `278e3af`)
-- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.2 đã merge PR #21; P1.3 plan-first)
+- Prompt đang làm / vừa xong: P1.3 — **✔ đã merge PR #22 `681e39d` vào `develop` 2026-11-25 07:24 +07** (CI 8 successful + 2 skipped; STATE §18; OQ-106…129 đóng). Tiếp theo: P1.4 plan-first (STATE §19; X-002/S1 vẫn mở nhưng không chặn P1.4 — làm theo §7/§8, xem §19 OQ-152).
+- Nhánh: `m1/p1.4-interpreter` (từ `018c562` = nội dung `develop` sau merge PR #22, develop head `681e39d`)
+- Cập nhật lần cuối: 2026-11-25 bởi AI (P1.3 đã merge PR #22; P1.4 plan-first)
 
 ## 2. Tiến độ prompt
 
@@ -31,8 +31,8 @@
 | G0     | ✔ đã ký 2026-11-24 (gói bằng chứng `docs/acceptance/M0.md`, 12/12 §15 ĐẠT; probe bổ sung 3/3 PASS; Windows 439/439 sau fix OQ-074) | nhánh `m0/g0-acceptance` (đã merge PR #15) | gate xanh 2026-11-24 ở bản sao sạch (439 test + coverage PASS, e2e 5/5, bench PASS, hash ghim khớp 2 lần chạy) | gói nghiệm thu M0 |
 | P1.1   | ✔ xong (gate xanh local; đã merge PR #20 `8b3dbb6` vào `develop` 2026-11-25 01:13 +07, CI xanh) | PR #20, nhánh `m1/p1.1-runtime-iec` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (651 test, 40 file; 144 test mới) + build xanh + bench guard PASS | xem §16; OQ-082…091 đóng |
 | P1.2   | ✔ xong (gate xanh local; đã merge PR #21 `278e3af` vào `develop` 2026-11-25 05:13 +07, CI 8 successful + 2 skipped) | PR #21, nhánh `m1/p1.2-scl-parser` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (746 test, 42 file; 95 test mới) + build xanh + bench guard PASS | xem §17; OQ-092…104 đóng, OQ-105 mở |
-| P1.3   | ◐ plan-first (STATE §18, nhánh `m1/p1.3-typecheck-lower`)                                                                                                                                                         |                                                   |                                                                                                                                                                           | X-002/S1 vẫn mở nhưng không chặn (làm theo §4.4/§6, OQ-121) |
-| P1.4   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
+| P1.3   | ✔ xong (gate xanh local; đã merge PR #22 `681e39d` vào `develop` 2026-11-25 07:24 +07, CI 8 successful + 2 skipped) | PR #22, nhánh `m1/p1.3-typecheck-lower` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (1310 test; 564 test mới) + build xanh + bench TagDB 4/4 (49,1M ops/s) + orchestrator 481.809 bước/s | xem §18; OQ-106…129 đóng |
+| P1.4   | ◐ plan-first (STATE §19, nhánh `m1/p1.4-interpreter`)                                                                                                                                                         |                                                   |                                                                                                                                                                           | X-002/S1 vẫn mở nhưng không chặn (làm theo §7/§8, OQ-152) |
 | P1.5   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P1.6   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | P1.7   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
@@ -83,7 +83,7 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 - File/hàm đang sửa: — (G0 xong file nghiệm thu, CHƯA mở PR — xem `docs/acceptance/M0.md`)
 - Test đang hỏng (nguyên văn): — (G0: gate xanh ở bản sao sạch `/tmp/vcs-g0` install thật — vitest 439/439 + coverage §13 PASS (kernel 97,66%, schemas 95,92%, project 97,83%), e2e 5/5, review:cheats SẠCH, diagnostics khớp, build 3/3; bench TagDB 4/4 (set/get 44,8M ops/s), orchestrator 442 432 bước/s; `check-bench-regression` exit 0, không có hồi quy > 20%; hash ghim khớp 2 lần chạy. P0.7 trước đó: TagDB set/get 51,7M ops/s, orchestrator 508 058 bước/s bản chính.)
 - Lệnh tái hiện nhanh: `npx -y pnpm@10.15.0 run lint && npx -y pnpm@10.15.0 run typecheck && npx -y pnpm@10.15.0 run depcheck && npx -y pnpm@10.15.0 run test && npx -y pnpm@10.15.0 run test:e2e && npx -y pnpm@10.15.0 run review:cheats && npx -y pnpm@10.15.0 run docs:diagnostics --check` (ĐÃ CHẠY 2026-11-24 ở P0.6: cả 7 xanh ở cả bản sao `/tmp/vcs-p06` (`pnpm install --frozen-lockfile` exit 0 — OQ-007) lẫn bản sao chính; vitest 438 passed / 35 file (17 test unit mới); e2e 5/5 local (E1–E5, Chromium cài được ở VM — xem §6); depcheck "no violations, 82 modules, 134 dependencies" ở `/tmp` (86 modules, 148 dependencies ở bản chính — lệch do cruise cả `apps/*/dist/` + `test-results/`, không có violation); review:cheats SẠCH, quét 108 file; diagnostics --check khớp, 24 mã). `pnpm bench` ĐÃ CHẠY: set/get 45,4M ops/s (≥10M), flush 5000/0 đổi 0,14 µs (≤50), flush 1000 đổi + 1 sub 0,062 ms (≤1), heap −0,05 MB (<1) — TagDB 4/4 PASS; orchestrator 513 310 bước/s — PASS. `pnpm build` ĐÃ CHẠY: turbo xanh 3 app (server/cli tsup + web vite, `apps/web/dist` có `index.html` + assets); smoke: `vcs serve examples/hello-tags` → `GET /` trả `index.html`, `/api/health` `{"ok":true}`, asset JS 200.
-- Bước tiếp theo cụ thể: **P1.3 triển khai** theo plan §18 (nhánh `m1/p1.3-typecheck-lower`), rồi mở PR P1.3 (plan + triển khai chung một PR), chờ CI xanh, merge; rồi P1.4 plan-first. X-002/S1 vẫn mở (chủ sản phẩm đưa mã SCL thật khi có) — không chặn P1.3. OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
+- Bước tiếp theo cụ thể: **P1.4 triển khai** theo plan §19 (nhánh `m1/p1.4-interpreter`), rồi mở PR P1.4 (plan + triển khai chung một PR), chờ CI xanh, merge; rồi P1.5 plan-first. X-002/S1 vẫn mở (chủ sản phẩm đưa mã SCL thật khi có) — không chặn P1.4. OQ-054 (sửa golden S1 dòng 6) chờ duyệt sau — không chặn.
 - Đẩy qua UI — danh sách file P0.7 (so với `develop` @ `471a2ec`, nhánh `m0/p0.7-docs`, CHƯA mở PR): `package.json` (script `test` thêm `--coverage`, devDep `@vitest/coverage-v8@4.1.12`), `pnpm-lock.yaml`, `vitest.config.ts` (coverage v8, ngưỡng dòng theo glob §13), `apps/cli/src/commands/run.test.ts` (+1 test ghim hash §15.6), `packages/kernel/src/tags.test.ts` (timeout 60 s cho test heap 10M ops khi đo coverage — xem §14), `.github/workflows/ci.yml` (comment coverage + job bench gọi `check-bench-regression.mjs`), `scripts/check-bench-regression.mjs` (mới), `bench/baseline.json` (mới, trung vị 5 mẫu), `docs/architecture.md` (mới), `docs/semantics.md` (mới, phần M0), `docs/adr/0001-package-jit-monorepo.md` … `0007-main-guard-tsup-split.md` (mới), `README.md` (viết lại), `docs/STATE.md`, `docs/open-questions.md` (OQ-071…073 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `coverage/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.6 (so với `develop` @ `65cd373`, nhánh `m0/p0.6-web`, đã merge PR #13 `471a2ec` 2026-11-24): `package.json` (script `test:e2e`, `typecheck` thêm web tsconfig, devDep `@playwright/test@1.65.0`), `pnpm-lock.yaml` (react 19.3.1, react-dom 19.3.1, zustand 5.1.0, @tanstack/react-virtual 3.14.26, vite 8.3.7, @vitejs/plugin-react 6.3.0, tailwindcss 4.3.5, @tailwindcss/vite 4.3.5, @types/react 19.3.0, @types/react-dom 19.3.0, @playwright/test 1.65.0 + link workspace; lưu ý: `vite@8.3.8` trong lockfile là transitive của vitest 4.1.12, đã có từ trước P0.6 — không phải vite của web (8.3.7); `immer`/`use-sync-external-store` là peer optional của zustand, pnpm KHÔNG cài), `tsconfig.json` (exclude `apps/web/**`, include `playwright.config.ts`), `playwright.config.ts`, `.gitignore` (`apps/web/e2e/fixtures/big-project/`, `test-results/`), `.github/workflows/ci.yml` (job `e2e` mới, ubuntu), `scripts/ensure-web-dist.mjs`, `apps/web/package.json` (deps + script `dev`/`build`) + `tsconfig.json` (riêng: lib DOM, jsx react-jsx — root tsconfig lib ES2022 không typecheck được `.tsx`, xem §13) + `vite.config.ts` + `index.html` + `src/{main.tsx,App.tsx,format.ts,format.test.ts,store.ts,store.test.ts,ws-client.ts,ws-client.test.ts,vite-env.d.ts,index.css}` + `src/i18n/{index,vi,en}.ts` + `index.test.ts` + `src/components/{SimBar,TagTable,DiagnosticsPanel}.tsx` + `e2e/{helpers,e1,e2,e3,e4,e5,perf-scroll}.spec.ts` + `e2e/fixtures/gen-big-project.ts`, `apps/server/src/ws.test.ts` (fix OQ-044: test trỏ `webDistDir` vào thư mục tạm trống — kiểm chứng gate của parent), `docs/STATE.md`, `docs/open-questions.md` (OQ-057…OQ-070 đã ghi từ plan; OQ-062 đóng). KHÔNG đẩy `node_modules/`, `apps/*/dist/`, `bench/results.json`, `apps/web/e2e/fixtures/big-project/`, `test-results/`.
 - Đẩy qua UI — danh sách file P0.4 (so với `develop` @ `4a1181a`): `package.json` (script `vcs` + dep `@vcs/project`), `pnpm-lock.yaml` (commander 15.1.0 + link workspace), `tsconfig.base.json` (path `@vcs/kernel/demo`), `.gitignore` (`bench/project-5000/`), `packages/kernel/package.json` (export `./demo`), `packages/kernel/src/{component,errors,orchestrator,builder,pacer,index}.ts` + `demo/{loopback,extension,index}.ts` + test (`orchestrator`, `builder`, `pacer`, `demo/loopback` test), `packages/test-utils/src/sim.ts` + `index.ts` + `sim.test.ts`, `apps/cli/package.json` (commander 15.1.0), `apps/cli/tsconfig.json`, `apps/cli/src/{index,extensions}.ts`, `apps/cli/src/commands/{index,version,validate,run}.ts` + test, `examples/hello-tags/{vcs.project.yaml,tags/tags.yaml}`, `scripts/gen-bench-project.ts`, `bench/orchestrator.bench.ts`, `docs/STATE.md`, `docs/open-questions.md` (OQ-030/031/032). KHÔNG đẩy `node_modules/`, `bench/results.json`, `bench/project-5000/`, file profile tạm (đã xóa).
@@ -1857,3 +1857,326 @@ VERIFIED/UNVERIFIED).
   probe do một test khác tạo/xóa trong lúc scan; chạy lại và chạy lẻ đều
   pass (7/7). Không sửa (không phải lỗi P1.3); theo dõi ở gate cuối.
 - Tiếp theo: P1.4 plan-first (interpreter/SoftPlc).
+
+## 19. Kế hoạch P1.4 — Interpreter + scheduler + SoftPlc (plan-first, 2026-11-25)
+
+**Điểm xuất phát:** P1.3 **đã merge PR #22** (merge commit `681e39d`, develop head `681e39d` — xác minh qua MCP read, `merged_at` 2026-11-25T00:24:17Z tức 2026-11-25 07:24 +07; CI 8 successful + 2 skipped). Tổng test hiện tại **1310**. Diagnostic: **42 mã**. PROMPTS P1.4 nguyên văn: "Làm P1.4 theo AGENTS.md §9 (plan-first). Đọc: … → AMENDMENTS (A1, A2, A12, D2, D3, E5) → M1 §7–8, 10, 12. Nhiệm vụ: interpreter (IR → closures), quy tắc số học bảng M1 §7.2 (mỗi quy tắc có dòng semantics.md + test), scheduler (OB1/OB100/cyclic OB), SoftPlc implements ControllerAdapter (step ĐỒNG BỘ, snapshot/restore) + ControllerIntrospection (read/write/force/unforce/listForces/start/stop), force, TagAddressMap. TRƯỚC KHI CODE: tự tính tay ≥ 6 scan (process image latch input đầu scan/ghi output cuối scan; OB100 một lần; cyclic OB). Gate: golden xanh; snapshot→restore→chạy lại cho trace giống hệt; lint chặn Date.now trong runtime-iec."
+
+**Hiểu biết (tóm tắt):** (1) P1.4 là tầng thực thi đầu tiên: IR của P1.3 chỉ là cây có kiểu — mọi quyết định ngữ nghĩa runtime (§7.2 số học, §8 scan, §10 API) đều thành hành vi quan sát được ở đây. Sai ở đây là sai im lặng (chạy "gần đúng"), nên bảng tính tay (scan timing, process image, OB, số học, force/snapshot) phải tự tính trước, không sao chép từ implementation. (2) Đồ thị phụ thuộc quyết định vị trí: `runtime-iec` chỉ được import schemas/kernel/runtime-iec (dep-cruiser `runtime-iec-deps`) — SoftPlc + interpreter + TagAddressMap đều nằm ở `runtime-iec`, **không** import `vendor-siemens` (nên `parseAddress` của P1.1 không dùng được ở đây — xem OQ-137); `vendor-siemens` không được import kernel nên extension không nằm ở đó. (3) Hạ tầng đã sẵn, không cần sửa: `ControllerAdapter` + `ControllerIntrospection` đã khai báo ở `packages/kernel/src/component.ts` (D3, B8); `step(): void | Promise<void>` (A1 — SoftPlc đồng bộ, trả `void`); `snapshot()`/`restore()` bắt buộc (A2); `IoBus` + `IoPort` fast path (`readInputsInto`/`writeOutputsFrom`, không cấp phát) đã có; `createSimulation` + extension (`registerController('builtin:<vendor>')`, factory nhận `def` + `ctx`, `init` nhận `ControllerConfig` với `scanPeriodMs` đã tính theo D2 + `tags` của controller) đã có; `MemoryArea`/`DbStore` (big-endian, `snapshot()`/`restore()` theo byte) đã có; `layoutStruct` đã có; lint cấm `Date.now`/`performance.now`/`Math.random`/`new Date()` đã bao `packages/runtime-iec/src/**/*.ts` trong `CORE_FILES` (eslint.config.js) — **không cần sửa eslint**, gate chỉ cần probe chứng minh rule chặn (xem Gate). (4) Khoảng trống spec phải lấp bằng mặc định tier B + OQ: mô hình thời gian scan (nội suy đều hay "tại simTimeMs hiện tại"); số DB gán thế nào (`IrDb` không có số, chỉ có tên); period/phase của cyclic OB lấy từ đâu (`compileScl` không sinh `cycleMs`); `TagAddressMap` lấy từ đâu (constructor hay `init`); `write()`/`force()` vào từng loại ref ra sao; `callSys` khi chưa có std block (P1.5); intrinsics §7.3 (PROMPTS chỉ nêu §7.2 nhưng interpreter phải xử lý mọi `IrExpr` — xem OQ-144); golden runner YAML là P1.7 nên golden P1.4 là bảng TS (xem OQ-151). (5) X-002/S1 vẫn mở — P1.4 **không chờ** (xem OQ-152): interpreter thực thi đúng spec §7/§8, không theo mã thật; mã thật chỉ ảnh hưởng các mục VERIFY (§14) và P1.5 (system FB). (6) Chương trình P1.4 chạy được vẫn bị giới hạn bởi P1.3: system FB (`TON`…) → SCL-U001 ở compile nên IR hợp lệ không chứa `callSys` tới std block; `callSys` ở P1.4 chỉ là điểm cắm registry để P1.5 điền vào (OQ-143).
+
+**Phạm vi (PROMPTS P1.4; M1 §7, §8, §10, §12.1–§12.2; AMENDMENTS A1, A2, A12, D2, D3, E5; M1 §17):**
+
+| File | Nội dung |
+|---|---|
+| `packages/runtime-iec/src/faults.ts` | `RuntimeFault`, `RuntimeFaultCode` (8 mã, mục 2 thiết kế), `FaultCollector` (gom theo code+block+src, đếm) |
+| `packages/runtime-iec/src/arithmetic.ts` | Hàm thuần §7.2: wrap Int/DInt/unsigned, `roundHalfEven` (banker's), `convertChecked` (mode round/trunc + CONV_RANGE), `intBinary` (cộng/trừ/nhân/chia/mod + OV/DIV_ZERO), `shiftOp` (SHL/SHR/ROL/ROR) |
+| `packages/runtime-iec/src/intrinsics.ts` | `IntrinsicRegistry` + `createIntrinsicRegistry()` (§7.3: POWER, ABS, SQRT, MIN, MAX, LIMIT, SHL, SHR, ROL, ROR, CEIL, FLOOR, NORM_X, SCALE_X) |
+| `packages/runtime-iec/src/tagmap.ts` | `TagAddressMap`, `TagAddr`, `buildTagAddressMap(tags)`, `parsePlcRef(ref, tagMap)`, `canonicalRef` (key force + hiển thị) |
+| `packages/runtime-iec/src/interpreter.ts` | `Frame`, `Ref`, `DbView`, `Interpreter` (compile IR → closures một lần: `compileProgram`/`compileBlock`/`compileExpr`/`compileStmt`), `callBlock`, `maxCallDepth`/`maxLoopIterations` |
+| `packages/runtime-iec/src/softplc.ts` | `SoftPlc` (ControllerAdapter + ControllerIntrospection), `SoftPlcConfig`, `SoftPlcSnapshot`, `ScanInfo`, scheduler §8.2/§8.3, force, snapshot/restore, `onScan` |
+| `packages/runtime-iec/src/extension.ts` | `softPlcExtension(program, opts?)` — đăng ký factory `builtin:siemens` |
+| `packages/runtime-iec/src/index.ts` | Export các kiểu/lớp/hàm mới trên |
+| `packages/runtime-iec/src/arithmetic.test.ts` | Test hàm thuần §7.2 (bảng E ở mức hàm) |
+| `packages/runtime-iec/src/intrinsics.test.ts` | Test §7.3 (mỗi hàm + biên) |
+| `packages/runtime-iec/src/tagmap.test.ts` | Test map/parser/canonical + cross-test với `parseAddress` (P1.1) |
+| `packages/runtime-iec/src/interpreter.test.ts` | Test closures/frame: eval expr, flow, TEMP reset, IN_OUT ref, call depth, loop limit |
+| `packages/runtime-iec/src/softplc.test.ts` | Test API SoftPlc: load/start/stop/reset/init/read/write/force/diagnostics/onScan |
+| `packages/runtime-iec/src/softplc-scan.test.ts` | Golden scan (bảng A–D, G): timing, process image, OB100/cyclic, block calls, flow |
+| `packages/runtime-iec/src/softplc-snapshot.test.ts` | Golden force + snapshot/restore (bảng F) + tích hợp `makeSim` + `softPlcExtension` |
+| `docs/semantics.md` | Thêm §15: interpreter/scheduler/SoftPlc, mỗi điểm gắn `VERIFIED`/`UNVERIFIED` |
+| `docs/STATE.md`, `docs/open-questions.md` | Plan này (§19) + OQ-130…160 |
+
+**Thiết kế nhỏ nhất (từng mục — signature chính xác, chỗ KHÔNG làm):**
+
+1. **`faults.ts` — lỗi runtime gom lại, không bao giờ im lặng (§7.2).** `RuntimeFault` không nằm trong `DiagnosticCatalog` (nó là lỗi lúc chạy, không phải lỗi biên dịch — không thêm mã PRJ/SCL mới).
+```ts
+export type RuntimeFaultCode =
+  | 'DIV_ZERO' | 'CONV_RANGE' | 'ARRAY_RANGE' | 'CALL_DEPTH'
+  | 'LOOP_LIMIT' | 'CYCLE_OVERRUN' | 'SCAN_OVERRUN' | 'SYS_UNSUPPORTED';
+export interface RuntimeFault {
+  code: RuntimeFaultCode; blockName?: string; src?: SrcRef;
+  simTimeMs: number; // thời điểm lần đầu ghi nhận
+  count: number; // số lần ghi nhận (gom theo code + blockName + src)
+  message: string; // thông điệp lần đầu (đối tượng + vị trí + nguyên nhân)
+}
+export class FaultCollector {
+  record(code: RuntimeFaultCode, opts: { blockName?: string; src?: SrcRef; simTimeMs: number; message: string }): void;
+  faults(): RuntimeFault[]; // theo thứ tự lần xuất hiện đầu tiên
+  clear(): void;
+  snapshot(): RuntimeFault[]; restore(f: RuntimeFault[]): void;
+}
+```
+Quy tắc ghim: cùng (code, blockName, src) → `count++`, giữ `simTimeMs`/`message` lần đầu; khác `src` (hai dòng khác nhau) là hai fault riêng. `getDiagnostics().faults` map từ đây thành `{code, message, count}` (kernel `ControllerDiagnostics`).
+
+2. **`arithmetic.ts` — hàm thuần, không trạng thái, test trực tiếp không cần SoftPlc.**
+```ts
+export function wrapInt16(x: number): number; // ((x + 32768) & 0xFFFF) - 32768
+export function wrapInt32(x: number): number; // x | 0
+export function wrapUnsigned(bits: 8 | 16 | 32, x: number): number; // x & ((1 << bits) - 1), 32-bit dùng >>> 0
+export function roundHalfEven(x: number): number; // banker's: .5 về số chẵn gần nhất (2.5→2, 3.5→4, -2.5→-2, -3.5→-4)
+export function convertChecked(from: PrimitiveType, to: PrimitiveType, value: number | boolean, mode?: 'round' | 'trunc')
+  : { value: number | boolean; fault?: 'CONV_RANGE' };
+export function intBinary(fn: 'add' | 'sub' | 'mul' | 'div' | 'mod', type: PrimitiveType, a: number, b: number)
+  : { value: number; ov?: boolean; fault?: 'DIV_ZERO' };
+export function shiftOp(fn: 'SHL' | 'SHR' | 'ROL' | 'ROR', type: PrimitiveType, value: number, count: number): number;
+```
+Quy tắc ghim (§7.2 + OQ): `Int` tràn → wrap 16-bit + `ov=true`; `DInt` tràn → wrap 32-bit (`ov` không đặt — spec chỉ nêu cờ OV cho `Int`); chia/mod số nguyên cho 0 → giá trị 0 + `DIV_ZERO` (OQ-133: `MOD` cũng vậy); `Real` sau mỗi phép tính → `Math.fround` (OQ-159; `LReal` giữ float64); `REAL_TO_INT`/`ROUND` → `roundHalfEven` rồi kiểm khoảng đích (ngoài khoảng/NaN → 0 + `CONV_RANGE`, OQ-150); `TRUNC` → cắt về 0 (`Math.trunc`); `CEIL`/`FLOOR` → `Math.ceil`/`Math.floor` (kết quả DInt, kiểm khoảng như convert); `SQRT` số âm → `NaN` (không fault); shift: độ rộng theo kiểu (Byte 8, Word/UInt/Int 16, DWord/UDInt/DInt 32), count ≥ độ rộng → 0, count < 0 → 0 (OQ-134), `SHR` số có dấu mở rộng dấu (`>>`), không dấu dùng `>>>`; `ROL`/`ROR` xoay trong độ rộng; `ABS` số nguyên nhỏ nhất → wrap về chính nó (OQ-134, vd `ABS(-32768: Int) = -32768`).
+
+3. **`intrinsics.ts` — registry §7.3, P1.5 điền `callSys` vào registry riêng (không chung).**
+```ts
+export type IntrinsicFn = (args: TagValue[], type: PrimitiveType) => TagValue;
+export interface IntrinsicRegistry { get(name: string): IntrinsicFn | undefined; }
+export function createIntrinsicRegistry(): IntrinsicRegistry;
+```
+Registry mặc định chứa đúng 14 hàm: `POWER, ABS, SQRT, MIN, MAX, LIMIT, SHL, SHR, ROL, ROR, CEIL, FLOOR, NORM_X, SCALE_X` (OQ-144). Ngữ nghĩa: `POWER` = `Math.pow` (kết quả Real fround, LReal giữ nguyên); `ABS`/`SQRT`/`MIN`/`MAX` theo kiểu `type` (số nguyên wrap như mục 2, Real fround); `LIMIT(MN, IN, MX)` = `MIN(MAX(IN, MN), MX)`; `SHL`/`SHR`/`ROL`/`ROR` gọi `shiftOp` (mục 2); `CEIL`/`FLOOR` → DInt (kiểm khoảng, `CONV_RANGE` nếu ngoài — đi qua `convertChecked` ở interpreter, không tự fault trong registry: registry trả giá trị đã convert, interpreter ghi fault nếu có); `NORM_X(MIN, VALUE, MAX)` → `(VALUE − MIN) / (MAX − MIN)` float32 (fround từng bước? Không — tính double rồi fround kết quả một lần, OQ-159); `SCALE_X(MIN, VALUE, MAX)` → `VALUE * (MAX − MIN) + MIN`, kiểu ra nguyên thì làm tròn như `ROUND`; giá trị ngoài [0..1] **không kẹp** (VERIFY §14.4 — ghi `UNVERIFIED` ở semantics §15). Tên intrinsic không có trong registry → lỗi nội bộ ở compile (throw ồn ào — không tới được qua IR hợp lệ vì lower chỉ sinh tên đã biết).
+
+4. **`tagmap.ts` — ánh xạ tag ↔ địa chỉ (A12, C2, M1 §10).**
+```ts
+export interface TagAddr { area: 'I' | 'Q' | 'M' | 'DB'; byte: number; bit?: number; db?: number; type: PrimitiveType; }
+export type TagAddressMap = ReadonlyMap<string, TagAddr>; // key = tên tag (giữ nguyên case)
+export function buildTagAddressMap(tags: readonly TagDef[]): TagAddressMap;
+export type ParsedRef =
+  | { k: 'abs'; area: 'I' | 'Q' | 'M'; byte: number; bit?: number; width: 8 | 16 | 32 | 64; type: PrimitiveType }
+  | { k: 'absDb'; db: number; byte: number; bit?: number; width: 8 | 16 | 32 | 64; type: PrimitiveType }
+  | { k: 'dbField'; db: string; path: string[] }
+  | { k: 'tag'; name: string };
+export function parsePlcRef(ref: string, tagMap: TagAddressMap): ParsedRef; // sai cú pháp/không tìm thấy → throw RangeError nêu ref
+export function canonicalRef(parsed: ParsedRef, tagMap: TagAddressMap): string; // key force + chuỗi hiển thị trong listForces
+```
+Quy tắc ghim: `buildTagAddressMap` dùng `TagDef.address` + `TagDef.type` đã khai báo (không diễn giải lại theo OQ-110 — tag khai báo kiểu tường minh); địa chỉ `sym:` → throw `Error('TagAddressMap: sym: chưa hỗ trợ (P5.7)')` (OQ-137); tên tag trùng → throw (loud); `parsePlcRef` nhận: `%I0.0`, `%MW10`, `%MD0`, `%Q0.0`, `%M0.0`, `DB1.DBW4`, `DB1.DBX0.0`, `"DB_Name".field[.sub]`, tên tag symbolic (tra map); `#name`/`sym:` → throw; kiểu mặc định cho abs trần theo OQ-110 (bit→Bool, 8→Byte, 16→Int, 32→DInt); `canonicalRef` chuẩn hóa mọi dạng về một key: abs → `%I0.0`/`%MW10` (kèm width để `%MB10` ≠ `%MW10`), absDb → `DB1.DBW4`, dbField → `"DB".field`, tag → dạng abs tương ứng (OQ-142 — force bằng tên tag và bằng địa chỉ là cùng một force). Parser này là bản sao nhỏ của `vendor-siemens` `parseAddress` (P1.1) — **không** di chuyển code P1.1 sang (Đã loại #8); test cross-check hai parser cho ra cùng area/byte/bit/type trên mọi dạng địa chỉ (tiền lệ P0.8 `TYPE_RANGES` cross-test).
+
+5. **`interpreter.ts` — IR → closures một lần, không duyệt cây mỗi scan (§6).**
+```ts
+export interface Ref { get(): TagValue; set(v: TagValue): void; }
+export interface DbView { store: DbStore; fields: IrField[]; base: number; } // view vào store tại offset (multi-instance lồng)
+export interface Frame {
+  temp: Map<string, TagValue>; // VAR_TEMP + biến local FC — cấp phát mới mỗi lần gọi, reset về mặc định kiểu
+  vars: Map<string, TagValue>; // FC: VAR_INPUT/OUTPUT + local tên FC (giá trị trả); OB: VAR_TEMP (dùng chung temp)
+  instance?: DbView; // instance DB của FB đang chạy
+  inout: Map<string, Ref>; // IN_OUT: tham chiếu tới LValue nơi gọi (OQ-148)
+  returnValue?: TagValue;
+  loopDepth: number;
+  flow: 'normal' | 'exit' | 'continue' | 'return';
+  ov: boolean; // cờ tràn Int (§7.2), xóa ở đầu mỗi scan (OQ-135)
+  depth: number; // độ sâu lời gọi (OB = 0; vượt maxCallDepth → CALL_DEPTH, bỏ qua lời gọi — OQ-157)
+}
+export interface CompiledBlock { id: string; kind: 'OB' | 'FC' | 'FB'; run(frame: Frame): void; }
+export class Interpreter {
+  constructor(program: IrProgram, mem: PlcMemory, faults: FaultCollector, opts?: {
+    intrinsics?: IntrinsicRegistry; sysCalls?: Map<string, SysCallHandler>;
+    maxCallDepth?: number; maxLoopIterations?: number;
+  });
+  runBlock(blockId: string, frame: Frame): void;
+  // nội bộ (không export khỏi package): compileExpr/compileStmt/compileBlock, resolveLValue, readMem/writeMem
+}
+export type SysCallHandler = (instance: DbView | undefined, inArgs: Map<string, TagValue>, outArgs: Map<string, Ref>, nowMs: number) => void;
+export interface PlcMemory { i: MemoryArea; q: MemoryArea; m: MemoryArea; dbs: Map<string, DbStore>; dbNumbers: Map<string, number>; }
+```
+Quy tắc ghim: compile ở constructor (mỗi node IR → closure một lần); statement biên dịch trả `void` và đặt `frame.flow`, sequence dừng khi `flow !== 'normal'` (không throw cho điều khiển luồng — không cấp phát ở đường nóng); vòng lặp: `FOR` bao hàm hai đầu, kiểm tra tràn trước khi tăng (§7.2), `by` mặc định 1, 0 lần lặp khi hướng sai (OQ-149); `WHILE`/`REPEAT` kiểm `maxLoopIterations` (mặc định 10_000, OQ-132) → vượt thì `LOOP_LIMIT`, thoát vòng lặp, chạy tiếp sau vòng lặp; `EXIT`/`CONTINUE`/`RETURN` đặt `flow` tương ứng, vòng lặp dịch `continue` → normal + lặp tiếp, `exit` → normal + thoát, `return` → lan truyền; `callFcExpr`/`callFc`: frame mới (temp/vars mới, `depth+1`), copy IN, chạy, đọc local tên FC làm giá trị trả (OQ-112), `ret` ghi ra nếu có; `callFb`: resolve instance thành `DbView` (xem mục 6), copy IN vào field input của view, chạy với `frame.instance = view`, copy OUT ra `outArgs`, IN_OUT qua `Ref` (ghi thẳng nơi gọi, không copy-back — OQ-148); `callSys`: tra `sysCalls` — không có handler → `SYS_UNSUPPORTED`, bỏ qua lời gọi, chạy tiếp (OQ-143); `index`: chỉ số ngoài khoảng → đọc 0/false + `ARRAY_RANGE`, ghi bỏ qua + `ARRAY_RANGE` (chỉ số không nguyên → lỗi nội bộ throw — typecheck đã chặn); `load`/`assign`: đọc/ghi qua `resolveLValue` → `Ref` (local/static/dbField/abs/absDb/index/member — xem mục 6); mọi giá trị Real ghi vào bộ nhớ đều `Math.fround` trước (memory.ts đã fround ở `write`, interpreter fround cả giá trị trong frame trước khi so sánh — OQ-159); `convert` → `convertChecked` (fault `CONV_RANGE` ghi vào collector với `blockName`/`src` của statement chứa nó); `intrinsic` → registry (tên không có → throw nội bộ ồn ào).
+
+6. **Phân giải LValue → storage (interpreter nội bộ, dùng `DbView` + layout P1.1/P1.3).** `local`: tra interface block đang chạy — tên thuộc `input`/`output` của FB → field trong `frame.instance` (đường dẫn `[tên]`); tên thuộc `static` → field trong `frame.instance` (đường dẫn `[tên, ...]`); tên thuộc `inout` → `frame.inout.get(tên)` (Ref); tên thuộc `temp` (hoặc mọi local của FC/OB) → `frame.temp`/`frame.vars`; tên = tên block FC → `frame.vars` (local giá trị trả, OQ-112). `static` path `[a, b, ...]`: đi từ `frame.instance`, mỗi bước tra field trong layout (struct lồng = multi-instance, §3.5); field là system FB (`TON`…) không tới được (U001 ở compile). `dbField` `{db, path}`: store = `mem.dbs.get(db)` (không có → throw nội bộ ở load — xem mục 7), đi theo path bằng layout `IrDb.fields`. `member` `{base, field}`: resolve `base` thành `DbView` rồi đi tiếp một field (P1.3 lệch #14). `abs`/`absDb`: memory area theo `area`/`db` + `byte`/`bit`/`width` (bit → `getBit`/`setBit`, còn lại `read`/`write` với `type`; width 8 cho bit là quy ước P1.3 lệch #4 — interpreter dùng `bit !== undefined` để chọn đường bit, không dùng width). `index`: base → `DbView`/mảng trong frame, chỉ số tính từ `IrExpr` (phải nguyên — typecheck đã chặn; ngoài khoảng → `ARRAY_RANGE` như mục 5). Đọc `%M`/DB: trực tiếp, tức thời (§8.4). Đọc `%I`: từ PII (`mem.i`, đã latch đầu scan). Đọc `%Q`: từ PIQ (`mem.q`, giá trị vừa ghi trong cùng scan — VERIFY §14.10, ghi `UNVERIFIED`). Ghi `%Q`: vào PIQ (chỉ cuối scan mới đẩy ra IoBus). **Kích thước vùng nhớ** tính ở `load()`: quét toàn bộ `IrProgram` (mọi `abs`/`absDb` + mọi tag trong `TagAddressMap` dùng cho latch/output) lấy `byte + ceil(width/8)` lớn nhất cho từng area I/Q/M (tối thiểu 0); DB sized theo `IrDb.size`; DB không dùng tới vẫn cấp phát đủ `size` (snapshot/restore cần đủ). **Số DB** (OQ-136): `load()` gán số 1..n cho các `IrDb` theo thứ tự `id` đã sắp xếp (IrProgram mảng đã sort ở P1.3); `absDb` với số ngoài 1..n → `load()` throw `RangeError` nêu block/src; `dbField` với tên DB không có → `load()` throw. Số DB này chỉ dùng nội bộ cho `absDb`; TIA numbering thật là việc P5.7/SimaticML.
+
+7. **`softplc.ts` — CPU + scheduler (§8, §10; A1, A2, D2, D3).**
+```ts
+export interface SoftPlcConfig {
+  id: string; scanPeriodMs: number; maxScansPerStep?: number; // mặc định 50 (M1 §17)
+  faultPolicy?: 'continue' | 'stop'; // mặc định 'continue'
+  maxCallDepth?: number; // mặc định 24 (§7.1)
+  maxLoopIterations?: number; // mặc định 10_000 (OQ-132)
+  outputsOnStop?: 'zero' | 'hold'; // mặc định 'zero' (§17)
+}
+export interface ScanInfo { scanTimeMs: number; scanCount: number; }
+export interface SoftPlcSnapshot {
+  version: 1; state: 'STOP' | 'RUN';
+  scanCount: number; lastScanSimMs: number; accMs: number; lastScanTimeMs: number | null;
+  ob100Done: boolean; cyclic: { ob: number; lastIdx: number }[];
+  memI: number[]; memQ: number[]; memM: number[]; // byte theo từng vùng (OQ-147)
+  dbs: { name: string; bytes: number[] }[];
+  forces: { ref: string; value: TagValue }[]; // ref đã chuẩn hóa (OQ-142)
+  faults: RuntimeFault[];
+}
+export class SoftPlc implements ControllerAdapter, ControllerIntrospection {
+  constructor(program: IrProgram, tagMap: TagAddressMap, cfg: SoftPlcConfig);
+  readonly id: string; readonly kind: 'builtin';
+  load(program: IrProgram): void; // yêu cầu STOP (không thì throw); gán số DB (OQ-136); xóa forces + reset trạng thái (OQ-139)
+  start(): void; stop(): void; reset(): void; // reset = cold: bộ nhớ về init, xóa forces/faults/scanCount/acc/cyclic (OQ-140)
+  step(simTimeMs: number, dtMs: number): void; // ĐỒNG BỘ (A1), trả void
+  read(ref: string): TagValue; write(ref: string, v: TagValue): void;
+  force(ref: string, v: TagValue): void; unforce(ref: string): void;
+  listForces(): { ref: string; value: TagValue }[];
+  getDiagnostics(): ControllerDiagnostics;
+  snapshot(): SoftPlcSnapshot; restore(s: unknown): void; // s sai hình → throw (loud)
+  onScan(cb: (info: ScanInfo) => void): Unsub;
+  init(cfg: ControllerConfig, io: IoBus): Promise<void>; // build lại TagAddressMap từ cfg.tags (OQ-138); scanPeriodMs lấy từ cfg (D2); gọi 2 lần → throw
+}
+```
+**Scheduler (§8.2, OQ-130 — mô hình lưới thời gian đều):** trạng thái: `accMs`, `lastScanTimeMs: number | null` (null = chưa rebase), `scanCount`, `lastScanSimMs`, `ob100Done`, `cyclicLastIdx: Map<ob, number>`. `step(T, dt)`: STOP → no-op; `dt < 0` → `RangeError`; `T < lastScanTimeMs` (khi đã set) → `RangeError` (OQ-160); nếu `lastScanTimeMs === null` → rebase: `lastScanTimeMs = T`, `cyclicLastIdx` mỗi OB = `floor((T − phaseMs) / periodMs)`; `accMs += dt`; `n = floor(accMs / scanPeriodMs)`; nếu `n > maxScansPerStep` → `SCAN_OVERRUN` count += `n − maxScansPerStep`, `n = maxScansPerStep` (phần acc thừa GIỮ LẠI để bắt kịp ở bước sau — OQ-131); lặp `k = 1..n`: `scanTime = lastScanTimeMs + scanPeriodMs`, chạy scan tại `scanTime`, `lastScanTimeMs = scanTime`; `accMs −= n * scanPeriodMs`. Hệ quả ghim (bảng A): stepMs = scanPeriodMs = 10 → scan tại 10, 20, 30… (không phải 0, 10, 20); `start()` rebase lại lưới (không reset bộ nhớ — chỉ `reset()` làm việc đó, OQ-154). **Một scan tại `t` (§8.2 bước 3):** (a) latch: `IoPort.readInputsInto` (mảng tái dùng, không cấp phát) → ghi từng input tag vào PII theo `TagAddressMap`, rồi áp force I (OQ-142); không có `io` (dùng trực tiếp, chưa `init`) → bỏ qua latch/output; (b) nếu là scan đầu sau RUN (`!ob100Done`): chạy OB100 (block có `organization.ob === 100`) một lần, `ob100Done = true` (không có OB100 → bỏ qua im lặng — không phải lỗi); (c) cyclic OB đến hạn: `idx = floor((t − phaseMs) / periodMs)`, đến hạn khi `idx > lastIdx`, mỗi OB tối đa 1 lần/scan, chạy theo số OB tăng dần, trễ bỏ qua: `CYCLE_OVERRUN` count += `idx − lastIdx − 1`, rồi `lastIdx = idx` (OQ-145); (d) chạy OB1 (block có `organization.ob === 1`); không có OB1 → scan chạy 0 block (vẫn latch/output, vẫn đếm scan — OQ-146); (e) áp force Q rồi `IoPort.writeOutputsFrom` (mảng tái dùng) từ PIQ; `scanCount++`, `lastScanSimMs = t`, xóa `frame.ov` ở đầu scan (OQ-135), gọi `onScan({scanTimeMs: t, scanCount})`; nếu `faultPolicy === 'stop'` và có fault mới trong scan → `stop()` sau khi scan xong (OQ-158). **STOP/RUN (§8.1, OQ-153/154):** `start()` khi đã RUN → no-op; `stop()` khi đã STOP → no-op; `start()` không reset bộ nhớ; STOP→RUN re-arms OB100 (`ob100Done = false` + rebase lưới ở bước kế); vào STOP: Q về 0 ngay nếu `outputsOnStop === 'zero'` (mặc định) — `stop()` đẩy ảnh Q ra IoBus ngay (không chờ scan), `hold` thì giữ nguyên; `reset()` = cold (OQ-140). **`read`/`write` (OQ-141):** `read`: `%I` → PII, `%Q` → PIQ, `%M`/DB → bộ nhớ trực tiếp, tất cả force-aware (force thắng); tên tag symbolic → qua map; `"DB".field` → DbView; ref không tìm thấy → throw `RangeError` nêu ref; `sym:` → throw `Error` chưa hỗ trợ. `write`: `%I` → ghi PII (thấy tới lần latch kế), `%Q` → ghi PIQ (thấy ngay trong scan, đẩy ra ở output update kế), `%M`/DB → ghi trực tiếp; ghi vào ref đang force → bỏ qua (force thắng, không báo lỗi — force là trạng thái hiển thị, xem bảng F3); kiểu sai → throw `TagError('TAG-E001')` qua `validateTagValue`. **`force`/`unforce`/`listForces` (OQ-142):** `force` validate kiểu như `write` (sai → TAG-E001); force lưu theo key chuẩn hóa (mọi dạng ref cùng địa chỉ là một force); `unforce` ref không có force → no-op (không throw); `listForces` trả ref dạng chuẩn (`%I0.0`, `%MW10`, `"DB".field`) + giá trị, sắp xếp theo ref. **Snapshot/restore (A2, §10, §16.8):** `snapshot()` chụp đủ để tái lập hoàn toàn: state, scanCount, lastScanSimMs, accMs, lastScanTimeMs, ob100Done, cyclic lastIdx, toàn bộ byte I/Q/M/DB (dạng `number[]` — OQ-147), forces, faults; `restore(s: unknown)` validate `version === 1` + đủ trường + độ dài byte khớp vùng nhớ (sai → throw `RangeError`/`Error` nêu trường sai); restore xong chạy tiếp cho trace giống hệt (gate — bảng F6/F7). **Diagnostics:** `getDiagnostics()` → `{state, scanCount, lastScanSimMs, faults: [{code, message, count}]}` (map từ `FaultCollector`; `info` không dùng ở P1.4). **`onScan`:** gọi sau mỗi scan (sau output update); lỗi trong callback → lan truyền ra `step()` (loud — orchestrator xử lý theo errorPolicy).
+
+8. **`extension.ts` — nối SoftPlc vào `createSimulation` (OQ-155).**
+```ts
+export function softPlcExtension(program: IrProgram, opts?: {
+  faultPolicy?: SoftPlcConfig['faultPolicy']; maxCallDepth?: number;
+  maxLoopIterations?: number; maxScansPerStep?: number; outputsOnStop?: SoftPlcConfig['outputsOnStop'];
+}): SimulationExtension;
+```
+Factory đăng ký `builtin:siemens` → `new SoftPlc(program, emptyTagMap, { id: def.id, scanPeriodMs: 20 })`; `init(cfg, io)` ghi đè `scanPeriodMs` bằng `cfg.scanPeriodMs` (D2 — builder đã tính `def.config.scanPeriodMs ?? simulation.plcScanMs`) và build lại `TagAddressMap` từ `cfg.tags` (OQ-138). Extension KHÔNG thêm vào `apps/cli/src/extensions.ts` / `apps/server/src/extensions.ts` ở P1.4 (chưa có nguồn program từ project file — việc đó là P1.7 `compileProject`); test dùng `makeSim(project, { extensions: [softPlcExtension(program)] })`.
+
+**Đã loại:** (1) Golden runner YAML (`runtime-iec/golden/*.golden.yaml` + runner, M1 §12.1) — P1.7; golden P1.4 là bảng TS tính tay, mỗi test ghi `expectedFrom: 'spec'` trong tên/comment (OQ-151). (2) Phương thức `scanAt(t)` công khai — test điều khiển qua `step(T, dt)`; P1.7 có thể thêm điểm vào scan trực tiếp cho runner (OQ-156). (3) CLI (`vcs plc run`, demo `motor-interlock`, Watch) — P1.7. (4) std blocks `TON`/`CTU`/`R_TRIG`/… — P1.5; P1.4 chỉ có điểm cắm `sysCalls` + fault `SYS_UNSUPPORTED`. (5) LAD — P1.6. (6) `compileProject` nhiều file — P1.7. (7) Số DB thật từ TIA — P5.7; P1.4 gán 1..n theo id đã sort (OQ-136). (8) Di chuyển `parseAddress` từ `vendor-siemens` sang `runtime-iec` — giữ nguyên code P1.1 đã test; `tagmap.ts` viết parser nhỏ riêng + cross-test (OQ-137). (9) Warm restart / retentive — M1 §8.1: không có; `reset()` luôn cold. (10) ENO/OV đọc được từ SCL — IR không có đường đọc; OV chỉ theo dõi trên frame (OQ-135). (11) Mã diagnostic mới — `RuntimeFault` không vào catalog (D6 chỉ áp cho diagnostic biên dịch). (12) Benchmark M1 §12.4 (200 FB_Motor, ≥ 1000 scan/s) — P1.7; P1.4 chỉ giữ quy tắc không cấp phát ở đường nóng (closures build một lần, mảng IO tái dùng, fault là ngoại lệ duy nhất được cấp phát) + đo smoke một lần ghi vào STATE (không ngưỡng, không gate). (13) `step()` bất đồng bộ — A1: SoftPlc đồng bộ, `asyncStep` không đặt (mặc định false). (14) Thay đổi `.dependency-cruiser.cjs` / `eslint.config.js` / `vitest.config.ts` / `packages/kernel` / `packages/schemas` — không cần: rule đã cho phép (runtime-iec ← kernel; lint đã chặn Date.now ở runtime-iec; ngưỡng coverage 85 đã có cho runtime-iec).
+
+**Bảng tính tay A — scan timing (mô hình lưới đều, OQ-130; stepMs = 10 trừ khi ghi khác):**
+
+| # | Cấu hình | Diễn biến | Kỳ vọng |
+|---|---|---|---|
+| A1 | period 20, `start()` ở T=0 | step T=0 dt=10: acc 0→10, 0 scan. step T=10: acc 10→20, n=1, scan tại 0+20=20, acc=0. step T=20: acc 10. step T=30: scan tại 40. | Sau 10 bước (T=0..90, clock=100): scan tại 20,40,60,80,100; scanCount=5, lastScanSimMs=100, acc=0 |
+| A2 | period 20, dt=50 | step T=0 dt=50: acc 0→50, n=2, scan tại 20, 40; acc=10. step T=50 dt=50: acc 10→60, n=3, scan tại 60, 80, 100; acc=0. | Scan tại 20,40,60,80,100 — lưới đều 20, không trôi |
+| A3 | period 20, dt=1200, maxScans=50 | step T=0: acc=1200, n_raw=60 → cap 50, scan tại 20..1000 (cách 20); acc giữ 200; SCAN_OVERRUN count += 10. step T=1200 dt=10: acc 200→210, n=10, scan tại 1020..1200; acc=10. | scanCount=60 sau 2 bước; SCAN_OVERRUN count=10; lưới vẫn đều |
+| A4 | period 20, STOP giữa chừng | 3 scan (20,40,60) rồi `stop()`; 5 bước nữa (T=60..100) | scanCount giữ 3; không scan mới; Q về 0 ngay khi `stop()` (outputsOnStop 'zero') |
+| A5 | period 20, restart | Sau A4: `start()` rồi step T=110 dt=10 (rebase lastScanTime=110, acc=10), step T=120: scan tại 130 | Scan đầu sau restart tại 130 (lưới rebase, không phải 120); OB100 chạy lại ở scan này |
+| A6 | period 10 (= stepMs) | step T=0: acc=10, n=1, scan tại 10. step T=10: scan tại 20. | Scan tại 10,20,30… (không có scan tại 0) — ghim khác biệt với mô hình "scan tại T" |
+
+**Bảng tính tay B — process image (§8.4; period 10, stepMs 10, scan tại 10,20,…):**
+
+Chương trình B1 (OB "Main", VAR_TEMP `t : Bool`):
+```
+#t := %I0.0;
+%Q0.0 := #t;
+%Q0.1 := %Q0.0;
+%I0.1 := %I0.0;
+#t := %I0.1;
+%M0.0 := #t;
+```
+| Scan | TagDB I0.0 trước step | PII sau latch | Q0.0/Q0.1 sau scan | M0.0 sau scan | Ghi chú |
+|---|---|---|---|---|---|
+| t=10 | TRUE | I0.0=1, I0.1=0 | 1 / 1 | 1 | Q0.1=1 chứng minh đọc `%Q` thấy giá trị vừa ghi cùng scan; `#t := %I0.1` = 1 chứng minh ghi `%I` vào PII |
+| t=20 | FALSE | I0.0=0, I0.1=0 (latch ghi đè giá trị chương trình ghi ở scan trước) | 0 / 0 | 0 | Latch đầu scan ghi đè PII |
+
+Chương trình B2 (chỉ `IF %I0.0 THEN %M0.0 := TRUE; END_IF;`): scan t=10 với I0.0=TRUE → M0.0=1; scan t=20 với I0.0=FALSE → M0.0 vẫn 1 (không ghi → giữ; `%M` trực tiếp, không latch).
+
+**Bảng tính tay C — OB100 một lần + cyclic OB (§8.3; stepMs 10, OB1 period 20, scan tại 20,40,…):**
+
+Chương trình: OB100: `%MW2 := 1;` · OB35 (period 100, phase 0): `%MW4 := %MW4 + 1;` · OB1: `%MW0 := %MW0 + 1;` (MW init 0).
+
+| Sau scan | MW0 (OB1) | MW2 (OB100) | MW4 (OB35) | Ghi chú |
+|---|---|---|---|---|
+| t=20 | 1 | 1 | 0 | OB100 chạy ở scan đầu; OB35 idx floor(20/100)=0, lastIdx init 0 → chưa đến hạn |
+| t=40,60,80 | 2,3,4 | 1 | 0 | Chỉ OB1 |
+| t=100 | 5 | 1 | 1 | OB35 idx=1 > 0 → đến hạn, chạy TRƯỚC OB1 |
+| t=200 | 10 | 1 | 2 | OB35 idx=2 → đến hạn |
+
+Biến thể C-overrun (OB1 period 200, OB35 period 100 phase 0; scan tại 200,400,600): scan t=200: OB35 idx=2 > lastIdx 0 → chạy 1 lần, trễ 1 kỳ (idx 1) → CYCLE_OVERRUN count=1, MW4=1; t=400: idx=4 → chạy, overrun=2, MW4=2; t=600: MW4=3, overrun=3. Biến thể C-phase (OB35 period 100 phase 30, OB1 period 20): đến hạn ở scan t=40 (idx 0 > lastIdx floor((0−30)/100)=−1), t=140 (idx 1), t=240 (idx 2) → sau scan t=140: MW4=2, overrun=0.
+
+**Bảng tính tay D — gọi block: FB + IN_OUT + TEMP + độ sâu + giới hạn vòng lặp:**
+
+FB `FB_Latch` (VAR_INPUT `iSet, iReset : Bool`; VAR_OUTPUT `qOut : Bool`; VAR `sLatched : Bool`; VAR_IN_OUT `ioCount : Int`):
+```
+IF #iSet THEN #sLatched := TRUE; END_IF;
+IF #iReset THEN #sLatched := FALSE; END_IF;
+#qOut := #sLatched;
+#ioCount := #ioCount + 1;
+```
+OB1: `"FB_Latch_DB"(iSet := %I0.0, iReset := %I0.1, ioCount := %MW10); %Q0.0 := "FB_Latch_DB".qOut;` (MW10 init 0; period 10, scan tại 10,20,30,40):
+
+| Scan | I0.0 / I0.1 trước step | sLatched | qOut / Q0.0 | MW10 | Ghi chú |
+|---|---|---|---|---|---|
+| t=10 | 0 / 0 | FALSE | 0 | 1 | IN_OUT tăng mỗi scan dù không set/reset |
+| t=20 | 1 / 0 | TRUE | 1 | 2 | iSet chốt |
+| t=30 | 0 / 0 | TRUE | 1 | 3 | static giữ giữa các scan |
+| t=40 | 0 / 1 | FALSE | 0 | 4 | iReset xả; MW10 chứng minh IN_OUT ghi thẳng nơi gọi |
+
+TEMP reset — FC `FC_Temp` (VAR_INPUT `x : Int`; VAR_TEMP `t : Int`; body `#t := #t + #x; "FC_Temp" := #t;`), OB1: `%MW12 := "FC_Temp"(x := 5);`: scan 1 → MW12=5 (`t` bắt đầu 0); scan 2 → MW12=5 (không phải 10 — TEMP không giữ). Độ sâu — chuỗi FC_1→…→FC_25, mỗi FC trả `FC_{k+1}() + 1`, FC_25 trả 0, maxCallDepth=24 (OB depth 0): lời gọi tới FC_25 (depth 25) → CALL_DEPTH, bỏ qua, trả mặc định 0 → FC_24=1, …, FC_1=24; CALL_DEPTH count=1. Giới hạn vòng lặp — `WHILE TRUE DO #i := #i + 1; END_WHILE;` (`#i` init 0): sau 10_000 lần lặp → LOOP_LIMIT count=1, thoát vòng lặp, `#i`=10000, chạy tiếp sau vòng lặp.
+
+**Bảng tính tay E — số học §7.2 (tính tay, mỗi case là một gán trong OB rồi đọc kết quả):**
+
+| # | Biểu thức | Kết quả | Fault / cờ |
+|---|---|---|---|
+| E1 | `32767 + 1` (Int) | −32768 | ov=true |
+| E2 | `−32768 − 1` (Int) | 32767 | ov=true |
+| E3 | `32767 * 2` (Int) | −2 (65534 wrap: ((65534+32768) & 0xFFFF) − 32768 = 32766 − 32768) | ov=true |
+| E4 | `2147483647 + 1` (DInt) | −2147483648 | (không đặt ov) |
+| E5 | `7 / 2`, `−7 / 2`, `7 MOD 2`, `−7 MOD 2` (Int) | 3, −3, 1, −1 | cắt về 0; MOD dấu theo số bị chia |
+| E6 | `7 / 0`, `7 MOD 0` (Int) | 0, 0 | DIV_ZERO ×1 mỗi phép |
+| E7 | `1.0 / 0.0`, `−1.0 / 0.0`, `0.0 / 0.0` (Real) | +Infinity, −Infinity, NaN | không fault (IEEE) |
+| E8 | `SQRT(−1.0)`, `SQRT(4.0)` | NaN, 2.0 | không fault |
+| E9 | `REAL_TO_INT`: 2.5, 3.5, −2.5, −3.5, 0.5, 1.5 | 2, 4, −2, −4, 0, 2 | banker's rounding |
+| E9b | `TRUNC(2.9)`, `TRUNC(−2.9)`, `CEIL(2.1)`, `CEIL(−2.1)`, `FLOOR(2.9)`, `FLOOR(−2.9)` | 2, −2, 3, −2, 2, −3 | TRUNC cắt về 0 |
+| E10 | `REAL_TO_INT(40000.0)`, `REAL_TO_INT(NaN)` | 0, 0 | CONV_RANGE ×1 mỗi phép |
+| E10b | `INT_TO_REAL(16777217)` | 16777216.0 | 2^24+1 không biểu diễn được ở float32 → fround |
+| E11 | `#r := 0.1 + 0.2; #b := #r = 0.3;` | `#r` = 0.30000001192092896, `#b` = TRUE | cả hai vế fround về cùng float32 |
+| E12 | Word `16#0001 SHL 3`, `SHL 16`, Int `−1 SHR 1`, Word `16#8000 SHR 1`, Byte `16#81 ROL 1`, `ROR 1`, SHL count −1 | `16#0008`, 0, −1, `16#4000`, `16#03`, `16#C0`, 0 | shift ≥ độ rộng → 0; SHR có dấu mở rộng dấu; count âm → 0 |
+| E13 | `#a : Array[0..3] of Int`, đọc `#a[5]`, ghi `#a[5] := 7` | đọc 0; ghi bỏ qua, `#a[0..3]` không đổi | ARRAY_RANGE ×1 mỗi lần |
+| E14 | `FOR #i := 1 TO 3`, `3 TO 1 BY −1`, `5 TO 1 BY 1`, `32766 TO 32767` (Int) | 3 lần, 3 lần, 0 lần, 2 lần (32766, 32767 — không tràn) | bao hàm hai đầu; kiểm tràn trước khi tăng |
+| E15 | `NORM_X(0, 5, 10)`, `SCALE_X(0, 0.5, 10)`, `NORM_X(0, 15, 10)`, `SCALE_X(0, 2.0, 10)` | 0.5, 5.0, 1.5, 20.0 | ngoài [0..1] không kẹp (UNVERIFIED §14.4) |
+| E16 | `MIN(3, 7)`, `MAX(3, 7)`, `LIMIT(0, −5, 10)`, `LIMIT(0, 15, 10)`, `LIMIT(0, 5, 10)` | 3, 7, 0, 10, 5 | |
+| E17 | `#r := 7;` (`#r` Real, `#x` Int = 7) | 7.0 | widening Int→Real |
+
+**Bảng tính tay F — force + snapshot/restore (chương trình đếm: OB1 `#c := #c + 1; %Q0.0 := #c >= 3;` với `#c` là static? Không — dùng `%MW0 := %MW0 + 1; %Q0.0 := %MW0 >= 3;`):**
+
+| # | Thao tác | Kỳ vọng |
+|---|---|---|
+| F1 | Force `%I0.0` = TRUE (IoBus FALSE); scan | Chương trình thấy `%I0.0` = TRUE. `unforce` → scan kế thấy FALSE |
+| F2 | Force `%Q0.0` = TRUE; chương trình ghi FALSE; scan xong | IoBus `%Q0.0` = TRUE (force thắng ở output update). `listForces()` = `[{ref: "%Q0.0", value: true}]`. `unforce` → giá trị chương trình chảy lại |
+| F3 | Force `%M0.0` = TRUE; chương trình ghi `%M0.0 := FALSE`; đọc `read("%M0.0")` | Đọc = TRUE (force thắng); bộ nhớ M0.0 vẫn FALSE (ghi bị bỏ qua, không đổi bộ nhớ). `unforce` → đọc = FALSE |
+| F4 | Force `"DB_X".run` = TRUE; chương trình ghi FALSE | Đọc = TRUE; ghi bỏ qua |
+| F5 | Force bằng tên tag `"START_PB"` (map → `%I0.0`) | `listForces()` hiện `{ref: "%I0.0", value: …}` (dạng chuẩn, OQ-142); force lại bằng `"%I0.0"` ghi đè cùng force (không tạo 2 force) |
+| F6 | Chạy 5 scan (MW0=5, scanCount=5, Q0.0=TRUE vì 5≥3) → snapshot S; chạy 3 scan nữa (MW0=8, scanCount=8, ghi trace Q0.0 = [1,1,1]) → `restore(S)` → chạy 3 scan | MW0=8, scanCount=8, trace Q0.0 = [1,1,1] giống hệt; faults giống hệt (kể cả count) |
+| F7 | Force `%I0.0`=TRUE → snapshot → `unforce` → `restore` | `listForces()` hiện lại force `%I0.0` (force nằm trong snapshot) |
+| F8 | Tích hợp orchestrator: `makeSim` + `softPlcExtension`, chạy 5 bước, `snapshotAll`, chạy 3 bước (ghi TagDB Q0.0), `restoreAll`, chạy 3 bước | TagDB Q0.0 + scanCount + simTime giống hệt sau restore |
+
+**Bảng tính tay G — điều khiển luồng (mỗi case 1 chương trình OB nhỏ, kết quả cuối sau 1 scan trừ khi ghi khác):**
+
+| # | Chương trình | Kỳ vọng |
+|---|---|---|
+| G1 | `CASE #n OF 1..3: #r := 1; 5: #r := 2; ELSE #r := 3; END_CASE;` với `#n` = 2 / 5 / 9 | `#r` = 1 / 2 / 3 |
+| G2 | `#i := 0; WHILE #i < 10 DO #i := #i + 1; IF #i = 3 THEN EXIT; END_IF; END_WHILE;` | `#i` = 3 |
+| G3 | `FOR #i := 1 TO 5 DO IF #i MOD 2 = 0 THEN CONTINUE; END_IF; #s := #s + #i; END_FOR;` (`#s` init 0) | `#s` = 9 (1+3+5) |
+| G4 | `#r := 1; RETURN; #r := 2;` | `#r` = 1 (lệnh sau RETURN không chạy) |
+| G5 | `#i := 0; REPEAT #i := #i + 1; UNTIL TRUE; END_REPEAT;` | `#i` = 1 (REPEAT chạy ít nhất 1 lần) |
+| G6 | `IF #a THEN #r := 1; ELSIF #b THEN #r := 2; ELSE #r := 3; END_IF;` với (`#a`,`#b`) = (0,1) / (0,0) / (1,0) | `#r` = 2 / 3 / 1 |
+| G7 | `WHILE #i < 3 DO #i := #i + 1; END_WHILE;` lồng trong `IF FALSE THEN … END_IF;` | `#i` = 0 (nhánh không chạy) |
+| G8 | Bit logic: `#q0 := #i0 AND #i1; #q1 := #i0 OR #i1; #q2 := NOT #i0; #q3 := #i0 XOR #i1;` với (I0.0,I0.1) = (1,0) / (1,1) / (0,0) | (0,1,0,1) / (1,1,0,0) / (0,0,1,0) |
+
+**Test (mục tiêu: ≥ 100 test mới; tổng ≥ 1410 = 1310 + 100):**
+
+| Nhóm | File | Test mới (tên + kỳ vọng) |
+|---|---|---|
+| arithmetic — hàm thuần (~20) | `packages/runtime-iec/src/arithmetic.test.ts` | Bảng E ở mức hàm: E1–E5 (wrap + ov), E6 (div/mod 0), E9/E9b (banker's/TRUNC/CEIL/FLOOR, đủ 6 giá trị .5), E10 (CONV_RANGE + NaN), E10b (fround 16777217), E12 (shift đủ 7 case), `roundHalfEven` property (fast-check: kết quả luôn chẵn khi .5, `roundHalfEven(x)` = `Math.round` khi không .5) |
+| intrinsics (~12) | `packages/runtime-iec/src/intrinsics.test.ts` | Mỗi hàm §7.3 ≥ 1 test: POWER (0, âm, phân số), ABS (âm, min-int wrap), SQRT (âm → NaN), MIN/MAX/LIMIT (đủ 5 case E16), SHL/SHR/ROL/ROR (bảng E12), CEIL/FLOOR (E9b), NORM_X/SCALE_X (E15, gồm ngoài khoảng không kẹp) |
+| tagmap (~8) | `packages/runtime-iec/src/tagmap.test.ts` | Build từ TagDef (I/Q/M/DB, bit/word/dword), `parsePlcRef` đủ dạng (`%I0.0`, `%MW10`, `DB1.DBW4`, `"DB".field.sub`, tên tag), `sym:` → throw, tên trùng → throw, cross-test `parsePlcRef` vs `parseAddress` (P1.1) trên ~20 địa chỉ (cùng area/byte/bit/type), canonical (`%MB10` ≠ `%MW10`, tag → địa chỉ) |
+| interpreter — closures/frame (~15) | `packages/runtime-iec/src/interpreter.test.ts` | Eval: const/load/unary/binary/convert/intrinsic/callFcExpr (mỗi op 1 test); flow: if/elsif/case/for/while/repeat/exit/continue/return (bảng G ở mức interpreter, không qua SoftPlc); TEMP reset qua 2 lần gọi FC (bảng D); IN_OUT Ref ghi thẳng nơi gọi (đổi trong callee → caller thấy ngay); call depth (bảng D, CALL_DEPTH); loop limit (bảng D, LOOP_LIMIT); `callSys` không handler → SYS_UNSUPPORTED, chạy tiếp |
+| softplc scan goldens (~38) | `packages/runtime-iec/src/softplc-scan.test.ts` | Bảng A (A1–A6, mỗi case 1 test: scanCount/lastScanSimMs/acc + SCAN_OVERRUN), bảng B (B1 2 scan + B2 2 scan), bảng C (OB100/cyclic: 4 scan mốc + overrun + phase = 6), bảng D (FB 4-scan + TEMP + depth + loop = 4 test, IN_OUT assert qua MW10 từng scan), bảng G (G1–G8, mỗi case 1 test), bit logic 8 (G8 + 7 chương trình AND/OR/NOT/latch/seal — xem ghi chú dưới) |
+| softplc math goldens (14) | `packages/runtime-iec/src/softplc-scan.test.ts` | Bảng E1–E17 qua chương trình OB thật (mỗi case 1 test: giá trị cuối + fault count); riêng E11 assert `0.1+0.2 = 0.3` TRUE |
+| force/snapshot (~10) | `packages/runtime-iec/src/softplc-snapshot.test.ts` | Bảng F1–F8 (mỗi case 1 test; F6 assert trace 3 scan giống hệt từng giá trị + scanCount + faults; F8 qua `makeSim` + `snapshotAll`/`restoreAll`) + `restore` sai hình → throw (version sai, thiếu trường, độ dài byte sai) |
+| softplc API (~12) | `packages/runtime-iec/src/softplc.test.ts` | `load` khi RUN → throw; `load` DB ref không tồn tại → throw; `load` xong scanCount/acc/faults reset; `start`/`stop` idempotent; `stop` đẩy Q=0 ra IoBus ngay (outputsOnStop 'zero') vs 'hold' giữ; `reset` cold (forces/faults/memory về init); `init` 2 lần → throw; `read`/`write` ref không tìm thấy → throw; `write` sai kiểu → TAG-E001; `getDiagnostics` (state/scanCount/faults gom count); `onScan` gọi đúng số lần + unsub |
+| scheduler (~8) | `packages/runtime-iec/src/softplc.test.ts` | `step` dt=0 → no-op; dt<0 → RangeError; T đi ngược → RangeError; STOP → step no-op; `faultPolicy: 'stop'` → STOP sau scan có fault đầu tiên (Q về 0); `maxScansPerStep` custom (vd 2) cap đúng; scan không có OB1 → scanCount vẫn tăng, Q vẫn đẩy |
+
+Ghi chú đếm: bit logic 8 = G8 (1 test với 3 bộ input) + 7 test chương trình AND/OR/NOT/latch SET-RST/seal/contact-coil (mỗi chương trình 1–2 scan, giá trị I cho trước, Q kỳ vọng tính tay — không liệt kê từng dòng ở plan, test tự ghi bảng truth). Tổng bảng trên ≈ 20+12+8+15+38+14+10+12+8 = **137 test mới** (mục tiêu sàn ≥ 100, tổng ≥ 1410). Đối chiếu M1 §12.2 cho phần P1.4: bit logic 8 ✓, toán/so sánh/convert/tràn/chia 0: 14 ✓, điều khiển luồng: 8 (G1–G8) ✓, gọi block: 8 (bảng D: FB 4-scan + IN_OUT + TEMP + FC return + depth + loop + multi-instance + callSys — 8 test) ✓, bộ nhớ & địa chỉ: 8 golden (bảng B) + unit tagmap/interpreter ✓, scan: 6 (bảng A) ✓, force/snapshot: 4+ (bảng F) ✓. Mỗi golden ghi `expectedFrom: 'spec'` trong tên test (OQ-151).
+
+**Mơ hồ (phân loại):** **Tier A (tự quyết):** vị trí file theo dep graph (mọi thứ P1.4 ở `runtime-iec`, không đụng `vendor-siemens`/`kernel`/`schemas`); `Frame.flow` thay vì throw cho điều khiển luồng; `FaultCollector` gom theo (code, blockName, src); mảng IO tái dùng cho latch/output (không cấp phát/scan); test dùng `compileSclProgram` + `SoftPlc` trực tiếp, tích hợp dùng `makeSim` + `softPlcExtension`; thứ tự triển khai (faults → arithmetic → intrinsics → tagmap → interpreter → softplc → extension → semantics §15). **Tier B (mặc định + ghi OQ):** OQ-130 (scan lưới đều, scan tại `lastScanTime + period`); OQ-131 (cap scan giữ acc thừa + SCAN_OVERRUN đếm số scan bị cắt); OQ-132 (maxLoopIterations 10_000 + LOOP_LIMIT thoát vòng lặp); OQ-133 (MOD 0 → 0 + DIV_ZERO); OQ-134 (shift count âm → 0 + bảng độ rộng + ABS min-int wrap); OQ-135 (OV trên frame, xóa đầu scan, không lộ ra IR); OQ-136 (số DB 1..n theo id sort ở `load()`; ref ngoài → load throw); OQ-137 (parser địa chỉ riêng ở runtime-iec + cross-test; `sym:` → throw); OQ-138 (`init` build lại map từ `cfg.tags`); OQ-139 (`load` yêu cầu STOP + xóa forces + validate DB ref); OQ-140 (`reset` cold toàn phần); OQ-141 (`write` theo từng loại ref + force thắng + TAG-E001); OQ-142 (force chuẩn hóa về key địa chỉ, `listForces` dạng chuẩn); OQ-143 (`callSys` không handler → SYS_UNSUPPORTED, chạy tiếp); OQ-144 (intrinsics §7.3 trong phạm vi P1.4); OQ-145 (cyclic period/phase từ `organization.cycleMs`); OQ-146 (thiếu OB100/OB1 → bỏ qua im lặng, scan vẫn đếm); OQ-147 (snapshot bộ nhớ dạng `number[]`); OQ-148 (IN_OUT = alias trực tiếp, không copy-back); OQ-149 (FOR bao hàm, 0 lần khi hướng sai, kiểm tràn trước khi tăng); OQ-150 (convert kiểm khoảng theo kiểu đích, NaN → 0 + CONV_RANGE); OQ-151 (golden P1.4 là bảng TS + `expectedFrom: 'spec'`; YAML runner là P1.7); OQ-152 (X-002 không chặn P1.4); OQ-153 (`step` khi STOP = no-op; `stop()` đẩy Q ra IoBus ngay); OQ-154 (`start`/`stop` idempotent; `start` không reset bộ nhớ; STOP→RUN re-arm OB100); OQ-155 (`softPlcExtension(program)` đăng ký `builtin:siemens`, chưa thêm vào CLI/SERVER_EXTENSIONS); OQ-156 (không thêm `scanAt()` ở P1.4); OQ-157 (bộ 8 mã fault + key gom + message lần đầu); OQ-158 (`faultPolicy: 'stop'` dừng sau khi scan xong); OQ-159 (Real fround sau mỗi phép tính, so sánh trên giá trị đã fround); OQ-160 (`step` T đi ngược/dt âm → RangeError, dt=0 → no-op). **Tier C (không chặn P1.4):** không có mục mới — OQ-105 (X-002/S1) vẫn mở từ P1.2, không chặn (OQ-152 ghi rõ lý do); nếu khi triển khai phát hiện §7/§8 thiếu quy tắc mà chỉ mã thật/PLCSIM mới quyết được → ghi OQ/SCR, không tự nới lỏng.
+
+**Rủi ro + cách kiểm:** (1) Mô hình thời gian scan (OQ-130) lệch TIA: "tại simTimeMs hiện tại" có thể hiểu là scan tại T (bảng A6 sẽ khác: scan tại 0,10,20 thay vì 10,20,30) — giảm thiểu: bảng A ghim mô hình lưới đều (thỏa "nội suy tăng đều" cho multi-scan + khớp kịch bản §13 với t=0 là trạng thái đầu); xác minh bằng PLCSIM khi có (VERIFY §14.14 cyclic OB + §14.9 R_TRIG scan đầu); nếu sai thì SCR đổi mô hình + sửa bảng A (test là bằng chứng). (2) Số DB gán 1..n theo id (OQ-136) lệch số DB thật trong TIA — giảm thiểu: chỉ dùng nội bộ cho `absDb`; số thật đi theo SimaticML ở P5.7; ghi `UNVERIFIED` ở semantics §15. (3) OV/ENO không quan sát được từ SCL (OQ-135) — nếu PLCSIM cho thấy ENO ảnh hưởng luồng (vd `ENO` sau phép chia 0) thì cần SCR thêm ENO vào IR (P1.7). (4) X-002/S1: mã thật có thể dùng `TON`… (compile báo U001 — P1.4 không chạy được chương trình đó cho tới P1.5) hoặc dùng `%MD0` như Real (OQ-110 đã ghim ở P1.3) — giảm thiểu: lỗi ồn ào, không chạy sai im lặng. (5) Hiệu năng: closures mỗi node + không cấp phát/scan là thiết kế đúng hướng cho bench §12.4, nhưng P1.4 chưa có bench đo — giảm thiểu: đo smoke một lần với chương trình 200 FB_Motor (ghi số vào STATE, không ngưỡng, không gate); bench chính thức là P1.7. (6) `readInputsInto`/`writeOutputsFrom` ném `RangeError` nếu mảng ngắn hơn số input/output — giảm thiểu: SoftPlc cấp mảng theo đúng số tag trong map ở `init` (test assert không throw khi đủ tag). (7) VM restart mất `/tmp` (bài học P1.3): triển khai làm ở bản sao `/tmp` nhưng **rsync về `~/workspace/vcs` sau mỗi bước lớn**, không để bản duy nhất trong `/tmp`.
+
+**Ngoài phạm vi:** std blocks `TON`/`TOF`/`TP`/`TONR`/`CTU`/`CTD`/`CTUD`/`R_TRIG`/`F_TRIG`/`SR`/`RS` (P1.5 — P1.4 chỉ có điểm cắm `sysCalls`); LAD (P1.6); golden runner YAML + demo `motor-interlock` + UI + bench M1 §12.4 (P1.7); `compileProject` đọc nhiều file (P1.7); CLI `vcs plc run` (P1.7); sửa EBNF §4.2 / M1 §7/§8/§10; đổi `.dependency-cruiser.cjs` / `eslint.config.js` / `vitest.config.ts` / `packages/kernel` / `packages/schemas` / `apps/cli` / `apps/server` / `examples/`; ADR mới (quyết định scan/DB/force là thực thi spec §7/§8/§10, không phải quyết định kiến trúc mới — ghi vào plan + semantics §15); mã diagnostic mới; `docs/facts/` mới; P0.9 PWA; script spike S1 (chạy khi có mã thật).
+
+**Gate P1.4 (triển khai):** `lint && typecheck && depcheck && test && test:e2e && review:cheats && docs:diagnostics --check` + `build` + bench guard M0 (`pnpm bench`: TagDB 4/4 PASS + orchestrator ≥ 100 000 bước/s — P1.4 không chạm đường nóng bench; rớt > 20% so với baseline thì dừng điều tra, không hạ ngưỡng) + **probe lint**: thêm `Date.now()` vào một file scratch trong `packages/runtime-iec/src/` ở bản sao `/tmp` → `pnpm lint` exit 1 (chứng minh rule chặn Date.now trong runtime-iec), xóa file probe sau khi kiểm (tiền lệ probe M0) + CI (check + test ubuntu/windows + e2e ubuntu) xanh. Tổng test sau P1.4: **≥ 1410** (≥ 100 mới). `pnpm-lock.yaml` **không đổi** (không dependency mới — diff lockfile khác rỗng là cờ đỏ, dừng kiểm tra). `pnpm install` trong VM vẫn EPERM (OQ-007) — triển khai làm ở bản sao `/tmp` như các prompt trước, cài thật `--frozen-lockfile` (dùng `git archive` để copy, không `cp -r` cả cây kèm `node_modules` — bài học ENOSPC ở P0.8), **rsync về `~/workspace/vcs` sau mỗi bước lớn** (bài học VM restart P1.3). **Cần kiểm lại khi triển khai:** root `package.json` không bị ghi đè (bài học P1.2: từng bị ghi đè bằng nội dung vendor-siemens — kiểm `name: "vcs"` + diff vs HEAD trống trước khi commit).
+
+**Triển khai P1.4 — KẾT QUẢ (2026-11-25, bản sao `/tmp/vcs-p14`, install thật `--frozen-lockfile`):**
+
+**File (18 file phạm vi + 1 file testkit + 2 file sửa P1.3):** `packages/runtime-iec/src/faults.ts`, `arithmetic.ts`, `intrinsics.ts`, `tagmap.ts`, `interpreter.ts` (~1833 dòng), `softplc.ts` (~700 dòng), `extension.ts`, `index.ts`; test: `arithmetic.test.ts`, `intrinsics.test.ts`, `tagmap.test.ts`, `interpreter.test.ts`, `interpreter-composite.test.ts`, `interpreter-view.test.ts`, `softplc.test.ts`, `softplc-scan.test.ts`, `softplc-snapshot.test.ts`, `ir-testkit.ts` (helper test-only, không export từ index); tích hợp SCL→IR→SoftPlc: `packages/vendor-siemens/src/scl/softplc.test.ts`; sửa P1.3: `packages/vendor-siemens/src/scl/typecheck.ts` (`resolveDb` — xem bug 11) + `packages/runtime-iec/src/ir.ts` (`IrObBinding.phaseMs?`); docs: `docs/semantics.md` §15, `docs/STATE.md` §19 (mục này), `docs/open-questions.md` (OQ-130…160 đóng, OQ-145 bổ sung, OQ-161 mới).
+
+**Test: 256 mới, tổng 1566/1566 (59 file)** — vượt mục tiêu ≥ 100 mới / ≥ 1410 tổng. Chi tiết: arithmetic 26, intrinsics 12, tagmap 19, interpreter 20, interpreter-composite 24, interpreter-view 27, softplc 26, softplc-scan 56, softplc-snapshot 19, vendor-siemens softplc 22 (+45 test khác đã có ở các file này từ trước — tổng mới ròng 256).
+
+**Gate (chạy thật trên `/tmp/vcs-p14`):** lint 0; typecheck 0; depcheck sạch (105 module, 190 dep, no violations); test 1566/1566 (59 file), exit 0 (coverage runtime-iec ≥ 85% — interpreter 85.36% dòng, softplc 86.49%, arithmetic/faults/intrinsics 100%, tagmap 91.89%, memory 98.46%); test:e2e 5/5 (12,1 s); review:cheats SẠCH; docs:diagnostics --check khớp (42 mã); build OK (3 task, 3,582 s); bench guard M0: TagDB 4/4 PASS (set/get 47.306.848 ops/s; flush 5000 tag/0 đổi 0,39 µs; flush 1000 đổi + 1 sub 0,084 ms; heap −0,05 MB), orchestrator 458.835 bước/s PASS (≥ 100.000); probe lint Date.now trong `packages/runtime-iec/src/`: thêm file scratch `__probe-date-now.ts` → `pnpm lint` exit 1 (`no-restricted-properties`), đã xóa file probe. `pnpm-lock.yaml` **không đổi**; root `package.json` không bị ghi đè (kiểm trước khi commit).
+
+**Smoke bench 200 FB_Motor (không ngưỡng, không gate — plan §19):** 2000 scan, FB latch iStart/iStop → qRun, 200 DB riêng: **519 scan/s** (3,86 s) và **533 scan/s** (3,75 s) — 2 lần, ổn định ~520–535, **dưới mục tiêu P1.7 ≥ 1000 scan/s** (~1,9 ms/scan, ~9,6 µs/FB call). Đây là số đo thật, không phải gate P1.4; tối ưu + bench chính thức là P1.7. SUY ĐOÁN nguyên nhân: cấp phát Frame/Ref mỗi lần gọi + đi qua viewFieldRef mỗi lần truy cập field — cách kiểm: profile ở P1.7 trước khi tối ưu.
+
+**Bug thật đã tìm và sửa trong triển khai (12):** (1) `roundHalfEven(-3.5)` sai (−2 thay vì −4; `Math.round` làm tròn .5 về +∞, r lẻ → số chẵn gần nhất là `r−1`). (2) `parsePlcRef` nhận nhầm tag `DB1_VAL` thành ref DB (check `startsWith('DB')` trước tra map) — sửa tra map trước. (3) `DbStore` constructor 2 đối số `(dbNumber, sizeBytes)`, code gọi 1 đối số. (4) `compileSclProgram` không sinh `cycleMs` → cyclic mặc định 100 ms (bổ sung OQ-145). (5) testkit `abs`/`absDb` hardcode `width: 8` — sai cho Int/DInt/LReal (đã sửa theo `widthFor`). (6) `dbForFb` truyền `FieldType` dạng string trần → rơi nhánh struct, crash `fields is not iterable` (đã bọc `{kind:'elem', type}`). (7) `SoftPlc.init` không `async` → throw đồng bộ, test `.rejects` không bắt được; đã đổi `async` rồi REVERT về sync vì lint `require-await` (test đổi sang expect sync). (8) testkit `runSteps` luôn bắt đầu T=0 → lần gọi thứ 2 bị "T đi ngược" (thêm tham số `startT`). (9) `SCAN_OVERRUN`/`CYCLE_OVERRUN` đếm sai: `FaultCollector.record` chỉ +1/lần gọi → thêm `count?: number`, SCAN_OVERRUN truyền số scan bị cắt, CYCLE_OVERRUN truyền số kỳ trễ. (10) `IrObBinding` không có phase — plan bảng C cần → thêm `phaseMs?: number` (mặc định 0) vào `ir.ts`. (11) **BUG P1.3 THẬT — layout DB instance FB sai spec:** `resolveDb` (typecheck.ts) chỉ lấy `iface.static` + prefix 4 byte, trong khi M1 §3.5 + OQ-125 + semantics §14 đều nói layout = `VAR_INPUT + VAR_OUTPUT + VAR_IN_OUT` (slot 4 byte nội bộ, không lộ) + `VAR(static)`; hệ quả: interpreter throw "không tìm thấy field 'iStart'" với mọi IR do compiler sinh, OB không đọc được `"DB".qRun` (T005). Đã sửa `resolveDb` + cập nhật 2 test ghim layout cũ với kỳ vọng tính tay mới (FB_S: fields [['i',0,1],['st',2,2],['b',4,1]], size 6; FB_T có IN_OUT: [['a',0,1],['q',0,1],['st',6,2]], size 8, `io` không trong fields, `"DB_T".io` → T005); đồng bộ `dbForFb` trong testkit. Sau sửa: FB_Motor SCL latch compile + chạy 4 scan đúng; toàn suite 1566/1566. (12) **BUG THẬT — `compositeRef` nhánh struct:** `field()` luôn đệ quy `compositeRef(subField.type, …)` nên truy cập member scalar của struct TEMP (`#u.speed`, speed: Int) ném "compositeRef chỉ dùng cho mảng/struct" ngay lúc compile — nhánh array xử lý scalar đúng, chỉ nhánh struct sai. Đã sửa: tách `getParent`/`getSub`/`setSub`; field scalar → `baseRef`, field composite → đệ quy.
+
+**Sửa kỳ vọng test (không phải bug code, có lý do):** test C-phase: 7 bước chỉ tới scan t=120, cần 14 bước (clock 0→140, period 20) mới tới scan t=140; test `write %I`: latch ghi đè PII từ TagDB ở scan kế nên Q=FALSE sau scan 1 rồi TRUE khi TagDB IN_A=TRUE; test `memM: [0,0]` đúng độ dài thật (MW0 = 2 byte) nên đổi thành `[0]`; test F6: trace ghi từng scan, so faults sau 2 lần chạy 3 scan với nhau; FaultCollector gom theo code+block+src nên 2 lần ARRAY_RANGE OOB → 1 entry count 2; WHILE điều kiện Int: `condFn(frame) === true` nên body bị bỏ qua, không throw (typecheck P1.3 đã chặn non-Bool); `irTypeSize(MOTOR)` = 4 theo §3.4 rule 6; `resolveInstance` dbField chưa nạp throw lúc CHẠY block, không phải lúc dựng Interpreter; `convertChecked('Int','Time',5)` KHÔNG throw — `Time` là đích số hợp lệ (INT_RANGES gồm Time, min 0, max +Inf); `sizeOf('Nope')` crash `TYPE_INFO[type] undefined` trước khi tới nhánh "không có kích thước" — nhánh đó trong `memory.ts#sizeOf` là **dead code** (chỉ `String` cho `undefined`, nhưng đã bị chặn ở trên), chỉ còn dòng 152 chưa cover (memory 98.46%); `intBinary`/`shiftOp` nhận op trước type (`intBinary('add','Real',…)`), không phải type trước.
+
+**Lệch plan (12, đã ghi ở trên + trong báo cáo):** (1) test runtime-iec KHÔNG import được `compileSclProgram` (dep-cruiser cấm runtime-iec → vendor-siemens) — test runtime-iec dựng IR tay qua `ir-testkit.ts`; pipeline thật SCL→IR→SoftPlc ở `vendor-siemens/src/scl/softplc.test.ts`; F8 dùng `createSimulation` trực tiếp (không phải `makeSim` — test-utils cũng không import được từ runtime-iec). (2) Frame thêm `composite: Map<string, LocalValue>` cho biến local mảng/struct; Ref thêm `elem`/`field` tùy chọn. (3) CEIL/FLOOR registry trả số thô, interpreter chuẩn hóa qua `convertChecked`. (4) `convertChecked` kiểm khoảng với mọi chuyển đổi số (OQ-150). (5) FOR BY 0 → cắt bởi LOOP_LIMIT, không special-case. (6) Member sau index sâu hơn 1 cấp + mảng trong mảng → throw ồn ào lúc compile (chưa hỗ trợ). (7) `irTypeToFieldTypeForLayout` đã viết rồi xóa (không cần). (8) Cross-test `parsePlcRef` vs `parseAddress` dời vào file test vendor-siemens (dep-cruiser). (9) `start()` reset `accMs` về 0 cùng rebase lưới; `reset()` về STOP; cyclic không `cycleMs` → 100 ms. (10) `ir-testkit.ts` là helper test-only trong `packages/runtime-iec/src/` (không có tiền lệ shared helper — các package khác dùng `@vcs/test-utils`, runtime-iec không import được). (11) `FaultCollector.record` thêm `count?: number`; `IrObBinding` thêm `phaseMs?`; `resolveDb` sửa theo §3.5 (bug 11); `fbInterfaceStruct` (multi-instance lồng) vẫn layout IN_OUT theo kích thước tự nhiên, không slot 4 byte — **không nhất quán với DB top-level** (OQ-161 mới, mở). (12) `SoftPlc.init` revert về sync (bug 7); `FaultCollector.restore` validate qua type guard `isRuntimeFault`.
+
+**OQ-130…160: đóng (đã áp dụng ở P1.4).** OQ-145 bổ sung: `compileSclProgram` không sinh `cycleMs` → mặc định 100 ms. OQ-161 mới (tier B, mở): layout IN_OUT của multi-instance lồng chưa nhất quán với DB top-level. X-002/S1 vẫn mở, không chặn P1.4 (OQ-152).
+
+**SỰ CỐ `.git` bị xóa (2026-11-25 ~09:00, trong phiên triển khai):** subagent chạy `rsync -a --delete …` không exclude `.git`; nguồn `/tmp/vcs-p14` (từ `git archive`, không có `.git`) nên rsync xóa `~/workspace/vcs/.git`. Chỉ `.git` mất — cây làm việc nguyên vẹn (dry-run rsync không còn diff; manifest hash cây ở `~/workspace/vcs-p14-tree-manifest.sha256`, 248 file). **Không thể commit "feat(m1): P1.4 interpreter + SoftPlc" cho tới khi `.git` được khôi phục** (quyết định của parent: true clone có history, vd máy Windows của owner; KHÔNG re-init mù). Từ nay rsync KHÔNG dùng `--delete` (hoặc luôn `--exclude .git`). Bài học: rsync đích có `.git` thì `--delete` mà không exclude `.git` là lệnh phá hoại.
+
+**Việc tiếp theo:** khôi phục `.git` (parent) → commit duy nhất "feat(m1): P1.4 interpreter + SoftPlc" trên `m1/p1.4-interpreter` (kiểm root `package.json` + lockfile không đổi + `user-chat/` không trong commit) → parent xác minh gate độc lập trên bản sao sạch → PR qua cloud browser → CI xanh → merge → P1.5 plan-first (std blocks).
