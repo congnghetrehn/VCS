@@ -1,4 +1,18 @@
-# CI — VCS (M0 §13, sửa bởi AMENDMENTS A16: chỉ Node 22). Chạy trên push + PR.
+# CI — VCS (M0 §13, sửa bởi AMENDMENTS A16: chỉ Node 22).
+# Tiết kiệm phút Actions (gói A, 2026-11-26 — tài khoản free 2000 phút/tháng
+# đã hết 100% ngày 2026-11-26; mỗi commit trên nhánh PR từng tốn ~25 phút):
+# - push chỉ chạy trên develop/main. Commit trên nhánh feature KHÔNG chạy CI
+#   qua push nữa; khi PR đã mở, sự kiện pull_request chạy 1 lượt thay vì 2.
+#   Đẩy lên nhánh chat-logs (cron log) cũng không tốn phút nào.
+# - concurrency cancel-in-progress: commit mới hủy lượt chạy cũ cùng ref
+#   (browser upload theo batch nhiều commit liên tiếp chỉ chạy lượt cuối).
+# - test Windows (hệ số tính phí ×2 — job đắt nhất mỗi lượt) chỉ chạy khi
+#   push lên develop/main, chạy tay, hoặc PR nhắm vào main (giữ đủ 4 check
+#   bắt buộc của D-001 trên main: check / test ubuntu / test windows / e2e).
+#   PR vào develop chạy check + test ubuntu + e2e; lỗi chỉ-Windows sẽ lộ
+#   ở lượt chạy sau merge vào develop.
+# - schedule nightly chỉ còn chạy bench (check/test/e2e không chạy khi
+#   không có code mới).
 # Job test (P0.7, M0 §13): `pnpm test` chạy kèm `--coverage` (provider v8),
 # ngưỡng dòng: kernel/schemas ≥ 85%, project ≥ 80% (vitest.config.ts).
 # Job bench (P0.3, M0 §13 + OQ-008, P0.7 + OQ-073): chạy tay/nightly, upload
@@ -10,14 +24,20 @@ name: CI
 
 on:
   push:
+    branches: [develop, main]
   pull_request:
   workflow_dispatch:
   schedule:
     - cron: '0 2 * * *'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     name: check (lint, typecheck, depcheck, diagnostics, cheats)
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,13 +57,9 @@ jobs:
       - run: pnpm review:cheats
 
   test:
-    name: test (${{ matrix.os }}, node ${{ matrix.node }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        node: [22]
+    name: test (ubuntu-latest, node 22)
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -51,13 +67,32 @@ jobs:
           version: 10.15.0
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
+
+  test-windows:
+    name: test (windows-latest, node 22)
+    # Chỉ chạy khi push lên develop/main, chạy tay, hoặc PR nhắm vào main
+    # (đủ check bắt buộc D-001 trên main). PR vào develop không chạy job này.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.base_ref == 'main'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
 
   e2e:
     name: e2e (ubuntu, node 22)
+    if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
