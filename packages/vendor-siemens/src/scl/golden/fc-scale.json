@@ -1,0 +1,75 @@
+{
+  "blocks": [
+    {
+      "body": [
+        {
+          "op": "assign",
+          "src": {
+            "col": 3,
+            "endCol": 22,
+            "endLine": 9,
+            "file": "FC_Scale.scl",
+            "line": 9
+          },
+          "target": {
+            "k": "local",
+            "name": "scaled"
+          },
+          "value": {
+            "a": {
+              "a": {
+                "op": "load",
+                "ref": {
+                  "k": "local",
+                  "name": "raw"
+                },
+                "type": "Int"
+              },
+              "b": {
+                "op": "const",
+                "type": "Int",
+                "value": 2
+              },
+              "fn": "mul",
+              "op": "binary",
+              "type": "Int"
+            },
+            "from": "Int",
+            "op": "convert",
+            "to": "Real"
+          }
+        }
+      ],
+      "id": "FC_Scale",
+      "interface": {
+        "inout": [],
+        "input": [
+          {
+            "name": "raw",
+            "type": "Int"
+          }
+        ],
+        "output": [
+          {
+            "name": "scaled",
+            "type": "Real"
+          }
+        ],
+        "static": [],
+        "temp": []
+      },
+      "kind": "FC",
+      "name": "FC_Scale",
+      "src": {
+        "col": 1,
+        "endCol": 13,
+        "endLine": 10,
+        "file": "FC_Scale.scl",
+        "line": 1
+      }
+    }
+  ],
+  "dbs": [],
+  "organization": [],
+  "udts": []
+}

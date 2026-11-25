@@ -1,0 +1,49 @@
+{
+  "blocks": [],
+  "dbs": [
+    {
+      "fields": [
+        {
+          "byteOffset": 0,
+          "init": 1500,
+          "name": "speed",
+          "size": 2,
+          "type": "Int"
+        },
+        {
+          "bitOffset": 0,
+          "byteOffset": 2,
+          "name": "run",
+          "size": 1,
+          "type": "Bool"
+        }
+      ],
+      "id": "DB_Motor",
+      "name": "DB_Motor",
+      "size": 4
+    }
+  ],
+  "organization": [],
+  "udts": [
+    {
+      "fields": [
+        {
+          "byteOffset": 0,
+          "name": "speed",
+          "size": 2,
+          "type": "Int"
+        },
+        {
+          "bitOffset": 0,
+          "byteOffset": 2,
+          "name": "run",
+          "size": 1,
+          "type": "Bool"
+        }
+      ],
+      "id": "UDT_Motor",
+      "name": "UDT_Motor",
+      "size": 4
+    }
+  ]
+}
