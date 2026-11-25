@@ -94,6 +94,13 @@ export function SimBar({ lang, onCommand, onTimeScale }: SimBarProps) {
       <span>
         {t(lang, 'sim.stepCount')}: <span data-testid="step-count">{sim?.stepCount ?? 0}</span>
       </span>
+      {sim?.plc !== undefined && (
+        <span data-testid="plc-stats">
+          {t(lang, 'sim.plcScans')}: <span data-testid="plc-scan-count">{sim.plc.scanCount}</span>
+          {' · '}
+          {t(lang, 'sim.plcFaults')}: <span data-testid="plc-fault-count">{sim.plc.faultCount}</span>
+        </span>
+      )}
       <span>
         {t(lang, 'sim.state')}: <span data-testid="sim-state">{state}</span>
       </span>
