@@ -1635,3 +1635,23 @@ Phần chỉ anh làm được (đã liệt kê cuối báo cáo): bench trên m
 ---
 Log tới thời điểm 2026-11-25 19:08 +07.
 ---
+
+## 2026-11-25 19:26 +07 — Em My
+
+Backup VCS vẫn khỏe, anh Tiến ạ. Em My kiểm rồi: script chạy exit 0, cây local không đổi nội dung từ 16:56 nên không có snapshot mới — snapshot mới nhất `vcs-20261125-095604.tar.gz` (5,78 MB) vẫn đủ. Việc sau đó (merge G1, probe M1) diễn ra trên GitHub và ngoài cây, không chạm nội dung cây local.
+
+Lưu ý nhỏ: quy tắc báo khi snapshot quá 2h sẽ còn nhắc lại mỗi 30 phút cho tới khi cây đổi nội dung. Anh muốn em My nới ngưỡng này lên không, hay cứ để vậy?
+
+## 2026-11-25 19:35 +07 — Anh Tiến
+
+Cứ để vậy. E ktra cả chat log nữa xem lên repo chưa nhé
+
+## 2026-11-25 19:35 +07 — Em My
+
+Lên rồi, anh Tiến ạ. Em My đối chiếu trực tiếp với GitHub: file `user-chat/main.md` trên nhánh `chat-logs` có sha256 trùng khớp tuyệt đối với file local (`86761e5c…`), 1636 dòng, tới đúng mục 19:08 báo cáo probe M1. Cron đẩy log chạy đúng, state file cũng khớp.
+
+Quy tắc backup thì cứ để vậy như anh nói.
+
+---
+Log tới thời điểm 2026-11-25 19:35 +07.
+---
