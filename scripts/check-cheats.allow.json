@@ -1,7 +1,13 @@
 {
   "_ghi_chu": "Mỗi mục: { \"file\": \"đường/dẫn/posix\", \"max\": số lần tối đa được phép, \"reason\": \"lý do ≥ 10 ký tự, nêu ADR/OQ nếu có\" }. Khóa bắt đầu bằng '_' bị bỏ qua.",
   "explicit-any": [],
-  "test-skip": [],
+  "test-skip": [
+    {
+      "file": "apps/web/e2e/e7.spec.ts",
+      "max": 1,
+      "reason": "P0.9 OQ-230: E7.6 opt-in — test cập nhật PWA sửa nguồn App.tsx + rebuild, chỉ chạy khi VCS_RUN_PWA_UPDATE=1, không chạy mặc định ở CI."
+    }
+  ],
   "eslint-disable": [],
   "console": [],
   "time-random": []
