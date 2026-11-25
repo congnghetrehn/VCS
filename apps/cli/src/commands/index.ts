@@ -3,6 +3,7 @@
 // `serve` thuộc P0.5.
 
 import { Command } from 'commander';
+import { goldenRunCommand } from './golden.js';
 import { runCommand } from './run.js';
 import { serveCommand } from './serve.js';
 import { validateCommand } from './validate.js';
@@ -43,6 +44,7 @@ export function createProgram(): Command {
     .option('--csv <file>', 'ghi chuỗi thay đổi ra file CSV')
     .option('--hash', 'in TraceHasher.hash() sau khi chạy')
     .option('--json', 'in JSON thay cho text')
+    .option('--scans <n>', 'chạy tới khi PLC đủ N scan (P1.7, OQ-203)')
     .action(
       async (
         dir: string | undefined,
@@ -54,6 +56,7 @@ export function createProgram(): Command {
           csv?: string;
           hash?: boolean;
           json?: boolean;
+          scans?: string;
         },
       ) => {
         process.exitCode = await runCommand(dir, opts);
@@ -77,11 +80,20 @@ export function createProgram(): Command {
 
   const ir = program.command('ir').description('Lệnh liên quan tới IR (M1 §6)');
   ir.command('dump')
-    .description('Biên dịch file SCL ra IR JSON (exit 0 ok, 2 lỗi biên dịch, 3 sai tham số)')
-    .argument('[file]', 'file SCL (.scl)')
+    .description('Biên dịch file SCL/thư mục ra IR JSON (exit 0 ok, 2 lỗi biên dịch, 3 sai tham số)')
+    .argument('[file]', 'file SCL (.scl) hoặc thư mục project/plc (P1.7, OQ-204)')
     .option('--out <file>', 'ghi JSON ra file thay vì stdout')
     .action(async (file: string | undefined, opts: { out?: string }) => {
       process.exitCode = await irDumpCommand(file, opts);
+    });
+
+  const golden = program.command('golden').description('Lệnh liên quan tới golden YAML (M1 §12.1)');
+  golden
+    .command('run')
+    .description('Chạy golden YAML (exit 0 pass, 1 có golden fail, 2 không chạy được)')
+    .argument('[path]', 'file .golden.yaml hoặc thư mục chứa golden')
+    .action(async (path: string | undefined) => {
+      process.exitCode = await goldenRunCommand(path);
     });
 
   return program;
