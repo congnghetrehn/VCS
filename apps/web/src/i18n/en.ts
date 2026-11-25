@@ -63,4 +63,10 @@ export const en: Dict = {
   'plc.forced': 'forced',
   'plc.remove': 'Remove',
   'plc.noWatch': 'No refs yet — add a ref to watch',
+  'pwa.update.available': 'A new version is available — reload to update',
+  'pwa.update.reload': 'Reload',
+  'pwa.update.confirmDirty': 'There are unsaved changes — reloading will lose them. Reload now?',
+  'kiosk.fullscreen': 'Fullscreen',
+  'kiosk.exit': 'Exit kiosk',
+  'kiosk.noWakeLock': 'This device does not support Wake Lock — the screen follows system settings',
 };

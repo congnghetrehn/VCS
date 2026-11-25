@@ -63,4 +63,10 @@ export const vi: Dict = {
   'plc.forced': 'forced',
   'plc.remove': 'Xóa',
   'plc.noWatch': 'Chưa có ref nào — thêm ref để theo dõi',
+  'pwa.update.available': 'Có bản mới — tải lại để cập nhật',
+  'pwa.update.reload': 'Tải lại',
+  'pwa.update.confirmDirty': 'Còn thay đổi chưa lưu — tải lại sẽ mất. Tải lại ngay?',
+  'kiosk.fullscreen': 'Toàn màn hình',
+  'kiosk.exit': 'Thoát kiosk',
+  'kiosk.noWakeLock': 'Thiết bị không hỗ trợ Wake Lock — màn hình tắt theo hệ thống',
 };

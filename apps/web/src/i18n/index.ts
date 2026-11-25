@@ -67,6 +67,12 @@ export const I18N_KEYS = [
   'plc.forced',
   'plc.remove',
   'plc.noWatch',
+  'pwa.update.available',
+  'pwa.update.reload',
+  'pwa.update.confirmDirty',
+  'kiosk.fullscreen',
+  'kiosk.exit',
+  'kiosk.noWakeLock',
 ] as const;
 
 export type I18nKey = (typeof I18N_KEYS)[number];
