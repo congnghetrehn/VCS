@@ -9,13 +9,13 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DIAGNOSTIC_CODE_RE, PRJ_CATALOG, SCL_CATALOG } from '@vcs/schemas';
+import { DIAGNOSTIC_CODE_RE, LAD_CATALOG, PRJ_CATALOG, SCL_CATALOG } from '@vcs/schemas';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'docs', 'diagnostics.md');
 
-/** Toàn bộ catalog (M0 + SCL) — gộp để sinh và kiểm mã chưa đăng ký. */
-const CATALOGS = [PRJ_CATALOG, SCL_CATALOG];
+/** Toàn bộ catalog (M0 + SCL + LAD) — gộp để sinh và kiểm mã chưa đăng ký. */
+const CATALOGS = [PRJ_CATALOG, SCL_CATALOG, LAD_CATALOG];
 
 function hasCode(code: string): boolean {
   return CATALOGS.some((c) => c.has(code));
