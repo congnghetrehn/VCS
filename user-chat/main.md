@@ -2419,3 +2419,13 @@ TraMuse báo nhanh backup cây VCS, anh Tiến ạ: script chạy ok (exit 0), c
 ---
 Log tới thời điểm 2026-11-27 02:26 +07.
 ---
+
+## 2026-11-27 02:59 +07 — em My
+
+em My báo: P2.8 đã MERGED 02:58 +07 (PR #39, merge commit 1508fc5; CI xanh 3 pass/2 skip, branch không xóa). Parent gate 11/11: test 2910/2910, e2e 14/14, cheats SẠCH, build 3/3. OQ-381 + 382…398 đóng; OQ-380 (X-003) vẫn mở, R-010 chờ anh duyệt.
+
+Lưu ý: tab Checks của GitHub hiển thị sai — báo "in progress" 45 phút trong khi Actions run đã xong sau 2m37s (check 1m20s, test 1m14s, e2e 2m32s); lần sau em kiểm tra thẳng trang Actions. Còn tồn đọng không chặn: §14 #8 chưa có e2e chạy trọn flow trong một test, perf-scroll 20k dưới 50 FPS trên VM (cần đo lại trên máy thật). P2.1–P2.8 đã merge hết; M2 còn G2 (sign-off) — chặn ở dữ liệu thật X-003.
+
+---
+Log tới thời điểm 2026-11-27 02:59 +07.
+---
