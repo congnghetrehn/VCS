@@ -4,6 +4,7 @@
 
 import { Command } from 'commander';
 import { goldenRunCommand } from './golden.js';
+import { importIoCommand } from './import-io.js';
 import { plantRunCommand } from './plant.js';
 import { runCommand } from './run.js';
 import { serveCommand } from './serve.js';
@@ -95,6 +96,17 @@ export function createProgram(): Command {
     .argument('[path]', 'file .golden.yaml hoặc thư mục chứa golden')
     .action(async (path: string | undefined) => {
       process.exitCode = await goldenRunCommand(path);
+    });
+
+  program
+    .command('import-io')
+    .description('Đọc I/O list CSV/XLSX, xem trước 50 dòng + mapping JSON (M2 §8; exit 0 ok, 2 lỗi đọc/header/profile, 3 sai tham số)')
+    .argument('[file]', 'file CSV/XLSX')
+    .option('--sheet <name>', 'tên sheet (XLSX)')
+    .option('--profile <yaml>', 'file import-profile.yaml')
+    .option('--json', 'in JSON thay cho text')
+    .action(async (file: string | undefined, opts: { sheet?: string; profile?: string; json?: boolean }) => {
+      process.exitCode = await importIoCommand(file, opts);
     });
 
   const plant = program.command('plant').description('Lệnh liên quan tới plant vòng kín (M2 §11.4)');
