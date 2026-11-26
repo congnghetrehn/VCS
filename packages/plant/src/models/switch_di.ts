@@ -56,7 +56,7 @@ export const switchDiModel: EquipmentModel<SwitchDiParams, SwitchDiState> = {
       dataType: 'Bool',
       description: 'Trạng thái công tắc (sau invert)',
       synonyms: ['DI', 'SWITCH', 'LS'],
-      descKeywords: ['switch', 'limit', 'level', 'contact'],
+      descKeywords: ['switch', 'limit', 'level', 'contact', 'công tắc', 'tiếp điểm', 'schalter', 'kontakt'],
     },
   ],
   paramsSchema: switchDiParamsSchema,

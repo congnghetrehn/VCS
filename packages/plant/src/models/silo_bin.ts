@@ -66,7 +66,7 @@ export const siloBinModel: EquipmentModel<SiloBinParams, SiloBinState> = {
       dataType: 'Int',
       description: 'Mức vật liệu (%, đã lag)',
       synonyms: ['LEVEL_RAW', 'LEVEL', 'LT'],
-      descKeywords: ['level', 'silo', 'bin', 'mass'],
+      descKeywords: ['level', 'silo', 'bin', 'mass', 'mức', 'füllstand'],
       optional: true,
     },
     {
@@ -75,7 +75,7 @@ export const siloBinModel: EquipmentModel<SiloBinParams, SiloBinState> = {
       dataType: 'Bool',
       description: 'Mức cao (≥ highPct)',
       synonyms: ['LEVEL_HIGH', 'LSH', 'HIGH'],
-      descKeywords: ['level', 'high'],
+      descKeywords: ['level', 'high', 'mức cao', 'hoch'],
       optional: true,
     },
     {
@@ -84,7 +84,7 @@ export const siloBinModel: EquipmentModel<SiloBinParams, SiloBinState> = {
       dataType: 'Bool',
       description: 'Mức thấp (≤ lowPct)',
       synonyms: ['LEVEL_LOW', 'LSL', 'LOW'],
-      descKeywords: ['level', 'low'],
+      descKeywords: ['level', 'low', 'mức thấp', 'niedrig'],
       optional: true,
     },
     {
@@ -93,7 +93,7 @@ export const siloBinModel: EquipmentModel<SiloBinParams, SiloBinState> = {
       dataType: 'Bool',
       description: 'Mức rất cao (≥ highHighPct)',
       synonyms: ['LEVEL_HIGH_HIGH', 'LSHH'],
-      descKeywords: ['level', 'high'],
+      descKeywords: ['level', 'high', 'mức rất cao', 'hoch'],
       optional: true,
     },
   ],

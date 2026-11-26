@@ -48,7 +48,7 @@ export const valveCtrlModel: EquipmentModel<ValveCtrlParams, ValveCtrlState> = {
       unit: '%',
       description: 'Vị trí đặt (%)',
       synonyms: ['POS_REF', 'POS_SP', 'POS_SET', 'SOLLWERT'],
-      descKeywords: ['pos', 'setpoint', 'reference'],
+      descKeywords: ['pos', 'setpoint', 'reference', 'vị trí', 'đặt vị trí', 'stellung', 'sollwert'],
     },
     {
       role: 'posFb',
@@ -57,7 +57,7 @@ export const valveCtrlModel: EquipmentModel<ValveCtrlParams, ValveCtrlState> = {
       unit: '%',
       description: 'Vị trí thực (%)',
       synonyms: ['POS_FB', 'POS', 'POS_ACT', 'POS_FBK', 'ISTWERT'],
-      descKeywords: ['pos', 'feedback'],
+      descKeywords: ['pos', 'feedback', 'vị trí', 'phản hồi vị trí', 'stellung', 'istwert'],
     },
     {
       role: 'fault',
@@ -66,7 +66,7 @@ export const valveCtrlModel: EquipmentModel<ValveCtrlParams, ValveCtrlState> = {
       optional: true,
       description: 'Lỗi van (đảo theo faultNC)',
       synonyms: ['FAULT', 'FAULT_DI', 'ALARM'],
-      descKeywords: ['fault', 'alarm'],
+      descKeywords: ['fault', 'alarm', 'lỗi', 'fehler', 'störung'],
     },
     {
       role: 'closedLs',
@@ -75,7 +75,7 @@ export const valveCtrlModel: EquipmentModel<ValveCtrlParams, ValveCtrlState> = {
       optional: true,
       description: 'Limit switch van đóng (pos ≤ 1%)',
       synonyms: ['CLOSED_LS', 'CLOSE_LS', 'CLOSED_LIMIT', 'LS_CLOSED'],
-      descKeywords: ['closed', 'limit'],
+      descKeywords: ['closed', 'limit', 'đóng', 'geschlossen'],
     },
     {
       role: 'openLs',
@@ -84,7 +84,7 @@ export const valveCtrlModel: EquipmentModel<ValveCtrlParams, ValveCtrlState> = {
       optional: true,
       description: 'Limit switch van mở (pos ≥ 99%)',
       synonyms: ['OPEN_LS', 'OPEN_LIMIT', 'LS_OPEN'],
-      descKeywords: ['open', 'limit'],
+      descKeywords: ['open', 'limit', 'mở', 'offen'],
     },
   ],
   paramsSchema: valveCtrlParamsSchema,

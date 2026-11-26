@@ -58,7 +58,7 @@ export const valveOnoffModel: EquipmentModel<ValveOnoffParams, ValveOnoffState> 
       dataType: 'Bool',
       description: 'Lệnh mở van từ PLC',
       synonyms: ['OPEN_CMD', 'OPEN', 'START_OPEN'],
-      descKeywords: ['open', 'valve'],
+      descKeywords: ['open', 'valve', 'mở', 'öffnen'],
     },
     {
       role: 'closeCmd',
@@ -67,7 +67,7 @@ export const valveOnoffModel: EquipmentModel<ValveOnoffParams, ValveOnoffState> 
       optional: true,
       description: 'Lệnh đóng van từ PLC',
       synonyms: ['CLOSE_CMD', 'CLOSE'],
-      descKeywords: ['close', 'valve'],
+      descKeywords: ['close', 'valve', 'đóng', 'schließen'],
     },
     {
       role: 'openLs',
@@ -75,7 +75,7 @@ export const valveOnoffModel: EquipmentModel<ValveOnoffParams, ValveOnoffState> 
       dataType: 'Bool',
       description: 'Limit switch van mở',
       synonyms: ['OPEN_LS', 'OPEN_LIMIT', 'LS_OPEN'],
-      descKeywords: ['open', 'limit'],
+      descKeywords: ['open', 'limit', 'mở', 'offen'],
     },
     {
       role: 'closedLs',
@@ -83,7 +83,7 @@ export const valveOnoffModel: EquipmentModel<ValveOnoffParams, ValveOnoffState> 
       dataType: 'Bool',
       description: 'Limit switch van đóng',
       synonyms: ['CLOSED_LS', 'CLOSE_LS', 'CLOSED_LIMIT', 'LS_CLOSED'],
-      descKeywords: ['closed', 'limit'],
+      descKeywords: ['closed', 'limit', 'đóng', 'geschlossen'],
     },
     {
       role: 'fault',
@@ -92,7 +92,7 @@ export const valveOnoffModel: EquipmentModel<ValveOnoffParams, ValveOnoffState> 
       optional: true,
       description: 'Lỗi van (đảo theo faultNC)',
       synonyms: ['FAULT', 'FAULT_DI', 'ALARM'],
-      descKeywords: ['fault', 'alarm'],
+      descKeywords: ['fault', 'alarm', 'lỗi', 'fehler', 'störung'],
     },
   ],
   paramsSchema: valveOnoffParamsSchema,
