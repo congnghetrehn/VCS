@@ -2349,3 +2349,37 @@ Tiếp theo: P2.6 (địa chỉ/validate/diff) đang làm plan trước, theo l�
 ---
 Log tới thời điểm 2026-11-26 19:03 +07.
 ---
+
+## 2026-11-26 20:33 +07 — TraMuse
+
+TraMuse báo: P2.6 đã merge vào develop, anh Tiến ạ.
+
+**ĐÃ CHẠY:** [PR #37](https://github.com/congnghetrehn/VCS/pull/37) — CI xanh (check + test ubuntu + e2e; Windows/bench skip theo gói A), merge commit ef5da92, 27 file, +4317/−18. TraMuse kiểm lại trên develop: validate.ts và diagnostics-catalog.ts giống hệt local (sha256 khớp), IO_CATALOG + PL-W010 đã có trên develop.
+
+Gate đã kiểm: test 2761/2761 (mới 198), coverage importers 92,69%, diagnostics 74 mã, CLI --report chạy được trên fixture (300 bản ghi, 18 lỗi, 23 cảnh báo), --commit trên fixture bẩn bị safety net chặn đúng, smoke 20k dòng ~0,46 s. OQ-341…360 đóng hết.
+
+Một điểm đáng chú ý: smoke đầu đo 4925 ms do 2 vòng lặp O(n²) trong validate/diff; đã sửa bằng sweep-line + Set, còn ~0,42 s, số diagnostic giống hệt.
+
+Tiếp theo: P2.7 (auto-suggest) đang làm plan trước — nhưng phần này cần dữ liệu I/O thật (X-003), nên plan sẽ nêu rõ chỗ nào chặn chờ anh.
+
+---
+Log tới thời điểm 2026-11-26 20:33 +07.
+---
+
+## 2026-11-26 20:44 +07 — Em My
+
+Em My xin anh quyết một việc cho P2.7, anh Tiến ạ.
+
+P2.7 (auto-suggest) đã có plan (§31). Code engine + đo trên fixture 300 tín hiệu làm được ngay, không chờ gì. Nhưng số acceptance ≥ 90% phải đo trên I/O list thật mới có giá trị — đo trên fixture không chứng minh được 90% trên dữ liệu thật.
+
+Cần anh chọn một trong hai:
+
+A — Gửi file I/O list thật đã ẩn danh (1–2 dự án, ≥ 100 tín hiệu, XLSX/CSV, giữ nguyên tên tag + mô tả + địa chỉ; kèm quy ước đặt tên nếu có). Đặt vào fixtures-real/ (không vào repo) hoặc gửi riêng; em chỉ đọc trong máy, không commit.
+
+B — Chưa có file lúc này: P2.7 merge với bằng chứng fixture, acceptance thật ghi UNVERIFIED tới khi có dữ liệu, M2 ký sau.
+
+Em đề xuất A, vì đây là dữ liệu quan trọng nhất để M2 sát thực tế. Hạn mong muốn: trước khi ký M2.
+
+---
+Log tới thời điểm 2026-11-26 20:44 +07.
+---
