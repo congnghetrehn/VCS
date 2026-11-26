@@ -10,6 +10,7 @@ import {
   hasErrors,
   type ControllerDef,
   type Diagnostic,
+  type EquipmentInstance,
   type ProjectConfig,
   type TagCatalog,
   type TagDef,
@@ -42,6 +43,8 @@ export interface SimulationProject {
   tags: readonly TagDef[];
   catalog: TagCatalog;
   diagnostics: readonly Diagnostic[];
+  /** Thiết bị plant (M2 §4.2, P2.4) — vắng → plantExtension no-op. */
+  plant?: readonly EquipmentInstance[] | undefined;
 }
 
 export interface BuildCtx {
