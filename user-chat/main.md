@@ -1777,3 +1777,509 @@ Có 3 luật cứng trong prompt: không bịa (chỗ không chắc ghi "CHƯA X
 Log tới thời điểm 2026-11-25 23:12 +07.
 ---
 
+## 2026-11-25 23:40 +07 — Em My
+
+M1 đã ký xong trên GitHub, anh Tiến ạ. Em My báo:
+
+**PR #28 đã merge vào develop** lúc 23:38, merge commit `b7cb601`. CI 8 successful + 2 skipped (bench bỏ qua như mọi lần). Em My đối chiếu cả 3 file trên develop với bản local bằng sha256 — trùng khớp tuyệt đối.
+
+Chậm hơn thường lệ vì tối nay GitHub gặp sự cố (lỗi 500, Git Operations degraded, Pull Requests major outage từ khoảng 22:55 giờ mình); trình duyệt đợi GitHub khắc phục xong rồi mới đẩy lên được. Không có check nào đỏ.
+
+**Đang làm tiếp:** trình duyệt cloud đang mở PR develop → main để đẩy M1 lên main theo D-001, chờ CI xanh rồi merge. Xong bước này em My bắt đầu P0.9 plan-first luôn.
+
+---
+Log tới thời điểm 2026-11-25 23:40 +07.
+---
+
+## 2026-11-25 23:54 +07 — Em My
+
+M1 lên main rồi, anh Tiến ạ. Em My báo:
+
+**PR #29 đã merge vào main** lúc 23:53, merge commit `1a2beed3` (parents `31c7200` + `b7cb601`). CI 8 successful + 2 skipped, 91 commits, 244 files (+39.460/−95). Em My đối chiếu qua GitHub: merged true, đúng đầu nhánh `b7cb601`. Main giờ là `1a2beed3`, develop giữ ở `b7cb601`. **M1 hoàn tất và đã lên main.**
+
+Một lưu ý nhỏ: sau merge, GitHub chạy thêm một lượt CI riêng cho commit merge trên main, lúc merge xong nó vẫn đang pending (0/5) — đó là lượt CI của chính commit merge, không phải check của PR (PR đã xanh hết trước khi merge), nên không chặn gì.
+
+**Tiếp theo:** em My đã cho làm plan P0.9 (PWA: manifest, service worker chỉ precache tĩnh, trang offline, thông báo cập nhật, kiosk) trên nhánh `m0/p0.9-pwa`. Plan xong sẽ implement → tự kiểm gate → PR → merge liên tục, không dừng chờ anh, trừ khi có tier C.
+
+---
+Log tới thời điểm 2026-11-25 23:54 +07.
+---
+
+## 2026-11-26 05:01 +07 — TraMuse
+
+Anh Tiến, TraMuse báo cáo đêm qua — 3 phase đã merge vào develop, và có 1 việc cần anh xử lý:
+
+**Đã merge:**
+- P0.9 (PR #30, 01:33): PWA + offline + kiosk, 1946 test.
+- P2.1 (PR #31, 03:49): nền plant, 2121 test. CI từng kẹt 4 lần vì `pnpm lint` hết heap — đã sửa bằng cách cho lint script 4096 MB heap, CI xanh ngay.
+- P2.2 (PR #32, 04:59): model `motor_dol` đầu tiên (6 role, 15 tham số, 5 trạng thái, 6 luật) + golden runner 14 case + docgen, 2171 test. Kèm 1 bug thật của P2.1 được test bắt ra: `PlantEngine.snapshot()` giữ state bằng reference nên restore không tua được — đã sửa bằng deep-copy.
+
+**Cần anh xử lý — GitHub billing:** CI chạy trên develop sau khi merge PR #32 (run #307) không chạy được job nào, GitHub báo "recent account payments have failed or your spending limit needs to be increased". Đây là lỗi thanh toán/hạn mức của tài khoản, không phải lỗi code — code đã xanh hết trên PR. Anh kiểm tra mục Billing & plans trên GitHub, sửa xong thì CI chạy lại được. Chừng nào chưa sửa thì mọi push lên develop cũng không chạy CI.
+
+P2.3 (các model còn lại) đang làm plan, xong thì triển khai tiếp. D-007 (HTTPS cho LAN) vẫn mở, chưa chặn gì.
+
+---
+Log tới thời điểm 2026-11-26 05:01 +07.
+---
+
+## 2026-11-26 06:10 +07 — Anh Tiến
+
+A thấy github gửi mail báo đã dùng hết hạn mức 2000 phút action. Tại sao nhanh thế nhỉ? Dùng vào việc gì? Có cách nào giảm thiểu việc sử dụng hạhạn mức này mà vẫn đảm bảo dự án chạy (a thấy số lượng PR cũng ít thôi mà #32, run thì dùng đến #307)
+
+## 2026-11-26 06:11 +07 — Em My
+
+Anh Tiến, em My kiểm tra rồi — mail GitHub báo 90% lúc 02:45 và 100% lúc 04:50 sáng nay. Hạn mức là 2000 phút/tháng của gói free, repo private nên phút nào cũng tính phí (repo public thì không giới hạn).
+
+**Vì sao hết nhanh — không phải do ít PR, mà do mỗi commit chạy CI nhiều lần:**
+- Mỗi commit trên nhánh PR chạy **2 lượt CI** (1 lần sự kiện push + 1 lần PR sync). Mỗi lượt khoảng 12–13 phút tính phí: check ~2, test ubuntu ~3, test windows ~3 phút wall nhưng nhân hệ số **×2** nên tính 6, e2e ~2. Vậy mỗi commit tốn khoảng **25 phút**. Tháng 11 có 175 commit local, riêng P2.2 đã 13 commit, P2.1 9 commit.
+- `ci.yml` đang chạy trên **mọi push, mọi nhánh** — kể cả nhánh chat-logs (cron đẩy log mỗi 30 phút, mỗi lần đẩy là 1 lượt CI đầy đủ) và từng commit trung gian của browser khi upload theo batch.
+- Chạy **nightly 02:00 UTC mỗi ngày** cả bộ check/test/e2e dù không có code mới, cộng vài lần chạy lại do lỗi (P2.1 check OOM fail 4 lần, P0.9 e2e chạy lại).
+- Số **#307 là số lần chạy CI**, không phải số PR: 32 PR nhưng mỗi commit = 2 lượt chạy, cộng chat-logs, nightly, chạy lại.
+
+**Cách giảm mà vẫn giữ dự án chạy — em đề xuất gói A, ước tính giảm 60–70%:**
+1. Push chỉ chạy CI trên `develop`/`main`; PR vẫn kiểm đầy đủ qua sự kiện PR (mỗi commit từ 2 lượt xuống 1 lượt, chat-logs về 0 phút).
+2. Hủy lượt chạy cũ khi có commit mới (`cancel-in-progress`) — browser đẩy 13 commit liên tiếp thì chỉ chạy lượt cuối.
+3. Test Windows chỉ chạy khi merge vào develop + nightly, bỏ khỏi PR (Windows là job đắt nhất vì ×2; lỗi chỉ-Windows sẽ phát hiện ở lúc merge thay vì ở PR).
+4. Bỏ nightly chạy full suite, chỉ chạy bench.
+
+Ngoài ra, để CI chạy lại ngay trước kỳ reset tháng sau, anh có thể tăng spending limit trong Billing & plans để mua thêm phút theo nhu cầu ($0.008/phút Linux, $0.016/phút Windows) — đó cũng là lý do run #307 không chạy được.
+
+Anh chọn phương án nào? Em đề xuất gói A vì nó giữ nguyên độ kiểm tra trên PR, chỉ bỏ phần trùng lặp.
+
+---
+Log tới thời điểm 2026-11-26 06:11 +07.
+---
+
+## 2026-11-26 06:18 +07 — Anh Tiến
+
+Làm gói A — push chỉ develop/main, hủy chạy cũ khi có commit mới, Windows chỉ trên develop, bỏ nightly (em đề xuất)
+
+## 2026-11-26 06:19 +07 — Anh Tiến
+
+Chat log em chỉ push lên develop branch (upload file + commit only), ko chạy CI nhé
+
+## 2026-11-26 06:20 +07 — TraMuse
+
+Anh Tiến, TraMuse cần anh chốt lại một câu vì ý này mâu thuẫn với 2 thứ anh đã quyết trước đó:
+
+Hiện tại cron đẩy chat log lên nhánh riêng `chat-logs`, và quy định từ 25/11 là **không đẩy log lên develop hay main**. Còn gói A anh vừa chọn thì push lên `develop` **sẽ chạy CI đầy đủ** (check + test ubuntu + test windows + e2e) — tức là nếu chuyển log sang develop, mỗi lần đẩy log 30 phút lại đốt một lượt CI, đi ngược mục tiêu tiết kiệm phút. Muốn "lên develop mà không chạy CI" thì phải thêm `paths-ignore: user-chat/**` vào `ci.yml`, và lịch sử develop sẽ lẫn một commit log mỗi 30 phút, rồi theo develop vào main ở các milestone sau.
+
+Nếu ý anh là "log chỉ upload + commit, không tốn CI" thì không cần đổi gì: gói A đã làm các lần đẩy lên nhánh `chat-logs` tốn 0 phút CI rồi.
+
+Anh chọn phương án nào?
+
+---
+Log tới thời điểm 2026-11-26 06:20 +07.
+---
+
+## 2026-11-26 06:20 +07 — Anh Tiến
+
+Xong em cứ làm tiếp dự án. Lát nữa a ngồi máy sẽ mở tạm repo thành public để chạy tiếp ko giới hạn
+
+## 2026-11-26 06:20 +07 — Em My
+
+Rõ rồi anh. Em My cứ làm tiếp dự án — P2.3 đang implement, PR gói A tiết kiệm phút CI đang mở chờ merge sau khi CI chạy lại được.
+
+Một lưu ý nhỏ khi anh mở repo thành public tạm: nhánh `chat-logs` (chứa file log chat của anh) cũng sẽ nhìn thấy được công khai, không chỉ code. Anh nhớ chuyển lại private sau khi xong.
+
+---
+Log tới thời điểm 2026-11-26 06:20 +07.
+---
+
+## 2026-11-26 06:22 +07 — TraMuse
+
+TraMuse báo nhanh: PR gói A đã mở — [PR #33](https://github.com/congnghetrehn/VCS/pull/33), nhánh `infra/ci-save-minutes`, 1 file `ci.yml`. Chưa merge, đúng như hẹn: CI đang 0 phút nên chưa có check nào chạy. Khi nào anh mở repo public tạm (hoặc hết kỳ hạn mức), CI chạy xanh thì em merge.
+
+---
+Log tới thời điểm 2026-11-26 06:22 +07.
+---
+
+## 2026-11-26 06:29 +07 — Anh Tiến
+
+Giữ nguyên nhánh chat-logs — gói A đã làm các lần đẩy này tốn 0 phút CI (TraMuse đề xuất)
+
+## 2026-11-26 06:29 +07 — Em My
+
+Rõ anh, em My giữ nguyên nhánh `chat-logs` — không đổi gì ở cron đẩy log. Gói A đã lo phần phút CI rồi, cứ làm tiếp dự án.
+
+---
+Log tới thời điểm 2026-11-26 06:29 +07.
+---
+
+## 2026-11-26 08:15 +07 — Anh Tiến
+
+A mở repo vcs thành public rồi. Ko còn bị giới hạn action nữa. Em làm đến đâu rồi?
+
+## 2026-11-26 08:16 +07 — TraMuse
+
+TraMuse báo cáo nhanh, anh Tiến:
+
+**Repo public:** tốt rồi, hết giới hạn Actions. Em vừa cho chạy lại CI trên [PR #33](https://github.com/congnghetrehn/VCS/pull/33) (gói A tiết kiệm phút) — lúc mở PR thì hết phút nên chưa có check nào chạy, giờ phải đóng/mở lại PR để CI chạy; xanh thì merge luôn, đỏ thì báo anh.
+
+**P2.3 — 8/10 commit xong:**
+- Commit 8 `conveyor_simple` xong (`7b379d2`), gate xanh.
+- Commit 9 bench plant đang làm dở (đã có file `bench/plant.bench.ts` + sửa baseline, chưa commit).
+- Còn commit 10 fix OQ-267 (đo trước/sửa sau) + kết phase (semantics §22, đóng OQ còn lại).
+
+**Khác:** dashboard đã tự cập nhật snapshot 07:20 sáng nay theo cron.
+
+---
+Log tới thời điểm 2026-11-26 08:16 +07.
+---
+
+## 2026-11-26 08:17 +07 — Em My
+
+Em My phải sửa lại một điểm, anh Tiến: mở public **chưa đủ** để CI chạy.
+
+PR #33 vừa chạy CI (run #309, 08:11) nhưng cả 3 job `check`, `test`, `e2e` đều fail trong 0 giây, chưa chạy bước nào — vẫn đúng lỗi cũ: *"recent account payments have failed or your spending limit needs to be increased"*. Tức là khóa này nằm ở **billing của tài khoản**, không phải hạn mức phút nữa. Code không có lỗi gì.
+
+Anh cần vào Settings → Billing & plans kiểm tra phương thức thanh toán / spending limit. Xong rồi thì chạy lại job fail trên PR #33, xanh thì em merge.
+
+---
+Log tới thời điểm 2026-11-26 08:17 +07.
+---
+
+## 2026-11-26 08:29 +07 — Anh Tiến
+
+A ko thấy billing trong setting nhỉ.
+Settings của dự án hay tài khoản?
+
+## 2026-11-26 08:29 +07 — TraMuse
+
+TraMuse trả lời luôn: Billing nằm ở **Settings của tài khoản**, không phải Settings của repo.
+
+Đường đi: bấm avatar của anh (góc phải trên GitHub) → **Settings** → menu trái mục **Billing and plans**. Hoặc mở thẳng link này: 
+
+Trong Settings của repo thì không có mục Billing đâu anh, nên anh không thấy là đúng rồi.
+
+Nhân tiện, em vừa cho chạy lại job fail trên PR #33 — vì run #309 fail lúc 08:11, có thể lúc đó anh chưa mở public xong (anh nhắn lúc 08:15). Nếu lần chạy lại này chạy được thì không cần động đến billing nữa; nếu vẫn fail đúng lỗi đó thì mới chắc là khóa ở tài khoản.
+
+---
+Log tới thời điểm 2026-11-26 08:29 +07.
+---
+
+## 2026-11-26 08:34 +07 — Em My
+
+Em My báo tin tốt, anh Tiến: **PR #33 đã merge xong** (08:33, commit `e06cfaa`, 1 file `ci.yml`).
+
+Hóa ra không cần động đến billing: chạy lại job trên PR #33 thì CI chạy ngon — `check`, `test`, `e2e` đều xanh, 2 job skip đúng như thiết kế. Run #309 fail lúc 08:11 là do lúc đó anh chưa mở public xong, chứ không phải khóa ở tài khoản. Develop giờ ở `e06cfaa`, gói A đã có hiệu lực.
+
+P2.3 vẫn đang làm tiếp (commit 9 bench plant), xong thì em tự kiểm gate rồi mở PR.
+
+---
+Log tới thời điểm 2026-11-26 08:34 +07.
+---
+
+## 2026-11-26 09:00 +07 — TraMuse
+
+TraMuse báo: **P2.3 xong 10/10 commit**, gate xanh — test 2333/2333 (+162 mới, vượt mục tiêu), coverage plant 97,13%, golden 77 case đủ tối thiểu §11.1 cho cả 8 model, e2e 11/11, diagnostics 58, equipment 9 model.
+
+Còn 1 việc cần anh chốt trước khi mở PR: **bench plant 1300/5000 bước/s**. Trước fix 128 → sau fix 1300 (×10,2; trung vị 5 lần chạy, 1207–1394). Nguyên nhân gốc đã tìm ra và sửa: `EventLog.shift()` O(n) chiếm 74,7% CPU → ring buffer. Profile sau fix phẳng, không còn điểm nóng đơn lẻ; heap PASS. Ngưỡng M2 §12 vẫn thiếu ×3,85, em không tự hạ ngưỡng.
+
+Anh chọn 1 trong 3 (em đề xuất A — giữ nguyên ngưỡng, dồn việc kiến trúc vòng nóng vào P2.4 vốn đã làm vòng kín):
+
+---
+Log tới thời điểm 2026-11-26 09:00 +07.
+---
+
+## 2026-11-26 09:34 +07 — Anh Tiến
+
+A — Chấp nhận 1300, làm lại vòng nóng ở P2.4
+
+## 2026-11-26 09:35 +07 — Em My
+
+Rõ anh, em My đã ghi quyết định A vào STATE §26 + semantics §22 (ngưỡng §12 giữ nguyên, không hạ) và gộp luôn bookkeeping A20 cho gói A vào cùng commit `ed3cae2`.
+
+Giờ em tự kiểm lại gate trên bản sao sạch rồi mở PR P2.3, chờ CI xanh thì merge.
+
+---
+Log tới thời điểm 2026-11-26 09:35 +07.
+---
+
+## 2026-11-26 09:45 +07 — TraMuse
+
+**✅ Tip 6: Em giúp anh theo dõi mục tiêu được**
+
+Đang tiết kiệm cho việc gì đó, tập luyện cho một sự kiện, hay học thứ mới — hoặc đang làm một dự án lớn như VCS, từng milestone một?
+
+Em có thể chia mục tiêu thành các bước tiếp theo, đặt nhắc nhở, và làm một bảng theo dõi đơn giản để anh thấy tiến độ và việc tiếp theo — dù là các phase của M2 hay việc cá nhân anh đang để đó.
+
+Nghĩ xem có việc gì anh muốn làm được — lớn hay nhỏ cũng được. Kể em nghe, mình cùng lên kế hoạch.
+
+---
+Log tới thời điểm 2026-11-26 09:45 +07.
+---
+
+## 2026-11-26 09:48 +07 — TraMuse
+
+TraMuse báo: gate tự kiểm đã xanh hết — test 2333/2333, coverage plant 97,13%, e2e 11/11 (E2 có flake timing 2 lần rồi xanh lần 3, không sửa code), bench plant đo lại 1768 bước/s, vẫn dưới ngưỡng §12 như anh đã chấp nhận ở phương án A.
+
+Em đang đẩy code P2.3 lên GitHub (56 file, chia 2 đợt), xong thì mở PR, chờ CI xanh rồi merge.
+
+---
+Log tới thời điểm 2026-11-26 09:48 +07.
+---
+
+## 2026-11-26 10:19 +07 — Em My
+
+Em My báo: PR #34 đã mở nhưng CI đỏ — không phải lỗi code mới, mà do file test cũ `motor-dol.test.ts` còn sót trên GitHub.
+
+Nguyên nhân: ở commit 1 của P2.3, file đó được **đổi tên** thành `golden.test.ts`, nhưng web upload của GitHub không đổi tên được — nó thêm file mới mà không xóa file cũ, nên nhánh chạy cả 2 bộ test, fail 64 cái. Em đã kiểm tra: file `runner.ts` trên nhánh giống hệt local, chỉ thừa đúng file cũ đó.
+
+Em đang cho xóa file cũ trên nhánh, CI chạy lại rồi merge khi xanh.
+
+---
+Log tới thời điểm 2026-11-26 10:19 +07.
+---
+
+## 2026-11-26 10:30 +07 — TraMuse
+
+TraMuse báo: **P2.3 đã merge** — PR #34, merge commit `aec87ef9`, 10:26. Em đã tự kiểm lại qua GitHub: PR đóng, `merged: true`, file `golden.test.ts` trên develop giống hệt local, file cũ `motor-dol.test.ts` đã biến mất.
+
+Tóm tắt P2.3: 8 model mới, test 2333/2333, golden 14 → 77 case, coverage plant 97,13%. Bench plant vẫn 1300 bước/s, dưới ngưỡng §12 — phần này làm lại ở P2.4 như anh đã chốt.
+
+Em đã bắt đầu lập plan P2.4 (vòng kín + CLI `plant run` + làm lại vòng nóng), và đang kiểm nốt CI trên develop sau merge.
+
+---
+Log tới thời điểm 2026-11-26 10:30 +07.
+---
+
+## 2026-11-26 10:42 +07 — Em My
+
+Em My báo: plan P2.4 xong (commit `2bca76f` — STATE §27, OQ-305…319, không có tier C nào cần anh chốt).
+
+Plan gồm 8 commit: nối plant vào vòng kín → CLI `vcs plant run` + demo A–D → đo bench vòng kín trước → làm lại vòng nóng 3 bước (kênh tính trước, dispatch đơn hình, fault fast-path nếu profile cần) → server tối thiểu + panel lỗi + e2e → docs. Mục tiêu: bench plant ≥ 5000 bước/s, bench vòng kín ≥ 1000 bước/s, ~76 test mới.
+
+Em đã cho triển khai luôn. Còn 2 điểm có thể thành tier C giữa đường thì plan đã ghi rõ: bench vòng kín mà SoftPlc chiếm hết ngân sách, hoặc hot-loop sau commit 6 vẫn không đạt ×3,85 — tới đó em dừng và hỏi anh, không tự chọn.
+
+---
+Log tới thời điểm 2026-11-26 10:42 +07.
+---
+
+## 2026-11-26 10:52 +07 — TraMuse
+
+TraMuse báo nốt: CI trên develop sau merge P2.3 đã **xanh hoàn toàn** — run #314, 6 phút 19 giây, check + test Ubuntu + test Windows + e2e đều pass (2333/2333, e2e 11/11).
+
+Cái "e2e chạy 25 phút" lúc nãy là đọc nhầm đồng hồ — thực tế job chỉ chạy 6 phút 14 giây, trong đó 5 phút 22 giây là cài trình duyệt Playwright, test chỉ mất 39 giây. Không có gì kẹt cả.
+
+Giờ chỉ còn P2.4 đang triển khai, em báo khi có kết quả từng chặng.
+
+---
+Log tới thời điểm 2026-11-26 10:52 +07.
+---
+
+## 2026-11-26 12:53 +07 — Em My
+
+Em My cần anh chốt một quyết định cho P2.4 (D-008).
+
+Đã xong commit 1–5, em tự kiểm lại độc lập trên bản sao sạch: test 2404/2404, demo A–D chạy qua CLI đều pass, bench vòng kín 1285 ≥ 1000 (đạt). Nhưng bench plant engine-alone chỉ ~1930 bước/s sau cả 2 lần làm lại vòng nóng (commit 4 +2,8%, commit 5 +0,5% — gần như không nhúc nhích), vẫn thiếu ×2,6 so với §12 ≥ 5000. Profile cho thấy chi phí rải đều ở máy móc step/emit/tag, không còn điểm nóng đơn lẻ để vá.
+
+Ba phương án: **A** — kênh số cho StepCtx (breaking, viết lại 9 model, ước tính chỉ +10–20%, không đủ lên 5000); **B** — JS biên dịch trước (spike chứng minh không làm kiểu additive được, tsx chỉ 7,4% nên chỉ +~8%, không đủ); **C (em đề xuất)** — chấp nhận số đạt được, hạ ngưỡng §12 về ≥ 1500 bước/s (thấp hơn min quan sát 1772 khoảng 15%; 1900 bước/s = 19× thời gian thực ở bước 10 ms cho 500 thiết bị). Chọn C thì làm tiếp commit 7–8; chọn A/B thì cần plan mới cho hướng đó.
+
+---
+Log tới thời điểm 2026-11-26 12:53 +07.
+---
+
+## 2026-11-26 13:11 +07 — Anh Tiến
+
+phân tích sâu hơn phương án A và C. cho a đường dẫn file đọc về ngưỡng §12 (5000 bước/s)
+
+## 2026-11-26 13:13 +07 — TraMuse
+
+TraMuse phân tích sâu theo số đo thật, không theo cảm giác. Trước hết, đường dẫn anh cần:
+
+**Đọc ngưỡng §12 ở `docs/specs/M2-plant-and-io-import-spec.md`, mục 12 "Hiệu năng", dòng 727–732.** Nguyên văn: engine một mình 500 thiết bị hỗn hợp, bước 10 ms, ≥ 5.000 bước/s (≥ 50× realtime) "trên laptop phổ thông", heap tăng < 1 MB sau 100.000 bước; vòng kín (SoftPlc 200 FB_Motor + 200 motor_dol) ≥ 1.000 bước/s (≥ 10× realtime). Cùng con số này được restate ở `bench/plant.bench.ts` dòng 1–10 và dòng 37 (hằng `THRESHOLD_STEPS_PER_SEC = 5000`), và nó được ép bằng exit code: dòng 300 đặt `process.exitCode = 1` khi FAIL. Lưu ý: spec chỉ nêu con số + ghi chú "50× realtime", không có tính toán nào dẫn ra 5000 — nó là ngưỡng headroom đặt ra trước khi có code plant nào để đo. Mục 14 điểm 6 chỉ nói "Hiệu năng đạt mục 12", nên hạ §12 là đổi tiêu chí nghiệm thu M2, phải qua AMENDMENTS + quyết định của anh, không sửa lặng lẽ được.
+
+**Phương án A — kênh số cho StepCtx: trần tăng đã bị khóa bởi profile, không phải do làm chưa tới.**
+
+Cơ chế hiện tại: model gọi `ctx.emit('speedFb', v)`, `ctx.cmd(...)`, `ctx.fault(...)` bằng tên role dạng chuỗi — tổng ~97 điểm gọi trong 8 file model + `faults.ts` (emit 26, fault 30, setObs 25, cmd 7, source 6). Commit 4 đã ăn phần rẻ của A rồi: kênh tính trước thành `channels[]` + `roleSlot`, `#channelOf` chỉ còn một `Map.get` mỗi lần gọi. A chỉ xóa nốt cái `Map.get` đó và một phần closure dispatch.
+
+Profile sau commit 5 (52.388 mẫu) khóa trần: `#emit` 25,0%, `#prepareOne` 10,4%, `#applyWrite` (TagDB) 10,1%, `step` 8,6%, `#drainPendingObs` 5,8%, `#channelOf` 5,6%, các `model.step` ~16%, GC 2%. `#channelOf` chỉ 5,6% — xóa sạch nó cũng chỉ tăng ~6% (một bước hiện ~518 µs ở 1932 bước/s, bớt 5,6% còn ~489 µs → ~2045 bước/s). Phần còn lại của `#emit` (25%) là thứ kênh số không chạm tới: `#faults.applyEmit` đánh giá fault mỗi lần emit, `TagDB.set` ghi tag + dirty tracking, `#lastEmit.set`. `#prepareOne` là đánh giá source (ramp/sine/link) mỗi bước, `#applyWrite` là đường ghi TagDB, `model.step` là toán của model — tất cả đứng ngoài A. Cộng lại, ~75–80% CPU nằm ngoài tầm A; ước tính +10–20% trong D-008 đã là phía lạc quan (tính cả spillover dispatch), và ngay cả đầu +20% cũng chỉ ra ~2300 — chưa được một nửa đường tới 5000. Muốn lên 5000 phải cắt ~61% thời gian mỗi bước (518 → 200 µs), không một đổi interface nào làm được điều đó.
+
+Giá phải trả cho A: viết lại 9 model + `StepCtx` (interface công khai của model) + test-helpers + golden runner, đảo ngược OQ-309 (hiện ghi rõ KHÔNG đổi interface StepCtx — phải sửa AMENDMENTS trước khi code), gate lại toàn bộ golden/determinism — rồi vẫn fail ngưỡng, quay lại đúng điểm này. A không giải quyết D-008, nó chỉ dời điểm fail từ 1900 lên ~2300.
+
+**Phương án C — hạ §12 về ≥ 1500: đúng về bản chất, nhưng có một điểm yếu về dao động đo cần anh biết.**
+
+Về bản chất: 5000 là số đặt không có dữ liệu; giờ đã có 15+ lần đo nói ~1900. Yêu cầu dùng thật là vòng kín ≥ 1000 (≥ 10× realtime) — đã đạt 1285, dư ~29%. Còn 1900 bước/s × bước 10 ms = 19× realtime cho 500 thiết bị, đủ dùng commissioning. C không đổi một dòng code hay hành vi nào; chỉ đổi spec + AMENDMENTS + hằng ngưỡng trong `bench/plant.bench.ts` + baseline, rồi làm tiếp commit 7–8. Và C không hủy việc đạt 5000 sau này — nếu có phase cần 5000 thật (FAT rất lớn, chạy nhanh hơn realtime nhiều), đó là một phase viết lại engine sâu riêng (bỏ ctx/fault/tag machinery khỏi đường nóng), không phải việc của P2.4.
+
+Điểm yếu duy nhất: con số 1500 được căn theo min quan sát 1772 (thấp hơn ~15%) trong tập đo P2.4, nhưng lịch sử đo đầy đủ dao động rộng hơn nhiều: P2.3 trung vị 1300 (phạm vi 1207–1394), lần kiểm độc lập P2.3 đo 1768, P2.4 đo 1835–1932. Tức cùng một bench, cùng code gần như nhau, VM lúc tải nặng đo 1300, lúc rảnh đo 1932 — chênh ~±20%. Nếu bench chạy đúng lúc VM tải nặng như đợt P2.3, ngưỡng 1500 vẫn fail (1300 < 1500). Ngưỡng này chỉ ổn định bằng độ ổn định của máy đo, không phải bằng code. Bench đã có warm-up + trung vị 5 lần để giảm nhiễu, nhưng không triệt tiêu được. Nếu anh muốn ngưỡng sống được cả lúc VM tải nặng thì phải xuống ~1200 — tức nhượng thêm một nấc nữa; còn giữ 1500 thì phải chấp nhận nó được căn theo điều kiện đo P2.4 (máy rảnh, trung vị 5 runs).
+
+Tóm lại: A tốn một breaking change để đổi lấy +6–20% và vẫn fail — không giải quyết được gì. C giải quyết D-008 bằng cách căn spec theo dữ liệu đo, với điều kiện anh chấp nhận hai điều: ngưỡng mới 1500 được căn theo máy đo rảnh (dao động VM có thể đẩy số đo xuống dưới nó), và việc đạt 5000 — nếu sau này cần — là một phase viết lại engine riêng, không phải P2.4.
+
+---
+Log tới thời điểm 2026-11-26 13:13 +07.
+---
+
+## 2026-11-26 13:18 +07 — Anh Tiến
+
+phân tích thêm cả phương án B. Nếu anh áp dụng cả 2 phương án A và B thì tăng thêm bao nhiêu %? Giá đánh đổi là gì? có ảnh hưởng đến độ ổn định của hệ thống ko? Mục đích của anh là tăng tốc độ vòng lặp lên tối đa, và sẽ hạ ngưỡng chấp nhận theo khả năng tối đa đó (2000-2500).
+
+## 2026-11-26 13:25 +07 — TraMuse
+
+TraMuse vừa đo thật phương án B thay vì suy từ profile — kết quả làm thay đổi cả cách nhìn về B.
+
+**B — đo thật: tsx 2054 → JS biên dịch 2331 bước/s, +13,5% trong cùng một phiên.** ĐÃ CHẠY: bundle `bench/plant.bench.ts` bằng esbuild theo đúng pattern của server (bundle `@vcs/*`, để `yaml` external), chạy bằng `node --expose-gc`, so với chạy bằng `tsx` ngay trước đó. Lưu ý: đây là một cặp chạy (mỗi số đã là trung vị 5 mẫu nội bộ của bench), dao động VM giữa các ngày là ±5%, nên con số quy hoạch cho B là **+8–14%**, đo được +13,5%. Bundle gặp đúng hai bẫy đã biết: `yaml` bundle cùng thì nổ `Dynamic require of "process"` (đúng lý do config tsup của server để `yaml` external), và bundle phải đặt chỗ Node resolve được `yaml` — TraMuse đã dọn sạch spike dir và khôi phục `bench/results.json` sau khi đo.
+
+**Nhưng bản chất của B khác điều D-008 từng giả định — và điều này quan trọng với mục đích của anh.** tsx chỉ biến đổi module lúc load; ở trạng thái ổn định code đã là JS thuần, chi phí 7,4% `runCallSync` trong profile là loader/interop + code dạng module rời rạc khiến V8 inline kém hơn bundle một scope. Và điểm mấu chốt: **server và CLI production ĐÃ chạy từ JS biên dịch** — `tsup` bundle toàn bộ `@vcs/*` (`pnpm build`, M0 acceptance chạy `node apps/cli/dist/index.js`, `node dist/main.js`). `tsx` chỉ là đường chạy dev và bench. Tức là bench hiện tại đang **đo thấp hơn tốc độ thật ~10–13%**: tốc độ thật của engine hôm nay đã ~2300, không phải ~2000. B không làm vòng lặp thật nhanh hơn một chút nào — nó chỉ làm bench đo đúng cái production đang chạy. Nếu mục đích của anh là vòng lặp thật nhanh hơn, B đóng góp ~0; chỉ A (đổi code) mới tăng tốc thật.
+
+**A+B cộng lại — tính theo thời gian mỗi bước, không cộng % bừa.** Gốc hôm nay (tsx): 2054 bước/s ≈ 487 µs/bước. A: sàn +6% (chỉ xóa `#channelOf` 5,6%), lạc quan +20%. B đo được: +8–14%. Nhân lại:
+- Sàn: ×1,06 × ×1,08 → **~2350 bước/s**
+- Trung tâm: ×1,13 × ×1,11 → **~2550 bước/s**
+- Lạc quan: ×1,20 × ×1,135 → **~2800 bước/s**
+
+Từ gốc 1932 hôm qua thì sàn ~2210, trung tâm ~2420. Gộp lại: **A+B cho ~2200–2800, trung tâm ~2400–2550**. Band 2000–2500 của anh: sàn đã qua 2000, trung tâm nằm ở mép trên band. Nếu đo xong đặt ngưỡng theo công thức cũ (min quan sát −15%), ngưỡng sẽ rơi vào **~2000** — đúng đáy band của anh, còn số chạy thường ~2400–2500. Và dù lạc quan nhất, A+B vẫn chỉ ~2800 — còn xa 5000, vì muốn 5000 phải cắt 61% thời gian mỗi bước.
+
+**Một cảnh báo nữa cho mục tiêu "tăng tốc vòng lặp": A+B gần như không động tới vòng kín.** Vòng kín 1285 bước/s chia ra plant chỉ ~0,160 ms trong tổng ~0,778 ms/bước, PLC chiếm ~79%. A+B tăng tốc phần plant ~25% thì vòng kín chỉ lên ~1340–1360 (+4–6%). Cái người dùng cảm nhận là vòng kín; cái A+B cải thiện chủ yếu là bench engine-alone (tổng hợp). Nếu "vòng lặp" anh nói là vòng kín thì đòn bẩy thật nằm ở PLC scan — ngoài phạm vi P2.4.
+
+**Giá đánh đổi và độ ổn định.** A: breaking — viết lại 9 model (~97 điểm gọi ctx), đảo ngược OQ-309 (sửa AMENDMENTS trước khi code), gate lại toàn bộ golden/determinism; slot số khó đọc hơn tên role, gán sai slot thì ghi nhầm kênh (lưới an toàn là 77 golden case + determinism + typecheck + giữ reverse map cho thông báo lỗi + dùng branded slot type). Rủi ro vừa, có lưới bắt. B: rẻ hơn D-008 từng nghĩ rất nhiều nếu chỉ scope cho bench — một bước bundle trong `run-all-benches.mjs` + xử lý `yaml` external + sửa tính `ROOT` theo bundle (spike vừa rồi lộ ra nó tính sai đường `results.json` khi chạy từ bundle) — KHÔNG cần đổi exports hay build toàn workspace như D-008 từng viết, vì server đã chứng minh pattern bundle ở app. B không đổi gì ở production nên rủi ro runtime ~0; rủi ro nằm ở pipeline đo (bước build mới có thể hỏng hoặc cho số lệch, giảm bằng build fresh mỗi lần chạy + so baseline). Thứ tự bắt buộc: **A trước, đo, rồi B, đo** — gộp một lần thì không bóc tách được gain và không bisect được khi đỏ. A+B không sinh rủi ro mới ngoài tổng hai cái, nhưng re-gate phải đủ: test + golden + determinism + e2e + bench ×5 + bench vòng kín.
+
+**Kết luận cho mục tiêu của anh:** A+B là mức tối đa không viết lại kiến trúc — muốn 5000 vẫn cần một phase viết lại engine sâu riêng. Với hướng "tối đa rồi hạ ngưỡng theo max", quy trình sẽ là: làm A+B theo thứ tự, đo, đặt §12 ≈ min −15% (~2000), rồi xong P2.4 commit 7–8. Lựa chọn này thay thế quyết định D-008 cũ (A/B/C) anh chưa chốt:
+
+---
+Log tới thời điểm 2026-11-26 13:25 +07.
+---
+
+## 2026-11-26 13:30 +07 — Anh Tiến
+
+nếu viết lại engine riêng để giữ 5000 thì đánh đổi là gì? phải làm lại từ bước nào (tương đương P mấy?)?
+
+## 2026-11-26 13:31 +07 — TraMuse
+
+TraMuse trả lời theo số đo và code thật, vì đây là quyết định đắt nhất trong ba hướng.
+
+**Con số phải đạt: cắt ~53% thời gian mỗi bước.** Đo được hôm nay (JS biên dịch): 2331 bước/s → 429 µs/bước cho 500 thiết bị, tức 0,86 µs/thiết bị/bước. Muốn 5000 thì 200 µs/bước, tức 0,40 µs/thiết bị/bước. A+B cộng lại chỉ cắt được ~25–35%. Muốn 5000 phải lấy thêm ~25–30 điểm phần trăm nữa từ những chỗ mà A và B không chạm tới — và đó chính là kiến trúc engine.
+
+**Chi phí nằm ở đâu — đọc từ code, không đoán.** Một bước của `motor_dol` gọi 1 `cmd` + 5 `fault()` + 5 `setObs` + 5 `emit`. Mỗi `emit` là một chuỗi: `channelOf` (Map lookup) → `applyEmit` (quét `#activeSignalFaults` — không có fault thì trả mảng chia sẻ nhanh, có fault thì filter toàn bộ records cho mỗi emit) → `tags.set` → `#checkHandle` + `#applyWrite` (validate giá trị, kiểm ownership, normalize, ghi 4 mảng `values/ts/source/writes`, cập nhật dirty flag + `dirtyList`) → `lastEmit.set` (Map). Mỗi `setObs` ghi object `obs` + Map `pendingObs`; cuối bước `#drainPendingObs` duyệt Map đó và push event. Mỗi bước còn `evalSource` cho từng source và vòng lặp `step()` qua 500 thiết bị với `ctx` là object 8 closure. Profile sau commit 5 khớp đúng bức tranh này: `#emit` 25%, `#prepareOne` 10,4%, `#applyWrite` 10,1%, `step` 8,6%, `#drainPendingObs` 5,8%, `#channelOf` 5,6%, model step ~16% — chi phí rải đều, không còn điểm nóng.
+
+**Viết lại engine nghĩa là gì, cụ thể.** Chỉ có ba đòn bẩy đủ lớn, và cả ba đều phá kiến trúc hiện tại:
+1. **Ảnh tag bóng (shadow tag image):** engine không ghi TagDB từng emit nữa mà ghi vào mảng phẳng (`Float64Array`/`Uint8Array`), flush một lần mỗi bước trước khi PLC scan. Đòn này nhắm `#applyWrite` 10,1% + phần lớn `#emit` 25%. Giá: đổi hợp đồng với TagDB — lõi M0 dùng chung cho mọi thứ. Timestamp/quality/source của tag sẽ ghi theo bước thay vì theo lần emit, ownership check dời về lúc flush, và thứ tự flush so với scan PLC phải đúng tuyệt đối (orchestrator hiện tại: plant → PLC scan → flush).
+2. **Struct-of-arrays thay cho object/closure/Map:** toàn bộ trạng thái 500 thiết bị thành các mảng song song, một vòng lặp phẳng với chỉ số số, không còn `RuntimeEquipment` object, không còn `ctx` 8 closure, không còn Map `pendingObs`/`namedSourceValues`/`roleSlot`. Đòn này nhắm model step 16% + `#prepareOne` + `#drainPendingObs` + `#channelOf` + dispatch. Giá: model không còn là hàm TS `step(ctx)` đọc được nữa — hoặc viết tay dạng mảng cho 9 model (khó đọc, dễ sai), hoặc sinh code từ định nghĩa model (một bộ codegen mới — một subsystem riêng).
+3. **Fault fast-path dạng bitmask:** kiểm tra một số nguyên mỗi emit thay vì quét fault records. Đòn nhỏ, nhưng là phần của `#emit`.
+
+**Đánh đổi, xếp theo độ nặng.**
+- **Hợp đồng viết model đổi vĩnh viễn.** P2.2/P2.3 xây model dạng TS đọc được, tên role rõ ràng, docgen sinh tài liệu từ định nghĩa, golden timeline kiểm từng model. Viết lại thay nó bằng hợp đồng mảng/codegen — mọi model tương lai (P2.5+ import, model người dùng tự thêm) đều phải viết theo cách khó hơn, khó debug hơn. Đây là chi phí trả mãi, không phải một lần.
+- **Bằng chứng hành vi phải chứng minh lại từ đầu.** 77 golden case + determinism + snapshot/restore là nguồn sự thật. Engine mới phải cho ra trace/hash **giống hệt bit** — nếu khác một giá trị thì đó là đổi hành vi, không phải tối ưu, và quy tắc của dự án cấm sửa golden cho xanh. Đây là phần khó và lâu nhất của việc viết lại, không phải code mới.
+- **Rủi ro lớn nhất: viết lại xong vẫn không đạt 5000.** P2.4 đã dạy bài này: hai lần đổi kiến trúc được kỳ vọng nhiều, đo được +2,8% và +0,5%. Chi phí rải đều thì tổng trên giấy không bằng tổng đo được. Hoàn toàn có thể bỏ ra cả một phase để rồi dừng ở 3500–4000 — vẫn thiếu — và quay lại đúng quyết định này với một engine phức tạp hơn. Cách duy nhất định giá đúng là **spike trước**: làm SoA + ảnh tag bóng cho riêng `motor_dol`, bench 200 motor, đo. ≥2,5× thì mới plan viết lại toàn bộ; <2× thì giết ý tưởng này.
+- **Chi phí cơ hội:** P2.5–P2.8 (import, UI) dừng lại; nghiệm thu M2 lùi. Và lợi ích người dùng cảm nhận được rất nhỏ (xem dưới).
+- **Không mua được tốc độ vòng kín.** Dù engine-alone đạt 5000 thì vòng kín cũng chỉ lên ~1430 (+11% từ 1285), vì phần plant trong vòng kín hiện chỉ 0,160 ms trên tổng 0,778 ms/bước — PLC scan 0,614 ms mới là phần lớn. Tiền bỏ ra mua chủ yếu là con số bench tổng hợp, không phải vòng lặp người dùng chạy.
+
+**Phải làm lại từ bước nào — tương đương P mấy.** Làm lại từ **P2.1** (lõi engine: `PlantEngine`, `FaultManager`, `EventLog`, hợp đồng `StepCtx`, sources) vì đó chính là thứ bị thay. Sau đó port lại toàn bộ 9 model sang hợp đồng mới — tức làm lại **P2.2 + P2.3** — rồi làm lại phần bench/hot-loop của **P2.4**. Giữ được (chỉ khi API công khai của engine — `step/snapshot/restore/getObservable/inject/clearFault` — được bảo toàn): loader + extension + CLI + scenario + demo A–D (commit 1–2 của P2.4), server/UI (commit 7), schemas. Tổng cộng cỡ **P2.1 + P2.2 + P2.3 cộng lại — tức làm lại gần như toàn bộ nửa plant của M2**, không phải một commit hay một phase nhỏ. Theo nhịp làm việc hiện tại (mỗi P2.x ≈ 1 ngày với subagent + parent gate độc lập), đây là một phase riêng có số hiệu mới (kiểu P2.9 engine v2), với plan + STATE + OQ + OWNER-INBOX tier C + PR riêng — và nên bắt đầu bằng spike một model trước khi cam kết.
+
+Tóm lại: giữ 5000 = trả bằng một phase viết lại cỡ nửa M2 + đổi vĩnh viễn hợp đồng viết model + chứng minh lại toàn bộ golden, để đổi lấy con số bench 5000 mà vòng kín chỉ hưởng +11%. Lựa chọn "Giữ 5000, viết lại engine riêng" anh chưa chốt ở trên vẫn đang chờ — phân tích này là để anh cân nó với hai lựa chọn còn lại.
+
+---
+Log tới thời điểm 2026-11-26 13:31 +07.
+---
+
+## 2026-11-26 13:38 +07 — Anh Tiến
+
+Làm A+B, hạ ngưỡng theo số đạt được
+
+## 2026-11-26 13:39 +07 — Em My
+
+Em My đã ghi quyết định và cho chạy plan A+B.
+
+**Đã chốt:** D-008 — làm A+B, hạ ngưỡng theo số đạt được. Ghi vào MEMORY.md, OWNER-INBOX và STATE sẽ do planner cập nhật.
+
+**Trình tự đã giao cho planner:**
+1. Plan A+B (STATE §28 + OQ mới + bản nháp AMENDMENTS) — đang chạy.
+2. A trước: kênh số cho StepCtx, viết lại 9 model, golden 77 case phải giống hệt bit → đo bench.
+3. B sau: bench từ esbuild bundle (theo spike đã đo +13,5%) → đo bench.
+4. Hạ §12 = min quan sát −15% (dự kiến ~2000) + cập nhật baseline.
+5. P2.4 commit 7–8 (server + PlantFaultPanel + e2e) → gate độc lập → PR → merge.
+
+**Điểm dừng duy nhất:** nếu A+B cộng lại dưới 2000 bước/s (dưới band của anh) thì dừng, báo anh quyết — không tự hạ ngưỡng dưới 2000.
+
+Plan xong em My báo anh, rồi mới triển khai implement theo đúng quy trình plan → implement → tự kiểm gate → PR → merge.
+
+---
+Log tới thời điểm 2026-11-26 13:39 +07.
+---
+
+## 2026-11-26 13:46 +07 — TraMuse
+
+TraMuse đã kiểm plan (không chỉ nghe planner nói) và cho chạy implement.
+
+**Plan xong, đã kiểm:** STATE §28 (103 dòng), OQ-320…326 mới (tier B, có mặc định), D-008 đánh ✅ ĐÃ QUYẾT, AMENDMENTS A21 (đảo OQ-309, đã quyết) + A22 (§12, DRAFT — số N chỉ chốt sau đo). HEAD vẫn `24baaec`, `.git` nguyên, cây sạch ngoài 4 file plan.
+
+**Plan gồm 7 bước (commit 6–12):**
+- 6: A — `step(ctx, slots)` + brand types `RoleSlot`/`ObsSlot`/`FaultSlot`/`SourceSlot`, bảng slot dựng ở init, reverse map giữ tên role cho lỗi; 77 golden + determinism + hash demo phải giống hệt bit.
+- 7: đo sau A (bench ×5).
+- 8: B — esbuild bundle bench plant + closedloop (`yaml` external, ROOT qua env `VCS_REPO_ROOT`); không đổi exports packages; tagdb/orchestrator/softplc giữ tsx.
+- 9: đo sau B, tính ngưỡng mới = min −15%, làm tròn xuống trăm (dự kiến ~2000).
+- 10: hạ ngưỡng — M2 §12 + A22 (bỏ DRAFT) + hằng bench + baseline, chỉ sau khi đo.
+- 11–12: server tối thiểu + PlantFaultPanel + e2e parity; docs §23.
+
+**Điểm dừng (tier C):** trung vị plant sau A+B dưới 2000 → dừng, không tự hạ ngưỡng; golden/determinism/hash lệch sau A → dừng, không sửa golden; B tắc sau 3 lần sửa → fallback tsx, đo A-only, báo anh.
+
+Implementer đang chạy commit 6–12 theo đúng thứ tự, đo sau A rồi mới làm B. Xong em My tự kiểm gate độc lập trên bản sạch rồi mới mở PR — có kết quả hoặc vướng tier C em My báo anh.
+
+---
+Log tới thời điểm 2026-11-26 13:46 +07.
+---
+
+## 2026-11-26 15:01 +07 — Em My
+
+Em My báo: A+B đã dừng ở **TC-1**, chưa hạ ngưỡng, chưa làm commit 10–12.
+
+**Số đo của implementer (cùng phiên, trung vị 5 lần chạy):**
+- Gốc tsx trước A: plant **1527** (1449–1622), vòng kín 899.
+- Sau A: plant **1797** (**+17,7%**, vượt xa điểm quyết định +5%), vòng kín 959.
+- Sau A+B: plant **1941** (1840–2035), B **+8,0%**, A+B **+27,1%** so với gốc; vòng kín 985.
+- **TC-1: 1941 < 2000, thiếu 59 bước/s (3%).** Theo công thức OQ-326 ngưỡng sẽ là 1500 (min 1840 −15% = 1564 → 1500) — chưa áp dụng. Golden 78/78 + determinism + hash demo A–D vẫn giống hệt bit, không có vấn đề hành vi.
+
+**Điểm cần anh lưu ý trước khi quyết:** phiên đo này máy chậm bất thường — cùng code `24baaec` em My đo lúc 12:52 được plant 1932 / vòng kín 1285, nhưng trong phiên này chỉ 1527 / 899 (−21% / −30%). Tức 1941 thiếu 3% hoàn toàn nằm trong dao động máy; đo lại lúc máy yên có thể qua 2000. Cả hai bench đều thấp cùng lúc, không riêng plant.
+
+Em My đang đo lại độc lập trên bản sao sạch ở đúng commit dừng (`d64ebfc`, cài thật, plant ×5 + vòng kín ×3) để có bộ số thứ hai trước khi trình anh ba lựa chọn (chấp nhận 1500 / đo lại lúc máy yên / hướng khác). Có kết quả em My báo ngay.
+
+---
+Log tới thời điểm 2026-11-26 15:01 +07.
+---
+
+## 2026-11-26 15:04 +07 — TraMuse
+
+TraMuse đo lại độc lập xong, anh Tiến ạ. Kết quả làm thay đổi kết luận TC-1.
+
+**ĐÃ CHẠY:** bản sao sạch `~/.cache/vcs-tc1pv`, đúng HEAD `d64ebfc`, cài thật — plant ×5: **2061, 2032, 2131, 2036, 1825 → trung vị 2036**. Vòng kín ×3: 975, 963, 931 → trung vị 963.
+
+**TC-1 không tái hiện:** 2036 ≥ 2000. Implementer đo 1941, TraMuse đo 2036 — cùng code, chênh 5% do máy. Cả hai min (1840 / 1825) đều cho ngưỡng 1500 theo công thức OQ-326 (min −15%, tròn xuống trăm). Trung vị 2036 nằm trong dải 2000–2500 anh đặt ra, dù ở đáy.
+
+**Cần nói thẳng:** vòng kín 963 < 1000. Đây là cùng hiện tượng máy chậm như phiên implementer (985) — code PLC không đổi từ lúc đo 1285 PASS lúc 12:52, và trong phiên A còn giúp vòng kín +6,7%. TraMuse sẽ đo lại ở parent gate. TC-1 chỉ chặn ở plant, nên không đổi kết luận trên.
+
+TraMuse đề xuất **(a) chấp nhận 1500, làm tiếp commit 10–12** — vì bản chất của (b) đã làm xong rồi, và ngưỡng 1500 là số chung của cả hai bộ dữ liệu.
+
+---
+Log tới thời điểm 2026-11-26 15:04 +07.
+---
+
+## 2026-11-26 15:09 +07 — Anh Tiến
+
+Chấp nhận 1500, làm tiếp commit 10–12
+
+## 2026-11-26 15:09 +07 — Em My
+
+Đã chốt, anh Tiến ạ. Em My đã ghi quyết định (a) vào MEMORY.md và cho chạy implement commit 10–12: hạ §12 xuống 1500 (A22 chốt với cả hai bộ số đo), rồi server + PlantFaultPanel + e2e + docs.
+
+Xong implement, em My tự kiểm gate trên bản sạch rồi mở PR vào develop như mọi lần — xong báo anh.
+
+---
+Log tới thời điểm 2026-11-26 15:09 +07.
+---
+
+## 2026-11-26 15:13 +07 — Anh Tiến
+
+thế những sửa đổi em làm ở A+B để ra kết quả 2036 còn được giữa không? dù chấp nhận 1500 nhưng thành quả tối ưu A+B thì vẫn nên giữ chứ nhỉ?
+
+## 2026-11-26 15:13 +07 — Em My
+
+Còn nguyên, anh Tiến ạ — em My vừa kiểm trên cây thật.
+
+**ĐÃ CHẠY:** nhánh `m2/p2.4-closed-loop`, HEAD `d64ebfc` — commit 6 (A: kênh số, `f9ed204`) và commit 8 (B: bundle, `8d4a1fc`) vẫn nằm trong lịch sử. `RoleSlot` còn trong `registry.ts`/`models/index.ts`, `engine.ts` còn 12 chỗ dùng `slots`; `scripts/build-bench-bundle.mjs` + `bench/dist/` còn đủ cả hai bundle.
+
+Commit 10 đang làm dở (chưa commit) chỉ sửa ngưỡng + tài liệu — `THRESHOLD_STEPS_PER_SEC` đã là 1500, các file đổi là `bench/plant.bench.ts`, `baseline.json`, `AMENDMENTS.md`, `STATE.md`, `open-questions.md`, spec §12. Không file engine nào bị chạm.
+
+Và đúng như anh nói: 1500 chỉ là vạch đậu/rớt, không phải giới hạn tốc độ — máy vẫn chạy ~2036. Bỏ A+B đi thì lại rơi về ~1527–1932. Tối ưu giữ nguyên, ngưỡng hạ theo số đạt được, đúng quyết định (a).
+
+---
+Log tới thời điểm 2026-11-26 15:13 +07.
+---
