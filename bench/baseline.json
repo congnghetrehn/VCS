@@ -1,22 +1,24 @@
 {
   "generated": "2026-11-24",
-  "note": "Baseline bench M0 §12.4 (P0.7): trung vị 5 lần chạy `pnpm bench` trên VM chia sẻ (1,5 CPU). Mỗi lần chạy bench đã lấy trung vị mẫu nội bộ. Độ dao động giữa 5 lần chạy lớn (xem ranges) — so sánh hồi quy > 20% chỉ là CẢNH BÁO, không fail. bench/results.json vẫn gitignore (D8), không commit. P2.3 (2026-11-26): thêm key plant — baseline trước fix 128 bước/s (phạm vi 120–131); sau fix OQ-267/commit 10 cập nhật baseline mới: trung vị 5 runs 1300 bước/s (phạm vi 1207–1394), heap −16,18 MB. Ngưỡng M2 §12 (≥ 5000 bước/s) vẫn chưa đạt — không đổi ngưỡng, chờ quyết định owner.",
+  "note": "Baseline bench M0 §12.4 (P0.7): trung vị 5 lần chạy `pnpm bench` trên VM chia sẻ (1,5 CPU). Mỗi lần chạy bench đã lấy trung vị mẫu nội bộ. Độ dao động giữa 5 lần chạy lớn (xem ranges) — so sánh hồi quy > 20% chỉ là CẢNH BÁO, không fail. bench/results.json vẫn gitignore (D8), không commit. P2.3 (2026-11-26): thêm key plant — baseline trước fix 128 bước/s (phạm vi 120–131); sau fix OQ-267/commit 10 cập nhật baseline mới: trung vị 5 runs 1300 bước/s (phạm vi 1207–1394), heap −16,18 MB. Ngưỡng M2 §12 (≥ 5000 bước/s) vẫn chưa đạt — không đổi ngưỡng, chờ quyết định owner. P2.4 commit 3 (2026-11-26): thêm key closedLoop — trung vị 5 lần chạy trực tiếp bench/closedloop.bench.ts 1250 bước/s (phạm vi 1127–1274), tách plant ~0,160 / PLC ~0,614 / còn lại ~0,013 ms/bước (PLC ~77% ngân sách); ngưỡng M2 §12 vòng kín ≥ 1000 bước/s ĐẠT, sát ngưỡng (SoftPlc ngoài phạm vi P2.4). Số 1319 đo lần đầu đã HỦY (post sai shape → input không set, motor STOPPED). P2.4 commit 10 (2026-11-26, D-008/A22): sau A+B (kênh số StepCtx + bench bundle) cập nhật plant — trung vị 5 runs bundle 1941 bước/s (phạm vi 1840–2035); parent đo lại độc lập (bản sao sạch, cài thật) trung vị 2036 (phạm vi 1825–2131), TC-1 KHÔNG tái hiện; ngưỡng M2 §12 hạ xuống ≥ 1500 bước/s (min 1840 −15% = 1564 → 1500). closedLoop cập nhật — trung vị 5 runs bundle 985 bước/s (phạm vi 973–1021), dưới ngưỡng 1000 trong phiên đo do máy chậm (PLC 0,78–0,84 ms so với 0,614 ms lúc đo 1285 PASS lúc 12:52; parent đo lại 963, phạm vi 931–975); ngưỡng vòng kín 1000 KHÔNG đổi.",
   "ranges": {
+    "closedLoopStepsPerSec": [973, 1021],
     "flushChangesMs": [0.061, 0.105],
     "flushNoChangeUs": [0.14, 0.27],
     "heapIncreaseMB": [-0.05, -0.04],
     "orchestratorStepsPerSec": [337259, 488762],
     "plantHeapIncreaseMB": [-16.22, -16.18],
-    "plantStepsPerSec": [1207, 1394],
+    "plantStepsPerSec": [1840, 2035],
     "setGetOpsPerSec": [36915506, 52181321]
   },
   "results": {
+    "closedLoopStepsPerSec": 985,
     "flushChangesMs": 0.063,
     "flushNoChangeUs": 0.15,
     "heapIncreaseMB": -0.04,
     "orchestratorStepsPerSec": 411614,
     "plantHeapIncreaseMB": -16.18,
-    "plantStepsPerSec": 1300,
+    "plantStepsPerSec": 1941,
     "setGetOpsPerSec": 45354782
   },
   "runs": 5
