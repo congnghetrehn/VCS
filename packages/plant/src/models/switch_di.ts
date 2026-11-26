@@ -5,7 +5,7 @@
 import { z } from 'zod';
 
 import { hysteresisStep, offDelayStep, onDelayStep, type DelayTimerState } from '../delay.js';
-import type { EquipmentModel, StepCtx } from '../registry.js';
+import type { EquipmentModel, ModelSlots, StepCtx } from '../registry.js';
 
 // kind bắt buộc (OQ-287): zod optional + refine bắt buộc có mặt
 // (defaultParams không thể chứa giá trị mặc định cho trường "không default").
@@ -109,12 +109,18 @@ export const switchDiModel: EquipmentModel<SwitchDiParams, SwitchDiState> = {
       active: params.initialActive,
     };
   },
-  step(ctx: StepCtx<SwitchDiParams, SwitchDiState>): void {
+  step(ctx: StepCtx<SwitchDiParams, SwitchDiState>, slots: ModelSlots): void {
     const p = ctx.params;
     const s = ctx.state;
     const kind = p.kind;
     const effInvert = kind === 'pull_cord' ? true : p.invert;
     const effCondition = kind === 'zero_speed' ? 'lt' : p.condition;
+    const diSlot = slots.role.di;
+    const activeSlot = slots.obs.active;
+    const diObsSlot = slots.obs.di;
+    const stuckActiveSlot = slots.fault.stuckActive;
+    const stuckInactiveSlot = slots.fault.stuckInactive;
+    const chatterSlot = slots.fault.chatter;
 
     // 1. cond (có hysteresis).
     const src = ctx.source();
@@ -140,9 +146,9 @@ export const switchDiModel: EquipmentModel<SwitchDiParams, SwitchDiState> = {
 
     // 3. stuck ở mức active (OQ-289), rồi chatter (OQ-288), rồi invert.
     let effActive = s.active;
-    if (ctx.fault('stuckActive').active) effActive = true;
-    if (ctx.fault('stuckInactive').active) effActive = false;
-    const chatter = ctx.fault('chatter');
+    if (ctx.fault(stuckActiveSlot).active) effActive = true;
+    if (ctx.fault(stuckInactiveSlot).active) effActive = false;
+    const chatter = ctx.fault(chatterSlot);
     if (chatter.active) {
       const rawPeriod = chatter.params['periodMs'];
       const period = typeof rawPeriod === 'number' && rawPeriod > 0 ? rawPeriod : 100;
@@ -151,8 +157,8 @@ export const switchDiModel: EquipmentModel<SwitchDiParams, SwitchDiState> = {
       }
     }
     const di = effInvert ? !effActive : effActive;
-    ctx.emit('di', di);
-    ctx.setObs('active', effActive);
-    ctx.setObs('di', di);
+    ctx.emit(diSlot, di);
+    ctx.setObs(activeSlot, effActive);
+    ctx.setObs(diObsSlot, di);
   },
 };

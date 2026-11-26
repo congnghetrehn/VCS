@@ -5,11 +5,12 @@
 // KHÔNG hot reload PLC đang chạy (OQ-208).
 
 import { useEffect, useState } from 'react';
-import type { TagValue } from '@vcs/schemas';
+import type { FaultRequest, FaultTiming, TagValue } from '@vcs/schemas';
 import { t, type Lang } from '../i18n/index.js';
 import { isValidPlcFileName, isValidWatchRef, parseWatchValue } from '../plc-helpers.js';
 import { useSimSnapshot, useSimStore, type WsDiagnostic } from '../store.js';
 import { PlcEditor } from './PlcEditor.js';
+import { PlantFaultPanel } from './PlantFaultPanel.js';
 
 export interface PlcWorkspaceProps {
   lang: Lang;
@@ -18,6 +19,9 @@ export interface PlcWorkspaceProps {
   onPlcWrite: (ref: string, value: TagValue) => void;
   onPlcForce: (ref: string, value: TagValue) => void;
   onPlcUnforce: (ref: string) => void;
+  onPlantFaultInject: (request: FaultRequest) => void;
+  onPlantFaultClear: (id: string) => void;
+  onPlantFaultPreset: (equipment: string, preset: string, when?: FaultTiming) => void;
 }
 
 interface BuildResult {
@@ -58,6 +62,9 @@ export function PlcWorkspace({
   onPlcWrite,
   onPlcForce,
   onPlcUnforce,
+  onPlantFaultInject,
+  onPlantFaultClear,
+  onPlantFaultPreset,
 }: PlcWorkspaceProps) {
   const s = useSimSnapshot();
   const [newFileName, setNewFileName] = useState('');
@@ -368,6 +375,12 @@ export function PlcWorkspace({
           </table>
         )}
       </section>
+      <PlantFaultPanel
+        lang={lang}
+        onPlantFaultClear={onPlantFaultClear}
+        onPlantFaultInject={onPlantFaultInject}
+        onPlantFaultPreset={onPlantFaultPreset}
+      />
     </div>
   );
 }

@@ -195,6 +195,127 @@ describe('loadProject — hash hello-tags không đổi sau P0.8 (B5)', () => {
       tags: 'tags/tags.yaml',
       comms: 'comms/comms.yaml',
       hmi: 'hmi/',
+      plant: 'plant/equipment.yaml',
     });
+  });
+});
+
+const PLANT_TAGS = `tags:
+  - name: M01_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.0"
+    controller: PLC1
+    signal:
+      kind: DO
+  - name: M01_RUN_FB
+    type: Bool
+    area: I
+    address: "%I0.0"
+    controller: PLC1
+    signal:
+      kind: DI
+  - name: M01_OVL_OK
+    type: Bool
+    area: I
+    address: "%I0.1"
+    controller: PLC1
+    signal:
+      kind: DI
+`;
+
+const PLANT_OK = `- id: M01
+  model: motor_dol
+  controller: PLC1
+  signals:
+    runCmd: M01_RUN_CMD
+    runFb: M01_RUN_FB
+    overloadOk: M01_OVL_OK
+- id: LT01
+  model: analog_sensor
+  params: { engMin: 0, engMax: 100, unit: "%", tauMs: 500, noiseStd: 0 }
+`;
+
+function fsWithPlant(project: string, tags: string, plant?: string): ReturnType<typeof memoryFS> {
+  const files: Record<string, string> = {
+    'vcs.project.yaml': project,
+    'tags/tags.yaml': tags,
+  };
+  if (plant !== undefined) files['plant/equipment.yaml'] = plant;
+  return memoryFS(files);
+}
+
+describe('loadProject — plant/equipment.yaml (M2 §4.2, P2.4)', () => {
+  it('file hợp lệ → plant nạp đủ, controller giữ, files + hash tính cả plant', async () => {
+    const model = await loadProject(fsWithPlant(PROJECT, PLANT_TAGS, PLANT_OK));
+    expect(model.valid).toBe(true);
+    expect(model.plant).toHaveLength(2);
+    expect(model.plant?.[0]).toMatchObject({ id: 'M01', model: 'motor_dol', controller: 'PLC1' });
+    expect(model.plant?.[1]?.model).toBe('analog_sensor');
+    expect(model.files.map((f) => f.path)).toContain('plant/equipment.yaml');
+  });
+
+  it('hash đổi khi nội dung plant đổi, không đổi khi nạp lại cùng nội dung', async () => {
+    const a = await loadProject(fsWithPlant(PROJECT, PLANT_TAGS, PLANT_OK));
+    const b = await loadProject(fsWithPlant(PROJECT, PLANT_TAGS, PLANT_OK));
+    const c = await loadProject(
+      fsWithPlant(PROJECT, PLANT_TAGS, PLANT_OK.replace('M01', 'M02')),
+    );
+    expect(a.hash).toBe(b.hash);
+    expect(a.hash).not.toBe(c.hash);
+  });
+
+  it('thiếu file plant → im lặng, valid true, plant undefined', async () => {
+    const model = await loadProject(fsWithPlant(PROJECT, PLANT_TAGS));
+    expect(model.valid).toBe(true);
+    expect(model.plant).toBeUndefined();
+    expect(model.diagnostics.map((d) => d.file)).not.toContain('plant/equipment.yaml');
+    expect(model.files.map((f) => f.path)).not.toContain('plant/equipment.yaml');
+  });
+
+  it('plant YAML sai cú pháp → valid false, diagnostic error', async () => {
+    const model = await loadProject(fsWithPlant(PROJECT, PLANT_TAGS, '- id: [\n  broken'));
+    expect(model.valid).toBe(false);
+    expect(model.diagnostics.some((d) => d.severity === 'error')).toBe(true);
+  });
+
+  it('plant sai schema (thiếu model) → valid false', async () => {
+    const model = await loadProject(fsWithPlant(PROJECT, PLANT_TAGS, '- id: M01\n'));
+    expect(model.valid).toBe(false);
+    expect(model.plant).toBeUndefined();
+  });
+
+  it('plant không phải mảng → valid false', async () => {
+    const model = await loadProject(
+      fsWithPlant(PROJECT, PLANT_TAGS, 'id: M01\nmodel: motor_dol\n'),
+    );
+    expect(model.valid).toBe(false);
+  });
+
+  it('plant rỗng [] → valid true, plant = []', async () => {
+    const model = await loadProject(fsWithPlant(PROJECT, PLANT_TAGS, '[]\n'));
+    expect(model.valid).toBe(true);
+    expect(model.plant).toEqual([]);
+  });
+
+  it('files.plant tường minh → nạp từ đường dẫn đó', async () => {
+    const project = PROJECT.replace(
+      'controllers:',
+      'files:\n  plant: eq/custom.yaml\ncontrollers:',
+    );
+    const files: Record<string, string> = {
+      'vcs.project.yaml': project,
+      'tags/tags.yaml': PLANT_TAGS,
+      'eq/custom.yaml': PLANT_OK,
+    };
+    const model = await loadProject(memoryFS(files));
+    expect(model.valid).toBe(true);
+    expect(model.plant).toHaveLength(2);
+    expect(model.files.map((f) => f.path)).toContain('eq/custom.yaml');
+  });
+
+  it('project không có files.plant → mặc định plant/equipment.yaml', async () => {
+    const model = await loadProject(fsWithPlant(PROJECT, PLANT_TAGS, PLANT_OK));
+    expect(model.config.files.plant).toBe('plant/equipment.yaml');
   });
 });

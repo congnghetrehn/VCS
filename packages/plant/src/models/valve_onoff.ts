@@ -3,7 +3,7 @@
 
 import { z } from 'zod';
 
-import type { EquipmentModel, StepCtx } from '../registry.js';
+import type { EquipmentModel, ModelSlots, StepCtx } from '../registry.js';
 
 export const valveOnoffParamsSchema = z.object({
   travelTimeMs: z.number().positive(),
@@ -144,11 +144,26 @@ export const valveOnoffModel: EquipmentModel<ValveOnoffParams, ValveOnoffState> 
     warnedBothCmd: false,
     frozenPos: null,
   }),
-  step(ctx: StepCtx<ValveOnoffParams, ValveOnoffState>): void {
+  step(ctx: StepCtx<ValveOnoffParams, ValveOnoffState>, slots: ModelSlots): void {
     const p = ctx.params;
     const s = ctx.state;
-    const openCmd = ctx.cmd('openCmd') === true;
-    const closeCmd = ctx.cmd('closeCmd') === true;
+    const openCmdSlot = slots.role.openCmd;
+    const closeCmdSlot = slots.role.closeCmd;
+    const openLsSlot = slots.role.openLs;
+    const closedLsSlot = slots.role.closedLs;
+    const faultSlot = slots.role.fault;
+    const posPctSlot = slots.obs.posPct;
+    const movingSlot = slots.obs.moving;
+    const stateSlot = slots.obs.state;
+    const stuckOpenSlot = slots.fault.stuckOpen;
+    const stuckClosedSlot = slots.fault.stuckClosed;
+    const stuckAtPosSlot = slots.fault.stuckAtPos;
+    const slowTravelSlot = slots.fault.slowTravel;
+    const travelTimeoutSlot = slots.fault.travelTimeout;
+    const lsOpenFailSlot = slots.fault.lsOpenFail;
+    const lsClosedFailSlot = slots.fault.lsClosedFail;
+    const openCmd = ctx.cmd(openCmdSlot) === true;
+    const closeCmd = ctx.cmd(closeCmdSlot) === true;
 
     // Hướng chạy (OQ-277: cả hai lệnh true ở chế độ double → hold + warn 1 lần).
     let dir = 0;
@@ -167,19 +182,19 @@ export const valveOnoffModel: EquipmentModel<ValveOnoffParams, ValveOnoffState> 
     }
     s.dir = dir;
 
-    const stuckOpen = ctx.fault('stuckOpen').active;
-    const stuckClosed = ctx.fault('stuckClosed').active;
-    const stuckAtPos = ctx.fault('stuckAtPos');
-    const travelTimeout = ctx.fault('travelTimeout').active;
-    const slowTravel = ctx.fault('slowTravel');
+    const stuckOpen = ctx.fault(stuckOpenSlot).active;
+    const stuckClosed = ctx.fault(stuckClosedSlot).active;
+    const stuckAtPos = ctx.fault(stuckAtPosSlot);
+    const travelTimeout = ctx.fault(travelTimeoutSlot).active;
+    const slowTravel = ctx.fault(slowTravelSlot);
     const anyFault =
       stuckOpen ||
       stuckClosed ||
       stuckAtPos.active ||
       slowTravel.active ||
       travelTimeout ||
-      ctx.fault('lsOpenFail').active ||
-      ctx.fault('lsClosedFail').active;
+      ctx.fault(lsOpenFailSlot).active ||
+      ctx.fault(lsClosedFailSlot).active;
 
     if (stuckOpen) {
       s.posPct = 100;
@@ -199,16 +214,16 @@ export const valveOnoffModel: EquipmentModel<ValveOnoffParams, ValveOnoffState> 
     }
 
     const thr = p.lsThresholdPct;
-    const openLs = !ctx.fault('lsOpenFail').active && s.posPct >= 100 - thr;
-    const closedLs = !ctx.fault('lsClosedFail').active && s.posPct <= thr;
+    const openLs = !ctx.fault(lsOpenFailSlot).active && s.posPct >= 100 - thr;
+    const closedLs = !ctx.fault(lsClosedFailSlot).active && s.posPct <= thr;
     const fault = p.faultNC ? !anyFault : anyFault;
 
-    ctx.emit('openLs', openLs);
-    ctx.emit('closedLs', closedLs);
-    ctx.emit('fault', fault);
+    ctx.emit(openLsSlot, openLs);
+    ctx.emit(closedLsSlot, closedLs);
+    ctx.emit(faultSlot, fault);
 
-    ctx.setObs('posPct', s.posPct);
-    ctx.setObs('moving', dir !== 0);
-    ctx.setObs('state', deriveState(s.posPct, dir));
+    ctx.setObs(posPctSlot, s.posPct);
+    ctx.setObs(movingSlot, dir !== 0);
+    ctx.setObs(stateSlot, deriveState(s.posPct, dir));
   },
 };

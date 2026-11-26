@@ -8,6 +8,7 @@ import {
   TAGS_SHAPE,
   createTagCatalog,
   diag,
+  equipmentFileSchema,
   hasErrors,
   migrateProject,
   parseYamlWithSchema,
@@ -15,6 +16,7 @@ import {
   sortDiagnostics,
   tagsFileSchema,
   type Diagnostic,
+  type EquipmentInstance,
   type ProjectConfig,
   type TagCatalog,
   type TagDef,
@@ -27,6 +29,8 @@ export interface ProjectModel {
   config: ProjectConfig;
   tags: TagDef[];
   catalog: TagCatalog;
+  /** Thiết bị plant (M2 §4.2, P2.4) — undefined khi không có file plant. */
+  plant?: EquipmentInstance[] | undefined;
   files: { path: string; sha256: string }[];
   /** sha256 của danh sách (path, sha256) đã sắp xếp. */
   hash: string;
@@ -42,7 +46,12 @@ export const EMPTY_PROJECT_CONFIG: ProjectConfig = {
   language: 'vi',
   seed: 1,
   simulation: { stepMs: 10, plcScanMs: 10, timeScale: 1 },
-  files: { tags: 'tags/tags.yaml', comms: 'comms/comms.yaml', hmi: 'hmi/' },
+  files: {
+    tags: 'tags/tags.yaml',
+    comms: 'comms/comms.yaml',
+    hmi: 'hmi/',
+    plant: 'plant/equipment.yaml',
+  },
   controllers: [],
 };
 
@@ -51,6 +60,7 @@ export async function loadProject(fs: ProjectFS): Promise<ProjectModel> {
   const files: { path: string; sha256: string }[] = [];
   let config: ProjectConfig = EMPTY_PROJECT_CONFIG;
   let tags: TagDef[] = [];
+  let plant: EquipmentInstance[] | undefined;
 
   const projectPath = 'vcs.project.yaml';
   if (!(await fs.exists(projectPath))) {
@@ -125,6 +135,20 @@ export async function loadProject(fs: ProjectFS): Promise<ProjectModel> {
           });
         }
       }
+
+      // Plant (M2 §4.2, P2.4 — OQ-312): file thiếu → im lặng, plant
+      // undefined (plant là opt-in theo project); file có → parse schema,
+      // lỗi schema → diagnostic error như tags; file được tính vào hash.
+      const plantPath = config.files.plant;
+      if (await fs.exists(plantPath)) {
+        const plantText = await fs.readText(plantPath);
+        files.push({ path: plantPath, sha256: hashText(plantText) });
+        const parsedPlant = parseYamlWithSchema(plantPath, plantText, equipmentFileSchema);
+        diagnostics.push(...parsedPlant.diagnostics);
+        if (parsedPlant.value !== undefined) {
+          plant = parsedPlant.value;
+        }
+      }
     }
   }
 
@@ -136,6 +160,7 @@ export async function loadProject(fs: ProjectFS): Promise<ProjectModel> {
     config,
     tags,
     catalog: createTagCatalog(tags),
+    plant,
     files,
     hash,
     diagnostics: sorted,

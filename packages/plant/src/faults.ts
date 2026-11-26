@@ -98,6 +98,15 @@ function numParam(params: Record<string, unknown>, key: string, fallback: number
   return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
 }
 
+/** Trạng thái lỗi thiết bị theo slot (API theo chỉ số, A21): một entry cho
+ *  mỗi fault id của model. `record` là record mới nhất (inject sau ghi đè);
+ *  `result` tái dùng, cập nhật tại chỗ mỗi lần đọc (như #faultCache). */
+interface EquipmentFaultSlot {
+  id: string;
+  record: FaultRecord | undefined;
+  result: EquipmentFaultResult;
+}
+
 export class FaultManager {
   #records: FaultRecord[] = [];
   #nextSeq = 1;
@@ -109,11 +118,59 @@ export class FaultManager {
   /** Slot tái dùng cho applyEmit (OQ-267) — chỉ dùng ngay trong bước, không giữ qua lần gọi sau. */
   #emitValueSlot: { value: number | boolean } = { value: 0 };
   #emitRawSlot: { rawOverride: number } = { rawOverride: 0 };
+  /** Lỗi thiết bị theo slot, đăng ký bởi engine ở init (A21). */
+  #equipmentSlots = new Map<string, EquipmentFaultSlot[]>();
 
   constructor(options: FaultManagerOptions = {}) {
     this.#stepMs = options.stepMs ?? 10;
     this.#wireBreakRaw = options.wireBreakRaw ?? 32767;
     this.#initialValue = options.initialValue;
+  }
+
+  /**
+   * Đăng ký danh sách fault id của một thiết bị (engine gọi ở init, theo
+   * thứ tự `model.faults` — slot = chỉ số trong danh sách). Gọi lại ghi đè
+   * đăng ký cũ (engine reset tạo manager mới rồi đăng ký lại).
+   */
+  registerEquipment(equipmentId: string, faultIds: readonly string[]): void {
+    this.#equipmentSlots.set(
+      equipmentId,
+      faultIds.map((id) => ({
+        id,
+        record: undefined,
+        result: { active: false, params: {}, sinceMs: 0 },
+      })),
+    );
+  }
+
+  /**
+   * Trạng thái lỗi thiết bị mới nhất của (equipment, slot) — cùng ngữ nghĩa
+   * với `equipmentFault` nhưng không quét records (record mới nhất đã theo
+   * dõi ở inject/restore) và không nối chuỗi key (A21). Slot ngoài khoảng
+   * hoặc thiết bị chưa đăng ký → throw (lỗi lập trình, fail-fast).
+   */
+  equipmentFaultBySlot(
+    equipmentId: string,
+    slot: number | undefined,
+    /** Tên model — engine truyền vào để lỗi nêu tên model (FaultManager chỉ biết equipmentId). */
+    modelType?: string,
+  ): EquipmentFaultResult {
+    const slots = this.#equipmentSlots.get(equipmentId);
+    const state = slot === undefined ? undefined : slots?.[slot];
+    if (state === undefined) {
+      throw new Error(
+        `FaultManager: slot fault ${String(slot)} không hợp lệ cho thiết bị ${equipmentId}${modelType !== undefined ? ` (model ${modelType})` : ''} (thiết bị chưa đăng ký hoặc model chỉ có ${String(slots?.length ?? 0)} fault).`,
+      );
+    }
+    const r = state.record;
+    if (r === undefined) return NO_FAULT_RESULT;
+    const out = state.result;
+    out.active = r.state === 'active';
+    out.params = r.params;
+    out.sinceMs = r.sinceMs;
+    if (r.clearedAtMs !== undefined) out.clearedAtMs = r.clearedAtMs;
+    else delete out.clearedAtMs;
+    return out;
   }
 
   /**
@@ -141,6 +198,19 @@ export class FaultManager {
       record.delayLine = new DelayLine<number | boolean>(n, fill ?? 0);
     }
     this.#records.push(record);
+    // Lỗi thiết bị: record mới nhất cho (equipment, fault) — slot state
+    // theo dõi để equipmentFaultBySlot khỏi quét records (A21).
+    if (!isSignalTarget(req.target)) {
+      const target = req.target;
+      const slots = this.#equipmentSlots.get(target.equipment);
+      if (slots !== undefined) {
+        const st = slots.find((s) => s.id === target.fault);
+        if (st !== undefined) {
+          st.record = record;
+          st.result = { active: false, params: record.params, sinceMs: 0 };
+        }
+      }
+    }
     return id;
   }
 
@@ -422,5 +492,21 @@ export class FaultManager {
       if (rs.freezeValue !== null) r.freezeValue = rs.freezeValue;
       return r;
     });
+    // Dựng lại slot state từ records đã restore (duyệt theo thứ tự inject —
+    // record sau ghi đè record trước nên còn lại record mới nhất, A21).
+    for (const slots of this.#equipmentSlots.values()) {
+      for (const st of slots) {
+        st.record = undefined;
+        st.result = { active: false, params: {}, sinceMs: 0 };
+      }
+    }
+    for (const r of this.#records) {
+      if (isSignalTarget(r.target)) continue;
+      const target = r.target;
+      const slots = this.#equipmentSlots.get(target.equipment);
+      if (slots === undefined) continue;
+      const st = slots.find((s) => s.id === target.fault);
+      if (st !== undefined) st.record = r;
+    }
   }
 }

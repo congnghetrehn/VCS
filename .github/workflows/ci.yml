@@ -129,6 +129,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm bench
       - run: node scripts/check-bench-regression.mjs
+        # pnpm bench exit 1 khi có bench FAIL (plant FAIL vs ≥ 5000 tới P2.4
+        # commit 6) — vẫn chạy regression để in cảnh báo so với baseline.
+        if: always()
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -30,7 +30,7 @@ export {
 } from './duration.js';
 export { defineDiagnostics, PRJ_CATALOG, SCL_CATALOG, LAD_CATALOG, PL_CATALOG, DIAGNOSTIC_CODE_RE } from './diagnostics-catalog.js';
 export type { DiagnosticInfo, DiagnosticCatalog } from './diagnostics-catalog.js';
-export { equipmentInstanceSchema, sourceSpecSchema } from './equipment.js';
+export { equipmentFileSchema, equipmentInstanceSchema, sourceSpecSchema } from './equipment.js';
 export type { EquipmentInstance, SourceSpec } from './equipment.js';
 export {
   signalFaultTypeSchema,

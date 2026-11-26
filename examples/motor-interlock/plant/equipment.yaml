@@ -1,0 +1,12 @@
+# plant/equipment.yaml — examples/motor-interlock (P2.4 demo A–D, M2 §11.4).
+# 1 thiết bị M01 motor_dol, params mặc định (startDelayMs 500,
+# stopDelayMs 800, tripDelayMs 0, overloadResetMs 1000,
+# resetRequiresCmdOff true); ready/remote/currentFb không gán → PL-W001
+# ở validate (chấp nhận, đúng §11.4).
+- id: M01
+  model: motor_dol
+  controller: PLC1
+  signals:
+    runCmd: RUN_CMD
+    runFb: RUN_FB
+    overloadOk: OVL_OK

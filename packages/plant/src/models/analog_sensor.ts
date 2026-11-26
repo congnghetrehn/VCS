@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import { engToRaw } from '../adapter.js';
 import { lagStep } from '../delay.js';
-import type { EquipmentModel, StepCtx } from '../registry.js';
+import type { EquipmentModel, ModelSlots, StepCtx } from '../registry.js';
 
 // engMin/engMax/unit bắt buộc (OQ-284): zod optional + refine bắt buộc có mặt
 // (defaultParams không thể chứa giá trị mặc định cho trường "không default").
@@ -100,9 +100,12 @@ export const analogSensorModel: EquipmentModel<AnalogSensorParams, AnalogSensorS
     }
     return { pv: params.initialValue ?? 0, engMin: params.engMin, engMax: params.engMax };
   },
-  step(ctx: StepCtx<AnalogSensorParams, AnalogSensorState>): void {
+  step(ctx: StepCtx<AnalogSensorParams, AnalogSensorState>, slots: ModelSlots): void {
     const p = ctx.params;
     const s = ctx.state;
+    const rawSlot = slots.role.raw;
+    const pvSlot = slots.obs.pv;
+    const rawObsSlot = slots.obs.raw;
     const src = ctx.source();
     const target = typeof src === 'number' ? src : 0;
     s.pv = lagStep(s.pv, target, ctx.dtMs, p.tauMs);
@@ -114,8 +117,8 @@ export const analogSensorModel: EquipmentModel<AnalogSensorParams, AnalogSensorS
       const u2 = ctx.rand();
       engOut += Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * p.noiseStd;
     }
-    ctx.emit('raw', engOut);
-    ctx.setObs('pv', s.pv);
-    ctx.setObs('raw', engToRaw(engOut, { rawMin: 0, rawMax: 27648, engMin: s.engMin, engMax: s.engMax }));
+    ctx.emit(rawSlot, engOut);
+    ctx.setObs(pvSlot, s.pv);
+    ctx.setObs(rawObsSlot, engToRaw(engOut, { rawMin: 0, rawMax: 27648, engMin: s.engMin, engMax: s.engMax }));
   },
 };

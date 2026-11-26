@@ -283,6 +283,15 @@ export class WsHub {
       case 'plc.unforce':
         this.#onPlcUnforce(conn, msg);
         break;
+      case 'plant.fault.inject':
+        this.#onPlantFaultInject(conn, msg);
+        break;
+      case 'plant.fault.clear':
+        this.#onPlantFaultClear(conn, msg);
+        break;
+      case 'plant.fault.preset':
+        this.#onPlantFaultPreset(conn, msg);
+        break;
     }
   }
 
@@ -444,6 +453,34 @@ export class WsHub {
         plcErrorCode(err),
         err instanceof Error ? err.message : String(err),
       );
+    }
+  }
+
+  /** P2.4 (OQ-318): chèn lỗi plant — validate faultRequestSchema đã xong ở clientMessageSchema; lỗi engine → mã PL. */
+  #onPlantFaultInject(conn: Connection, msg: Extract<ClientMessage, { type: 'plant.fault.inject' }>): void {
+    const r = this.#service.plantFaultInject(msg.request);
+    if (!r.ok) {
+      this.#sendError(conn, r.code ?? 'PL-E001', r.message ?? 'plant.fault.inject lỗi');
+    }
+  }
+
+  /** P2.4 (OQ-318): clear tay lỗi plant (id record). */
+  #onPlantFaultClear(conn: Connection, msg: Extract<ClientMessage, { type: 'plant.fault.clear' }>): void {
+    const r = this.#service.plantFaultClear(msg.id);
+    if (!r.ok) {
+      this.#sendError(conn, r.code ?? 'PL-E001', r.message ?? 'plant.fault.clear lỗi');
+    }
+  }
+
+  /** P2.4 (OQ-318, tier B): áp preset lỗi của model (vd noRunFeedback). */
+  #onPlantFaultPreset(conn: Connection, msg: Extract<ClientMessage, { type: 'plant.fault.preset' }>): void {
+    const r = this.#service.plantFaultPreset(
+      msg.equipment,
+      msg.preset,
+      msg.when,
+    );
+    if (!r.ok) {
+      this.#sendError(conn, r.code ?? 'PL-E001', r.message ?? 'plant.fault.preset lỗi');
     }
   }
 }

@@ -1,6 +1,7 @@
 // Bench PlantEngine — M2 §12 (P2.3, OQ-296). Chạy: `pnpm bench` (bước thứ 4,
-// sau softplc). Ngưỡng (không hạ): 500 thiết bị hỗn hợp (mix ×10 fixture
-// §11.3), bước 10 ms, ≥ 5000 bước/s; heap tăng < 1 MB sau 100 000 bước.
+// sau softplc). Ngưỡng (A22, hạ từ 5000 theo D-008 — quyết 2026-11-26):
+// 500 thiết bị hỗn hợp (mix ×10 fixture §11.3), bước 10 ms, ≥ 1500 bước/s;
+// heap tăng < 1 MB sau 100 000 bước.
 // Đo có warm-up, lấy trung vị. Kết quả hợp nhất vào `bench/results.json`
 // (file sinh tự động, không commit — baseline ở P0.7). Exit ≠ 0 khi FAIL
 // (CI bench job chạy script này).
@@ -30,11 +31,15 @@ import {
 } from '@vcs/plant';
 import type { SourceSpec, TagDef } from '@vcs/schemas';
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+// ROOT: bundle chạy từ bench/dist/ (D-008 B) — import.meta.url cho bench/
+// thay vì gốc repo; ưu tiên env VCS_REPO_ROOT do runner truyền (OQ-325),
+// fallback import.meta.url để chạy trực tiếp bằng tsx vẫn đúng.
+const ROOT =
+  process.env.VCS_REPO_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'bench', 'results.json');
 
 const STEP_MS = 10;
-const THRESHOLD_STEPS_PER_SEC = 5000;
+const THRESHOLD_STEPS_PER_SEC = 1500;
 const HEAP_LIMIT_MB = 1;
 const HEAP_STEPS = 100000;
 const SAMPLE_STEPS = 2000;

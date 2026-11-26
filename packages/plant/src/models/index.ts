@@ -47,8 +47,13 @@ export type {
   EquipmentModel,
   FaultDef,
   FaultPreset,
+  FaultSlot,
   ModelDocs,
+  ModelSlots,
   ObsDef,
+  ObsSlot,
   RoleDef,
+  RoleSlot,
+  SourceSlot,
   StepCtx,
 } from '../registry.js';

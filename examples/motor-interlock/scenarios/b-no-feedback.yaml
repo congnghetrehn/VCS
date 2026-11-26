@@ -1,0 +1,18 @@
+# Demo B — mất feedback (preset noRunFeedback từ T=0, runFb stuck false):
+# timer FB đếm từ scan T=110 (_start=110) → ET = T−110 → Q khi ET ≥ 3000,
+# tức T=3110 (bảng B STATE §27; tính ET += dt/scan sẽ lệch về 3100 — SAI).
+name: b-no-feedback
+simulation: { stepMs: 10, plcScanMs: 10 }
+steps:
+  - { at: 0, set: { STOP_OK: true, PERM: true }, preset: { equipment: M01, preset: noRunFeedback } }
+  - { at: 100, set: { START_PB: true } }
+  - { at: 200, set: { START_PB: false } }
+expects:
+  - { at: 0, tags: { RUN_FB: false }, observables: { M01: { state: STOPPED } } }
+  - { at: 100, tags: { RUN_CMD: true } }
+  - { at: 110, observables: { M01: { state: STARTING } } }
+  - { at: 610, tags: { RUN_FB: false }, observables: { M01: { state: RUNNING } } }
+  - { at: 3100, tags: { RUN_CMD: true } }
+  - { at: 3110, tags: { FAULT_LAMP: true, RUN_CMD: false } }
+  - { at: 3120, tags: { RUN_FB: false }, observables: { M01: { state: STOPPING } } }
+  - { at: 3920, tags: { RUN_FB: false }, observables: { M01: { state: STOPPED } } }

@@ -6,16 +6,27 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { createSimulation, type SimulationBundle, type SimulationExtension } from '@vcs/kernel';
 import { demoExtension } from '@vcs/kernel/demo';
+import { plantExtension } from '@vcs/plant';
 import { loadProject, nodeFS } from '@vcs/project';
 import type { Diagnostic } from '@vcs/schemas';
 import { SimulationService } from './sim-service.js';
 
 const DIR = join(fileURLToPath(new URL('../../..', import.meta.url)), 'examples', 'hello-tags');
+const MOTOR = join(fileURLToPath(new URL('../../..', import.meta.url)), 'examples', 'motor-interlock');
 
 async function makeBundle(extensions?: SimulationExtension[]): Promise<SimulationBundle> {
   const model = await loadProject(nodeFS(DIR));
   return createSimulation(model, {
     extensions: extensions ?? [demoExtension],
+    errorPolicy: 'isolate',
+  });
+}
+
+/** Bundle motor-interlock chỉ với plant (không PLC) cho test plant/hash. */
+async function makeMotorBundle(): Promise<SimulationBundle> {
+  const model = await loadProject(nodeFS(MOTOR));
+  return createSimulation(model, {
+    extensions: [plantExtension()],
     errorPolicy: 'isolate',
   });
 }
@@ -297,6 +308,167 @@ describe('SimulationService — sim.state.locked? (P0.8, B4)', () => {
     const service = new SimulationService(bundle, { now: () => 0 });
     try {
       expect('locked' in service.simState()).toBe(false);
+    } finally {
+      service.stop();
+    }
+  });
+});
+
+/** sha256 hex của chuỗi rỗng — hash khi chưa có thay đổi tag nào. */
+const EMPTY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
+describe('SimulationService — plant + hash (P2.4, OQ-318)', () => {
+  it('hello-tags: plant() undefined, plantSnapshot() undefined, hash rỗng', async () => {
+    const bundle = await makeBundle();
+    const service = new SimulationService(bundle, { now: () => 0 });
+    try {
+      expect(service.plant()).toBeUndefined();
+      expect(service.plantSnapshot()).toBeUndefined();
+      expect(service.simHash()).toBe(EMPTY_SHA256);
+    } finally {
+      service.stop();
+    }
+  });
+
+  it('motor-interlock: plantSnapshot() M01 motor_dol + faultDefs/presets/observables', async () => {
+    const bundle = await makeMotorBundle();
+    const service = new SimulationService(bundle, { now: () => 0 });
+    try {
+      expect(service.plant()).toBeDefined();
+      const snap = service.plantSnapshot();
+      expect(snap?.equipment).toHaveLength(1);
+      const m01 = snap?.equipment[0];
+      expect(m01?.id).toBe('M01');
+      expect(m01?.model).toBe('motor_dol');
+      expect(m01?.controller).toBe('PLC1');
+      expect(m01?.faultDefs.map((f) => f.id)).toEqual([
+        'overload',
+        'failToStart',
+        'contactorStuck',
+        'notReady',
+        'localMode',
+      ]);
+      expect(m01?.presets.map((p) => p.name)).toEqual([
+        'noRunFeedback',
+        'feedbackStuckOn',
+        'overloadTrip',
+        'commandLost',
+      ]);
+      // Obs chỉ có giá trị sau bước đầu (engine khởi tạo undefined).
+      expect(m01?.observables).toEqual({});
+      expect(m01?.faults).toEqual([]);
+      expect(service.step(1).ok).toBe(true);
+      expect(service.plantSnapshot()?.equipment[0]?.observables['state']).toBe('STOPPED');
+    } finally {
+      service.stop();
+    }
+  });
+
+  it('plantFaultInject overload → active; lỗi lạ → PL-E001', async () => {
+    const bundle = await makeMotorBundle();
+    const service = new SimulationService(bundle, { now: () => 0 });
+    try {
+      const ok = service.plantFaultInject({
+        target: { equipment: 'M01', fault: 'overload' },
+        when: { at: 'now' },
+      });
+      expect(ok).toEqual({ ok: true });
+      // Inject xong chưa step → pending; step 1 lần → advance(0) kích hoạt.
+      expect(service.plantSnapshot()?.equipment[0]?.faults[0]).toMatchObject({
+        target: { equipment: 'M01', fault: 'overload' },
+        state: 'pending',
+        sinceMs: 0,
+      });
+      expect(service.step(1).ok).toBe(true);
+      const faults = service.plantSnapshot()?.equipment[0]?.faults ?? [];
+      expect(faults).toHaveLength(1);
+      expect(faults[0]).toMatchObject({
+        target: { equipment: 'M01', fault: 'overload' },
+        state: 'active',
+        sinceMs: 0,
+      });
+      expect(
+        service.plantFaultInject({
+          target: { equipment: 'M01', fault: 'khongCo' },
+          when: { at: 'now' },
+        }),
+      ).toMatchObject({ ok: false, code: 'PL-E001' });
+      expect(
+        service.plantFaultInject({
+          target: { equipment: 'M99', fault: 'overload' },
+          when: { at: 'now' },
+        }),
+      ).toMatchObject({ ok: false, code: 'PL-E001' });
+    } finally {
+      service.stop();
+    }
+  });
+
+  it('plantFaultClear: clear được → cleared; clear lại/id lạ → PL-E001', async () => {
+    const bundle = await makeMotorBundle();
+    const service = new SimulationService(bundle, { now: () => 0 });
+    try {
+      service.plantFaultInject({
+        target: { equipment: 'M01', fault: 'overload' },
+        when: { at: 'now' },
+      });
+      const id = service.plantSnapshot()?.equipment[0]?.faults[0]?.id as string;
+      // Clear sau 1 bước (simTime 100): clearedAtMs phải là 100 (simTime
+      // orchestrator) — clearFault không atMs lấy #simTimeMs engine (= 0 sau
+      // bước đầu) → lệch 1 bước so với runner (e2e A, OVL_OK T=2990).
+      expect(service.step(1).ok).toBe(true);
+      expect(service.plantFaultClear(id)).toEqual({ ok: true });
+      expect(service.plantSnapshot()?.equipment[0]?.faults[0]).toMatchObject({
+        state: 'cleared',
+        clearedAtMs: 100,
+      });
+      expect(service.plantFaultClear(id)).toMatchObject({ ok: false, code: 'PL-E001' });
+      expect(service.plantFaultClear('khong-co')).toMatchObject({ ok: false, code: 'PL-E001' });
+    } finally {
+      service.stop();
+    }
+  });
+
+  it('plantFaultPreset noRunFeedback → lỗi tín hiệu runFb stuck', async () => {
+    const bundle = await makeMotorBundle();
+    const service = new SimulationService(bundle, { now: () => 0 });
+    try {
+      expect(service.plantFaultPreset('M01', 'noRunFeedback')).toEqual({ ok: true });
+      expect(service.plantSnapshot()?.equipment[0]?.faults[0]).toMatchObject({
+        target: { equipment: 'M01', signal: 'runFb', type: 'stuck' },
+        state: 'pending',
+      });
+      expect(service.step(1).ok).toBe(true);
+      const faults = service.plantSnapshot()?.equipment[0]?.faults ?? [];
+      expect(faults).toHaveLength(1);
+      expect(faults[0]).toMatchObject({
+        target: { equipment: 'M01', signal: 'runFb', type: 'stuck' },
+        state: 'active',
+        sinceMs: 0,
+      });
+      expect(service.plantFaultPreset('M01', 'khongCo')).toMatchObject({
+        ok: false,
+        code: 'PL-E001',
+      });
+    } finally {
+      service.stop();
+    }
+  });
+
+  it('simHash tất định: reset + chạy lại giống hệt → cùng hash (OQ-318)', async () => {
+    const bundle = await makeMotorBundle();
+    const service = new SimulationService(bundle, { now: () => 0 });
+    try {
+      expect(service.tagWrite('START_PB', true).ok).toBe(true);
+      expect(service.step(5).ok).toBe(true);
+      const h1 = service.simHash();
+      expect(h1).not.toBe(EMPTY_SHA256);
+      expect(h1).toMatch(/^[0-9a-f]{64}$/);
+      service.reset();
+      expect(service.simHash()).toBe(EMPTY_SHA256);
+      expect(service.tagWrite('START_PB', true).ok).toBe(true);
+      expect(service.step(5).ok).toBe(true);
+      expect(service.simHash()).toBe(h1);
     } finally {
       service.stop();
     }

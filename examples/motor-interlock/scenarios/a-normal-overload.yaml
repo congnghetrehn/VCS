@@ -1,0 +1,32 @@
+# Demo A — chạy bình thường rồi overload, reset, chạy lại (M2 §11.4,
+# bảng A STATE §27). Trạng thái đầu: STOP_OK=1, PERM=1 (set ở T=0);
+# OVL_OK từ plant (không set tay).
+name: a-normal-overload
+simulation: { stepMs: 10, plcScanMs: 10 }
+steps:
+  - { at: 0, set: { STOP_OK: true, PERM: true } }
+  - { at: 100, set: { START_PB: true } }
+  - { at: 200, set: { START_PB: false } }
+  - { at: 1000, fault: { target: { equipment: M01, fault: overload } } }
+  - { at: 2000, clear: overload }
+  - { at: 3100, set: { RESET_PB: true } }
+  - { at: 3200, set: { RESET_PB: false, START_PB: true } }
+  - { at: 3300, set: { START_PB: false } }
+expects:
+  - { at: 0, tags: { RUN_CMD: false, OVL_OK: true, RUN_FB: false } }
+  - { at: 100, tags: { RUN_CMD: true } }
+  - { at: 110, observables: { M01: { state: STARTING } } }
+  - { at: 200, tags: { RUN_CMD: true } }
+  - { at: 600, tags: { RUN_FB: false } }
+  - { at: 610, tags: { RUN_FB: true, RUN_CMD: true }, observables: { M01: { state: RUNNING } } }
+  - { at: 1000, tags: { OVL_OK: false, RUN_FB: false, FAULT_LAMP: true, RUN_CMD: false }, observables: { M01: { state: TRIPPED } } }
+  - { at: 1010, observables: { M01: { state: TRIPPED } } }
+  - { at: 2000, tags: { OVL_OK: false }, observables: { M01: { state: TRIPPED } } }
+  - { at: 2990, tags: { OVL_OK: false } }
+  - { at: 3000, tags: { OVL_OK: true }, observables: { M01: { state: STOPPED } } }
+  - { at: 3100, tags: { FAULT_LAMP: false } }
+  - { at: 3200, tags: { RUN_CMD: true } }
+  - { at: 3210, observables: { M01: { state: STARTING } } }
+  - { at: 3300, tags: { RUN_CMD: true } }
+  - { at: 3700, tags: { RUN_FB: false } }
+  - { at: 3710, tags: { RUN_FB: true }, observables: { M01: { state: RUNNING } } }

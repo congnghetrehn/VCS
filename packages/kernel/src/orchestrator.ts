@@ -106,6 +106,11 @@ export class SimulationOrchestrator {
     return this.clock.nowMs();
   }
 
+  /** Bước mô phỏng (ms) — runner scenario cần để lặp đúng lưới bước. */
+  get stepMs(): number {
+    return this.#stepMs;
+  }
+
   /** Thứ tự đăng ký = thứ tự chạy trong pha; id duy nhất (OQ-024). */
   register(phase: Phase, c: SimComponent): void {
     if (this.#byId.has(c.id)) {

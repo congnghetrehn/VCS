@@ -70,8 +70,14 @@ export const projectSchema = z
         tags: z.string().default('tags/tags.yaml'),
         comms: z.string().default('comms/comms.yaml'),
         hmi: z.string().default('hmi/'),
+        plant: z.string().default('plant/equipment.yaml'),
       })
-      .default({ tags: 'tags/tags.yaml', comms: 'comms/comms.yaml', hmi: 'hmi/' }),
+      .default({
+        tags: 'tags/tags.yaml',
+        comms: 'comms/comms.yaml',
+        hmi: 'hmi/',
+        plant: 'plant/equipment.yaml',
+      }),
     controllers: z.array(controllerSchema).default([]),
   })
   .superRefine((doc, ctx) => {
@@ -99,7 +105,7 @@ export const PROJECT_SHAPE: YamlShape = {
   keys: ['schemaVersion', 'name', 'language', 'seed', 'simulation', 'files', 'controllers'],
   children: {
     simulation: { keys: ['stepMs', 'plcScanMs', 'timeScale'] },
-    files: { keys: ['tags', 'comms', 'hmi'] },
+    files: { keys: ['tags', 'comms', 'hmi', 'plant'] },
     controllers: {
       items: {
         keys: ['id', 'mode', 'vendor', 'model', 'config', 'adapter', 'endpoint'],

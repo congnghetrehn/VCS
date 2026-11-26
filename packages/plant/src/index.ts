@@ -11,6 +11,7 @@ export type { DelayTimerState } from './delay.js';
 export { generateEquipmentMarkdown } from './docgen.js';
 export { PlantEngine, validatePlantConfig } from './engine.js';
 export type { PlantConfig, PlantSnapshot } from './engine.js';
+export { plantExtension } from './extension.js';
 export { EventLog, EVENT_LOG_MAX } from './events.js';
 export type { PlantEvent, PlantEventType } from './events.js';
 export { FaultManager, SIGNAL_FAULT_ORDER } from './faults.js';
@@ -18,6 +19,15 @@ export type { FaultManagerOptions, FaultManagerSnapshot, FaultRecord, FaultRecor
 export { GoldenError, parseGoldenYaml, runPlantGoldenCase } from './golden/runner.js';
 export type { GoldenRunContext } from './golden/runner.js';
 export type { PlantGoldenCase, PlantGoldenFile, PlantGoldenStep } from './golden/schema.js';
+export { ScenarioError, parseScenarioYaml, runScenario, scenarioSchema } from './scenario.js';
+export type {
+  RunScenarioOptions,
+  Scenario,
+  ScenarioExpect,
+  ScenarioFailure,
+  ScenarioResult,
+  ScenarioStep,
+} from './scenario.js';
 export { motorDolModel } from './models/motor_dol.js';
 export type { MotorDolParams, MotorDolState } from './models/motor_dol.js';
 export { motorVfdModel } from './models/motor_vfd.js';
@@ -46,9 +56,14 @@ export type {
   EquipmentModel,
   FaultDef,
   FaultPreset,
+  FaultSlot,
   ModelDocs,
+  ModelSlots,
   ObsDef,
+  ObsSlot,
   RoleDef,
+  RoleSlot,
+  SourceSlot,
   StepCtx,
 } from './registry.js';
 export { rngState, rngNext, rngGaussian, hash32, hashSeed } from './rng.js';

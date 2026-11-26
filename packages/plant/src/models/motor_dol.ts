@@ -175,16 +175,33 @@ export const motorDolModel: EquipmentModel<MotorDolParams, MotorDolState> = {
     ],
   },
   init: () => ({ state: 'STOPPED', t0: 0, t1: 0, speedPct: 0, tripClearedAt: undefined }),
-  step: (ctx) => {
+  step: (ctx, slots) => {
     const p = ctx.params;
     const s = ctx.state;
     const T = ctx.simTimeMs;
-    const runCmd = ctx.cmd('runCmd') === true;
-    const overload = ctx.fault('overload');
-    const failToStart = ctx.fault('failToStart');
-    const stuck = ctx.fault('contactorStuck');
-    const notReady = ctx.fault('notReady');
-    const localMode = ctx.fault('localMode');
+    // Slot local (A21): destructure một lần ở đầu step, dùng số sau đó.
+    const runCmdSlot = slots.role.runCmd;
+    const runFbSlot = slots.role.runFb;
+    const overloadOkSlot = slots.role.overloadOk;
+    const readySlot = slots.role.ready;
+    const remoteSlot = slots.role.remote;
+    const currentFbSlot = slots.role.currentFb;
+    const stateSlot = slots.obs.state;
+    const speedPctSlot = slots.obs.speedPct;
+    const currentASlot = slots.obs.currentA;
+    const runningSlot = slots.obs.running;
+    const energizedSlot = slots.obs.energized;
+    const overloadSlot = slots.fault.overload;
+    const failToStartSlot = slots.fault.failToStart;
+    const contactorStuckSlot = slots.fault.contactorStuck;
+    const notReadySlot = slots.fault.notReady;
+    const localModeSlot = slots.fault.localMode;
+    const runCmd = ctx.cmd(runCmdSlot) === true;
+    const overload = ctx.fault(overloadSlot);
+    const failToStart = ctx.fault(failToStartSlot);
+    const stuck = ctx.fault(contactorStuckSlot);
+    const notReady = ctx.fault(notReadySlot);
+    const localMode = ctx.fault(localModeSlot);
     const remoteOk = !localMode.active;
     const readyOk = !notReady.active;
     const clearedAt = overload.clearedAtMs;
@@ -240,15 +257,15 @@ export const motorDolModel: EquipmentModel<MotorDolParams, MotorDolState> = {
           : 0;
       currentA = base + inrush;
     }
-    ctx.setObs('state', s.state);
-    ctx.setObs('speedPct', s.speedPct);
-    ctx.setObs('currentA', currentA);
-    ctx.setObs('running', s.speedPct > 5);
-    ctx.setObs('energized', s.state === 'STARTING' || s.state === 'RUNNING');
-    ctx.emit('runFb', s.state === 'RUNNING' || s.state === 'STOPPING');
-    ctx.emit('overloadOk', p.overloadNC ? s.state !== 'TRIPPED' : s.state === 'TRIPPED');
-    ctx.emit('ready', readyOk && s.state !== 'TRIPPED');
-    ctx.emit('remote', remoteOk);
-    ctx.emit('currentFb', currentA);
+    ctx.setObs(stateSlot, s.state);
+    ctx.setObs(speedPctSlot, s.speedPct);
+    ctx.setObs(currentASlot, currentA);
+    ctx.setObs(runningSlot, s.speedPct > 5);
+    ctx.setObs(energizedSlot, s.state === 'STARTING' || s.state === 'RUNNING');
+    ctx.emit(runFbSlot, s.state === 'RUNNING' || s.state === 'STOPPING');
+    ctx.emit(overloadOkSlot, p.overloadNC ? s.state !== 'TRIPPED' : s.state === 'TRIPPED');
+    ctx.emit(readySlot, readyOk && s.state !== 'TRIPPED');
+    ctx.emit(remoteSlot, remoteOk);
+    ctx.emit(currentFbSlot, currentA);
   },
 };

@@ -3,6 +3,7 @@
     "@fastify/static": "10.1.10",
     "@fastify/websocket": "11.3.7",
     "@vcs/kernel": "workspace:*",
+    "@vcs/plant": "workspace:*",
     "@vcs/project": "workspace:*",
     "@vcs/runtime-iec": "workspace:*",
     "@vcs/schemas": "workspace:*",

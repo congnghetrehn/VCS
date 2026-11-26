@@ -3,8 +3,9 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { createModelRegistry, deriveModel, defaultRegistry, ModelRegistry, type StepCtx } from './registry.js';
+import { createModelRegistry, deriveModel, defaultRegistry, ModelRegistry, type ModelSlots, type StepCtx } from './registry.js';
 import { fakeMotorModel, type FakeMotorParams, type FakeMotorState } from './test-helpers.js';
+import type { FaultSlot, ObsSlot, RoleSlot } from './registry.js';
 
 describe('ModelRegistry', () => {
   it('register/get/list/has', () => {
@@ -69,25 +70,35 @@ describe('deriveModel', () => {
       state: { t0: null },
       cmd: () => undefined,
       has: () => false,
-      emit: (role) => {
-        calls.push(`emit:${role}`);
+      emit: (slot) => {
+        calls.push(`emit:${String(slot)}`);
       },
       fault: () => ({ active: false, params: {}, sinceMs: 0 }),
       source: () => 0,
       rand: () => 0,
-      setObs: (key) => {
-        calls.push(`obs:${key}`);
+      setObs: (slot) => {
+        calls.push(`obs:${String(slot)}`);
       },
       getObs: () => undefined,
       log: () => undefined,
     };
+    const slots: ModelSlots = Object.freeze({
+      role: Object.freeze({
+        runCmd: 0 as RoleSlot,
+        runFb: 1 as RoleSlot,
+        currentFb: 2 as RoleSlot,
+      }),
+      obs: Object.freeze({ running: 0 as ObsSlot, current: 1 as ObsSlot }),
+      fault: Object.freeze({ noStart: 0 as FaultSlot, overload: 1 as FaultSlot }),
+      source: {},
+    });
     const child = deriveModel(fakeMotorModel, {
       type: 'fake_motor_noop',
       step: () => undefined,
     });
     // init giữ nguyên của base (trả { t0: null }); step đã patch là no-op.
     expect(child.init({ startDelayMs: 100 }, () => 0)).toEqual({ t0: null });
-    child.step(ctx);
+    child.step(ctx, slots);
     expect(calls).toEqual([]);
     expect(ctx.state).toEqual({ t0: null });
   });

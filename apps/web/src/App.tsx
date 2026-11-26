@@ -329,6 +329,15 @@ export function App() {
           onPlcWrite={(ref, value) => {
             clientRef.current?.plcWrite(ref, value);
           }}
+          onPlantFaultClear={(id) => {
+            clientRef.current?.plantFaultClear(id);
+          }}
+          onPlantFaultInject={(request) => {
+            clientRef.current?.plantFaultInject(request);
+          }}
+          onPlantFaultPreset={(equipment, preset, when) => {
+            clientRef.current?.plantFaultPreset(equipment, preset, when);
+          }}
         />
       )}
       <DiagnosticsPanel lang={lang} />

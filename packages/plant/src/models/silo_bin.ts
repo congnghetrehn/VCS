@@ -5,7 +5,7 @@
 import { z } from 'zod';
 
 import { lagStep } from '../delay.js';
-import type { EquipmentModel, StepCtx } from '../registry.js';
+import type { EquipmentModel, ModelSlots, StepCtx } from '../registry.js';
 
 export const siloBinParamsSchema = z.object({
   capacityT: z.number().positive(),
@@ -131,24 +131,36 @@ export const siloBinModel: EquipmentModel<SiloBinParams, SiloBinState> = {
       highHigh: params.initialLevelPct >= params.highHighPct,
     };
   },
-  step(ctx: StepCtx<SiloBinParams, SiloBinState>): void {
+  step(ctx: StepCtx<SiloBinParams, SiloBinState>, slots: ModelSlots): void {
     const p = ctx.params;
     const s = ctx.state;
-    const inflow = asNumber(ctx.source('inflow'));
-    const outflow = asNumber(ctx.source('outflow'));
+    const levelRawSlot = slots.role.levelRaw;
+    const levelHighSlot = slots.role.levelHigh;
+    const levelLowSlot = slots.role.levelLow;
+    const levelHighHighSlot = slots.role.levelHighHigh;
+    const levelPctSlot = slots.obs.levelPct;
+    const massTSlot = slots.obs.massT;
+    const inflowTphSlot = slots.obs.inflowTph;
+    const outflowTphSlot = slots.obs.outflowTph;
+    // Named source chưa cấu hình → 0 (giữ hành vi ctx.source('tên') cũ:
+    // kiểm slots.source.<tên> trước khi gọi, thay cho hasSource đã bỏ).
+    const inflowSlot = slots.source.inflow;
+    const outflowSlot = slots.source.outflow;
+    const inflow = inflowSlot !== undefined ? asNumber(ctx.source(inflowSlot)) : 0;
+    const outflow = outflowSlot !== undefined ? asNumber(ctx.source(outflowSlot)) : 0;
     s.massT = Math.min(p.capacityT, Math.max(0, s.massT + ((inflow - outflow) * ctx.dtMs) / 3600000));
     const rawPct = (s.massT / p.capacityT) * 100;
     s.levelPct = lagStep(s.levelPct, rawPct, ctx.dtMs, p.levelLagMs);
     s.high = highHysteresis(s.high, s.levelPct, p.highPct, p.highPct - p.hystPct);
     s.low = highHysteresis(s.low, -s.levelPct, -p.lowPct, -(p.lowPct + p.hystPct));
     s.highHigh = highHysteresis(s.highHigh, s.levelPct, p.highHighPct, p.highHighPct - p.hystPct);
-    ctx.emit('levelRaw', s.levelPct);
-    ctx.emit('levelHigh', s.high);
-    ctx.emit('levelLow', s.low);
-    ctx.emit('levelHighHigh', s.highHigh);
-    ctx.setObs('levelPct', s.levelPct);
-    ctx.setObs('massT', s.massT);
-    ctx.setObs('inflowTph', inflow);
-    ctx.setObs('outflowTph', outflow);
+    ctx.emit(levelRawSlot, s.levelPct);
+    ctx.emit(levelHighSlot, s.high);
+    ctx.emit(levelLowSlot, s.low);
+    ctx.emit(levelHighHighSlot, s.highHigh);
+    ctx.setObs(levelPctSlot, s.levelPct);
+    ctx.setObs(massTSlot, s.massT);
+    ctx.setObs(inflowTphSlot, inflow);
+    ctx.setObs(outflowTphSlot, outflow);
   },
 };

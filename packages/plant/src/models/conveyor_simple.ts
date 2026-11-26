@@ -6,7 +6,7 @@
 
 import { z } from 'zod';
 
-import { deriveModel, type EquipmentModel, type StepCtx } from '../registry.js';
+import { deriveModel, type EquipmentModel, type ModelSlots, type StepCtx } from '../registry.js';
 import {
   motorDolModel,
   motorDolParamsSchema,
@@ -130,26 +130,38 @@ export const conveyorSimpleModel: EquipmentModel<ConveyorSimpleParams, ConveyorS
         buf: [],
         idx: 0,
       }),
-      step: (ctx: StepCtx<ConveyorSimpleParams, ConveyorSimpleState>): void => {
+      step: (ctx: StepCtx<ConveyorSimpleParams, ConveyorSimpleState>, slots: ModelSlots): void => {
         const p = ctx.params;
         const s = ctx.state;
-        const pullCordTrip = ctx.fault('pullCordTrip');
+        const runCmdSlot = slots.role.runCmd;
+        const zeroSpeedSlot = slots.role.zeroSpeed;
+        const pullCordSlot = slots.role.pullCord;
+        const beltSpeedPctSlot = slots.obs.beltSpeedPct;
+        const deliveredTphSlot = slots.obs.deliveredTph;
+        const beltSlipSlot = slots.fault.beltSlip;
+        const pullCordTripSlot = slots.fault.pullCordTrip;
+        const beltBlockedSlot = slots.fault.beltBlocked;
+        const pullCordTrip = ctx.fault(pullCordTripSlot);
         const inhibited = pullCordTrip.active && p.pullCordHardwired;
-        // Proxy ctx: chỉ ép cmd('runCmd') khi inhibited; mọi thứ khác
+        // Proxy ctx: chỉ ép cmd(runCmd slot) khi inhibited; mọi thứ khác
         // (params/state/fault/emit/setObs/...) là cùng object của engine.
+        // Slots của conveyor liệt kê role/obs/fault của motor_dol trước
+        // (derive spread base) nên cùng chỉ số — motorDolModel.step đọc
+        // đúng slot của nó khi nhận cùng object slots.
         const proxyCtx: StepCtx<MotorDolParams, MotorDolState> = {
           ...ctx,
-          cmd: (role) => (role === 'runCmd' && inhibited ? false : ctx.cmd(role)),
+          cmd: (slot) => (slot === runCmdSlot && inhibited ? false : ctx.cmd(slot)),
         };
-        motorDolModel.step(proxyCtx);
-        const beltSpeed = ctx.fault('beltSlip').active ? 0 : s.speedPct;
+        motorDolModel.step(proxyCtx, slots);
+        const beltSpeed = ctx.fault(beltSlipSlot).active ? 0 : s.speedPct;
         const zeroSpeed = beltSpeed < p.zeroSpeedThresholdPct;
+        const loadSlot = slots.source.load;
         const load =
-          ctx.hasSource?.('load') === true ? asNumber(ctx.source('load')) : p.loadTph;
+          loadSlot !== undefined ? asNumber(ctx.source(loadSlot)) : p.loadTph;
         const input = (load * beltSpeed) / 100;
         let deliveredTph: number;
         const n = Math.max(0, Math.round(p.transportDelayMs / ctx.dtMs));
-        if (ctx.fault('beltBlocked').active) {
+        if (ctx.fault(beltBlockedSlot).active) {
           // OQ-293: đóng băng — không dịch, không nhận input mới.
           deliveredTph = 0;
         } else if (n === 0) {
@@ -160,10 +172,10 @@ export const conveyorSimpleModel: EquipmentModel<ConveyorSimpleParams, ConveyorS
           s.buf[s.idx] = input;
           s.idx = (s.idx + 1) % n;
         }
-        ctx.setObs('beltSpeedPct', beltSpeed);
-        ctx.setObs('deliveredTph', deliveredTph);
-        ctx.emit('zeroSpeed', zeroSpeed);
-        ctx.emit('pullCord', !pullCordTrip.active);
+        ctx.setObs(beltSpeedPctSlot, beltSpeed);
+        ctx.setObs(deliveredTphSlot, deliveredTph);
+        ctx.emit(zeroSpeedSlot, zeroSpeed);
+        ctx.emit(pullCordSlot, !pullCordTrip.active);
       },
     },
   );

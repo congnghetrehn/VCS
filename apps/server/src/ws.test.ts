@@ -739,3 +739,195 @@ describe('drift event loop §12.4', () => {
     expect(maxP95).toBeLessThanOrEqual(150);
   }, 30000);
 });
+
+const MOTOR = join(ROOT, 'examples', 'motor-interlock');
+
+/** Poll GET /api/plant tới khi pred đúng (WS không ack inject/clear). */
+async function waitForPlant(
+  httpUrl: string,
+  pred: (body: { equipment: Array<{ id: string; faults: unknown[] }> }) => boolean,
+  timeoutMs = 5000,
+): Promise<{ equipment: Array<{ id: string; faults: unknown[] }> }> {
+  const start = Date.now();
+  for (;;) {
+    const res = await fetch(`${httpUrl}api/plant`);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      equipment: Array<{ id: string; faults: unknown[] }>;
+    };
+    if (pred(body)) return body;
+    if (Date.now() - start > timeoutMs) {
+      throw new Error(`timeout đợi /api/plant thỏa điều kiện: ${JSON.stringify(body)}`);
+    }
+    await new Promise((r) => setTimeout(r, 50));
+  }
+}
+
+describe('WS plant.fault.* + REST /api/plant + /api/sim/hash (P2.4, OQ-318)', () => {
+  it('GET /api/plant motor-interlock → M01 + faultDefs/presets/observables, faults rỗng', async () => {
+    const { wsUrl, httpUrl } = await startServer({ dir: MOTOR });
+    const res = await fetch(`${httpUrl}api/plant`);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      equipment: Array<{
+        id: string;
+        model: string;
+        controller: string;
+        faults: unknown[];
+        observables: Record<string, unknown>;
+        faultDefs: Array<{ id: string }>;
+        presets: Array<{ name: string }>;
+      }>;
+    };
+    expect(body.equipment).toHaveLength(1);
+    const m01 = body.equipment[0] as (typeof body.equipment)[number];
+    expect(m01.id).toBe('M01');
+    expect(m01.model).toBe('motor_dol');
+    expect(m01.controller).toBe('PLC1');
+    expect(m01.faultDefs.map((f) => f.id)).toEqual([
+      'overload',
+      'failToStart',
+      'contactorStuck',
+      'notReady',
+      'localMode',
+    ]);
+    expect(m01.presets.map((p) => p.name)).toEqual([
+      'noRunFeedback',
+      'feedbackStuckOn',
+      'overloadTrip',
+      'commandLost',
+    ]);
+    // Obs chỉ có giá trị sau bước đầu (engine khởi tạo undefined).
+    expect(m01.observables).toEqual({});
+    expect(m01.faults).toEqual([]);
+    const c0 = await helloClient(wsUrl);
+    await c0.waitFor((m) => m.type === 'welcome', 5000, 'welcome');
+    c0.send({ type: 'sim.command', cmd: 'step', steps: 1 });
+    await c0.waitFor(
+      (m) => m.type === 'sim.state' && m.stepCount === 1,
+      5000,
+      'state stepCount 1',
+    );
+    const res2 = await fetch(`${httpUrl}api/plant`);
+    const body2 = (await res2.json()) as {
+      equipment: Array<{ observables: Record<string, unknown> }>;
+    };
+    expect(body2.equipment[0]?.observables['state']).toBe('STOPPED');
+  });
+
+  it('GET /api/plant hello-tags → {equipment: []}; GET /api/sim/hash → 64-hex, simTimeMs 0', async () => {
+    const { httpUrl } = await startServer();
+    const plantRes = await fetch(`${httpUrl}api/plant`);
+    expect(plantRes.status).toBe(200);
+    expect(await plantRes.json()).toEqual({ equipment: [] });
+    const hashRes = await fetch(`${httpUrl}api/sim/hash`);
+    expect(hashRes.status).toBe(200);
+    const hashBody = (await hashRes.json()) as {
+      hash: string;
+      simTimeMs: number;
+      stepCount: number;
+    };
+    expect(hashBody.hash).toMatch(/^[0-9a-f]{64}$/);
+    expect(hashBody.hash).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+    expect(hashBody.simTimeMs).toBe(0);
+    expect(hashBody.stepCount).toBe(0);
+  });
+
+  it('WS plant.fault.inject overload → /api/plant thấy active; clear → cleared', async () => {
+    const { wsUrl, httpUrl } = await startServer({ dir: MOTOR });
+    const c = await helloClient(wsUrl);
+    await c.waitFor((m) => m.type === 'welcome', 5000, 'welcome');
+    c.send({
+      type: 'plant.fault.inject',
+      request: { target: { equipment: 'M01', fault: 'overload' } },
+    });
+    // Đồng bộ: subscribe sau inject — snapshot tới nghĩa inject đã xử lý.
+    c.send({ type: 'tags.subscribe', names: '*' });
+    await c.waitFor((m) => m.type === 'tags.snapshot', 5000, 'snapshot sau inject');
+    const afterInject = await waitForPlant(
+      httpUrl,
+      (b) => (b.equipment[0]?.faults.length ?? 0) === 1,
+    );
+    const fault = afterInject.equipment[0]?.faults[0] as {
+      id: string;
+      target: { fault: string };
+      state: string;
+    };
+    expect(fault.target.fault).toBe('overload');
+    // Inject xong chưa step → pending (kích hoạt ở advance đầu bước kế).
+    expect(fault.state).toBe('pending');
+    c.send({ type: 'sim.command', cmd: 'step', steps: 1 });
+    const afterStep = await waitForPlant(httpUrl, (b) => {
+      const f = b.equipment[0]?.faults[0] as { state?: string } | undefined;
+      return f?.state === 'active';
+    });
+    expect(
+      (afterStep.equipment[0]?.faults[0] as { target: { fault: string } }).target.fault,
+    ).toBe('overload');
+    c.send({ type: 'plant.fault.clear', id: fault.id });
+    await waitForPlant(httpUrl, (b) => {
+      const f = b.equipment[0]?.faults[0] as { state?: string } | undefined;
+      return f?.state === 'cleared';
+    });
+    expect(c.messages.some((m) => m.type === 'error')).toBe(false);
+  });
+
+  it('WS plant.fault.inject lỗi lạ → error PL-E001, kết nối còn mở', async () => {
+    const { wsUrl } = await startServer({ dir: MOTOR });
+    const c = await helloClient(wsUrl);
+    await c.waitFor((m) => m.type === 'welcome', 5000, 'welcome');
+    c.send({
+      type: 'plant.fault.inject',
+      request: { target: { equipment: 'M01', fault: 'khongCo' } },
+    });
+    const err = await c.waitFor(
+      (m) => m.type === 'error' && m.code === 'PL-E001',
+      5000,
+      'error PL-E001',
+    );
+    expect(err).toMatchObject({ type: 'error', code: 'PL-E001' });
+    // Kết nối còn mở: subscribe sau lỗi vẫn nhận snapshot.
+    c.send({ type: 'tags.subscribe', names: '*' });
+    await c.waitFor((m) => m.type === 'tags.snapshot', 5000, 'snapshot sau lỗi');
+  });
+
+  it('WS plant.fault.clear id lạ → error PL-E001', async () => {
+    const { wsUrl } = await startServer({ dir: MOTOR });
+    const c = await helloClient(wsUrl);
+    await c.waitFor((m) => m.type === 'welcome', 5000, 'welcome');
+    c.send({ type: 'plant.fault.clear', id: 'khong-co' });
+    await c.waitFor(
+      (m) => m.type === 'error' && m.code === 'PL-E001',
+      5000,
+      'error PL-E001 clear',
+    );
+  });
+
+  it('WS plant.fault.preset noRunFeedback → lỗi tín hiệu runFb stuck', async () => {
+    const { wsUrl, httpUrl } = await startServer({ dir: MOTOR });
+    const c = await helloClient(wsUrl);
+    await c.waitFor((m) => m.type === 'welcome', 5000, 'welcome');
+    c.send({ type: 'plant.fault.preset', equipment: 'M01', preset: 'noRunFeedback' });
+    c.send({ type: 'tags.subscribe', names: '*' });
+    await c.waitFor((m) => m.type === 'tags.snapshot', 5000, 'snapshot sau preset');
+    const body = await waitForPlant(
+      httpUrl,
+      (b) => (b.equipment[0]?.faults.length ?? 0) === 1,
+    );
+    const fault = body.equipment[0]?.faults[0] as {
+      target: { equipment: string; signal: string; type: string };
+      state: string;
+    };
+    expect(fault.target).toEqual({ equipment: 'M01', signal: 'runFb', type: 'stuck' });
+    expect(fault.state).toBe('pending');
+    c.send({ type: 'sim.command', cmd: 'step', steps: 1 });
+    const afterStep = await waitForPlant(httpUrl, (b) => {
+      const f = b.equipment[0]?.faults[0] as { state?: string } | undefined;
+      return f?.state === 'active';
+    });
+    expect(
+      (afterStep.equipment[0]?.faults[0] as { target: unknown }).target,
+    ).toEqual({ equipment: 'M01', signal: 'runFb', type: 'stuck' });
+    expect(c.messages.some((m) => m.type === 'error')).toBe(false);
+  });
+});

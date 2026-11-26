@@ -51,6 +51,8 @@ export const equipmentInstanceSchema = z
   .object({
     id: z.string().min(1),
     model: z.string().min(1),
+    /** Controller sở hữu thiết bị (M2 §4.2 ví dụ có `controller: PLC1`). */
+    controller: z.string().min(1).optional(),
     params: z.record(z.string(), z.unknown()).optional(),
     signals: z.record(z.string(), z.string()).optional(),
     source: sourceSpecSchema.optional(),
@@ -59,3 +61,6 @@ export const equipmentInstanceSchema = z
   });
 
 export type EquipmentInstance = z.infer<typeof equipmentInstanceSchema>;
+
+/** Nội dung file `plant/equipment.yaml` (M2 §4.2): danh sách thiết bị. */
+export const equipmentFileSchema = z.array(equipmentInstanceSchema);
