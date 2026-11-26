@@ -328,6 +328,11 @@ export const PL_CATALOG: DiagnosticCatalog = defineDiagnostics({
     title: 'Cảnh báo cấu hình plant',
     hint: 'Kiểm tra cấu hình plant: gán tag cho role; plcScanMs (nếu có) phải là số nguyên ≥ stepMs.',
   },
+  'PL-W010': {
+    severity: 'warning',
+    title: 'Tham chiếu treo sau khi re-import I/O list',
+    hint: 'Tag đã gán thiết bị bị xóa/đổi tên — cập nhật equipment.yaml.',
+  },
   'PL-W020': {
     severity: 'warning',
     title: 'Hành vi chưa kiểm chứng',
@@ -335,8 +340,106 @@ export const PL_CATALOG: DiagnosticCatalog = defineDiagnostics({
   },
 });
 
-/** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E/-W/-L/-P/-S/-T/-U, rồi 3 chữ số.
+/** Danh mục mã import I/O list (M2 §8.7, P2.6). */
+export const IO_CODES = [
+  'IO-E001',
+  'IO-E002',
+  'IO-E003',
+  'IO-E010',
+  'IO-E011',
+  'IO-E012',
+  'IO-E013',
+  'IO-W001',
+  'IO-W002',
+  'IO-W003',
+  'IO-W010',
+  'IO-W020',
+  'IO-W030',
+  'IO-W040',
+  'IO-I001',
+] as const;
+export type IoCode = (typeof IO_CODES)[number];
+
+export const IO_CATALOG: DiagnosticCatalog = defineDiagnostics({
+  'IO-E001': {
+    severity: 'error',
+    title: 'Trùng tag (không phân biệt hoa/thường)',
+    hint: 'Đổi tên một trong các tag trùng.',
+  },
+  'IO-E002': {
+    severity: 'error',
+    title: 'Tag trống hoặc quá dài',
+    hint: 'Đặt tên tag khác rỗng, ≤ 128 ký tự, bắt đầu bằng chữ hoặc _.',
+  },
+  'IO-E003': {
+    severity: 'error',
+    title: 'Thiếu signalType và không suy ra được từ địa chỉ',
+    hint: 'Ghi signalType (DI/DO/AI/AO) hoặc dùng địa chỉ I/Q để suy kind.',
+  },
+  'IO-E010': {
+    severity: 'error',
+    title: 'Địa chỉ không hợp lệ',
+    hint: 'Sửa địa chỉ theo dạng %I0.0 / %IW64 / DB1.DBX0.0 (xem M2 §8.5).',
+  },
+  'IO-E011': {
+    severity: 'error',
+    title: 'Trùng/chồng địa chỉ trong cùng controller',
+    hint: 'Đổi địa chỉ của một trong hai tín hiệu chồng lấn.',
+  },
+  'IO-E012': {
+    severity: 'error',
+    title: 'Hướng sai (DI/AI ở vùng Q, DO/AO ở vùng I)',
+    hint: 'DI/AI phải ở area I; DO/AO phải ở area Q.',
+  },
+  'IO-E013': {
+    severity: 'error',
+    title: 'Kiểu dữ liệu không khớp độ rộng địa chỉ',
+    hint: 'DI/DO cần địa chỉ bit; AI/AO cần Word/DWord.',
+  },
+  'IO-W001': {
+    severity: 'warning',
+    title: 'Tín hiệu analog thiếu engMin/engMax',
+    hint: 'Ghi Range Lo/Hi cho tín hiệu AI/AO.',
+  },
+  'IO-W002': {
+    severity: 'warning',
+    title: 'Tên tag có ký tự không chuẩn',
+    hint: 'Dùng tên đã làm sạch trong báo cáo import.',
+  },
+  'IO-W003': {
+    severity: 'warning',
+    title: 'Địa chỉ Word/DWord ở offset lẻ',
+    hint: 'Word cần byte chẵn; DWord cần byte chia hết cho 4.',
+  },
+  'IO-W010': {
+    severity: 'warning',
+    title: 'Địa chỉ nằm ngoài vùng khai báo của controller',
+    hint: 'Kiểm tra vùng địa chỉ của controller (mặc định I/Q 1024 byte).',
+  },
+  'IO-W020': {
+    severity: 'warning',
+    title: 'Controller chưa khai báo trong vcs.project.yaml',
+    hint: 'Khai báo controller trong vcs.project.yaml.',
+  },
+  'IO-W030': {
+    severity: 'warning',
+    title: 'Có tiền tố peripheral (P/:P)',
+    hint: 'Địa chỉ peripheral đã được strip về dạng chuẩn; M1 chưa mô phỏng khác biệt.',
+  },
+  'IO-W040': {
+    severity: 'warning',
+    title: 'engMin ≥ engMax hoặc giá trị không phải số',
+    hint: 'Kiểm tra Range Lo/Hi: phải là số và Lo < Hi (trừ range đảo có chủ đích).',
+  },
+  'IO-I001': {
+    severity: 'info',
+    title: 'Dòng bị bỏ qua (dòng trống/tiêu đề phụ)',
+    hint: 'Dòng trống trong vùng dữ liệu được bỏ qua.',
+  },
+});
+
+/** Regex quét mã chẩn đoán: tiền tố 2–4 chữ hoa, rồi -E/-W/-L/-P/-S/-T/-U/-I, rồi 3 chữ số.
  * Mở rộng cho SCL (L/P/U) để `gen-diagnostics --check` kiểm được mã SCL dùng
  * trong parser (không thì mã lạ lọt qua im lặng); P1.3 thêm T/S cho typecheck
- * (OQ-107). */
-export const DIAGNOSTIC_CODE_RE = /\b[A-Z]{2,4}-[ELPSTWU]\d{3}\b/g;
+ * (OQ-107); P2.6 thêm I cho mã info IO-I001. */
+export const DIAGNOSTIC_CODE_RE = /\b[A-Z]{2,4}-[EILPSTWU]\d{3}\b/g;

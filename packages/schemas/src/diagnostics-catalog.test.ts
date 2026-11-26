@@ -1,6 +1,6 @@
 // Test DiagnosticCatalog (M0 §4.1).
 import { describe, expect, it } from 'vitest';
-import { PRJ_CATALOG, SCL_CATALOG, defineDiagnostics } from './diagnostics-catalog.js';
+import { IO_CATALOG, PL_CATALOG, PRJ_CATALOG, SCL_CATALOG, defineDiagnostics } from './diagnostics-catalog.js';
 
 describe('PRJ_CATALOG', () => {
   it('chứa đủ mã M0 §4.5', () => {
@@ -118,5 +118,51 @@ describe('defineDiagnostics', () => {
     });
     expect(cat.has('IO-E001')).toBe(true);
     expect(cat.codes()).toEqual(['IO-E001']);
+  });
+});
+
+describe('IO_CATALOG (M2 §8.7, P2.6)', () => {
+  it('chứa đủ 15 mã IO-*', () => {
+    expect(IO_CATALOG.codes()).toEqual([
+      'IO-E001',
+      'IO-E002',
+      'IO-E003',
+      'IO-E010',
+      'IO-E011',
+      'IO-E012',
+      'IO-E013',
+      'IO-I001',
+      'IO-W001',
+      'IO-W002',
+      'IO-W003',
+      'IO-W010',
+      'IO-W020',
+      'IO-W030',
+      'IO-W040',
+    ]);
+  });
+
+  it('mức độ theo spec §8.7: E* error, W* warning, I001 info', () => {
+    for (const code of ['IO-E001', 'IO-E002', 'IO-E003', 'IO-E010', 'IO-E011', 'IO-E012', 'IO-E013']) {
+      expect(IO_CATALOG.get(code)?.severity, code).toBe('error');
+    }
+    for (const code of ['IO-W001', 'IO-W002', 'IO-W003', 'IO-W010', 'IO-W020', 'IO-W030', 'IO-W040']) {
+      expect(IO_CATALOG.get(code)?.severity, code).toBe('warning');
+    }
+    expect(IO_CATALOG.get('IO-I001')?.severity).toBe('info');
+  });
+
+  it('mỗi mã có severity + title + hint', () => {
+    for (const [code, info] of IO_CATALOG.entries()) {
+      expect(info.title.length, code).toBeGreaterThan(0);
+      expect(info.hint?.length, code).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('PL-W010 (M2 §9.4, P2.6, OQ-359)', () => {
+  it('PL_CATALOG có PL-W010 warning (spec đã định nghĩa, P2.6 đăng ký)', () => {
+    expect(PL_CATALOG.get('PL-W010')?.severity).toBe('warning');
+    expect(PL_CATALOG.get('PL-W010')?.title).toContain('re-import');
   });
 });

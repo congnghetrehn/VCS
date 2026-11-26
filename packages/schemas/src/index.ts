@@ -28,8 +28,8 @@ export {
   formatDuration,
   durationSchema,
 } from './duration.js';
-export { defineDiagnostics, PRJ_CATALOG, SCL_CATALOG, LAD_CATALOG, PL_CATALOG, DIAGNOSTIC_CODE_RE } from './diagnostics-catalog.js';
-export type { DiagnosticInfo, DiagnosticCatalog } from './diagnostics-catalog.js';
+export { defineDiagnostics, PRJ_CATALOG, SCL_CATALOG, LAD_CATALOG, PL_CATALOG, IO_CATALOG, IO_CODES, DIAGNOSTIC_CODE_RE } from './diagnostics-catalog.js';
+export type { DiagnosticInfo, DiagnosticCatalog, IoCode } from './diagnostics-catalog.js';
 export { equipmentFileSchema, equipmentInstanceSchema, sourceSpecSchema } from './equipment.js';
 export type { EquipmentInstance, SourceSpec } from './equipment.js';
 export {
@@ -39,7 +39,7 @@ export {
   faultInfoSchema,
 } from './fault.js';
 export type { SignalFaultType, FaultTarget, FaultTiming, FaultRequest, FaultInfo } from './fault.js';
-export { canonicalFieldSchema, importProfileSchema, ruleSeveritySchema, transformStepSchema } from './import-profile.js';
+export { canonicalFieldSchema, importProfileSchema, ioCodeSchema, ruleSeveritySchema, transformStepSchema } from './import-profile.js';
 export type { CanonicalField, ImportProfile, RuleSeverity, TransformStep } from './import-profile.js';
 export { namingConfigSchema } from './naming.js';
 export type { NamingConfig } from './naming.js';
