@@ -41,8 +41,14 @@ export {
 export type { SignalFaultType, FaultTarget, FaultTiming, FaultRequest, FaultInfo } from './fault.js';
 export { canonicalFieldSchema, importProfileSchema, ioCodeSchema, ruleSeveritySchema, transformStepSchema } from './import-profile.js';
 export type { CanonicalField, ImportProfile, RuleSeverity, TransformStep } from './import-profile.js';
-export { namingConfigSchema } from './naming.js';
-export type { NamingConfig } from './naming.js';
+export {
+  DEFAULT_EQUIPMENT_CODE_TO_MODEL,
+  DEFAULT_NAMING_CONVENTION,
+  DEFAULT_TAG_PATTERN,
+  namingConfigSchema,
+  namingConventionSchema,
+} from './naming.js';
+export type { NamingConfig, NamingConvention } from './naming.js';
 export { parseYamlWithSchema, levenshtein, zodIssueParams } from './yaml.js';
 export type { YamlShape, ParseYamlResult } from './yaml.js';
 export { controllerIdSchema, controllerSchema, projectSchema, PROJECT_SHAPE } from './project.js';

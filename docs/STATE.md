@@ -41,9 +41,9 @@
 | P2.2   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #32 `6e5505c` vào `develop` 2026-11-26 04:59 +07, CI 8 successful + 2 skipped) | PR #32, nhánh `m2/p2.2-motor-dol` (đã merge) | lint/typecheck/depcheck/test/review:cheats xanh 2026-11-26 (2171 test, 91 file; 50 test mới) + build xanh + bench softplc 1708 scan/s (parent) | xem §25; OQ-253…266 đóng, OQ-267 mở |
 | P2.3   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #34 `aec87ef9` vào `develop` 2026-11-26 10:26 +07, CI xanh) | PR #34, nhánh `m2/p2.3-other-models` (đã merge) | test 2333/2333, golden 77 case, plant coverage 97,13% | xem §26; OQ-268…300 đóng, OQ-301/302/303 mở tier B |
 | P2.4   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #35 `0c4308f` vào `develop` 2026-11-26 17:15 +07, CI 3 successful + 2 skipped) | PR #35, nhánh `m2/p2.4-closed-loop` (đã merge) | test 2440/2440, e2e 15+1, plant 2572 ≥ 1500, vòng kín 1351 ≥ 1000 | xem §27–28; OQ-305…319, 308/318, 326 đóng; OQ-301/302/303, OQ-320…325 mở tier B |
-| P2.5   | ☑ xong local (implementer gate xanh, 2026-11-26; OQ-327…340 đã đóng; chờ parent kiểm gate + PR) | nhánh `m2/p2.5-io-import` (implementer gate) | | ⚠ X-003 không chặn P2.5 (chỉ chặn P2.7) |
-| P2.6   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
-| P2.7   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first, cần X-003                                           |
+| P2.5   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #36 `ef853b4` vào `develop` 2026-11-26 19:03 +07, CI xanh) | PR #36, nhánh `m2/p2.5-io-import` (đã merge) | test 2563/2563, importers 99,53%, smoke 20k 1093 ms | xem §29; OQ-327…340 đóng |
+| P2.6   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #37 `ef5da92` vào `develop` 2026-11-26 20:33 +07, CI xanh) | PR #37, nhánh `m2/p2.6-address-validate` (đã merge) | test 2761/2761, importers 92,69%, smoke 20k 455 ms | xem §30; OQ-341…360 đóng |
+| P2.7   | ☑ plan xong (commit plan, STATE §31; implement chưa — chờ triển khai) | nhánh `m2/p2.7-auto-suggest` (plan) | | xem §31; OQ-361…380 mở, OQ-380 tier C (X-003 chặn nghiệm thu thật) |
 | P2.8   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | G2     | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | gói nghiệm thu M2                                                 |
 | P3.1   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
@@ -5830,3 +5830,359 @@ Property test: overlap của implementation khớp mô hình tham chiếu bitmap
 - OWNER-INBOX: **không thêm mục mới** — P2.6 không cần quyết định owner; X-003/D-003 đã có (chặn P2.7, không chặn P2.6); PL-E001 drift chỉ ghi nhận (OQ-359), không cần owner quyết ở P2.6.
 - Đề xuất ngoài phạm vi (ghi lại, không làm): suggest/apply (P2.7); UI wizard (P2.8); streaming read file > 20k nếu smoke đỏ (TC-3); tự tạo controller khi IO-W020 (P2.8 hoặc flag CLI sau).
 
+
+## §31 — P2.7 — Auto-suggest thiết bị (§9) + CLI `vcs suggest` (PLAN)
+
+> **Prompt (M2 §13, ngày 12):** "Theo mục 9, cài thuật toán gợi ý đúng 6 bước, lấy role/synonym trực tiếp từ `plant/registry`. Mọi suggestion có `reasons`. Chạy trên fixture 300 tín hiệu và in bảng precision theo role/model; đạt ngưỡng 11.3. Không "học" bằng LLM hay mạng ngoài."
+>
+> **Branch:** `m2/p2.7-auto-suggest` (tách từ `7d62668`, tip nhánh P2.6 = `develop` trên GitHub sau merge PR #37).
+> **Trạng thái:** ☑ plan → ☑ implement (commit 1–6 + fix smoke cd52c2d) → ☑ gate (xanh, xem kết quả commit 7) → ☐ PR → ☐ merge. **X-003 ĐÃ QUYẾT B 2026-11-26 21:55: chưa có file I/O thật lúc này — acceptance thật UNVERIFIED tới khi có dữ liệu, M2 ký sau** (TC-2 không còn là đo thật mà là ghi nhận hoãn đo ở commit 7).
+> **Phạm vi:** §9 (suggest 6 bước + apply + roleOverrides) + §10 CLI (`vcs suggest [--accept-confident]`, `vcs plant validate`) + §11.3 (nghiệm thu thống kê trên fixture) + §12 (chốt ngưỡng import 20k ≤ 10 s, đã validate + suggest). Ground truth: fixture 300 tín hiệu + `expected.yaml` của P2.5 (177 role-known + 123 extra role null) + registry model P2.2/P2.3 (synonyms/descKeywords) + `plant/naming.yaml` mới (quy ước cement-default theo §4.3).
+> **Prompt:** M2 §13 ngày 12 (trích ở trên); ngày 13–14 (UI wizard) thuộc P2.8, không làm ở đây.
+
+### Đọc (kiểm chứng bằng code thật, không suy đoán)
+
+- M2 §9 (thuật toán 6 bước cố định + interface `Suggestion`/`SuggestResult` + §9.3 apply + §9.4 bảng mã PL-*), §10 CLI (`vcs suggest [--accept-confident]`, `vcs plant validate`), §11.3 (nghiệm thu thống kê: (a) ≥90% equipment+role, (b) ≥95% model, (c) 100% địa chỉ, (d) 100% lỗi cố ý phát hiện, 0 báo nhầm dòng sạch), §12 (import XLSX 20 000 dòng → kết quả đã validate + suggest ≤ 10 s), §14 (#4), §15 (heuristic có giải thích; không ML/LLM trong M2), §16 mục 1 (owner cung cấp I/O list thật + quy ước tên), §4.3 (`plant/naming.yaml`: `tagPattern`, `equipmentIdTemplate`, `equipmentCodeToModel`, `roleOverrides`), §4.4 (profile).
+- **X-003 CHƯA có:** không có thư mục `fixtures-real/`; OWNER-INBOX §3 X-003 chưa tick; D-003 (chính sách dữ liệu) chưa quyết (cả 2 lựa chọn chưa tick); STATE §46 P2.7 "cần X-003"; AMENDMENTS E8 (dữ liệu thật trước P2.7/P3.5/P4.4/P5.7). Xem mục "X-003" dưới.
+- `packages/plant/src/registry.ts`: `RoleDef` có `synonyms: string[]` + `descKeywords: string[]`; 9 model đã đăng ký (8 trong fixture + `damper` derive từ `valve_ctrl`, OQ-298). OQ-301 (quy ước hậu tố mirror §7.1 cho synonym, tier B) vẫn mở. Bảng role bắt buộc/tùy chọn (đọc code thật, script đếm): motor_dol bắt buộc {runCmd DO, runFb DI}, tùy chọn {ready, remote, overloadOk, currentFb}; motor_vfd bắt buộc {runCmd DO, speedRef AO, runFb DI, speedFb AI}, tùy chọn {ready, vfdFaultOk, remote, currentFb}; valve_onoff bắt buộc {openCmd DO, openLs DI, closedLs DI}, tùy chọn {closeCmd, fault}; valve_ctrl bắt buộc {posRef AO, posFb AI}, tùy chọn {fault, closedLs, openLs}; damper = valve_ctrl (derive); analog_sensor bắt buộc {raw AI}; switch_di bắt buộc {di DI}; **silo_bin KHÔNG có role bắt buộc nào** (cả 4 role đều optional — xem OQ-363); conveyor_simple = motor_dol + {zeroSpeed, pullCord} (cả 2 optional, OQ-292) → bắt buộc {runCmd, runFb}.
+- `packages/schemas/src/naming.ts`: chỉ có `namingConfigSchema` (template `{n}` sinh tên tag, dùng ở `import-profile.ts` — KHÔNG được đụng). **Schema quy ước §4.3 (`tagPattern`/`equipmentCodeToModel`/`roleOverrides`) CHƯA tồn tại ở đâu; không code nào đọc `naming.yaml`; không có file `plant/naming.yaml` trong repo.**
+- **Chưa có code suggest nào:** grep `suggest` chỉ ra `suggestMapping` (P2.5, mapping cột) + `suggest()` gợi ý key YAML — không có `suggest.ts`, không có `tagPattern`, không có `equipmentCodeToModel`.
+- P2.6 để lại cho P2.7: `normalizeImport` + `validateImport` là hàm thuần, export từ `@vcs/importers` (dùng làm đầu vào suggest); `NormalizedSignal.tagDef: TagDef | null` (record lỗi không dựng được TagDef); `ValidateResult` có stats + diagnostics; diff/commit/report dùng cho apply. PL-E004/PL-E010 (§9.4) CHƯA có trong code.
+- **Drift mã PL-* ở `validatePlantConfig` (`packages/plant/src/engine.ts:148–280`) — kiểm tra sau áp dụng (§9.3) dùng hàm này NGUYÊN VẸN, không đổi mã (OQ-359 tiền lệ, xem OQ-371):**
+
+  | Kiểm tra §9.3 | Mã spec §9.4 | Mã code thật |
+  |---|---|---|
+  | Thiếu role bắt buộc | PL-E001 | **PL-E003** (`Thiếu tag bắt buộc cho role…`, engine.ts:212) |
+  | Tag gán trùng (1 tag → 2 role) | PL-E003 | **PL-E001** (engine.ts:232) |
+  | Kind tag không khớp role | PL-E004 | **PL-E002** (engine.ts:223) |
+  | Role trỏ tag không tồn tại | PL-E002 | **TAG-E003** (engine.ts:223) |
+  | Tham số sai schema | PL-E010 | **PL-E001** (engine.ts:196) |
+  | Role analog thiếu range | PL-E012 | PL-E012 ✓ (engine.ts:244) |
+  | Link tạo vòng | PL-E020 | PL-E020 ✓ |
+
+  Ngoài ra: role optional chưa gán → PL-W001 (warning, không chặn); Real → PL-W020 (OQ-239).
+- CLI (`apps/cli/src/commands/index.ts` + `plant.ts`): subcommand `plant` chỉ có `run`; **chưa có `vcs plant validate`, chưa có `vcs suggest`**. Các lệnh khác nhận `[dir]` tùy chọn (mặc định cwd), exit 0/1/2/3 theo convention repo.
+- Dependency-cruiser: rule `importers-deps` cho phép importers ← {schemas, plant, importers} — `suggest.ts` trong `@vcs/importers` được import registry từ `@vcs/plant`, không cần đổi rule.
+- Fixture — đo bằng script trên `fixtures/io-list-300.csv` + `expected.yaml` (không đoán): **50 nhóm thiết bị** (motor_dol 8, motor_vfd 4, valve_onoff 6, valve_ctrl 3, analog_sensor 14, switch_di 10, silo_bin 3, conveyor_simple 2); **cả 300 tag đều khớp `tagPattern`** (bước 1 fallback không được fixture bao phủ — test tổng hợp); **6 tín hiệu có prefix tag ≠ equipment ground-truth** (cùng 6 dòng mà cột `Equipment` cũng lệch theo prefix — fallback (a) không cứu được), trong đó **2 tín hiệu có role**: `CR01_MV02_REMOTE` (ground truth FCV01 posFb; có 2 dòng cùng tên — 1 là remote thật của MV02 desc "Remote mode" DI, 1 là bản dup desc "Position feedback" AI) và `CR01_SS01_TEST` (ground truth CR02_BC02 zeroSpeed); **trần đạt được của §11.3(a) = 175/177 = 98,9%** (xem bảng 5). 6 dòng trùng tag (IO-E001) gồm cả 2 trường hợp lệch prefix trên — suggest gặp cả 2 bản ghi cùng tên (xem OQ-365).
+- Generator 20k (`scripts/gen-io-fixture.ts`, `signalCount: 20000`): tag `SM01_<CODE><nn>_<suffix>`, tất cả khớp `tagPattern`, nhóm ~10 tín hiệu/thiết bị — suggest không có nhóm khổng lồ; rủi ro perf chỉ ở fallback LCP nếu làm ngây thơ O(n²) (xem OQ-368).
+- docgen (`scripts/gen-equipment-docs.ts`, `docs:equipment`): render `synonyms` vào `docs/equipment/*.md`, KHÔNG render `descKeywords` — mở rộng descKeywords (OQ-364) không đổi docs sinh ra, không cần regen.
+
+### Tóm tắt hiểu biết (≤ 8 dòng)
+
+1. P2.7 cài thuật toán §9.2 đúng 6 bước (parse tag → gom nhóm → suy model → gán role → confidence → mồ côi), lấy synonym/descKeywords trực tiếp từ registry; mọi suggestion có `reasons`.
+2. Đầu vào suggest là `NormalizedSignal[]` của P2.6 (đã normalize + validate); CLI `vcs suggest` chạy trên project đã commit (đọc `tags.yaml`), không đọc file import thô.
+3. `plant/naming.yaml` (mới, §4.3) chứa `tagPattern` + `equipmentCodeToModel` + `roleOverrides`; thiếu file → dùng mặc định cement-default trong code + warn.
+4. Apply = ghi `equipment.yaml` (params mặc định + signals map) + cập nhật `equipment`/`role` trong `tags.yaml` (qua machinery diff/commit P2.6); kiểm tra sau áp dụng bằng `validatePlantConfig` nguyên vẹn (mã thực tế khác spec §9.4 — ghi nhận, không đổi).
+5. Nghiệm thu trên fixture: (a) ≥90% equipment+role trên 177 tín hiệu có role (trần 98,9% do 2 tín hiệu lệch prefix), (b) ≥95% model trên 50 thiết bị; (c)/(d) là hồi quy P2.6.
+6. Ngưỡng §12 ≤ 10 s cho 20k dòng (đã validate + suggest) CHỐT ở P2.7 (OQ-357) — đo pipeline đầy đủ, không hạ ngưỡng nếu suggest chậm (TC-3).
+7. X-003 chưa có: implement làm hết được; chỉ đo acceptance 90% trên dữ liệu thật là chặn (TC-2) — fixture chỉ là proxy, không được coi là bằng chứng cho dữ liệu thật.
+8. Không ML/LLM, không học từ dữ liệu (trừ `roleOverrides` do người dùng ghi tường minh, học ở P2.8 UI — xem OQ-370).
+
+### X-003 — trạng thái và ranh giới chặn (đọc trước khi implement)
+
+- **Chưa có** (bằng chứng: không có `fixtures-real/`; OWNER-INBOX §3 X-003 chưa tick; D-003 chưa quyết).
+- **Làm được KHÔNG cần X-003 (commit 1–6):** toàn bộ engine suggest + `naming.yaml` mặc định + CLI `vcs suggest` + apply + `vcs plant validate` + đo precision trên fixture + smoke 20k. Fixture 300 là dữ liệu làm việc hợp lệ cho code + test (E8).
+- **CHẶN chờ X-003 (TC-2):** (1) đo acceptance §11.3(a)/(b) trên I/O list thật (≥90%/≥95%); (2) hiệu chỉnh `naming.yaml`/`synonym`/`descKeywords` theo quy ước tên thật; (3) ký nghiệm thu M2 §14 #4 trên dữ liệu thật (G2). **Không dùng số fixture để tuyên bố đạt 90% trên dữ liệu thật** — fixture là proxy theo đúng chữ spec §11.3, nhưng OWNER-INBOX X-003 + M2 §16 mục 1 + E8 đều nói fixture "chỉ là xấp xỉ"; con số fixture chỉ chứng minh engine chạy đúng spec, không chứng minh đúng với quy ước tên thật.
+- **OWNER-INBOX:** thêm mục X-003/P2.7 (mục mới trong §3, xem OQ-380) — mô tả chính xác cần gì (định dạng, số lượng tối thiểu, ẩn danh, cách giao). D-003 vẫn mở từ trước (không tạo mục mới cho D-003).
+
+### Phạm vi
+
+**Làm:**
+- `namingConventionSchema` (zod, §4.3) + `DEFAULT_NAMING_CONVENTION` (cement-default, đúng ví dụ spec §4.3) + loader `loadNamingConvention(projectDir)` (thiếu file → mặc định + warn; file lỗi → exit 2) + `examples/motor-interlock/plant/naming.yaml` (bản mặc định để CLI chạy được trên ví dụ).
+- `suggest.ts` trong `@vcs/importers`: `parseTag` (bước 1) + `groupSignals` (bước 2) + `scoreModel` (bước 3) + `assignRoles` (bước 4, ghép tham lam) + `equipmentConfidence` (bước 5) + `suggest` (bước 6, orchestration) + types `Suggestion`/`SuggestResult` đúng §9.1.
+- Mở rộng `descKeywords` vi/de trong định nghĩa model (OQ-364, bảng 6 — chỉ thêm từ khóa, không đổi synonym/step; docgen không render descKeywords nên không đổi docs).
+- Precision harness: test chạy pipeline thật trên fixture → `suggest()` → so `expected.yaml`, in bảng per-role/per-model; assert (a) ≥160/177, (b) ≥48/50; hồi quy (c) 300/300 địa chỉ, (d) counts P2.6 (IO-E001 ×6, IO-E011 ×12, IO-W030 ×23).
+- Apply: `applySuggestions` — ghi `equipment.yaml` (instance mới: params mặc định model + signals map; instance đã có: cập nhật signals, giữ params) + cập nhật `equipment`/`role` trong `tags.yaml` (qua `applyCommit`/safety net P2.6) + kiểm tra sau áp dụng bằng `validatePlantConfig` (mã thực tế, xem bảng drift); idempotent (apply 2 lần → không đổi).
+- CLI `vcs suggest [dir] [--accept-confident] [--json]` + `vcs plant validate [dir]` (subcommand mới trong `plant.ts`); exit 0/1/2/3 (xem OQ-372/376).
+- Smoke 20k pipeline đầy đủ (read→validate→suggest→diff) ≤ 10 s; chốt ngưỡng §12 ở P2.7 (OQ-373).
+- Test: ≥80 test mới (tổng ~2840); gate `lint && typecheck && depcheck && test && review:cheats` + `docs:diagnostics --check` + build 3/3; không e2e (không UI — e2e ở P2.8).
+
+**Không làm (ghi lại, không chạm):**
+- Học `roleOverrides` từ lựa chọn người dùng (ghi lại ở P2.8 UI — CLI không có bước sửa tay để học; cơ chế ĐỌC overrides thì có, xem OQ-370).
+- UI wizard / Plant Designer tab Suggestions (P2.8); streaming read file > 20k (chỉ đo, trừ khi smoke đỏ — TC-3).
+- Đổi mã PL-* trong `validatePlantConfig` cho khớp spec §9.4 (drift OQ-359 — cần SCR riêng, không làm ở P2.7; xem OQ-371).
+- Đổi synonym hiện có trong model defs (chỉ THÊM descKeywords vi/de — synonym đã có quy ước OQ-301); đổi `namingConfigSchema` (template sinh tên, việc khác); đổi ngưỡng/golden hiện có.
+- Tự tạo controller khi IO-W020 (P2.6 đã warn; tạo là việc P2.8 hoặc flag CLI sau).
+- Đo acceptance trên dữ liệu thật (chặn TC-2 — chờ X-003); dùng fixture làm bằng chứng thay dữ liệu thật.
+
+### Thiết kế
+
+**Layout (mới trong `@vcs/importers` + `@vcs/schemas`, không đụng package khác ngoài CLI):**
+
+```
+packages/schemas/src/naming.ts          # + namingConventionSchema + DEFAULT_NAMING_CONVENTION (mới; giữ nguyên namingConfigSchema)
+packages/importers/src/io-list/
+  naming.ts                             # loadNamingConvention(projectDir) — đọc plant/naming.yaml, lỗi → Diagnostic/throw
+  naming.test.ts
+  suggest.ts                            # parseTag, groupSignals, scoreModel, assignRoles, equipmentConfidence, suggest
+  suggest.test.ts                       # unit 6 bước + synthetic (fallback, tie, 0-required, dup tag)
+  suggest.precision.test.ts             # harness fixture: pipeline thật → suggest → so expected.yaml, bảng per-role/per-model
+  apply.ts                              # applySuggestions — ghi equipment.yaml + cập nhật tags.yaml + validatePlantConfig
+  apply.test.ts                         # idempotence, từ chối khi lỗi, instance đã có giữ params
+packages/plant/src/models/*.ts          # + descKeywords vi/de (OQ-364, dữ liệu — không đổi step/synonym)
+apps/cli/src/commands/suggest.ts        # vcs suggest [dir] [--accept-confident] [--json]
+apps/cli/src/commands/suggest.test.ts
+apps/cli/src/commands/plant.ts          # + subcommand `validate` (vcs plant validate [dir])
+apps/cli/src/commands/index.ts          # đăng ký `suggest`
+examples/motor-interlock/plant/naming.yaml   # bản mặc định cement-default (để CLI chạy được trên ví dụ)
+```
+
+**Kiểu (đúng M2 §9.1, thêm trường truy vết):**
+
+```ts
+interface Suggestion {
+  equipmentId: string; model: string; confidence: number;   // 0..1
+  signals: { tag: string; role: string; confidence: number; reasons: string[] }[];
+  missingRequiredRoles: string[]; unusedOptionalRoles: string[];
+  status: 'confident' | 'review' | 'unmatched';              // ≥0.8 | 0.5–0.8 | <0.5 (so với eps 1e-9, OQ-361)
+  modelCandidates?: { model: string; score: number }[];       // top-2 khi chênh ≤ 0.1 (OQ-367)
+}
+interface SuggestResult {
+  suggestions: Suggestion[];
+  unassignedTags: { tag: string; reasons: string[] }[];
+  stats: { totalTags: number; assignedTags: number; confident: number; review: number; unmatched: number };
+}
+```
+
+**Thứ tự pipeline (CLI `vcs suggest` trên project; harness fixture dùng cùng hàm, khác nguồn đầu vào):**
+
+1. CLI: đọc `tags.yaml` của project (đã commit, đã dedup theo định nghĩa) → `TagDef[]` → chuyển thành `NormalizedSignal[]` (tag/kind/description/address/controller/equipment cột nếu có). Harness: fixture CSV → read → detectHeader → suggestMapping → gridToRecords → transform → `normalizeImport` → `NormalizedSignal[]` (không qua commit — đo trong bộ nhớ).
+2. `loadNamingConvention(projectDir)` (thiếu file → mặc định + warn stderr; file lỗi zod → exit 2).
+3. `suggest(signals, naming, registry)` → `SuggestResult` (thuần, tất định: không `Date.now`/`Math.random`; thứ tự sort ổn định theo tên tag).
+4. In bảng (text) hoặc JSON (`--json`); `--accept-confident` → `applySuggestions` (chỉ status confident) → kiểm tra `validatePlantConfig` → lỗi thì từ chối ghi (exit 1), warn thì ghi kèm report.
+5. Ghi `equipment.yaml` + cập nhật `tags.yaml` qua safety net `tagsFileSchema.parse` (mirror P2.6 commit — tags.yaml fail load thì từ chối ghi).
+
+**Quy tắc tính điểm (mặc định tier B — spec §9.2 không định nghĩa hết, xem OQ):**
+
+- **Bước 1 parse:** thử `tagPattern` trước → `{area, eqcode, roleToken}`; không khớp → cột `equipment` (nếu có, tách `equipmentId` từ giá trị cột — dạng `{area}_{eqcode}` hoặc nguyên chuỗi làm key); không có → tách theo `_ - .`, lấy **tiền tố chung dài nhất với các tag khác** làm `equipmentKey` (OQ-368: chỉ so trong cùng bucket token đầu tiên, không O(n²)). Ghi `reason` cho mỗi tag (pattern/equipment-column/lcp).
+- **Bước 3 model score (thô, chưa chuẩn hóa):** `+0.5` nếu tiền tố chữ của eqcode khớp `equipmentCodeToModel` — **chỉ model khớp DÀI NHẤT được +0.5** ("MV" thắng "M", OQ-369); `+0.4 × coverage` với coverage = tỷ lệ role bắt buộc có ≥ 1 tín hiệu trong nhóm đạt điểm role ≥ 0.4 cho role đó (tính bằng scoring bước 4, trước greedy — OQ-366); tín hiệu thừa: **−0.1 mỗi tín hiệu không gán được cho role nào (điểm tốt nhất < 0.4), tối đa −0.3**; signature (OQ-362): `+0.3` cho MỖI chữ ký khớp (AO+runCmd → motor_vfd; hai LS → valve_onoff; chỉ có AI → analog_sensor; chỉ có 1 DI → switch_di; posRef AO → valve_ctrl) và `−0.2` cho motor_dol khi có AO+runCmd. "Chỉ có AI/1 DI" xét trên toàn bộ tín hiệu của nhóm (kể cả thừa).
+- **Bước 4 role score:** exact synonym (token chuẩn hóa == synonym, không phân biệt hoa/thường) `+0.6`; chứa ở biên token `+0.4` (token chứa synonym ở đầu/cuối/giữa với phân cách `_ - .`, vd `RUN_CMD_1` chứa `RUN_CMD`); `roleOverrides` khớp exact → tính như exact `+0.6` cho role đó và chặn exact của role khác trên cùng token (OQ-370); descKeywords `+0.2` theo quy tắc (OQ-364); kind khớp `+0.2`, kind không khớp `−0.5`. Ghép tham lam theo điểm giảm dần, hòa điểm → tên tag asc rồi row asc; mỗi role tối đa 1 tín hiệu; tín hiệu < 0.4 cho mọi role → `unassignedTags`. Role confidence = `clamp(score, 0, 1)` (OQ-367).
+- **Bước 5 confidence thiết bị:** `0.5 × modelScoreChuẩnHóa + 0.5 × trung bình confidence role − 0.15 × số role bắt buộc thiếu`; **modelScoreChuẩnHóa = `clamp(rawModelScore, 0, 1)`** (OQ-361 — xem bảng 1: raw 0.6 → 0.6); phân loại `confident ≥ 0.8`, `review 0.5–0.8`, `unmatched < 0.5`, **so sánh với eps 1e-9** (0.5×0.6+0.5×1.0 = 0.7999999999999999 ở IEEE754 — không có eps sẽ rớt khỏi confident, xem bảng 1); **chênh model ≤ 0.1 → status review bất kể confidence** (bảng 4).
+- **Bước 6 mồ côi:** tag không thuộc nhóm nào có model → `unassignedTags` với `reasons[]` (vd "no equipment group", "no role ≥ 0.4", "invalid record (tagDef null)", "duplicate tag — role taken by row N").
+- **Coverage khi model không có role bắt buộc (silo_bin):** tỷ lệ = **1.0** (OQ-363 — không role nào thiếu).
+- **Đầu vào suggest:** chỉ record có `tagDef` non-null (record lỗi IO-E002/IO-E010 không dựng được TagDef → bỏ qua, vào `unassignedTags` với lý do mã lỗi); record có diagnostic khác (IO-E001 dup, IO-E011 overlap…) vẫn suggest bình thường (OQ-365).
+
+### Bảng tính tay
+
+**Bảng 1 — CR01_M01 (motor_dol, fixture dòng 7–16: 6 tín hiệu có role + 4 thừa TEMP/VIB/PWR/ESTOP).** Tất cả 10 tag khớp `tagPattern` → area CR01, eqcode M01.
+
+| Bước | Tính | Kết quả |
+|---|---|---|
+| 3 — model score | motor_dol: prefix `M` +0.5; required {runCmd, runFb} phủ 2/2 → +0.4; thừa 4 × −0.1, cap −0.3; signature 0 | **0.6** |
+| 3 — đối thủ | motor_vfd: prefix 0 (chỉ khớp dài nhất `M` được +0.5, `MV` không khớp `M01`); required phủ 2/4 (runCmd ✓, runFb ✓, speedRef ✗, speedFb ✗ — CUR chỉ đạt 0.2 cho speedFb) → +0.2; signature 0; thừa −0.3 | **−0.1** (chênh 0.7 → không review) |
+| 4 — RUN_CMD → runCmd | exact `RUN_CMD` +0.6; kind DO=DO +0.2; desc "Laufbefehl" chứa de `lauf` (prefix, len 4) +0.2 | **1.00** |
+| 4 — RUN_FBK → runFb | exact `RUN_FBK` +0.6; kind DI +0.2; desc "Run feedback" chứa `run`/`feedback` +0.2 | **1.00** |
+| 4 — READY → ready | exact +0.6; kind +0.2; desc "San sang" chứa vi `sẵn sàng` (strip dấu → "san sang", phrase) +0.2 | **1.00** |
+| 4 — REMOTE → remote | exact +0.6; kind +0.2; desc "Remote mode" chứa `remote` +0.2 | **1.00** |
+| 4 — OVL_OK → overloadOk | exact +0.6; kind +0.2; desc "Overload OK" chứa `overload` +0.2 | **1.00** |
+| 4 — CUR → currentFb | exact `CUR` +0.6; kind AI +0.2; desc "Dong dong co" chứa vi `dòng` (strip dấu → "dong", whole-word) +0.2 | **1.00** |
+| 4 — TEMP/VIB/PWR/ESTOP | điểm tốt nhất 0.2 (chỉ kind khớp, vd TEMP vs currentFb: kind AI +0.2, synonym/desc 0) < 0.4 | **unassigned** |
+| 5 — confidence | 0.5 × clamp(0.6) + 0.5 × 1.00 − 0.15 × 0 = **0.80** → **confident** (eps 1e-9; float thô 0.7999999999999999 < 0.8 — KHÔNG có eps sẽ thành review) | confident |
+| Kết quả | equipment đúng, 6/6 role đúng | (a) +6, (b) +1 |
+
+**Bảng 2 — CR01_MV01 (motor_vfd, 11 tín hiệu: 8 có role + 3 thừa TEMP/VIB/PWR).**
+
+| Bước | Tính | Kết quả |
+|---|---|---|
+| 3 — model score | motor_vfd: prefix `MV` +0.5 (khớp dài nhất, thắng `M`); required 4/4 → +0.4; signature AO+runCmd +0.3; thừa 3 × −0.1 = −0.3 | **0.9** |
+| 3 — đối thủ | motor_dol: prefix 0 (chỉ khớp dài nhất được +0.5); required 2/2 → +0.4; signature AO+runCmd → −0.2; thừa −0.3 | **−0.1** (chênh 1.0 → không review) |
+| 4 — 8 role | RUN_CMD "Run command" 1.00; SPEED_REF "Speed setpoint" 1.00 (exact + kind AO + `speed`/`setpoint`); RUNNING "Run feedback" 1.00; SPEED_FB "Speed feedback" 1.00; READY "Ready" 1.00; VFD_OK "VFD fault OK" 1.00 (`vfd` whole-word); REMOTE "Remote mode" 1.00; CUR "Dong dong co" 1.00 (`dòng`) | avg **1.00** |
+| 5 — confidence | 0.5 × 0.9 + 0.5 × 1.00 = **0.95** → **confident** | confident |
+| Kết quả | equipment đúng, 8/8 role đúng | (a) +8, (b) +1 |
+
+**Bảng 3 — CR01_LT01 (analog_sensor, 2 tín hiệu) + CR01_BIN01 (silo_bin, 7 tín hiệu).**
+
+| Nhóm | Bước 3 | Bước 4 | Bước 5 |
+|---|---|---|---|
+| LT01 | prefix `LT` +0.5; required {raw} phủ 1/1 → +0.4; thừa BYPASS 1 × −0.1; signature "chỉ có AI" KHÔNG kích (nhóm có AI + DI) → 0. Tổng **0.8** | RAW "Measured value": exact `RAW` +0.6, kind AI +0.2, `measure` (len 7) là prefix của "measured" +0.2 → **1.00**. BYPASS vs raw: kind DI≠AI −0.5 → unassigned | 0.5×0.8 + 0.5×1.00 = **0.90** → confident |
+| BIN01 | prefix `BIN` +0.5; required 0/0 → **mặc định 1.0** → +0.4 (OQ-363); thừa WEIGHT/TEMP/DUST 3 × −0.1 = −0.3; signature 0. Tổng **0.6** | LEVEL_RAW "Fullstand": exact +0.6, kind +0.2, de `füllstand` +0.2 → 1.00; LEVEL_HIGH "High level" 1.00; LEVEL_LOW "Low level" 1.00; LEVEL_HIGH_HIGH "High-high level" 1.00 | 0.5×0.6 + 0.5×1.00 = **0.80** → confident (eps; nếu coverage mặc định 0.0 thì 0.2 → 0.60 review — nhạy với OQ-363) |
+
+**Bảng 4 — Trường hợp tie tổng hợp (chênh ≤ 0.1 → review bất kể confidence).** Nhóm giả: `XX_M01_RUN_CMD` (DO), `XX_M01_SPEED_REF` (AO), `XX_M01_RUN_FB` (DI), naming mặc định.
+
+| Model | Tính | Điểm |
+|---|---|---|
+| motor_dol | prefix `M` +0.5; required 2/2 +0.4; signature AO+runCmd → −0.2; thừa 0 | **0.7** |
+| motor_vfd | prefix 0 (khớp dài nhất là `M` → dol); required 3/4 (runCmd ✓, speedRef ✓, runFb ✓, speedFb ✗) → +0.3; signature AO+runCmd +0.3; thừa 0 | **0.6** |
+| Kết luận | Chênh 0.7 − 0.6 = **0.1 ≤ 0.1 → status review**, cả hai model liệt kê trong `reasons` + `modelCandidates`. Gán role theo model cao nhất (dol): RUN_CMD→runCmd 1.00, RUN_FB→runFb 1.00, SPEED_REF không có role dol (điểm tốt nhất < 0.4) → unassigned. Confidence = 0.5×0.7 + 0.5×1.00 = 0.85 nhưng status vẫn **review** (quy tắc tie thắng phân loại confidence). | review |
+
+**Bảng 5 — Thiết kế đo precision trên fixture (harness, không commit).**
+
+| Chỉ tiêu §11.3 | Mẫu số | Trần đạt được (tính tay) | Ngưỡng assert trong test |
+|---|---|---|---|
+| (a) equipment + role đúng | 177 tín hiệu có role (OQ-329 tái xác nhận: 123 extra role null LOẠI khỏi mẫu số) | **175/177 = 98,9%** — 2 tín hiệu không thể đúng bằng grouping theo prefix: `CR01_MV02_REMOTE` (ground truth FCV01 posFb) và `CR01_SS01_TEST` (ground truth CR02_BC02 zeroSpeed); cột `Equipment` cũng lệch theo prefix ở cả 6 dòng lệch nên fallback (a) không cứu được | ≥ **160/177 (90,4%)** |
+| (b) model đúng | 50 thiết bị | **50/50 = 100%** (2 tín hiệu lệch không đổi model của nhóm chứa chúng) | ≥ **48/50 (96%)** |
+| (c) địa chỉ chuẩn hóa đúng | 300 | 300/300 (hồi quy P2.6) | 300/300 |
+| (d) lỗi cố ý phát hiện / 0 báo nhầm dòng sạch | counts P2.6 | IO-E001 ×6, IO-E011 ×12, IO-W030 ×23, tổng 41 (hồi quy P2.6) | đúng từng mã |
+| Per-model role-known (để debug, không assert riêng lẻ) | dol 48, vfd 32, onoff 30, ctrl 15, analog 14, switch 10, silo 12, conveyor 16 (= 177) | ctrl tối đa 14/15 (mất posFb), conveyor tối đa 15/16 (mất zeroSpeed) | in bảng, không assert |
+
+**Bảng 6 — Mở rộng `descKeywords` vi/de (OQ-364, chỉ THÊM từ khóa — bản dịch generic của nghĩa role, không đào từ fixture).**
+
+| Model / role | Thêm vi | Thêm de |
+|---|---|---|
+| runCmd | chạy, khởi động | lauf, einschalten |
+| runFb | phản hồi chạy, đang chạy | rückmeldung, läuft |
+| ready | sẵn sàng | bereit, betriebsbereit |
+| remote | từ xa, điều khiển xa | fern |
+| overloadOk | quá tải | überlast |
+| currentFb | dòng, dòng điện | strom |
+| speedRef | tốc độ đặt, đặt tốc độ | drehzahl, sollwert |
+| speedFb | tốc độ thực, phản hồi tốc độ | drehzahl, istwert |
+| vfdFaultOk | lỗi biến tần | umrichter |
+| openCmd / openLs | mở | öffnen / offen |
+| closeCmd / closedLs | đóng | schließen / geschlossen |
+| fault | lỗi | fehler, störung |
+| posRef / posFb | vị trí, đặt vị trí | stellung, sollwert / istwert |
+| raw (analog) | đo, giá trị đo | messwert |
+| di (switch) | công tắc, tiếp điểm | schalter, kontakt |
+| level* (silo) | mức, mức cao, mức thấp, mức rất cao | füllstand, hoch, niedrig |
+| zeroSpeed | dừng, đứng yên | stillstand |
+| pullCord | giật, khẩn cấp | notzug, reißleine |
+
+Quy tắc khớp desc (OQ-364): chuẩn hóa cả hai phía (lowercase + strip dấu NFKD + gom whitespace); keyword nhiều từ → chứa chuỗi (vd "san sang" trong "san sang"); keyword 1 từ → bằng đúng 1 từ trong mô tả, HOẶC (len ≥ 4) là prefix của 1 từ (vd "measure" ~ "measured", "lauf" ~ "laufbefehl"); keyword ≤ 3 ký tự chỉ khớp whole-word (vd "mo" không khớp "motor"/"remote").
+
+### Mơ hồ (phân loại)
+
+**Tier A (tự quyết, ghi lại):** layout module mới trong `@vcs/importers` (không đụng package khác ngoài schema + CLI); `Suggestion`/`SuggestResult` đúng §9.1 + trường `modelCandidates`; thứ tự pipeline CLI ở trên; `vcs suggest [dir]` theo convention các lệnh khác (positional dir, mặc định cwd).
+
+**Tier B (mặc định + ghi OQ + "Duyệt sau" trong OWNER-INBOX + tiếp tục):** OQ-361 (chuẩn hóa model score clamp [0,1] + eps 1e-9); OQ-362 (signature +0.3 mỗi chữ ký, dol −0.2 khi AO+runCmd); OQ-363 (coverage 0 required role = 1.0); OQ-364 (descKeywords vi/de + quy tắc khớp); OQ-365 (nguồn đầu vào suggest + record tagDef null + dup tag); OQ-366 (định nghĩa coverage + tín hiệu thừa); OQ-367 (role confidence clamp + tie-break greedy + modelCandidates); OQ-368 (LCP fallback có giới hạn); OQ-369 (chỉ khớp dài nhất được +0.5 prefix); OQ-370 (apply + roleOverrides chỉ đọc ở P2.7, học ở P2.8); OQ-371 (post-apply check dùng `validatePlantConfig` nguyên vẹn, mã thực tế); OQ-372 (`vcs suggest` contract); OQ-373 (chốt ngưỡng §12 ≤ 10 s ở P2.7); OQ-374 (mẫu số precision 177 + trần 98,9%); OQ-375 (`plant/naming.yaml` + mặc định khi thiếu); OQ-376 (`vcs plant validate`); OQ-377 (damper trong scoring); OQ-378 (reasons cho unassigned); OQ-379 (học roleOverrides ở P2.8, không phải P2.7 CLI); OQ-380 (giao thức đo X-003 khi dữ liệu về).
+
+**Tier C (chặn — dừng phần bị chặn, báo owner, không tự đổi):**
+- **TC-1:** precision trên fixture < ngưỡng §11.3 ((a) < 160/177 hoặc (b) < 48/50) sau khi implement xong → DỪNG, không hạ ngưỡng, không sửa `expected.yaml`, báo owner kèm bảng per-role/per-model (nguyên nhân thường là synonym/descKeyword thiếu hoặc hiểu sai thuật toán — sửa dữ liệu/thuật toán, không sửa số).
+- **TC-2:** X-003 chưa về khi tới bước nghiệm thu → DỪNG bước đo trên dữ liệu thật; P2.7 vẫn merge được với bằng chứng fixture (ghi rõ "UNVERIFIED trên dữ liệu thật" ở STATE + acceptance); không tuyên bố đạt 90% thật, không dùng fixture làm bằng chứng thay.
+- **TC-3:** smoke 20k pipeline đầy đủ > 10 s sau 3 lần tối ưu → DỪNG, đề xuất thu hẹp (vd cache scoring, giới hạn LCP) — không hạ ngưỡng §12.
+
+### Test target + gate
+
+- Test mới **≥ 80** (tổng ~2840): suggest unit (parse/group/score/assign/confidence, synthetic fallback/tie/0-required/dup) ~50; naming (schema + loader + mặc định) ~8; precision harness (fixture, bảng per-role/per-model, assert (a)/(b) + hồi quy (c)/(d)) ~10; apply (idempotence, từ chối khi lỗi, giữ params) ~10; CLI suggest + plant validate ~8; coverage `packages/importers/src/**` lines 85 (ngưỡng hiện có).
+- Gate: `lint && typecheck && depcheck && test && review:cheats` + `docs:diagnostics --check` + `build` 3/3; không e2e (không UI). Smoke 20k (read→validate→suggest→diff) ≤ 10 s, ghi phân rã thời gian theo chặng (read/validate/suggest/diff).
+- Precision harness chạy trong `vitest` (không phải script ngoài): đọc fixture thật qua pipeline P2.5/P2.6, so `expected.yaml` bằng code (không hard-code số 177/175 vào test ngoài assert ngưỡng — bảng per-role in ra console/log để đọc).
+
+### Rủi ro top-3
+
+1. **Confidence calibration (OQ-361/363):** công thức §9.2 + fixture nhiều tín hiệu thừa đẩy confidence về biên 0.80 (bảng 1/3) — sai mặc định chuẩn hóa là đổi cả confident/review trên diện rộng. Giảm bằng bảng tính tay 4 ví dụ + test ghim đúng các số đó (0.80/0.95/0.90/0.80) + eps 1e-9.
+2. **descKeywords vi/de (OQ-364):** từ khóa sai/thiếu làm role mất +0.2 nhưng KHÔNG đổi đúng/sai (vẫn ≥ 0.8 nhờ exact+kind) — rủi ro thấp cho precision, cao cho confident rate. Giảm bằng bảng 6 (bản dịch generic) + test ghim từng ví dụ (Laufbefehl/San sang/Dong dong co/Storung/Offnen Befehl).
+3. **X-003 không về (TC-2):** M2 §14 #4 không ký được trên dữ liệu thật dù P2.7 merge — giảm bằng tách rõ implement (làm được) khỏi acceptance thật (chặn), ghi UNVERIFIED thay vì tuyên bố đạt.
+
+### Commit plan (7 commit, mỗi commit gate xanh)
+
+1. `feat(schemas): naming.yaml schema + default cement-default + loader` — `namingConventionSchema` + `DEFAULT_NAMING_CONVENTION` (đúng ví dụ §4.3) trong `packages/schemas/src/naming.ts` (giữ nguyên `namingConfigSchema`); `loadNamingConvention` trong `@vcs/importers`; `examples/motor-interlock/plant/naming.yaml` (bản mặc định). OQ-375.
+2. `feat(importers): suggest bước 1–2 (parse tag + gom nhóm)` — `parseTag` (tagPattern → equipment column → LCP có giới hạn, OQ-368) + `groupSignals`; test synthetic fallback (không khớp pattern, cột equipment trống, LCP). OQ-368/369.
+3. `feat(importers): suggest bước 3–5 (model score + gán role + confidence)` — `scoreModel` + `assignRoles` (greedy) + `equipmentConfidence` + mở rộng `descKeywords` vi/de (OQ-364, bảng 6); test ghim bảng 1–4 đúng từng số (0.80/0.95/0.90/0.80 + tie review). OQ-361/362/363/364/366/367.
+4. `feat(importers): suggest bước 6 + precision harness trên fixture` — `suggest()` orchestration + `unassignedTags` + stats + test precision (bảng per-role/per-model, assert (a) ≥160/177, (b) ≥48/50, hồi quy (c)/(d)). OQ-374/378.
+5. `feat(importers+cli): apply suggestion + vcs plant validate` — `applySuggestions` (ghi equipment.yaml + cập nhật tags.yaml qua safety net + `validatePlantConfig` kiểm tra sau, mã thực tế OQ-371) + subcommand `vcs plant validate`; test idempotence + từ chối khi lỗi. OQ-370/371/376.
+6. `feat(cli): vcs suggest [--accept-confident]` — wiring CLI + in bảng/JSON + exit code + smoke 20k pipeline đầy đủ ≤ 10 s (chốt ngưỡng §12, OQ-373). OQ-372/373.
+7. `docs(m2): P2.7 kết quả + đóng OQ-361…379 (X-003 ở lại)` — chỉ docs: số test, precision thật, smoke thật, OQ đóng/mở; OQ-380 (X-003) KHÔNG đóng — chờ dữ liệu thật.
+
+### File mới/sửa
+
+- Mới: `packages/importers/src/io-list/{naming,suggest,apply}.ts` + test; `packages/importers/src/io-list/suggest.precision.test.ts`; `apps/cli/src/commands/suggest.ts` + test; `examples/motor-interlock/plant/naming.yaml`.
+- Sửa: `packages/schemas/src/naming.ts` (+ schema mới, không đụng `namingConfigSchema`); `packages/plant/src/models/*.ts` (chỉ thêm `descKeywords`); `apps/cli/src/commands/{plant,index}.ts`; `docs/STATE.md` §31; `docs/open-questions.md` (OQ-361…380); `docs/OWNER-INBOX.md` (mục X-003/P2.7 + §0).
+- Không sửa: `packages/schemas/src/tags.ts`, `packages/plant/src/engine.ts` (đặc biệt `validatePlantConfig` + mã PL-*), `packages/importers/src/io-list/{address,normalize,validate,diff,commit,report}.ts`, ngưỡng/golden hiện có, `docs/verify-owner-guide.md`.
+
+### OQ mới (OQ-361…380) + tier C còn mở
+
+- OQ-361…380: tier B, xem `open-questions.md` (đầy đủ ở dưới). OQ-380 (X-003) là tier C về acceptance, không phải tier B.
+- OWNER-INBOX: **thêm mục X-003/P2.7** (mục mới trong §3 — mô tả chính xác dữ liệu cần, xem OQ-380); D-003 vẫn mở từ trước (không tạo mục mới); không có quyết định owner nào khác cần ở P2.7 — implement không chặn.
+- Đề xuất ngoài phạm vi (ghi lại, không làm): UI wizard + tab Suggestions + học roleOverrides từ dropdown (P2.8); streaming read file > 20k nếu smoke đỏ (TC-3); SCR đổi mã PL-* cho khớp spec §9.4 (cần quyết riêng, không làm ở P2.7); tự tạo controller khi IO-W020 (P2.8 hoặc flag CLI sau).
+
+### Kết quả triển khai (điền sau khi implement — commit 6)
+
+#### Kết quả commit 1 — `feat(schemas,importers): naming.yaml schema + loader + ví dụ (§4.3)`
+- `packages/schemas/src/naming.ts`: `namingConventionSchema` (zod, `convention`/`tagPattern`/`equipmentIdTemplate`/`equipmentCodeToModel`/`roleOverrides`, mọi trường có default) + `DEFAULT_TAG_PATTERN` + `DEFAULT_EQUIPMENT_CODE_TO_MODEL` (20 mục, đúng ví dụ §4.3) + `DEFAULT_NAMING_CONVENTION = namingConventionSchema.parse({})`. `namingConfigSchema` cũ giữ nguyên, không đụng.
+- `packages/importers/src/io-list/naming.ts`: `parseNamingConvention` (YAML → zod, lỗi → `NamingConventionError`) + `loadNamingConvention` (thiếu file → mặc định + warning, `usedDefault: true`; file lỗi → throw). `examples/motor-interlock/plant/naming.yaml` = đúng mặc định (parse ra `toEqual(DEFAULT_NAMING_CONVENTION)`).
+- Test: `naming.test.ts` **12 passed** (ví dụ §4.3 đầy đủ, `{}` → mặc định, file ví dụ, tagPattern thiếu nhóm đặt tên / RegExp lỗi / template thiếu `{area}`/`{eqcode}` / key map không phải chữ hoa / YAML lỗi cú pháp → throw; loader thiếu file / có file / file lỗi; tagPattern mặc định tách đúng `CR01_MV02_REMOTE`). Typecheck `@vcs/schemas` + `@vcs/importers` xanh.
+- OQ-375: code xong, đóng ở commit 6 (theo plan).
+
+#### Kết quả commit 2 — `feat(importers): suggest bước 1–2 (parseTag + groupSignals)`
+- `packages/importers/src/io-list/suggest.ts`: `SuggestInput` + `normalizedSignalsToInputs` (errorCode khớp validateImport: tag rỗng/>128 → IO-E002, địa chỉ lỗi → IO-E010, còn lại tagDef null → IO-E003) + `tagDefsToInputs` (equipment từ TagDef, row = thứ tự) + `parseTag` (pattern → cột equipment → LCP fallback; pattern thắng khi tag khớp cả hai) + `groupSignals` (pattern/column lấy equipmentId từ parseTag; LCP: bucket theo first token, mỗi tag lấy LCP dài nhất với 2 neighbour đã sort, cắt tới separator cuối, không candidate → first token; group sort theo equipmentId, tín hiệu sort theo (tag, row)) + helper export `firstToken`/`stripEquipmentPrefix`/`truncateToSeparator`.
+- Fixture 300 (đo ở commit 2, neo trong test): **50 group = 50 thiết bị, 300/300 source pattern** (LCP không nổ trên fixture), 0 tagDef-null, 0 errorCode; map cỡ group đã chốt nguyên văn trong test.
+- Test: `suggest.test.ts` **16 passed** (parseTag 4 + helper 3 + groupSignals 5 + fixture 1 + converters 3). Lint + typecheck `@vcs/importers` xanh.
+- Lệch/quyết định tier A (ghi lại):
+  - Test đầu sai expectation (cột equipment với tag khớp pattern): implementation đúng thứ tự plan (pattern trước) — sửa test, không sửa code.
+  - `noUncheckedIndexedAccess`: test dùng `.find()` + optional chaining / `.map()`/`.flatMap()` thay cho index `[i]`; `IoRecord` import từ `./transform.js` (không export từ `./normalize.js`).
+  - Tag rỗng → group `''` (groupSignals thuần, không lọc; suggest ở commit 4 sẽ đưa vào unassigned vì tagDef null).
+
+#### Kết quả commit 3 — `feat(importers,plant): suggest bước 3–5 (scoreModel + assignRoles + confidence) + descKeywords vi/de`
+- `suggest.ts`: `scoreRole` (exact +0.6 / biên +0.4 / descKeywords +0.2 theo OQ-364 / kind +0.2/−0.5; roleOverrides exact +0.6 cho role đó và chặn exact role khác — OQ-370) + `scoreModel` (prefix dài nhất toàn cục +0.5 — OQ-369; coverage 0.4×, 0 required → 1.0 — OQ-363/366; thừa −0.1, cap −0.3; chữ ký +0.3 mỗi cái, dol −0.2 khi AO+runCmd — OQ-362; posRef AO cho cả valve_ctrl và damper — OQ-377) + `assignRoles` (greedy ≥ 0.4, hòa điểm → tag asc, row asc, role asc tie-break cuối) + `equipmentConfidence` (0.5×clamp(raw)+0.5×avg−0.15×thiếu, clamp [0,1]) + `normalizeDescText`/`descKeywordMatches` (lowercase + NFKD + gom whitespace) + `SUGGEST_EPS = 1e-9`.
+- `packages/plant/src/models/*.ts` (8 file, chỉ 32 dòng descKeywords): mở rộng vi/de theo Bảng 6 (damper hưởng qua derive từ valve_ctrl); synonym không đổi (diff kiểm: 0 dòng ngoài descKeywords).
+- Test: `suggest.test.ts` **33 passed** (16 cũ + 17 mới: desc 4 + scoreRole 4 + scoreModel 6 + assign/conf 2 + descKeywords 1). Bảng 1–3 ghim đúng từng số trên dữ liệu fixture thật (M01 dol 0.6/vfd −0.1; MV01 vfd 0.9/dol −0.1; LT01 analog 0.8; BIN01 silo 0.6; M01 gán 6, thừa 5 kể cả dup row 81; confidence 0.80/0.95/0.65-missing-1). Lint + typecheck `@vcs/importers`/`@vcs/plant` xanh; plant models 109/109.
+- Lệch/quyết định tier A (ghi lại):
+  - **Hiệu đính Bảng 4 §31 (sai số tay của plan, KHÔNG đổi quy tắc):** Bảng tính dol 0.7 (thừa 0) — sai: SPEED_REF (AO) không đạt ≥ 0.4 cho role nào của dol (kind −0.5 khắp nơi) nên là thừa −0.1 theo đúng định nghĩa OQ-366 → dol **0.6**, vfd 0.6, chênh 0.0 → vẫn **review** (kết luận không đổi, tie còn chặt hơn). Test ghim 0.6/0.6. Bảng 4 trong plan giữ nguyên chữ, hiệu đính ghi ở đây.
+  - Bảng 4 viết tag `XX_M01_*` — `XX` không khớp area `[A-Z]{2}\d{2}` của pattern mặc định (rớt LCP, tách 2 nhóm) — test dùng `CR99_M01_*` để giữ đúng 1 nhóm; eqcode `M01` nên điểm không đổi.
+  - **Số float plan "0.5×0.6+0.5×1.0 = 0.7999999999999999" không tái hiện** với thứ tự phép tính của implementation (điểm thô 0.5+0.4−0.3 = 0.6000000000000001 → confidence đúng 0.8; literal cũng ra đúng 0.8 — đã kiểm bằng node). Giá trị vẫn nằm ngay biên làm tròn nên **eps 1e-9 giữ nguyên** (đúng tinh thần OQ-361); test ghim tính chất biên (|raw−0.6| < eps, conf+eps ≥ 0.8) thay vì literal sai.
+  - `normalizeDescText` gộp thêm `đ`→`d` (NFKD không phân rã `đ`): không có bước này, từ khóa vi chứa `đ` (đặt, đóng, điều khiển, đo, dừng) không bao giờ khớp mô tả ASCII trong fixture (`Dat toc do`, `Dung khan cap`) — chỉ ảnh hưởng +0.2 desc, không đổi gán.
+  - posRef: Bảng 6 gộp "posRef / posFb: vị trí, đặt vị trí" — tách theo nghĩa: posRef + `đặt vị trí`/`sollwert`, posFb + `phản hồi vị trí`/`istwert` (cả hai đều + `vị trí`/`stellung`).
+  - Test đầu sai 3 chỗ (truyền array `groupSignals()` thay vì 1 group vào `signalOf`) — sửa test, không sửa code.
+- OQ-361/362/363/364/366/367/369/370/377: code xong, đóng ở commit 6 (theo plan).
+
+#### Kết quả commit 4 — `feat(importers): suggest() + precision harness trên fixture`
+- `suggest.ts`: `scoreRole` refactor về helper chung + `scoreRoleDetails` (điểm + reasons: `exact synonym X` / `role override TOKEN → role` / `boundary synonym X` / `description keyword X` / `kind DI matches` / `kind AI ≠ DI`; hành vi không đổi — 33 test cũ vẫn xanh) + `suggest(inputs, convention, registry)` — bước 6 (§9.1): input tagDef null → unassignedTags (`invalid record (tagDef null)` + `: IO-Exxx` khi có errorCode — OQ-365); mỗi group: scoreModel → assignRoles → equipmentConfidence → status (tie chênh ≤ 0.1+eps → review bất kể confidence — OQ-367; còn lại confident ≥ 0.8−eps, review ≥ 0.5−eps, unmatched < 0.5); `modelCandidates` top-2 chỉ khi tie; lý do mồ côi theo OQ-378 (`no role ≥ 0.4`; `duplicate tag — role taken by row N` chỉ khi điểm tốt nhất ≥ 0.4 và role bị lấy bởi record cùng tag; còn lại `role R taken by TAG (row N)`); stats {totalTags, assignedTags, confident, review, unmatched}; suggestions sort theo equipmentId, unassignedTags sort theo (tag, row).
+- Thêm tier A: `SuggestedSignal` có thêm field trace `row: number` (cần để phân biệt tag trùng khi matching/apply; §9.1 cho phép thêm field trace).
+- `suggest.precision.test.ts` (mới): pipeline thật (CSV → normalize → suggest) so với `fixtures/expected.yaml`; assert (a) ≥160/177, (b) ≥48/50, (c) 300/300 địa chỉ, (d) counts P2.6 (errors 18, warnings 23, IO-E001 ×6, IO-E011 ×12, IO-W030 ×23, tổng 41); in bảng per-model/per-role + misses qua `process.stdout.write` (không `console.*` — no-console cấm ở package, `eslint-disable` bị `review:cheats` cấm); header ghi rõ số fixture là PROXY, không chứng minh 90% thật (X-003/OQ-380/TC-2).
+- **Kết quả đo (lần chạy đầu, 2026-11-26 ~14:12 +07): (a) 175/177 — đúng trần tính tay của plan; (b) 50/50; (c) 300/300; (d) khớp P2.6.** Per-model: analog_sensor 14/14, conveyor_simple 15/16, motor_dol 48/48, motor_vfd 32/32, silo_bin 12/12, switch_di 10/10, valve_ctrl 14/15, valve_onoff 30/30 (khớp Bảng 5: ctrl mất posFb, conveyor mất zeroSpeed). Status: confident=36, review=14, unmatched=0, assigned=176/300. 2 miss (a) đúng 2 tín hiệu plan đã tiên đoán không đạt được bằng grouping prefix: `CR01_MV02_REMOTE@91` (gt CR01_FCV01/posFb) và `CR01_SS01_TEST@296` (gt CR02_BC02/zeroSpeed) — cả hai đều unassigned, không gán sai. 14 review đều là confidence 0.70–0.79 (không phải tie — không có modelCandidates): nhóm switch đơn có tín hiệu thừa + desc không khớp (di 0.8 thay vì 1.0), M04 0.78, BC01/BC02 0.79/0.76, FCV01 0.75 (thiếu posFb).
+- Test: `suggest.test.ts` **40 passed** (33 cũ + 7 mới suggest()) + harness **1 passed** = **41 passed**. Lint + typecheck `@vcs/importers` xanh.
+- Lệch/quyết định tier A (ghi lại):
+  - Harness ban đầu import `zod` — `@vcs/importers` không có dependency zod trực tiếp (chỉ `@vcs/schemas` có) → "Cannot find package 'zod'". Sửa bằng `parseExpected()` thủ công (plain TS, không thêm dependency) thay vì thêm zod vào importers.
+  - `mkInput` test helper mặc định `tagDef: null` → suggest() lọc hết sang unassigned (đúng OQ-365) — sửa helper thành TagDef tối thiểu hợp lệ, không sửa code.
+  - 2 expectation test đầu sai: (1) tie test kỳ vọng conf 0.85 theo Bảng 4 cũ — với desc rỗng role chỉ 0.8 → conf 0.7; đổi sang desc thật (`Run command`/`Run feedback`) để conf = 0.8 (đủ confident theo số) và tie vẫn ép review — chứng minh đúng quy tắc OQ-367. (2) Nhóm TEMP đơn kỳ vọng `unmatched` — thực tế dol 0.4 vs silo_bin 0.3 chênh đúng 0.1 → tie ép review dù confidence 0 (OQ-367 không trừ nhóm rỗng; quy tắc đọc theo chữ). Test ghim hành vi này; nếu chủ sản phẩm muốn nhóm rỗng → unmatched thì là thay đổi quy tắc 1 dòng.
+  - Harness in bảng: plan viết `console.log` nhưng AGENTS.md §5 + `review:cheats` cấm `eslint-disable` và no-console là error ở package → in qua `process.stdout.write` (cách CLI/e2e vẫn dùng), đầu ra giống hệt.
+- OQ-365/367/378: code xong, đóng ở commit 6 (theo plan).
+
+#### Kết quả commit 5 — `feat(importers+cli): apply suggestion + vcs plant validate`
+- `packages/importers/src/io-list/apply.ts`: `buildApplySuggestions(oldTags, oldEquipment, suggestions, opts)` — hàm thuần, không ghi file, không đột biến đầu vào. Instance mới: params = `model.defaultParams` (spread) + signals map (thứ tự theo model roles) + controller lấy từ tag đầu tiên (sort theo tên); instance đã có: cập nhật signals (bỏ entry cũ dùng tag nay gán sang role khác để tránh 1 tag 2 role; role cũ không đụng thì giữ — không xóa gán tay), GIỮ params/model/source/sources/controller (OQ-370); model khác suggestion → giữ model cũ, validate sau áp dụng từ chối nếu role không khớp (lộ ra); tag không có trong tags.yaml → lỗi TAG-E003 + bỏ tín hiệu đó; suggestion 0 signal → skip (không tạo instance rỗng); model không tồn tại → skip + PL-E001. Tags: set equipment/role cho tín hiệu được áp dụng, sort bằng `compareTagDefs`; equipment sort theo id. Kiểm tra sau áp dụng: `validatePlantConfig` nguyên vẹn + `safetyNetCheck` + `equipmentFileSchema.safeParse` (OQ-371); diagnostics đã sort; có error → CLI từ chối ghi. `serializeEquipment` = YAML mảng top-level (như ví dụ P2.4). Tên hàm là `buildApplySuggestions` (pure builder; plan gọi `applySuggestions` — file ghi ở biên CLI, commit 6).
+- `apps/cli/src/commands/plant.ts`: `vcs plant validate [dir] [--json]` (OQ-376) + helper export `buildPlantConfig(model)` (dùng lại ở commit 6 cho `vcs suggest`): stepMs/plcScanMs từ config.simulation, seed từ config gốc; exit 0 ok (warning vẫn 0, in OK kèm diagnostics), 2 có error/không project/không plant, 3 sai tham số; `--json` in `{name, valid, equipment, tags, diagnostics}`. Đăng ký trong `index.ts` (subcommand `plant validate`, trước `plant run`).
+- Test: `apply.test.ts` **14 passed** (mới: params mặc định, giữ params khi merge, tag đổi role, model khác → giữ + từ chối, idempotence, skip model lạ/0 signal, TAG-E003, không đột biến, equipment lạ giữ nguyên, serialize round-trip) + `plant.test.ts` **20 passed** (14 cũ + 6 mới validate: motor-interlock exit 0 + OK + PL-W001, --json, thiếu dir → 3, thư mục không có → 3, hello-tags không plant → 2, model lạ → 2 + PL-E001). Lint + typecheck `@vcs/importers`/`@vcs/cli` xanh.
+- Lệch/quyết định tier A + phát hiện (ghi lại):
+  - **PL-E012 (phát hiện mới, engine thật):** role AI/AO (dataType ≠ Real) cần dải đo — params engMin/engMax, scaling trong tag, hoặc unit '%'. Test M01 đầu tiên đỏ vì tag CUR không có scaling → PL-E012; sửa test setup (thêm scaling 0–27648/0–10 A, đúng thực tế project) + thêm test ghim PL-E012. Hệ quả: `vcs suggest --accept-confident` trên project có tag AI không scaling sẽ bị từ chối với PL-E012 — đúng hành vi "lộ ra, không im lặng" (người dùng bổ sung scaling/engMin-engMax rồi chạy lại); apply KHÔNG tự bịa dải đo.
+  - **Params bắt buộc không có trong defaultParams (OQ-284/287):** instance MỚI analog_sensor (thiếu engMin/engMax/unit) và switch_di (thiếu kind) bị validate từ chối PL-E001 — hành vi theo đúng plan (params mặc định + từ chối khi lỗi), đã ghim bằng test. Hệ quả tương tự PL-E012: accept-confident từ chối cả project có sensor/switch mới cho tới khi params được điền (đề xuất follow-up: điền engMin/engMax/unit từ scaling của tag, hoặc cờ CLI nhập params — cần quyết, không làm ở P2.7).
+  - `plant validate` in OK: lúc đầu chỉ in OK khi diagnostics rỗng → ví dụ motor-interlock (3 PL-W001) không có dòng tổng kết; sửa thành in OK khi không có error (warning vẫn 0) — đúng ngữ nghĩa exit code.
+  - `buildPlantConfig`: `plcScanMs` sau transform luôn là number (mặc định = stepMs, project.ts:59) — bỏ conditional spread (linter `no-unnecessary-condition`).
+- OQ-370/371/376: code xong, đóng ở commit 6 (theo plan).
+
+#### Kết quả commit 6 — `feat(cli): vcs suggest [--accept-confident] + smoke 20k (chốt §12)`
+- `apps/cli/src/commands/suggest.ts`: `vcs suggest [dir] [--accept-confident] [--json]` (OQ-372) — dir mặc định cwd; đọc `tags.yaml` + `plant/naming.yaml` (thiếu → mặc định + warn stderr, lỗi → exit 2); `tagDefsToInputs` → `suggest()` → in bảng text (equipment/model/conf/status/signals + ứng viên tie + role thiếu + unassigned) hoặc `--json` (SuggestResult, kèm `apply` khi accept); dry-run KHÔNG ghi file; `--accept-confident` chỉ áp dụng status confident qua `buildApplySuggestions` (stepMs/seed/plcScanMs từ project) → lỗi validate → in diagnostics + từ chối ghi, exit 1; ok → ghi `tags.yaml` + `plant/equipment.yaml`, in `apply: N thiết bị (...), ghi ...`. Exit 0/1/2/3 đúng OQ-372. Đăng ký trong `index.ts`.
+- `apps/cli/src/commands/suggest.test.ts` **9 passed**: dry-run motor-interlock exit 0 + bảng (ghi file byte-identical), --json parse được, thư mục không có → 3, accept trên motor-interlock 0 confident → không ghi, accept M01 confident → ghi equipment.yaml + tags.yaml + chạy lại idempotent, accept analog_sensor thiếu params → exit 1 + PL-E001 + không ghi file, naming.yaml lỗi → 2, project hỏng → 2.
+- `packages/importers/src/io-list/suggest.smoke.test.ts` (mới): smoke 20k pipeline đầy đủ read(CSV)→mapping→normalize→validate→suggest→diff trên file sinh `signalCount: 20000`, in phân rã từng chặng, assert tổng < 10000 ms. **Kết quả (2 lần chạy): tổng 2.942 ms / 3.061 ms** — read 77, mapping 26–34, normalize 66–80, validate 207–220, suggest 2.380–2.435, diff 149–172; signals 20000, suggestions 4210, assigned 20000/20000, diff added 20000. Ngưỡng §12 (M2 §12: XLSX 20k → ≤ 10 s) đã có sẵn trong spec — P2.7 "chốt" bằng đo: pipeline XLSX đo riêng 1 lần (script tạm, readXlsxFile): **tổng 3.962 ms** (read 1.062, mapping 73, normalize 94, validate 147, suggest 2.451, diff 135) — đạt cả đúng chữ XLSX.
+- **TC-3 nổ rồi xử lý xong (smoke đỏ → tối ưu, KHÔNG hạ ngưỡng):** lần đo đầu tổng **11.456 ms / 10.411 ms** (vượt 10 s), chặng nóng là `suggest()` 9.859 ms (95%). `node --cpu-prof` chứng minh: `normalizeDescText` **45,9%** CPU — mô tả được chuẩn hóa lại cho mỗi từ khóa × mỗi role × mỗi model (1 tín hiệu chấm ~36 lần). Tối ưu trong `suggest.ts` (chỉ bớt tính thừa, không đổi điểm số): mô tả chuẩn hóa 1 lần/tín hiệu/nhóm (`prepareGroup`, dùng chung cho cả 9 model ở scoreModel + assignRoles); từ khóa chuẩn hóa 1 lần/RoleDef (WeakMap memoize thuần); `assignRoles` tính reasons cùng lúc với điểm, `suggest()` dùng lại thay vì tính lại. **Kết quả: suggest 9.859 → 2.380 ms (4,1×), tổng 10.411 → 2.942 ms.** Precision harness đo lại sau tối ưu: vẫn **(a) 175/177, (b) 50/50, (c) 300/300, (d) khớp P2.6** — tối ưu không đổi hành vi.
+- Lệch/quyết định tier A + phát hiện (ghi lại):
+  - **OQ-381 (mới, tier B, MỞ): synonym gap `FB` trần.** `RUN_FB` (ví dụ motor-interlock dùng RUN_FB, không phải RUN_FBK) → roleToken `FB` không có trong synonyms runFb → chỉ 0.2 (kind) → nhóm RUN gợi ý silo_bin thay vì motor_dol, 0 tag gán. Dry-run `vcs suggest` trên motor-interlock: **8 tags → 7 thiết bị (0 confident, 6 review, 1 unmatched), 0 tags gán** — đúng theo spec hiện hành (synonym là nguồn duy nhất, OQ-301); test ghim đúng hành vi này (đã sửa 2 expectation đầu sai: kỳ vọng RUN → motor_dol). KHÔNG đổi synonym ở P2.7 (plan cấm); OQ-381 ghi trong open-questions.md + unit test ghim `scoreRole(runFb, FB) = 0.2`. START/STOP dính tiền tố `ST` → analog_sensor là quy tắc prefix dài nhất OQ-369 trên từ tự do (không phải lỗi).
+  - Smoke test import `scripts/gen-io-fixture.js` bằng đường dẫn tương đối (`../../../../scripts/…`) — depcheck exclude file `.test.ts` nên không vi phạm đồ thị package.
+  - Từ chối apply (exit 1): chỉ in diagnostics + dòng từ chối, không in bảng suggest (tránh gây hiểu lầm là đã áp dụng).
+- OQ-372/373: code xong, đóng ở commit 7 (docs, theo plan). OQ-381 mới, giữ MỞ.
+
+#### Kết quả commit 7 — `docs(m2): P2.7 kết quả + đóng OQ-361…379 (X-003 chọn B, acceptance thật UNVERIFIED)`
+
+**X-003 QUYẾT ĐỊNH B (2026-11-26 21:55, owner):** chưa có file I/O thật lúc này — hoãn đo acceptance. P2.7 merge với bằng chứng fixture; acceptance thật ghi **UNVERIFIED** tới khi có dữ liệu, M2 ký sau. Vì B, "commit acceptance" (TC-2) chỉ còn là ghi nhận hoãn đo (commit này) — **KHÔNG đo/tuyên bố acceptance 90% trên dữ liệu thật, KHÔNG hiệu chỉnh naming.yaml/synonym theo dữ liệu thật** (không có dữ liệu để hiệu chỉnh). OQ-380 giữ MỞ (dữ liệu thật vẫn là dependency tới khi có file hoặc M2 ký). OWNER-INBOX mục X-003/P2.7 đã tick B + ngày quyết định.
+
+**Gate cuối (cây live, HEAD `cd52c2d`, 2026-11-26 ~22:05 +07) — XANH toàn bộ:**
+- `pnpm lint` — EXIT 0
+- `pnpm typecheck` — EXIT 0
+- `pnpm depcheck` — EXIT 0 (`✔ no dependency violations found (179 modules, 414 dependencies cruised)`)
+- `pnpm test` — EXIT 0: **Test Files 124 passed (124); Tests 2845 passed (2845)**; coverage importers lines **97,21%** (1359/1398; ngưỡng 85); toàn repo lines 89,31%
+- `pnpm review:cheats` — EXIT 0
+- `pnpm docs:diagnostics --check` — EXIT 0
+- `pnpm build` — EXIT 0 (Tasks: 3 successful, 3 total)
+- **Test mới P2.7: 84** (naming 12 + suggest.test.ts 41 + precision harness 1 + apply.test.ts 14 + plant.test.ts +6 + CLI suggest.test.ts 9 + smoke 1) — đạt target plan ≥ 80. Tổng 2761 → **2845**.
+
+**Precision fixture (PROXY — không chứng minh 90% thật, xem OQ-380):** harness `suggest.precision.test.ts` trên fixture 300: **(a) 175/177** equipment+role (ngưỡng ≥ 160, đúng trần tính tay 175), **(b) 50/50** model (ngưỡng ≥ 48), **(c) 300/300** địa chỉ, **(d) counts khớp P2.6** (errors 18, warnings 23, IO-E001 ×6, IO-E011 ×12, IO-W030 ×23). Status: confident 36, review 14, unmatched 0, assigned 176/300. 2 miss đúng như dự đoán (không gán sai): `CR01_MV02_REMOTE@91`, `CR01_SS01_TEST@296`.
+
+**Smoke 20k (§12, OQ-373) — chốt:** CSV pipeline đầy đủ: wall standalone **2.942/3.061 ms**; XLSX đo riêng **3.962 ms** — đều ≤ 10 s. **Fix sau commit 6 (`cd52c2d`):** khẳng định smoke chuyển từ wall-clock sang **CPU time** (`process.cpuUsage`) — wall-clock dưới suite song song đo cả thời gian chờ CPU (suggest 2.380 ms standalone → 14.613 ms trong suite, ×6, làm test đỏ giả trên VM 1,5 CPU); pipeline đơn luồng nên CPU ≈ wall trên máy yên (standalone: wall 4.475 ms, CPU 4.568 ms). **Ngưỡng §12 vẫn 10 s, không hạ.** Trong gate cuối: **TỔNG CPU 7.331 ms** (wall trong suite 15.9 s do tải song song — chỉ tham khảo), signals 20000, suggestions 4210, assigned 20000/20000.
+
+**Gate đỏ giả gặp trong quá trình chạy gate (nguyên nhân gốc, không sửa kỳ vọng):**
+- Smoke wall-clock đỏ 2 lần chạy gate đầu (17.905 ms trong suite) → fix `cd52c2d` trên (CPU time); gate cuối xanh.
+- `sim-service.test.ts` 8 ms-slice (`expected 55 to be greater than 100`) đỏ 1/4 lần chạy gate đầy đủ — flake đã biết họ OQ-055 dưới tải VM; **không sửa kỳ vọng** (quyết định owner giữ ngưỡng); test này xanh ở gate cuối và khi chạy riêng.
+- `tags.test.ts` (heap < 1 MB) đỏ khi chạy `vitest` trực tiếp — lỗi cách gọi của implementer (thiếu `NODE_OPTIONS=--expose-gc` mà script `test` có); chạy qua `pnpm run test` thì xanh.
+
+**OQ:** đóng 361…379 (19 mục, đã áp dụng mặc định commit 1–6) + 372/373 (code xong commit 6). **MỞ:** OQ-380 (X-003, tier C — B đã chọn, vẫn mở chờ dữ liệu thật hoặc M2 ký), OQ-381 (tier B — synonym gap `FB` trần, xem commit 6).
+
+**Lệch so với plan:**
+- Smoke khẳng định trên CPU time thay wall-clock (ngưỡng 10 s không đổi) — xem trên.
+- Thêm 1 commit fix `cd52c2d` giữa commit 6 và commit 7 (smoke CPU time).
+- Phạm vi commit 7 đổi theo quyết định B của owner: làm luôn commit docs cuối ghi B/UNVERIFIED thay vì dừng trước commit acceptance như brief ban đầu (với B, acceptance commit chỉ còn là ghi nhận hoãn đo).
+- Không lệch khác: Bảng 4 (dol 0.6 không phải 0.7), float 0.8, `đ`→`d`, tách posRef/posFb đã ghi ở commit 3; PL-E012/PL-E001, tie-review đã ghi ở commit 5/4.
+
+**Điểm cần parent kiểm (trước PR):**
+- OQ-381: có thêm `FB` vào synonyms role *Fb không (đổi dữ liệu theo quy ước OQ-301 — cần quyết định, không làm trong P2.7).
+- `--accept-confident` từ chối khi instance mới analog_sensor/switch_di thiếu params (PL-E001, OQ-284/287) và khi role AI/AO thiếu range (PL-E012) — đề xuất follow-up (điền engMin/engMax/unit từ tag scaling, hoặc cờ params CLI) cần quyết định.
+- Tie rule (OQ-367) cũng ép review cho nhóm không gán được role nào (confidence 0 → review, không phải unmatched) — đọc literal, test đã ghim.
+- X-003/B đã ghi vào OWNER-INBOX + OQ-380 + STATE (commit 7 này); không còn gì chặn merge P2.7.

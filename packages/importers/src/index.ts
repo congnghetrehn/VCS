@@ -45,7 +45,48 @@ export type { DeriveColumns, NormalizeOptions, NormalizedSignal } from './io-lis
 export { isEmptyRow, recordRowNumbers, resolveSeverity, validateImport } from './io-list/validate.js';
 export type { AssignedTag, ValidateOptions, ValidateResult, ValidateStats } from './io-list/validate.js';
 export { diffTags, tagFields } from './io-list/diff.js';
+export { loadNamingConvention, NamingConventionError, parseNamingConvention } from './io-list/naming.js';
+export type { LoadNamingConventionResult } from './io-list/naming.js';
+export {
+  assignRoles,
+  clamp01,
+  descKeywordMatches,
+  eqcodeLetters,
+  equipmentConfidence,
+  firstToken,
+  groupSignals,
+  normalizeDescText,
+  normalizedSignalsToInputs,
+  parseTag,
+  scoreModel,
+  scoreRole,
+  scoreRoleDetails,
+  stripEquipmentPrefix,
+  SUGGEST_EPS,
+  suggest,
+  tagDefsToInputs,
+  truncateToSeparator,
+} from './io-list/suggest.js';
+export type {
+  AssignedSignal,
+  AssignRolesResult,
+  GroupedSignal,
+  ModelScore,
+  ParsedTag,
+  RoleScoreDetails,
+  SignalGroup,
+  SuggestedSignal,
+  Suggestion,
+  SuggestInput,
+  SuggestResult,
+} from './io-list/suggest.js';
 export type { DiffOptions, DiffResult, RenameCandidate, SkippedManual, TagChange } from './io-list/diff.js';
 export { applyCommit, compareTagDefs, safetyNetCheck, serializeTags } from './io-list/commit.js';
+export { buildApplySuggestions, serializeEquipment } from './io-list/apply.js';
+export type {
+  ApplySuggestionOptions,
+  ApplySuggestionsResult,
+  SkippedSuggestion,
+} from './io-list/apply.js';
 export { buildReport, escapeHtml, reportToHtml, reportToJson } from './io-list/report.js';
 export type { ImportReport, ImportReportStats } from './io-list/report.js';

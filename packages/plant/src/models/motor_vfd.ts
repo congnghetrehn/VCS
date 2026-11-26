@@ -57,7 +57,7 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
       dataType: 'Bool',
       description: 'Lệnh chạy từ PLC',
       synonyms: ['RUN_CMD', 'START_CMD', 'RUN', 'START', 'CMD'],
-      descKeywords: ['run', 'start'],
+      descKeywords: ['run', 'start', 'chạy', 'khởi động', 'lauf', 'einschalten'],
     },
     {
       role: 'speedRef',
@@ -66,7 +66,7 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
       unit: '%',
       description: 'Tốc độ đặt (%)',
       synonyms: ['SPEED_REF', 'SPEED_SP', 'SPEED_SET', 'SOLLWERT'],
-      descKeywords: ['speed', 'setpoint', 'reference'],
+      descKeywords: ['speed', 'setpoint', 'reference', 'tốc độ đặt', 'đặt tốc độ', 'drehzahl', 'sollwert'],
     },
     {
       role: 'runFb',
@@ -74,7 +74,7 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
       dataType: 'Bool',
       description: 'Phản hồi đang chạy',
       synonyms: ['RUN_FB', 'RUNNING', 'RUN_ST', 'AUX', 'RUN_FBK'],
-      descKeywords: ['run', 'feedback'],
+      descKeywords: ['run', 'feedback', 'phản hồi chạy', 'đang chạy', 'rückmeldung', 'läuft'],
     },
     {
       role: 'speedFb',
@@ -83,7 +83,7 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
       unit: '%',
       description: 'Tốc độ thực (%)',
       synonyms: ['SPEED_FB', 'SPEED', 'SPEED_ACT', 'SPEED_FBK', 'ISTWERT'],
-      descKeywords: ['speed', 'feedback'],
+      descKeywords: ['speed', 'feedback', 'tốc độ thực', 'phản hồi tốc độ', 'drehzahl', 'istwert'],
     },
     {
       role: 'ready',
@@ -92,7 +92,7 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
       optional: true,
       description: 'Sẵn sàng (không lỗi, không mất truyền thông)',
       synonyms: ['READY', 'RDY', 'MCB_OK', 'BREAKER_ON'],
-      descKeywords: ['ready', 'breaker'],
+      descKeywords: ['ready', 'breaker', 'sẵn sàng', 'bereit', 'betriebsbereit'],
     },
     {
       role: 'vfdFaultOk',
@@ -101,7 +101,7 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
       optional: true,
       description: 'Không lỗi biến tần (đảo theo faultNC)',
       synonyms: ['VFD_OK', 'VFD_FAULT_OK', 'DRIVE_OK', 'FAULT_OK'],
-      descKeywords: ['vfd', 'fault', 'drive'],
+      descKeywords: ['vfd', 'fault', 'drive', 'lỗi biến tần', 'umrichter'],
     },
     {
       role: 'remote',
@@ -110,7 +110,7 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
       optional: true,
       description: 'Chế độ điều khiển từ xa',
       synonyms: ['REMOTE', 'REM', 'AUTO_SEL'],
-      descKeywords: ['remote', 'auto'],
+      descKeywords: ['remote', 'auto', 'từ xa', 'điều khiển xa', 'fern'],
     },
     {
       role: 'currentFb',
@@ -120,7 +120,7 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
       optional: true,
       description: 'Dòng điện (A)',
       synonyms: ['CUR', 'CURRENT', 'AMP', 'I_ACT'],
-      descKeywords: ['current', 'amp'],
+      descKeywords: ['current', 'amp', 'dòng', 'dòng điện', 'strom'],
     },
   ],
   paramsSchema: motorVfdParamsSchema,

@@ -5,7 +5,8 @@
 import { Command } from 'commander';
 import { goldenRunCommand } from './golden.js';
 import { importIoCommand } from './import-io.js';
-import { plantRunCommand } from './plant.js';
+import { plantRunCommand, plantValidateCommand } from './plant.js';
+import { suggestCommand } from './suggest.js';
 import { runCommand } from './run.js';
 import { serveCommand } from './serve.js';
 import { validateCommand } from './validate.js';
@@ -112,7 +113,25 @@ export function createProgram(): Command {
       process.exitCode = await importIoCommand(file, opts);
     });
 
+  program
+    .command('suggest')
+    .description('Gợi ý thiết bị từ tags.yaml (M2 §10; exit 0 ok, 1 apply bị từ chối, 2 lỗi, 3 sai tham số)')
+    .argument('[dir]', 'thư mục dự án (mặc định cwd)')
+    .option('--accept-confident', 'áp dụng suggestion confident (ghi equipment.yaml + tags.yaml)')
+    .option('--json', 'in JSON thay cho text')
+    .action(async (dir: string | undefined, opts: { acceptConfident?: boolean; json?: boolean }) => {
+      process.exitCode = await suggestCommand(dir, opts);
+    });
+
   const plant = program.command('plant').description('Lệnh liên quan tới plant vòng kín (M2 §11.4)');
+  plant
+    .command('validate')
+    .description('Kiểm tra cấu hình plant (exit 0 ok, 2 có error, 3 sai tham số)')
+    .argument('[dir]', 'thư mục dự án')
+    .option('--json', 'in JSON thay cho text')
+    .action(async (dir: string | undefined, opts: { json?: boolean }) => {
+      process.exitCode = await plantValidateCommand(dir, opts);
+    });
   plant
     .command('run')
     .description('Chạy kịch bản vòng kín (exit 0 pass, 1 có expect fail, 2 không chạy được, 3 sai tham số)')

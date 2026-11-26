@@ -1,0 +1,28 @@
+# plant/naming.yaml — examples/motor-interlock (P2.7, M2 §4.3).
+# Quy ước đặt tên mặc định (cement-default) cho auto-suggest.
+convention: cement-default
+tagPattern: "^(?<area>[A-Z]{2}\\d{2})[_-](?<eqcode>[A-Z]{1,4}\\d{2,3})[_-](?<role>[A-Z0-9_]+)$"
+equipmentIdTemplate: "{area}_{eqcode}"
+equipmentCodeToModel: # theo tiền tố chữ của eqcode (so khớp dài nhất trước)
+  MV: motor_vfd
+  M: motor_dol
+  XV: valve_onoff
+  FCV: valve_ctrl
+  CV: valve_ctrl
+  DMP: damper
+  PT: analog_sensor
+  TT: analog_sensor
+  LT: analog_sensor
+  FT: analog_sensor
+  WT: analog_sensor
+  ST: analog_sensor
+  LSH: switch_di
+  LSL: switch_di
+  ZS: switch_di
+  SS: switch_di
+  PC: switch_di # pull-cord
+  BIN: silo_bin
+  SILO: silo_bin
+  BC: conveyor_simple
+roleOverrides: # bổ sung synonym theo dự án (suffix -> role), mở rộng bộ synonym của model
+  RUN_ST: runFb

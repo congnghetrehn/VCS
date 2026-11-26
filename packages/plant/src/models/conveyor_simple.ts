@@ -67,7 +67,7 @@ export const conveyorSimpleModel: EquipmentModel<ConveyorSimpleParams, ConveyorS
           optional: true,
           description: 'Băng đứng yên (beltSpeed < ngưỡng)',
           synonyms: ['ZERO_SPEED', 'ZERO_SPD', 'ZS', 'NO_SPEED', 'BELT_STOP'],
-          descKeywords: ['zero', 'speed', 'belt'],
+          descKeywords: ['zero', 'speed', 'belt', 'dừng', 'đứng yên', 'stillstand'],
         },
         {
           role: 'pullCord',
@@ -76,7 +76,7 @@ export const conveyorSimpleModel: EquipmentModel<ConveyorSimpleParams, ConveyorS
           optional: true,
           description: 'Dây kéo khẩn cấp (NC: true = bình thường)',
           synonyms: ['PULL_CORD', 'PULLCORD', 'CORD_SWITCH', 'EMERGENCY_PULL'],
-          descKeywords: ['pull', 'cord'],
+          descKeywords: ['pull', 'cord', 'giật', 'khẩn cấp', 'notzug', 'reißleine'],
         },
       ],
       defaultParams: {

@@ -50,7 +50,7 @@ export const analogSensorModel: EquipmentModel<AnalogSensorParams, AnalogSensorS
       dataType: 'Int',
       description: 'Giá trị đo (đơn vị theo param unit)',
       synonyms: ['RAW', 'PV', 'VALUE', 'MEAS'],
-      descKeywords: ['measure', 'sensor', 'value'],
+      descKeywords: ['measure', 'sensor', 'value', 'đo', 'giá trị đo', 'messwert'],
     },
   ],
   paramsSchema: analogSensorParamsSchema,

@@ -54,7 +54,7 @@ export const motorDolModel: EquipmentModel<MotorDolParams, MotorDolState> = {
       dataType: 'Bool',
       description: 'Lệnh chạy từ PLC',
       synonyms: ['RUN_CMD', 'START_CMD', 'RUN', 'START', 'CMD', 'BETRIEB_BEFEHL'],
-      descKeywords: ['run', 'start'],
+      descKeywords: ['run', 'start', 'chạy', 'khởi động', 'lauf', 'einschalten'],
     },
     {
       role: 'runFb',
@@ -62,7 +62,7 @@ export const motorDolModel: EquipmentModel<MotorDolParams, MotorDolState> = {
       dataType: 'Bool',
       description: 'Phản hồi đang chạy',
       synonyms: ['RUN_FB', 'RUNNING', 'RUN_ST', 'AUX', 'RUN_FBK', 'RUECKMELDUNG'],
-      descKeywords: ['run', 'feedback'],
+      descKeywords: ['run', 'feedback', 'phản hồi chạy', 'đang chạy', 'rückmeldung', 'läuft'],
     },
     {
       role: 'ready',
@@ -71,7 +71,7 @@ export const motorDolModel: EquipmentModel<MotorDolParams, MotorDolState> = {
       optional: true,
       description: 'Sẵn sàng (MCB đóng, không lỗi)',
       synonyms: ['READY', 'RDY', 'MCB_OK', 'BREAKER_ON'],
-      descKeywords: ['ready', 'breaker'],
+      descKeywords: ['ready', 'breaker', 'sẵn sàng', 'bereit', 'betriebsbereit'],
     },
     {
       role: 'remote',
@@ -80,7 +80,7 @@ export const motorDolModel: EquipmentModel<MotorDolParams, MotorDolState> = {
       optional: true,
       description: 'Chế độ điều khiển từ xa',
       synonyms: ['REMOTE', 'REM', 'AUTO_SEL'],
-      descKeywords: ['remote', 'auto'],
+      descKeywords: ['remote', 'auto', 'từ xa', 'điều khiển xa', 'fern'],
     },
     {
       role: 'overloadOk',
@@ -89,7 +89,7 @@ export const motorDolModel: EquipmentModel<MotorDolParams, MotorDolState> = {
       optional: true,
       description: 'Không quá tải (đảo theo overloadNC)',
       synonyms: ['OVL_OK', 'OL_OK', 'THERMAL_OK', 'OVERLOAD_OK', 'OVL'],
-      descKeywords: ['overload', 'thermal'],
+      descKeywords: ['overload', 'thermal', 'quá tải', 'überlast'],
     },
     {
       role: 'currentFb',
@@ -99,7 +99,7 @@ export const motorDolModel: EquipmentModel<MotorDolParams, MotorDolState> = {
       optional: true,
       description: 'Dòng điện (A)',
       synonyms: ['CUR', 'CURRENT', 'AMP', 'I_ACT'],
-      descKeywords: ['current', 'amp'],
+      descKeywords: ['current', 'amp', 'dòng', 'dòng điện', 'strom'],
     },
   ],
   paramsSchema: motorDolParamsSchema,
