@@ -2303,3 +2303,33 @@ Còn thiếu báo cáo gate cuối của implementer — chưa về tới TraMus
 ---
 Log tới thời điểm 2026-11-26 16:15 +07.
 ---
+
+## 2026-11-26 16:47 +07 — Em My
+
+Em My báo: P2.4 xong phần code, anh Tiến ạ.
+
+**ĐÃ CHẠY:** commit 10 (ngưỡng 1500), 11 (server + PlantFaultPanel + e2e), 12 (semantics §23) — xong hết. TraMuse kiểm gate độc lập trên bản sao sạch: **11/11 PASS** — test 2440/2440, e2e 15 passed + 1 skipped, plant trung vị 2572 (≥1500), vòng kín 1351 (≥1000, xanh trở lại), golden 78/78, hash demo A–D giống hệt. Parity server/UI kết luận **ĐẠT** theo §11.4/§14.3. A+B giữ nguyên trong cây.
+
+Còn một việc TraMuse tự sửa trước PR: `ci.yml` trên nhánh vẫn là bản trước gói A — đã rebase lên bản develop (commit 13) để không mất gói tiết kiệm phút CI. Code không đổi.
+
+PR đang đẩy lên GitHub (78 file, 2 đợt — đợt 1 đang chạy trên trình duyệt cloud, chưa mở PR). Xong đợt 2 là TraMuse mở PR, chờ CI xanh rồi merge — merge xong báo anh.
+
+---
+Log tới thời điểm 2026-11-26 16:47 +07.
+---
+
+## 2026-11-26 17:15 +07 — TraMuse
+
+TraMuse báo: P2.4 đã merge vào develop, anh Tiến ạ.
+
+**ĐÃ CHẠY:** [PR #35](https://github.com/congnghetrehn/VCS/pull/35) — CI xanh (check + test ubuntu + e2e; Windows/bench skip theo gói A), merge commit 0c4308f lúc 17:15, 78 file, +6133/−302. TraMuse kiểm lại trên develop: bench/plant.bench.ts và ci.yml giống hệt local (sha256 khớp), ngưỡng plant 1500 đã lên develop, gói A còn nguyên.
+
+Gate đã kiểm: test 2440/2440, e2e 15+1, plant 2572, vòng kín 1351. Parity server/UI: ĐẠT; rủi ro còn lại: hash UI chưa được pin (tier C riêng, không chặn).
+
+Một chi tiết nhỏ: lúc mở PR, compare hiện +6133 thay vì +6129 trong brief — TraMuse đo lại bằng git: +4 là 4 dòng ghi chú commit 13 trong STATE.md, không phải lỗi nội dung.
+
+Tiếp theo: P2.5 (đọc CSV/XLSX) đang làm plan trước, theo lệnh triển khai liên tục.
+
+---
+Log tới thời điểm 2026-11-26 17:15 +07.
+---
