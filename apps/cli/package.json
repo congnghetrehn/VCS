@@ -2,6 +2,7 @@
   "dependencies": {
     "@fastify/static": "10.1.10",
     "@fastify/websocket": "11.3.7",
+    "@vcs/importers": "workspace:*",
     "@vcs/kernel": "workspace:*",
     "@vcs/plant": "workspace:*",
     "@vcs/project": "workspace:*",

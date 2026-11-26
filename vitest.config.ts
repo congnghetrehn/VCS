@@ -22,6 +22,8 @@ export default defineConfig({
         'packages/vendor-siemens/src/**': { lines: 85 },
         // P2.1, OQ-251: package plant mới, bằng kernel/schemas.
         'packages/plant/src/**': { lines: 85 },
+        // P2.5, §29: package importers mới, bằng kernel/schemas.
+        'packages/importers/src/**': { lines: 85 },
       },
     },
   },

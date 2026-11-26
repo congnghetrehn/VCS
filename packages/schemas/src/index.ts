@@ -39,8 +39,8 @@ export {
   faultInfoSchema,
 } from './fault.js';
 export type { SignalFaultType, FaultTarget, FaultTiming, FaultRequest, FaultInfo } from './fault.js';
-export { importProfileSchema } from './import-profile.js';
-export type { ImportProfile } from './import-profile.js';
+export { canonicalFieldSchema, importProfileSchema, ruleSeveritySchema, transformStepSchema } from './import-profile.js';
+export type { CanonicalField, ImportProfile, RuleSeverity, TransformStep } from './import-profile.js';
 export { namingConfigSchema } from './naming.js';
 export type { NamingConfig } from './naming.js';
 export { parseYamlWithSchema, levenshtein, zodIssueParams } from './yaml.js';
