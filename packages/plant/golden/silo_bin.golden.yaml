@@ -1,0 +1,84 @@
+# Golden silo_bin (M2 §7.7, §11.1 — bảng F, STATE §26).
+# Named sources inflow/outflow (t/h) qua field `sources` của case.
+# expect: levelRaw đọc tag AI về eng; levelPct/massT là observable.
+model: silo_bin
+stepMs: 10
+seed: 42
+cases:
+  - id: inflow-basic
+    description: Bảng F — inflow 3600 t/h (0.01 t/bước), mass 31.01 @1000, 90.0 @59990.
+    sources: { inflow: { kind: const, value: 3600 }, outflow: { kind: const, value: 0 } }
+    steps:
+      - t: 1000
+        expect: { massT: 31.01, levelPct: 31.01, levelRaw: 31.01, levelHigh: false, levelLow: false }
+      - t: 59990
+        expect: { massT: 90, levelPct: 90, levelRaw: 90, levelHigh: true, levelLow: false }
+      - t: 60000
+        expect: { massT: 90.01, levelPct: 90.01, levelRaw: 90.01, levelHigh: true }
+  - id: outflow-basic
+    description: Bảng F — outflow 3600 t/h, mass 10.0 @19990 (levelLow=true), 9.99 @20000.
+    sources: { inflow: { kind: const, value: 0 }, outflow: { kind: const, value: 3600 } }
+    steps:
+      - t: 19990
+        expect: { massT: 10, levelPct: 10, levelRaw: 10, levelLow: true, levelHigh: false }
+      - t: 20000
+        expect: { massT: 9.99, levelPct: 9.99, levelRaw: 9.99, levelLow: true }
+  - id: highhigh
+    description: Inflow 3600 — mass 97.0 @66990, levelHigh + levelHighHigh true.
+    sources: { inflow: { kind: const, value: 3600 }, outflow: { kind: const, value: 0 } }
+    steps:
+      - t: 66990
+        expect: { massT: 97, levelPct: 97, levelRaw: 97, levelHigh: true, levelHighHigh: true }
+  - id: clamp-full
+    description: Mass kẹp tại capacity 100 — 100.0 @69990, giữ 100 @70000.
+    sources: { inflow: { kind: const, value: 3600 }, outflow: { kind: const, value: 0 } }
+    steps:
+      - t: 69990
+        expect: { massT: 100, levelPct: 100, levelRaw: 100, levelHigh: true, levelHighHigh: true }
+      - t: 70000
+        expect: { massT: 100, levelPct: 100, levelRaw: 100 }
+  - id: clamp-empty
+    description: Mass kẹp tại 0 — 0.0 @29990, giữ 0 @30000.
+    sources: { inflow: { kind: const, value: 0 }, outflow: { kind: const, value: 3600 } }
+    steps:
+      - t: 29990
+        expect: { massT: 0, levelPct: 0, levelRaw: 0, levelLow: true }
+      - t: 30000
+        expect: { massT: 0, levelPct: 0, levelRaw: 0 }
+  - id: lag
+    description: levelLagMs 1000 — levelPct trễ sau mass (30.0001/30.0064/30.1125/30.3774/34.0216).
+    params: { levelLagMs: 1000 }
+    sources: { inflow: { kind: const, value: 3600 }, outflow: { kind: const, value: 0 } }
+    steps:
+      - t: 0
+        expect: { massT: 30.01, levelPct: 30.0001, levelRaw: 30.0001 }
+      - t: 100
+        expect: { massT: 30.11, levelPct: 30.0064, levelRaw: 30.0064 }
+      - t: 500
+        expect: { massT: 30.51, levelPct: 30.1125, levelRaw: 30.1125 }
+      - t: 1000
+        expect: { massT: 31.01, levelPct: 30.3774, levelRaw: 30.3774 }
+      - t: 5000
+        expect: { massT: 35.01, levelPct: 34.0216, levelRaw: 34.0216 }
+  - id: hysteresis-high-off
+    description: "high hysteresis — init 90, outflow: 88.99 @1000 giữ true, 87.99 @2000 tắt."
+    params: { initialLevelPct: 90 }
+    sources: { inflow: { kind: const, value: 0 }, outflow: { kind: const, value: 3600 } }
+    steps:
+      - t: 0
+        expect: { massT: 89.99, levelPct: 89.99, levelHigh: true }
+      - t: 1000
+        expect: { massT: 88.99, levelPct: 88.99, levelHigh: true }
+      - t: 2000
+        expect: { massT: 87.99, levelPct: 87.99, levelHigh: false }
+  - id: signal-wirebreak-level
+    description: Signal wireBreak trên levelRaw — tag raw=32767 (eng 118.51), levelPct giữ nguyên.
+    sources: { inflow: { kind: const, value: 3600 }, outflow: { kind: const, value: 0 } }
+    steps:
+      - t: 0
+        expect: { massT: 30.01, levelPct: 30.01, levelRaw: 30.01 }
+      - t: 100
+        expect: { massT: 30.11, levelPct: 30.11, levelRaw: 30.11 }
+        fault: { signal: { role: levelRaw, type: wireBreak } }
+      - t: 110
+        expect: { massT: 30.12, levelPct: 30.12, levelRaw: 118.51 }

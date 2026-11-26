@@ -1,0 +1,152 @@
+# Golden analog_sensor (M2 §7.5, §11.1 — bảng D/J, STATE §26).
+# expect viết bằng eng: role raw đọc về eng qua tag scaling (OQ-257/299);
+# observable pv = eng chưa cộng noise. Giá trị noise tính bằng script tham
+# chiếu độc lập /tmp/p25-ref.mjs (mulberry32 seed 42 + Box-Muller).
+model: analog_sensor
+stepMs: 10
+seed: 42
+cases:
+  - id: base
+    description: Const 50, tau 100, noise 0 — bảng D (lag + eng→raw).
+    params: { tauMs: 100, noiseStd: 0 }
+    source: { kind: const, value: 50 }
+    steps:
+      - t: 0
+        expect: { pv: 4.7581, raw: 4.7581 }
+      - t: 10
+        expect: { pv: 9.0635, raw: 9.0635 }
+      - t: 100
+        expect: { pv: 33.3564, raw: 33.3564 }
+      - t: 200
+        expect: { pv: 43.8772, raw: 43.8772 }
+      - t: 500
+        expect: { pv: 49.6952, raw: 49.6952 }
+  - id: noisy
+    description: Model noise σ=1 (Box-Muller, 2 rand()/bước) — pv giữ 50.
+    params: { tauMs: 0, noiseStd: 1 }
+    source: { kind: const, value: 50 }
+    steps:
+      - t: 0
+        expect: { pv: 50, raw: 50.2966 }
+      - t: 10
+        expect: { pv: 50, raw: 50.17 }
+      - t: 20
+        expect: { pv: 50, raw: 52.3691 }
+      - t: 30
+        expect: { pv: 50, raw: 48.8679 }
+      - t: 40
+        expect: { pv: 50, raw: 50.2206 }
+      - t: 50
+        expect: { pv: 50, raw: 48.4809 }
+  - id: signal-wirebreak
+    description: Preset wireBreak — tag raw=32767 (eng 118.51), pv giữ 50.
+    params: { tauMs: 0, noiseStd: 0 }
+    source: { kind: const, value: 50 }
+    steps:
+      - t: 0
+        expect: { pv: 50, raw: 50 }
+      - t: 100
+        expect: { pv: 50, raw: 50 }
+        fault: { preset: wireBreak }
+      - t: 110
+        expect: { pv: 50, raw: 118.51 }
+      - t: 200
+        expect: { pv: 50, raw: 118.51 }
+  - id: signal-drift
+    description: Signal drift 3600/h — tag trôi 1/h·1000ms, pv giữ 50.
+    params: { tauMs: 0, noiseStd: 0 }
+    source: { kind: const, value: 50 }
+    steps:
+      - t: 100
+        expect: { pv: 50, raw: 50 }
+        fault: { signal: { role: raw, type: drift, params: { ratePerHour: 3600 } } }
+      - t: 1100
+        expect: { pv: 50, raw: 51 }
+      - t: 2100
+        expect: { pv: 50, raw: 52 }
+  - id: signal-stuck
+    description: Signal stuck value 42 — tag kẹt 42, pv giữ 50.
+    params: { tauMs: 0, noiseStd: 0 }
+    source: { kind: const, value: 50 }
+    steps:
+      - t: 100
+        expect: { pv: 50, raw: 50 }
+        fault: { signal: { role: raw, type: stuck, params: { value: 42 } } }
+      - t: 110
+        expect: { pv: 50, raw: 42 }
+      - t: 500
+        expect: { pv: 50, raw: 42 }
+  - id: signal-freeze
+    description: Signal freeze trên ramp 0→100/10s — tag đóng băng tại 10, pv tiếp tục tăng.
+    params: { tauMs: 0, noiseStd: 0 }
+    source: { kind: ramp, from: 0, to: 100, durationMs: 10000 }
+    steps:
+      - t: 0
+        expect: { pv: 0, raw: 0 }
+      - t: 1000
+        expect: { pv: 10, raw: 10 }
+        fault: { signal: { role: raw, type: freeze } }
+        durationMs: 5000
+      - t: 2000
+        expect: { pv: 20, raw: 10 }
+      - t: 5000
+        expect: { pv: 50, raw: 10 }
+      - t: 5990
+        expect: { pv: 59.9, raw: 10 }
+      - t: 6000
+        expect: { pv: 60, raw: 60 }
+  - id: signal-noise
+    description: Signal noise σ=1 (rngGaussian có spare, cùng stream PRNG) — pv giữ 50.
+    params: { tauMs: 0, noiseStd: 0 }
+    source: { kind: const, value: 50 }
+    steps:
+      - t: 100
+        expect: { pv: 50, raw: 50 }
+        fault: { signal: { role: raw, type: noise, params: { std: 1 } } }
+      - t: 110
+        expect: { pv: 50, raw: 51.7361 }
+      - t: 120
+        expect: { pv: 50, raw: 48.5135 }
+      - t: 130
+        expect: { pv: 50, raw: 50.4702 }
+      - t: 140
+        expect: { pv: 50, raw: 51.7542 }
+  - id: signal-spike
+    description: Signal spike +10 trong 100 ms — tag 60 rồi về 50.
+    params: { tauMs: 0, noiseStd: 0 }
+    source: { kind: const, value: 50 }
+    steps:
+      - t: 100
+        expect: { pv: 50, raw: 50 }
+        fault: { signal: { role: raw, type: spike, params: { magnitude: 10, durationMs: 100 } } }
+        durationMs: 100
+      - t: 110
+        expect: { pv: 50, raw: 60 }
+      - t: 190
+        expect: { pv: 50, raw: 60 }
+      - t: 200
+        expect: { pv: 50, raw: 50 }
+  - id: signal-offset
+    description: Signal offset +5 — tag 55, pv giữ 50.
+    params: { tauMs: 0, noiseStd: 0 }
+    source: { kind: const, value: 50 }
+    steps:
+      - t: 100
+        expect: { pv: 50, raw: 50 }
+        fault: { signal: { role: raw, type: offset, params: { offset: 5 } } }
+      - t: 110
+        expect: { pv: 50, raw: 55 }
+      - t: 500
+        expect: { pv: 50, raw: 55 }
+  - id: signal-gain
+    description: Signal gain ×1.2 — tag 60, pv giữ 50.
+    params: { tauMs: 0, noiseStd: 0 }
+    source: { kind: const, value: 50 }
+    steps:
+      - t: 100
+        expect: { pv: 50, raw: 50 }
+        fault: { signal: { role: raw, type: gain, params: { factor: 1.2 } } }
+      - t: 110
+        expect: { pv: 50, raw: 60 }
+      - t: 500
+        expect: { pv: 50, raw: 60 }

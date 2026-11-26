@@ -1,0 +1,222 @@
+# Golden timeline motor_vfd (M2 §7.2/§11.1, P2.3 — bảng A/H, STATE §26).
+# Quy ước (OQ-254): cmd/fault áp SAU engine.step(t); expect kiểm sau step(t).
+# File golden viết bằng đơn vị eng (OQ-299): cmd AO (speedRef) viết eng (%),
+# runner đổi eng→raw theo scaling tag 0..100% ↔ 0..27648.
+# Bẫy float (như bảng A T=300): 0.1 cộng 500 lần = 50.00000000000044 > 50
+# → runFb=true tại T=5100 với runThresholdPct=50 (case threshold-runfb).
+model: motor_vfd
+stepMs: 10
+seed: 42
+cases:
+  - id: base-ramp
+    description: Ramp lên 50% rồi xuống 0 (bảng A — accel/decel 10s, lag 200)
+    params:
+      ratedCurrentA: 10
+    steps:
+      - t: 0
+        expect: { state: STOPPED, runFb: false, speedPct: 0, speedFb: 0, currentA: 0, ready: true, remote: true, vfdFaultOk: true }
+      - t: 100
+        cmd: { runCmd: true, speedRef: 50 }
+        expect: { state: STOPPED }
+      - t: 110
+        expect: { state: RAMP_UP, speedPct: 0.1, speedFb: 0.0049, runFb: false, currentA: 0.007 }
+      - t: 300
+        expect: { state: RAMP_UP, speedPct: 2, speedFb: 0.7671, runFb: true, currentA: 0.14 }
+      - t: 310
+        expect: { speedPct: 2.1, speedFb: 0.8321, runFb: true, currentA: 0.147 }
+      - t: 5100
+        expect: { state: AT_SPEED, speedPct: 50, speedFb: 48.0496, runFb: true, currentA: 3.5 }
+      - t: 6000
+        cmd: { runCmd: false }
+        expect: { state: AT_SPEED, speedPct: 50 }
+      - t: 6010
+        expect: { state: RAMP_DOWN, speedPct: 49.9, speedFb: 49.9745, runFb: true, currentA: 3.493 }
+      - t: 11000
+        expect: { state: STOPPED, speedPct: 0, speedFb: 1.9504, runFb: false, currentA: 0 }
+
+  - id: trip-coast
+    description: vfdTrip khi đang chạy 50% — coast 20s về 0, clear ở tốc độ 0 (bảng H)
+    steps:
+      - t: 0
+        expect: { state: STOPPED }
+      - t: 100
+        cmd: { runCmd: true, speedRef: 50 }
+      - t: 5100
+        expect: { state: AT_SPEED, speedPct: 50 }
+      - t: 6000
+        fault: { id: vfdTrip }
+        expect: { state: AT_SPEED, speedPct: 50, ready: true, vfdFaultOk: true }
+      - t: 6010
+        expect: { state: TRIPPED, speedPct: 49.95, ready: false, vfdFaultOk: false }
+      - t: 11010
+        expect: { state: TRIPPED, speedPct: 24.95 }
+      - t: 16010
+        expect: { state: TRIPPED, speedPct: 0, runFb: false }
+        # runCmd=false trước khi clear — nếu không drive ramp lại (target 50).
+        cmd: { runCmd: false }
+      - t: 16020
+        fault: { clear: vfdTrip }
+        expect: { state: TRIPPED, speedPct: 0 }
+      - t: 16030
+        expect: { state: STOPPED, ready: true, vfdFaultOk: true }
+
+  - id: ramp-fail
+    description: rampFail đóng băng tốc độ ở 10%, state machine vẫn chạy
+    steps:
+      - t: 0
+        expect: { state: STOPPED }
+      - t: 100
+        cmd: { runCmd: true, speedRef: 50 }
+      - t: 1100
+        fault: { id: rampFail }
+        expect: { state: RAMP_UP, speedPct: 10 }
+      - t: 2000
+        expect: { state: RAMP_UP, speedPct: 10 }
+      - t: 2100
+        fault: { clear: rampFail }
+        expect: { state: RAMP_UP, speedPct: 10 }
+      - t: 2110
+        expect: { state: RAMP_UP, speedPct: 10.1 }
+
+  - id: speed-deviation
+    description: speedDeviation pct=+10 — target lệch 50→60, tốc độ ramp tới 60
+    steps:
+      - t: 0
+        expect: { state: STOPPED }
+      - t: 100
+        cmd: { runCmd: true, speedRef: 50 }
+      - t: 200
+        fault: { id: speedDeviation, params: { pct: 10 } }
+        expect: { speedPct: 1, targetPct: 50 }
+      - t: 300
+        expect: { state: RAMP_UP, speedPct: 2, targetPct: 60 }
+      - t: 6100
+        expect: { state: AT_SPEED, speedPct: 60, targetPct: 60 }
+
+  - id: comm-loss
+    description: commLoss latch lệnh + speedFb đóng băng 48.817, lệnh mới bị bỏ qua
+    steps:
+      - t: 0
+        expect: { state: STOPPED, ready: true }
+      - t: 100
+        cmd: { runCmd: true, speedRef: 50 }
+      - t: 5100
+        expect: { state: AT_SPEED, speedPct: 50, speedFb: 48.0496 }
+      - t: 5200
+        fault: { id: commLoss }
+        expect: { state: AT_SPEED, speedPct: 50, speedFb: 48.817, ready: true }
+      - t: 5210
+        expect: { state: AT_SPEED, speedPct: 50, speedFb: 48.817, ready: false }
+      - t: 5300
+        cmd: { runCmd: false, speedRef: 0 }
+        expect: { speedPct: 50, speedFb: 48.817, ready: false }
+      - t: 6000
+        expect: { state: AT_SPEED, speedPct: 50, speedFb: 48.817, ready: false }
+      - t: 6100
+        fault: { clear: commLoss }
+        expect: { speedPct: 50, speedFb: 48.817, ready: false }
+      - t: 6110
+        expect: { state: RAMP_DOWN, speedPct: 49.9, speedFb: 48.8698, ready: true }
+
+  - id: vfd-not-ready
+    description: notReady chặn chạy; clear xong chạy lại bình thường
+    steps:
+      - t: 0
+        expect: { state: STOPPED, ready: true }
+      - t: 100
+        fault: { id: notReady }
+        expect: { ready: true }
+      - t: 110
+        expect: { ready: false, state: STOPPED }
+      - t: 200
+        cmd: { runCmd: true, speedRef: 50 }
+        expect: { ready: false, speedPct: 0, state: STOPPED }
+      - t: 1000
+        expect: { state: STOPPED, speedPct: 0 }
+      - t: 1100
+        fault: { clear: notReady }
+        expect: { ready: false }
+      - t: 1110
+        expect: { ready: true, state: RAMP_UP, speedPct: 0.1 }
+
+  - id: vfd-local-mode
+    description: localMode chặn chạy, remote=false; clear xong chạy lại
+    steps:
+      - t: 0
+        expect: { state: STOPPED, remote: true }
+      - t: 100
+        fault: { id: localMode }
+        expect: { remote: true }
+      - t: 110
+        expect: { remote: false, state: STOPPED }
+      - t: 200
+        cmd: { runCmd: true, speedRef: 50 }
+        expect: { remote: false, speedPct: 0, state: STOPPED }
+      - t: 1000
+        expect: { state: STOPPED, speedPct: 0 }
+      - t: 1100
+        fault: { clear: localMode }
+        expect: { remote: false }
+      - t: 1110
+        expect: { remote: true, state: RAMP_UP, speedPct: 0.1 }
+
+  - id: min-max-clamp
+    description: speedRef kẹp vào [minSpeedPct, maxSpeedPct] = [10, 80]
+    params: { minSpeedPct: 10, maxSpeedPct: 80 }
+    steps:
+      - t: 0
+        expect: { state: STOPPED }
+      - t: 100
+        cmd: { runCmd: true, speedRef: 100 }
+        expect: { state: STOPPED }
+      - t: 110
+        expect: { state: RAMP_UP, targetPct: 80, speedPct: 0.1 }
+      - t: 8100
+        expect: { state: AT_SPEED, speedPct: 80, targetPct: 80 }
+      - t: 8200
+        cmd: { speedRef: 0 }
+        expect: { speedPct: 80, targetPct: 80 }
+      - t: 8210
+        expect: { state: RAMP_DOWN, targetPct: 10, speedPct: 79.9 }
+      - t: 15200
+        expect: { state: AT_SPEED, speedPct: 10, targetPct: 10, runFb: true }
+
+  - id: threshold-runfb
+    description: runFb theo runThresholdPct=50 — bẫy float tại T=5100
+    params: { runThresholdPct: 50 }
+    steps:
+      - t: 0
+        expect: { runFb: false }
+      - t: 100
+        cmd: { runCmd: true, speedRef: 80 }
+        expect: { state: STOPPED }
+      - t: 5090
+        expect: { speedPct: 49.9, runFb: false, state: RAMP_UP }
+      - t: 5100
+        expect: { speedPct: 50, runFb: true, state: RAMP_UP }
+      - t: 5110
+        expect: { speedPct: 50.1, runFb: true }
+
+  - id: trip-exit
+    description: vfdTrip rồi clear khi tốc độ còn 45.5 — về RAMP_DOWN rồi RAMP_UP lại
+    steps:
+      - t: 0
+        expect: { state: STOPPED }
+      - t: 100
+        cmd: { runCmd: true, speedRef: 50 }
+      - t: 5100
+        expect: { state: AT_SPEED, speedPct: 50 }
+      - t: 5200
+        fault: { id: vfdTrip }
+        expect: { state: AT_SPEED, speedPct: 50 }
+      - t: 5210
+        expect: { state: TRIPPED, speedPct: 49.95, ready: false, vfdFaultOk: false }
+      - t: 6000
+        expect: { state: TRIPPED, speedPct: 46 }
+      - t: 6100
+        fault: { clear: vfdTrip }
+        expect: { state: TRIPPED, speedPct: 45.5 }
+      - t: 6110
+        expect: { state: RAMP_DOWN, speedPct: 45.6, ready: true, vfdFaultOk: true }
+      - t: 6200
+        expect: { state: RAMP_UP, speedPct: 46.5 }

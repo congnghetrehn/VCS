@@ -1,0 +1,194 @@
+# Golden timeline conveyor_simple (M2 §7.8, §11.1 — bảng G, STATE §26).
+# Quy ước (OQ-254): cmd/fault áp SAU engine.step(t); expect kiểm sau step(t).
+# Số liệu từ script tham chiếu độc lập /tmp/p23b-ref.mjs (chỉ cài luật spec,
+# không import code repo). Bảng G khớp plan; beltBlocked-resume + zeroSpeed
+# biên 8850/8860 tính bằng script (xem STATE §26 "Lệch so với plan").
+model: conveyor_simple
+stepMs: 10
+seed: 42
+cases:
+  - id: start-delay
+    description: Bảng G — start cơ bản, delay line 20000ms, loadTph 100
+    params: { loadTph: 100 }
+    steps:
+      - t: 0
+        expect: { state: STOPPED, speedPct: 0, beltSpeedPct: 0, zeroSpeed: true, deliveredTph: 0, pullCord: true, runFb: false }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 110
+        expect: { state: STARTING, speedPct: 0.6667, beltSpeedPct: 0.6667, zeroSpeed: true, deliveredTph: 0, pullCord: true }
+      - t: 180
+        expect: { state: STARTING, speedPct: 5.3333, beltSpeedPct: 5.3333, zeroSpeed: false, deliveredTph: 0 }
+      - t: 610
+        expect: { state: RUNNING, speedPct: 34, beltSpeedPct: 34, zeroSpeed: false, deliveredTph: 0 }
+      - t: 1610
+        expect: { state: RUNNING, speedPct: 100, beltSpeedPct: 100, zeroSpeed: false, deliveredTph: 0 }
+      - t: 20110
+        expect: { state: RUNNING, speedPct: 100, beltSpeedPct: 100, zeroSpeed: false, deliveredTph: 0.6667 }
+      - t: 20610
+        expect: { deliveredTph: 34 }
+      - t: 21610
+        expect: { deliveredTph: 100 }
+
+  - id: pullcord-hardwired
+    description: pullCordTrip + pullCordHardwired → contactor rơi như notReady
+    params: { loadTph: 100 }
+    steps:
+      - t: 0
+        expect: { state: STOPPED, pullCord: true, zeroSpeed: true }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING, speedPct: 34 }
+      - t: 6000
+        fault: { id: pullCordTrip }
+        expect: { state: RUNNING, speedPct: 100, pullCord: true }
+      - t: 6010
+        expect: { state: STOPPING, speedPct: 99.6667, beltSpeedPct: 99.6667, zeroSpeed: false, pullCord: false, runFb: true }
+      - t: 6810
+        expect: { state: STOPPED, speedPct: 73, pullCord: false, runFb: false }
+      - t: 8860
+        expect: { speedPct: 4.6667, zeroSpeed: true, pullCord: false }
+      - t: 9010
+        expect: { speedPct: 0, zeroSpeed: true, pullCord: false }
+      - t: 20110
+        expect: { state: STOPPED, speedPct: 0, zeroSpeed: true, deliveredTph: 0.6667, pullCord: false }
+
+  - id: pullcord-not-hardwired
+    description: pullCordTrip + pullCordHardwired=false → motor vẫn chạy, chỉ pullCord=false
+    params: { pullCordHardwired: false, loadTph: 100 }
+    steps:
+      - t: 0
+        expect: { state: STOPPED, pullCord: true }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING, speedPct: 34 }
+      - t: 6000
+        fault: { id: pullCordTrip }
+        expect: { state: RUNNING, speedPct: 100, pullCord: true }
+      - t: 6010
+        expect: { state: RUNNING, speedPct: 100, beltSpeedPct: 100, zeroSpeed: false, pullCord: false, runFb: true }
+      - t: 7010
+        expect: { state: RUNNING, speedPct: 100, pullCord: false }
+
+  - id: beltslip
+    description: beltSlip → beltSpeed=0, zeroSpeed=true, deliveredTph xả hết sau 1 trễ
+    params: { loadTph: 100 }
+    steps:
+      - t: 0
+        expect: { state: STOPPED, beltSpeedPct: 0, zeroSpeed: true }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING, speedPct: 34 }
+      - t: 6000
+        fault: { id: beltSlip }
+        expect: { state: RUNNING, speedPct: 100, beltSpeedPct: 100, zeroSpeed: false }
+      - t: 6010
+        expect: { state: RUNNING, speedPct: 100, beltSpeedPct: 0, zeroSpeed: true, deliveredTph: 0, pullCord: true }
+      - t: 25610
+        expect: { beltSpeedPct: 0, zeroSpeed: true, deliveredTph: 100 }
+      - t: 26010
+        expect: { beltSpeedPct: 0, zeroSpeed: true, deliveredTph: 0 }
+
+  - id: beltblocked
+    description: beltBlocked → deliveredTph=0 + delay line đóng băng; hết fault chạy tiếp từ trạng thái đóng băng (OQ-293)
+    params: { loadTph: 100 }
+    steps:
+      - t: 0
+        expect: { state: STOPPED, deliveredTph: 0 }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING, speedPct: 34 }
+      - t: 6000
+        fault: { id: beltBlocked }
+        expect: { state: RUNNING, speedPct: 100, deliveredTph: 0 }
+      - t: 6010
+        expect: { state: RUNNING, speedPct: 100, beltSpeedPct: 100, deliveredTph: 0 }
+      - t: 20110
+        expect: { deliveredTph: 0 }
+      - t: 21000
+        fault: { clear: beltBlocked }
+        expect: { deliveredTph: 0 }
+      - t: 21010
+        expect: { deliveredTph: 0 }
+      - t: 36000
+        expect: { deliveredTph: 60 }
+      - t: 36110
+        expect: { deliveredTph: 67.3333 }
+      - t: 41010
+        expect: { deliveredTph: 100 }
+
+  - id: loadsource
+    description: Named source load=50 thắng param loadTph=100 (OQ-294)
+    params: { loadTph: 100 }
+    sources: { load: { kind: const, value: 50 } }
+    steps:
+      - t: 0
+        expect: { state: STOPPED, deliveredTph: 0 }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 1610
+        expect: { state: RUNNING, speedPct: 100, deliveredTph: 0 }
+      - t: 20110
+        expect: { deliveredTph: 0.3333 }
+      - t: 20610
+        expect: { deliveredTph: 17 }
+      - t: 21610
+        expect: { deliveredTph: 50 }
+
+  - id: overload-trip
+    description: overload kế thừa motor_dol → TRIPPED, speed coast về 0, ống vẫn xả theo trễ
+    params: { loadTph: 100 }
+    steps:
+      - t: 0
+        expect: { state: STOPPED }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING, speedPct: 34 }
+      - t: 6000
+        fault: { id: overload }
+        expect: { state: RUNNING, speedPct: 100 }
+      - t: 6010
+        expect: { state: TRIPPED, speedPct: 99.6667, beltSpeedPct: 99.6667, zeroSpeed: false, runFb: false }
+      - t: 9010
+        expect: { state: TRIPPED, speedPct: 0, beltSpeedPct: 0, zeroSpeed: true }
+      - t: 20110
+        expect: { state: TRIPPED, speedPct: 0, deliveredTph: 0.6667 }
+      - t: 29010
+        expect: { deliveredTph: 0 }
+
+  - id: stop-zerospeed
+    description: "Dừng bình thường → zeroSpeed bật khi beltSpeed < 5 (biên: 5.0 false tại 8850, 4.6667 true tại 8860)"
+    params: { loadTph: 100 }
+    steps:
+      - t: 0
+        expect: { state: STOPPED, zeroSpeed: true }
+      - t: 100
+        cmd: { runCmd: true }
+        expect: { state: STOPPED }
+      - t: 610
+        expect: { state: RUNNING, speedPct: 34 }
+      - t: 6000
+        cmd: { runCmd: false }
+        expect: { state: RUNNING, speedPct: 100 }
+      - t: 6010
+        expect: { state: STOPPING, speedPct: 99.6667, beltSpeedPct: 99.6667, zeroSpeed: false, runFb: true }
+      - t: 6810
+        expect: { state: STOPPED, speedPct: 73, runFb: false }
+      - t: 8850
+        expect: { speedPct: 5, zeroSpeed: false }
+      - t: 8860
+        expect: { speedPct: 4.6667, zeroSpeed: true }
+      - t: 20110
+        expect: { state: STOPPED, speedPct: 0, deliveredTph: 0.6667 }

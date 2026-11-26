@@ -1,0 +1,135 @@
+# Golden switch_di (M2 §7.6, §11.1 — bảng E/K, STATE §26).
+# expect viết bằng bool: role di đọc tag DI; observable active = sau
+# stuck/chatter, trước invert. Source đổi giữa case bằng step `source`
+# (sau step(t), cùng quy ước OQ-254 như cmd/fault).
+model: switch_di
+stepMs: 10
+seed: 42
+cases:
+  - id: basic-gt
+    description: Bảng E — gt thr 50 hyst 5, onDelay 100, offDelay 200 (source 0 → 60 @100 → 40 @1000).
+    params: { kind: generic, threshold: 50, hysteresis: 5, onDelayMs: 100, offDelayMs: 200 }
+    source: { kind: const, value: 0 }
+    steps:
+      - t: 0
+        expect: { active: false, di: false }
+      - t: 100
+        source: { kind: const, value: 60 }
+      - t: 110
+        expect: { active: false, di: false }
+      - t: 200
+        expect: { active: true, di: true }
+      - t: 1000
+        expect: { active: true, di: true }
+        source: { kind: const, value: 40 }
+      - t: 1010
+        expect: { active: true, di: true }
+      - t: 1200
+        expect: { active: false, di: false }
+  - id: pull-cord
+    description: Bảng K(1) — pull_cord ép invert=true, manual bool (false → true @100).
+    params: { kind: pull_cord }
+    # manualValue mặc định của engine là số 0 (không phải false) nên giá trị
+    # false ban đầu đi qua const; true giữa case đi qua manual (setManual).
+    source: { kind: const, value: false }
+    steps:
+      - t: 0
+        expect: { active: false, di: true }
+      - t: 100
+        expect: { active: false, di: true }
+        source: { kind: manual, value: true }
+      - t: 110
+        expect: { active: true, di: false }
+      - t: 200
+        expect: { active: true, di: false }
+  - id: chatter
+    description: Bảng K(2) — chatter periodMs 100, lật mỗi 100 ms (T=200 false, 300 true, 400 false).
+    params: { kind: generic }
+    source: { kind: const, value: 60 }
+    steps:
+      - t: 0
+        expect: { active: true, di: true }
+      - t: 100
+        expect: { active: true, di: true }
+        fault: { id: chatter, params: { periodMs: 100 } }
+      - t: 200
+        expect: { active: false, di: false }
+      - t: 300
+        expect: { active: true, di: true }
+      - t: 400
+        expect: { active: false, di: false }
+  - id: zero-speed
+    description: zero_speed ép condition=lt — value 10 → false, 3 → true.
+    params: { kind: zero_speed, threshold: 5 }
+    source: { kind: const, value: 10 }
+    steps:
+      - t: 0
+        expect: { active: false, di: false }
+      - t: 100
+        expect: { active: false, di: false }
+        source: { kind: const, value: 3 }
+      - t: 110
+        expect: { active: true, di: true }
+  - id: stuck-active
+    description: stuckActive ép active=true rồi clear về false.
+    params: { kind: generic, threshold: 50 }
+    source: { kind: const, value: 0 }
+    steps:
+      - t: 0
+        expect: { active: false, di: false }
+      - t: 100
+        expect: { active: false, di: false }
+        fault: { id: stuckActive }
+      - t: 110
+        expect: { active: true, di: true }
+      - t: 200
+        expect: { active: true, di: true }
+        fault: { clear: stuckActive }
+      - t: 210
+        expect: { active: false, di: false }
+  - id: stuck-inactive
+    description: stuckInactive ép active=false rồi clear về true.
+    params: { kind: generic }
+    source: { kind: const, value: 60 }
+    steps:
+      - t: 0
+        expect: { active: true, di: true }
+      - t: 100
+        expect: { active: true, di: true }
+        fault: { id: stuckInactive }
+      - t: 110
+        expect: { active: false, di: false }
+      - t: 200
+        expect: { active: false, di: false }
+        fault: { clear: stuckInactive }
+      - t: 210
+        expect: { active: true, di: true }
+  - id: hysteresis-lt
+    description: lt thr 50 hyst 5 — 40 → true, 52 giữ true (chưa tới 55), 60 → false.
+    params: { kind: generic, condition: lt, threshold: 50, hysteresis: 5 }
+    source: { kind: const, value: 40 }
+    steps:
+      - t: 0
+        expect: { active: true, di: true }
+      - t: 100
+        expect: { active: true, di: true }
+        source: { kind: const, value: 52 }
+      - t: 110
+        expect: { active: true, di: true }
+      - t: 200
+        expect: { active: true, di: true }
+        source: { kind: const, value: 60 }
+      - t: 210
+        expect: { active: false, di: false }
+  - id: invert
+    description: invert=true — cond true → di false, cond false → di true.
+    params: { kind: generic, invert: true }
+    source: { kind: const, value: 60 }
+    steps:
+      - t: 0
+        expect: { active: true, di: false }
+      - t: 100
+        expect: { active: true, di: false }
+        source: { kind: const, value: 0 }
+      - t: 110
+        expect: { active: false, di: true }
