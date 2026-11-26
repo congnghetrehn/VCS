@@ -7,9 +7,9 @@
 Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần cứng) · **X** DỮ LIỆU CẦN CÓ · **S** THAY ĐỔI SPEC/LỚN · **K** KÝ DUYỆT milestone · **R** DUYỆT SAU (tầng B)
 
 ## 0. Tóm tắt (AI cập nhật mỗi lần ghi)
-- Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). D-001/D-004/D-005 ĐÃ XONG; M0 ĐÃ KÝ 2026-11-24; M1 ĐÃ KÝ 2026-11-25.
+- Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). X-003 chặn nghiệm thu thật P2.7 (đo acceptance suggest ≥ 90% trên I/O list thật) — không chặn code/merge P2.7; ĐÃ QUYẾT B 2026-11-26 21:55 (hoãn đo, acceptance UNVERIFIED tới khi có dữ liệu). D-001/D-004/D-005 ĐÃ XONG; M0 ĐÃ KÝ 2026-11-24; M1 ĐÃ KÝ 2026-11-25.
 - Việc cần anh trong tuần này: quyết §16.5 (D-006) + OQ-161 + chọn HTTPS cho LAN (D-007: mkcert / reverse proxy / chỉ localhost); chạy T-001 (S6, môi trường Windows); chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA; VERIFY §14 với PLCSIM + mã thật (xem `docs/verify-owner-guide.md` mục 3)
-- Cập nhật lần cuối: 2026-11-26 (P2.2 đã merge PR #32; P2.3 plan §26, R-008)
+- Cập nhật lần cuối: 2026-11-26 (P2.5 merge PR #36, P2.6 merge PR #37; P2.7 plan §31, implement commit 1–6 + gate xanh; X-003 ĐÃ QUYẾT B 2026-11-26 21:55 — hoãn đo, acceptance UNVERIFIED)
 - Nhãn/milestone GitHub (II.7): CHƯA CHẠY — GitHub MCP không có tool tạo nhãn/milestone (46 tool đã kiểm, không có); cần làm qua giao diện GitHub hoặc chủ sản phẩm. Không tự đổi branch protection (D-001).
 
 ---
@@ -141,6 +141,16 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 - [ ] X-002 · Mã SCL/LAD thật ẩn danh (≥ 10 khối) cho spike S1 · cần trước P1.2
 - [ ] X-003 · I/O list thật + quy ước tên tag · cần trước P2.7
 - [ ] X-004 · C&E thật + biểu mẫu FAT + cách PLC nhận start/stop/reset · cần trước P3.4–P3.5
+
+### X-003 · P2.7: cần I/O list thật để đo acceptance suggest ≥ 90% (tier C — chặn nghiệm thu thật, KHÔNG chặn code/merge P2.7) · Hạn mong muốn: trước khi ký M2 (G2)
+**Bối cảnh:** P2.7 đã cài xong engine auto-suggest (§9) và đo được trên fixture tổng hợp 300 tín hiệu (177 có ground truth). Nhưng fixture chỉ là xấp xỉ quy ước tên thật (M2 §16 mục 1, AMENDMENTS E8): số ≥ 90% trên fixture KHÔNG chứng minh được 90% trên dữ liệu thật. Cần I/O list thật (đã ẩn danh theo D-003) để đo acceptance và hiệu chỉnh `naming.yaml`/synonym.
+**Cần anh cung cấp (chọn 1 trong 2 cách):**
+- [ ] A — File I/O list thật (1–2 dự án, đã ẩn danh: xóa/đổi tên khách hàng, tên dự án, IP, ghi chú nội bộ; giữ nguyên cấu trúc cột + tên tag/thiết bị + mô tả): định dạng XLSX hoặc CSV, ≥ 100 tín hiệu, có cột tag / mô tả / loại / địa chỉ (cột equipment nếu có càng tốt) + file `naming.yaml` hoặc mô tả quy ước đặt tên đang dùng (vd tiền tố thiết bị, hậu tố role). Đặt file vào `fixtures-real/` (đã .gitignore — không vào repo) hoặc gửi qua kênh riêng; AI chỉ đọc trong VM, không commit.
+- [x] B — Chưa có file lúc này: P2.7 merge với bằng chứng fixture, acceptance thật ghi UNVERIFIED tới khi có dữ liệu (M2 ký sau). **← ĐÃ CHỌN 2026-11-26 21:55.**
+**Cách AI dùng:** chạy `vcs suggest` trên file thật, so equipment+role với ground truth do anh xác nhận (AI in bảng, anh duyệt/tick đúng-sai hoặc đưa file đối chiếu); pass khi ≥ 90% tín hiệu và ≥ 95% thiết bị đúng (§11.3); nếu < 90% thì AI chỉnh `naming.yaml`/synonym (đổi dữ liệu, không đổi thuật toán) rồi đo lại. Kết quả ghi vào `docs/acceptance/M2.md`.
+**Đề xuất của AI:** A, vì đây là dữ liệu quan trọng nhất để M2 sát thực tế (M2 §16 mục 1); B chỉ hoãn việc đo, không hoãn code.
+**Việc đang chờ:** P2.7 (plan §31, OQ-380) · **Liên quan:** D-003 (chính sách dữ liệu — chưa quyết), STATE §31, OQ-374/380
+**Quyết định 2026-11-26 21:55 (owner chọn B):** chưa có file lúc này — hoãn đo acceptance; P2.7 merge với bằng chứng fixture, acceptance thật UNVERIFIED tới khi có dữ liệu, M2 ký sau. OQ-380 giữ MỞ. P2.7 không đo/không hiệu chỉnh theo dữ liệu thật.
 - [ ] X-005 · SCADA đích + ví dụ node id/tag + chính sách bảo mật · cần trước P4.4
 - [ ] X-006 · Windows có TIA + PLCSIM Advanced (+ giấy phép, nhóm quyền) · cần trước P5.4/P5.6 (spike S2, S3 nên sớm)
 - [ ] X-007 · ≥ 10 file SimaticML thật + XSD Openness · cần trước P5.7
