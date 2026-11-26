@@ -79,7 +79,7 @@ export interface MappingSuggestion {
 /** Địa chỉ IEC (§8.5): I0.0/E0.0/%I0.0/PEW64/IW64/DB1.DBX0.0...;
  *  bỏ khoảng trắng + hậu tố ':P' trước khi khớp. 'M01' trơ (không bit,
  *  không cỡ B/W/D, không %) KHÔNG tính là địa chỉ. */
-const ADDRESS_RE = /^%?(P?[IQEMAB][BWD]\d+(\.\d+)?|P?[IQEMAB]\d+\.\d+|DB\d+\.DB[WDXB]\d+(\.\d+)?)$/i;
+const ADDRESS_RE = /^%?(P?[IQEMABO][BWD]\d+(\.\d+)?|P?[IQEMABO]\d+\.\d+|DB\d+\.DB[WDXB]\d+(\.\d+)?)$/i;
 
 function looksLikeAddress(value: string): boolean {
   const v = value.replace(/\s+/g, '').replace(/:P$/i, '');

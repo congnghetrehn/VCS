@@ -24,3 +24,28 @@ export type { MappingConfidence, MappingSuggestion } from './io-list/mapping.js'
 export { buildProfile, loadProfile, matchesProfile, saveProfile } from './io-list/profile.js';
 export { applyTransforms, gridToRecords } from './io-list/transform.js';
 export type { IoRecord, TransformChange, TransformResult } from './io-list/transform.js';
+export {
+  addressBitRange,
+  deriveFromModule,
+  deriveKindFromAddress,
+  deriveType,
+  normalizeAddress,
+  parseModuleStart,
+  rangesOverlap,
+} from './io-list/address.js';
+export type { AddressArea, AddressBitRange, AddressSize, NormalizeAddressResult, ParsedAddress } from './io-list/address.js';
+export {
+  extractDeriveColumns,
+  normalizeImport,
+  normalizeTagName,
+  parsePolarity,
+  parseSignalType,
+} from './io-list/normalize.js';
+export type { DeriveColumns, NormalizeOptions, NormalizedSignal } from './io-list/normalize.js';
+export { isEmptyRow, recordRowNumbers, resolveSeverity, validateImport } from './io-list/validate.js';
+export type { AssignedTag, ValidateOptions, ValidateResult, ValidateStats } from './io-list/validate.js';
+export { diffTags, tagFields } from './io-list/diff.js';
+export type { DiffOptions, DiffResult, RenameCandidate, SkippedManual, TagChange } from './io-list/diff.js';
+export { applyCommit, compareTagDefs, safetyNetCheck, serializeTags } from './io-list/commit.js';
+export { buildReport, escapeHtml, reportToHtml, reportToJson } from './io-list/report.js';
+export type { ImportReport, ImportReportStats } from './io-list/report.js';

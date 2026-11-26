@@ -109,6 +109,21 @@ describe('suggestMapping — content sniffing', () => {
     expect(address?.reason).toContain('5/5');
   });
 
+  it("cột chứa 'O0.0' (biến thể Đức của Q, §8.5) → address (OQ-341)", () => {
+    const g = grid([
+      ['Kanal', 'Wert'],
+      ['O0.0', '10'],
+      ['O0.1', '20'],
+      ['O1.0', '30'],
+      ['%Q0.2', '40'],
+    ]);
+    const suggestions = suggestMapping(g, 1);
+    const address = suggestions.find((s) => s.field === 'address');
+    expect(address?.column).toBe('Kanal');
+    expect(address?.confidence).toBe('medium');
+    expect(address?.reason).toContain('4/4');
+  });
+
   it('cột chứa DI/DO/AI/AO > 70% → signalType khi tên không khớp', () => {
     const g = grid([
       ['K1', 'K2'],

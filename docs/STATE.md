@@ -5439,3 +5439,394 @@ Theo 8.1–8.4, cài đọc CSV/XLSX (exceljs), sniff, dò header, gợi ý mapp
 - OQ-327…340: tier B, xem `open-questions.md` (đầy đủ ở dưới).
 - OWNER-INBOX: **không thêm mục mới** — P2.5 không cần quyết định owner; X-003/D-003 đã có (chặn P2.7, không chặn P2.5); M2 §16 mục 1–2 vẫn mở từ trước, fixture tổng hợp chỉ là xấp xỉ (E8).
 - Đề xuất ngoài phạm vi (ghi lại, không làm): `vcs import-io --commit/--report` (P2.6); UI wizard (P2.8); streaming read cho file > 20k dòng nếu perf smoke cho thấy cần (đo trước, P2.6+).
+
+---
+
+## §30 — P2.6 — Chuẩn hóa địa chỉ / validate / diff & commit (PLAN)
+
+> **Prompt (M2 §13, ngày 11):** "Theo 8.5–8.8, cài chuẩn hóa địa chỉ (≥ 40 test), kiểm tra chồng lấn bằng bitmap, toàn bộ mã IO-*, diff/commit idempotent, báo cáo HTML/JSON."
+>
+> **Branch:** `m2/p2.6-address-validate` (tách từ `88493e7`, tip nhánh P2.5 = `develop` trên GitHub sau merge PR #36).
+> **Trạng thái:** ☑ implement xong (commit 1–7 + 1 fix perf + 1 fix test ripple) → ☐ parent gate → ☐ PR → ☐ merge. Gate trên cây live xanh (xem kết quả commit 7).
+> **Phạm vi:** §8.5 normalize địa chỉ + §8.6 normalize tên tag + §8.7 validate mã IO-* (đăng ký diagnostics) + §8.8 diff/commit + CLI `vcs import-io --commit/--report` (phần hoãn từ P2.5). Ground truth: fixture 300 tín hiệu + `expected.yaml` của P2.5 (địa chỉ display variant trong file → canonical trong `expected.yaml`; transform P2.5 KHÔNG chuẩn hóa).
+> **Prompt:** M2 §13 ngày 11 (trích ở trên); các prompt ngày 12 (suggest) thuộc P2.7, không làm ở đây.
+
+### Đọc (kiểm chứng bằng code thật, không suy đoán)
+
+- M2 §8.5–8.8 (§8.5 bảng chuẩn hóa, §8.6 tên tag, §8.7 bảng 15 mã IO-* + severity, §8.8 diff/commit/report); §9 (P2.7 cần gì từ P2.6: `suggest` dùng records đã normalize + validate; `apply` dùng diff/commit; PL-E004/PL-E010 là kiểm tra của P2.7, KHÔNG phải P2.6); §10 CLI (`vcs import-io <file> --profile <yaml> [--sheet X] [--commit] [--report]`); §11.3 (acceptance: ≥90% equipment+role, ≥95% model, 100% address, 100% lỗi cố ý phát hiện, 0 false positive trên dòng sạch; ≥40 case địa chỉ; property: normalize idempotent, re-import idempotent, overlap khớp bitmap tham chiếu; ≥1 test/mã diagnostic); §12 (import XLSX 20 000 dòng → kết quả đã validate + suggest ≤ 10 s — suggest chỉ có ở P2.7, xem OQ-357); §14 (#4/#5); §15 (mặc định: E→I, A→Q, PEW/PAW strip P + warn, dup tag case-insensitive = lỗi, re-import không ghi đè `provenance: manual`).
+- `packages/schemas/src/diagnostics-catalog.ts`: `PL_CATALOG` qua `defineDiagnostics` (PL-E001/E002/E003/E012/E020, PL-W001/W020). **Mã IO-* CHƯA đăng ký ở đâu**; `scripts/gen-diagnostics.ts` có `CATALOGS = [PRJ, SCL, LAD, PL]` và fail `--check` với mã chưa đăng ký — P2.6 phải thêm `IO_CATALOG` + đưa vào CATALOGS + chạy `pnpm docs:diagnostics` (không sửa tay `docs/diagnostics.md`). `DIAGNOSTIC_CODE_RE` đã nhận `IO-` (2–4 chữ hoa + `-E`/`-W` + 3 số). **PL-W010 có trong spec §9.4/§8.8 ("tham chiếu treo sau khi re-import") nhưng CHƯA có trong catalog và CHƯA dùng trong code** — P2.6 đăng ký nó (spec đã định nghĩa; không phải phát minh mã mới). PL-E004/PL-E010 (§9.4) cũng chưa có trong code — KHÔNG phải việc P2.6 (kiểm tra ở bước apply của P2.7).
+- **PL-E001 drift (tier-B, ghi nhận — KHÔNG sửa ở P2.6):** spec §9.4 ghi PL-E001 = "Thiếu role bắt buộc", nhưng trong code (`packages/plant/src/engine.ts:133,173,184,193,200,230,260,877,883,905,923`) PL-E001 là lỗi chung cấu hình plant (dup id, model lạ, role chưa khai báo, tag gán 2 lần, link sai). Title catalog "Model không tồn tại" chỉ là rút gọn. Xem OQ-359.
+- `packages/schemas/src/tags.ts`: `tagSchema` (`name` regex `TAG_NAME_RE`, `type`, `area` I/Q/M/DB, `address` qua `isValidAddressLight` — nhận `%I0.0`, `%IW64`, `%M0.0`, `DB1.DBW0`, `sym:`; KHÔNG nhận `E0.0`/`A0.0`/`PEW64`/`%I0.0:P` — các dạng này phải được normalize TRƯỚC khi dựng TagDef, đó là việc P2.6), `signal: {kind: DI/DO/AI/AO|null, scaling: {rawMin,rawMax,engMin,engMax,unit?}, polarity: NO/NC}`, `origin {file, sheet?, row?}`, `provenance: 'import'|'manual'`, `equipment?`, `role?`. `tagsFileSchema` superRefine: dup tag case-insensitive → **PRJ-E004** (commit phải từ chối ghi tags.yaml mà load sẽ fail; chạy `tagsFileSchema.parse` trên danh sách cuối làm safety net). PRJ-E010 (DI/AI phải area I, DO/AO area Q) và PRJ-E013 (DI/DO phải Bool; AI/AO numeric) trùng IO-E012/IO-E013 — validate báo mã IO lúc import; load kiểm lại mã PRJ.
+- `packages/schemas/src/import-profile.ts` (§4.4): `mapping` (partialRecord), `transforms`, `rules: {duplicateTag, duplicateAddress, missingType, missingRange}` (4 khóa nhóm chung, KHÔNG phải từng mã), `headerRow/firstDataRow/lastDataRow/skipRowsWhen/fillDownColumns`, `encoding/delimiter`, `defaults`, `addressDerive: {moduleStartColumn, channelColumn, moduleTypeColumn?, channelBase mặc định 0}`, `headers`, `naming?`. Spec §8.7 muốn cấu hình severity theo từng mã trong `rules` — 4 khóa nhóm không diễn tả được; mặc định tier-B: thêm `rules.overrides: Partial<Record<IOCode, RuleSeverity>>`, thứ tự ưu tiên override theo mã > khóa nhóm > mặc định catalog; giữ 4 khóa nhóm để tương thích ngược (xem OQ-348).
+- `packages/importers/src/io-list/transform.ts`: `IoRecord = Record<string, CellValue>` — **không mang thông tin dòng**. `gridToRecords(grid, headerRow, firstDataRow, mapping, lastDataRow?)` trả records theo thứ tự, dùng `grid.rowNumbers` nội bộ (CSV 1..N, XLSX số dòng Excel thật). Diagnostic của validate cần số dòng file + origin link-back → mặc định tier-B: validate nhận `{records, rowNumbers, origin: {file, sheet}}` với helper thuần tính rowNumbers căn với output của gridToRecords (KHÔNG gắn trường ẩn `_row` vào IoRecord).
+- CLI `apps/cli/src/commands/import-io.ts` (P2.5 commit 6, OQ-339): `vcs import-io <file> [--sheet X] [--profile <yaml>] [--json]` → read → detectHeader → fill-down → mapping → records → transform → preview 50 + mapping JSON; exit 0 ok, 2 lỗi đọc/header/profile, 3 sai tham số/không hỗ trợ đuôi file. `changed[].row` là record index 0-based; CLI cộng firstDataRow offset khi hiển thị. `--commit`/`--report` cắm vào sau transform. CLI đã phụ thuộc `@vcs/importers`, `@vcs/project`, `@vcs/plant`, `@vcs/schemas`, `yaml` — không cần workspace dep mới. Real time được phép ở `apps/*` (lint allow-list) nên tên file report `reports/import-<timestamp>.json|html` dùng wall time ở tầng CLI; builder report thuần nhận timestamp inject (test xác định).
+- Fixture ground truth (`fixtures/expected.yaml`, `fixtures/io-list-300.csv`): 300 tín hiệu, 177 role + 123 extra (role null), header dòng 6, first data dòng 7, merges `A7:A163`/`A164:A306`, sheet `Cover`. Dirty list: **36 dòng** — 9 suffix-variant (dòng 8, 18, 28, 38, 49, 60, 148, 165, 175; `RUN_FBK`/`RUNNING`/`RUN_ST` vs role ground-truth `runFb`), 15 thiếu type (dòng 25, 36, 45, 47, 86, 96, 106, 124, 161, 171, 180, 194, 216, 239, 291; ground truth AI/DI/DO/AO), 6 dup-tag (dòng 75, 81, 91, 144, 270, 296), 6 dup-address (dòng 50, 78, 137, 158, 163, 255; vd dòng 50 `%IW96 → %IW74` trùng dòng 23). Địa chỉ CSV: 299 distinct/300, **217 non-canonical** (thiếu `%`, dạng E/A Đức, tiền tố P: E0.0/E0.2/EW66/PEW70/PQW64…); **không có** space, `:P`, DB, M trong fixture — bảng ≥40 case phải lấy thêm từ bảng spec + case lỗi, không chỉ fixture.
+- `packages/project/src/load.ts`: `files.tags` mặc định `tags/tags.yaml`, `files.plant` mặc định `plant/equipment.yaml`; thiếu tags file → warning, tags rỗng. Không có khóa `files.io` trong config project → đường ra của commit mặc định tương đối: `io/io-list.normalized.csv`, `io/import-profile.yaml`, `reports/import-<timestamp>.json|html` (tier-B; không cấu hình được ở P2.6).
+- `examples/motor-interlock/plant/equipment.yaml`: M01 motor_dol, signals runCmd=RUN_CMD, runFb=RUN_FB, overloadOk=OVL_OK (ready/remote/currentFb chưa gán); `examples/motor-interlock/tags/tags.yaml` có START_PB %I0.0, STOP_OK %I0.1, OVL_OK %I0.2, PERM %I0.3, RUN_FB %I0.4, RESET_PB… (+ RUN_CMD %Q0.0) — testbed tự nhiên cho PL-W010 (re-import bỏ RUN_CMD phải warn PL-W010, nêu equipment M01 + role runCmd).
+- `yaml`: `yaml.stringify` có sẵn (`scripts/gen-io-fixture.ts` dùng); `@vcs/importers` đã phụ thuộc `yaml@2.9.1` — ghi YAML ở commit không cần dep mới. Không có dep mới nào khác (hàm thuần).
+- Dependency-cruiser: rule `importers-deps` cho phép importers ← {schemas, plant, importers} — module mới P2.6 (`address.ts`, `normalize.ts`, `validate.ts`, `diff.ts`, `commit.ts`, `report.ts` trong `@vcs/importers`) không cần đổi rule. CLI đã được phép import importers.
+- `vitest.config.ts` thresholds: `packages/importers/src/**` lines 85 (P2.5); không cần đổi cho P2.6 (cùng package).
+- `packages/schemas/src/naming.ts`: không có `tagPattern`/`equipmentCodeToModel` (grep không ra) — naming là việc P2.7 (grouping); normalize tên tag ở P2.6 chỉ theo §8.6 (trim, space → `_` mặc định bật, giữ case, charset `[A-Za-z0-9_.-]`, bắt đầu chữ/`_`, ≤128 ký tự, còn lại IO-W002 với đề xuất đã làm sạch; dup case-insensitive → IO-E001). KHÔNG đụng naming ở P2.6.
+- Project schema (`packages/schemas/src/project.ts`): controllers chỉ có `id` + discriminated union theo `mode` (builtin/external) — **không khai báo vùng địa chỉ**. Nên IO-W010 ("vùng khai báo của controller") không có nguồn nào ngoài mặc định: I/Q 1024 byte, M 1024 byte, DB không giới hạn (xem OQ-349).
+- CLI registration (`apps/cli/src/commands/index.ts:102`): lệnh `import-io` đã có; thêm flag `--commit`/`--report`/`--overwrite-manual` tại đây + mở rộng `import-io.ts`.
+
+### Tóm tắt hiểu biết (≤ 8 dòng)
+
+1. P2.6 biến records thô của P2.5 thành **TagDef hợp lệ để ghi tags.yaml**: normalize địa chỉ (§8.5) + tên tag (§8.6) trước, validate mã IO-* (§8.7) sau, rồi diff/commit (§8.8).
+2. Địa chỉ trong file là **display variant** (E/A, thiếu `%`, P-prefix, `:P`, DB, M); canonical luôn có `%` (trừ DB) và dùng I/Q; kiểu suy từ width + kind.
+3. Validate là hàm thuần trên records đã normalize: 15 mã IO-* + PL-W010; mỗi diagnostic có (code, severity hiệu dụng, row file, tag, message, hint); severity: override theo mã > khóa nhóm `rules` > mặc định catalog.
+4. Chồng lấn kiểm bằng **khoảng bit** theo (controller, area): bit→1 bit, B→8, W→16, D→32, DB tách theo số DB; giao nhau → IO-E011, báo cả hai dòng.
+5. Diff khóa theo **tag đã normalize (case-insensitive)**: added/removed/changed/unchanged/renamedCandidates + `skippedManual` (mở rộng thêm, xem OQ-355); `renamedCandidates` chỉ đề xuất, không tự áp.
+6. Commit **từ chối khi có lỗi** (error-level), warning không chặn; safety net cuối: `tagsFileSchema.parse` trên danh sách cuối — nếu fail thì từ chối ghi dù validate đã pass (TC-2).
+7. Tag `provenance: manual` không bao giờ bị ghi đè/xóa trừ `--overwrite-manual`; tag unchanged giữ nguyên TagDef cũ (kể cả origin) để re-import cho tags.yaml byte-identical.
+8. Report JSON + HTML cùng dữ liệu; `--commit` luôn viết report; `--report` một mình = validate+diff+report, không ghi tags.yaml; re-import cùng file → diff rỗng (idempotent).
+
+### Phạm vi
+
+**Làm:**
+- `address.ts`: parse/normalize địa chỉ (§8.5) + suy kind/type từ địa chỉ + khoảng bit cho overlap + `addressDerive` (module→địa chỉ).
+- `normalize.ts`: normalize tên tag (§8.6) + dựng normalized record (TagDef + metadata: `derivedKind`, `cleanedTag`, peripheral flag).
+- `IO_CATALOG` (15 mã) + PL-W010 vào catalog; `pnpm docs:diagnostics` tái sinh `docs/diagnostics.md`.
+- `validate.ts`: toàn bộ mã IO-* + PL-W010, severity theo `rules` (+ `overrides`), stats (kể cả `inferredKinds`).
+- `diff.ts` / `commit.ts` / `report.ts`: diff 5 bucket + skippedManual, ghi tags.yaml (sort controller, area, address — sort số học theo byte/bit, không sort chuỗi), normalized CSV, profile, report JSON+HTML.
+- CLI `--commit` / `--report` / `--overwrite-manual` + exit code (0 ok / 1 lỗi validate chặn commit / 2 không chạy được / 3 sai tham số).
+- Test: ≥40 case địa chỉ (bảng dưới), ≥1 test/mã diagnostic, property (normalize idempotent, overlap khớp bitmap tham chiếu, re-import idempotent), smoke 20k (read→validate→diff ≤ 10 s, guard — xem OQ-357).
+
+**Không làm (ghi lại, không chạm):**
+- Suggest/apply (P2.7) — nhưng P2.6 phải để lại API sạch cho P2.7 dùng: `normalizeImport(records)` và `validateImport(...)` là hàm thuần, export từ `@vcs/importers`.
+- UI wizard (P2.8); streaming read file > 20k (chỉ đo, chưa làm trừ khi smoke đỏ — xem TC-3).
+- Sửa PL-E001 (drift title, OQ-359); sửa `mapping.ts` ngoài 1 dòng regex sniff thiếu `O` (xem commit 1 — fix nhỏ có test, vì `O0.0` là biến thể hợp lệ theo §8.5).
+- Đổi ngưỡng/golden hiện có; đổi `tagsFileSchema` (PRJ-E004/E010/E013) — validate/commit chỉ DÙNG nó làm safety net.
+- Tự tạo controller khi IO-W020 (chỉ warn + gợi ý; tạo là việc P2.8 hoặc flag CLI sau này, xem OQ-350).
+- Chuẩn hóa `sym:` — passthrough nguyên văn (OQ-341); Real cho D-word — mặc định DInt, không có nguồn Real trong P2.6 (OQ-342).
+
+### Thiết kế
+
+**Layout (mới trong `@vcs/importers`, không đụng package khác ngoài catalog + CLI):**
+
+```
+packages/importers/src/io-list/
+  address.ts        # normalizeAddress, deriveKindFromAddress, deriveType, addressBitRange, deriveFromModule
+  address.test.ts   # bảng ≥ 40 + property idempotent + overlap
+  normalize.ts      # normalizeTagName, normalizeImport(records, opts) -> NormalizedSignal[]
+  normalize.test.ts
+  validate.ts       # validateImport({records, rowNumbers, origin, profile?, declaredControllers?, assignedTags?}) -> ValidateResult
+  validate.test.ts  # mỗi mã ≥ 1 + fixture counts + rules severity
+  diff.ts           # diffImport(normalized, existingTags) -> ImportDiff
+  diff.test.ts
+  commit.ts         # commitImport(...) -> ghi tags.yaml / normalized CSV / profile / report
+  commit.test.ts
+  report.ts         # renderImportReportJson, renderImportReportHtml (string template, escape HTML)
+  report.test.ts
+packages/schemas/src/diagnostics-catalog.ts  # + IO_CATALOG (15 mã) + PL-W010 vào PL_CATALOG
+scripts/gen-diagnostics.ts                   # CATALOGS += IO_CATALOG
+apps/cli/src/commands/import-io.ts           # + --commit/--report/--overwrite-manual
+apps/cli/src/commands/index.ts               # đăng ký flag
+apps/cli/src/commands/import-io.test.ts      # + case CLI
+```
+
+**Kiểu chính (định nghĩa ở `normalize.ts`, `validate.ts`, `diff.ts`):**
+
+```ts
+type NormalizedSignal = {
+  tag: string;                 // đã normalize (§8.6)
+  originalTag: string;         // tên gốc trong file (để report)
+  tagDef: TagDef;              // sẵn sàng ghi tags.yaml (type/area/address/controller/signal/origin/provenance)
+  derivedKind: boolean;        // kind suy từ địa chỉ (không có trong file)
+  cleanedTag: boolean;         // tên đã bị làm sạch (IO-W002)
+  peripheral: boolean;         // địa chỉ có P/:P (đã strip + IO-W030)
+  row: number;                 // số dòng file (1-based, theo grid.rowNumbers)
+};
+type ValidateResult = {
+  signals: NormalizedSignal[];
+  diagnostics: Diagnostic[];  // sort (row, code) — xác định
+  stats: { records: number; errors: number; warnings: number; infos: number;
+           inferredKinds: number; skippedRows: number; diagnosticsByCode: Record<string, number> };
+};
+type ImportDiff = {
+  added: NormalizedSignal[]; removed: TagDef[];
+  changed: { tag: string; fields: { field: string; old: unknown; next: unknown }[] }[];
+  unchanged: string[];        // tag
+  renamedCandidates: { from: string; to: string; address: string }[];
+  skippedManual: { tag: string; fields: string[] }[];  // mở rộng thêm ngoài §8.8
+  dangling: { tag: string; equipment: string; role: string }[]; // PL-W010
+};
+```
+
+**Thứ tự pipeline (CLI `--commit`/`--report`):** read → detectHeader → fill-down → mapping → `gridToRecords` → transform → `normalizeImport` (address + tag + derive kind/type + `addressDerive` nếu có module/channel) → `validateImport` (15 mã IO-* + PL-W010, severity theo rules) → `diffImport` (vs tags.yaml hiện có, scope = controller có trong file) → nếu `--commit`: lỗi → từ chối (exit 1, vẫn ghi report); không lỗi → safety net `tagsFileSchema.parse` → ghi tags.yaml + normalized CSV + profile + report. Nếu chỉ `--report`: validate+diff+report, không ghi tags.yaml. Mặc định (không flag): preview như P2.5.
+
+**Quy tắc chi tiết (mỗi quy tắc có test; OQ tương ứng ghi ở mục Mơ hồ):**
+- Normalize địa chỉ: trim/bỏ mọi whitespace, uppercase, strip `%` đầu, E→I, A→Q, O→Q (§8.5 bảng), strip P-prefix (PIW/PEW/PQW/PAW) + strip hậu tố `:P` → peripheral + IO-W030; parse `^(I|Q|M)(B|W|D)?(\d+)(\.(\d+))?$` hoặc `^DB(\d+)\.DB([XBWD])(\d+)(\.(\d+))?$`; canonical `%` + area + size + số (+ `.bit`); bit phải 0–7, byte ≥ 0 nguyên, B/W/D không lấy phần bit, area lạ → IO-E010; rỗng + không derive được → IO-E010; `sym:` passthrough nguyên văn.
+- Suy kiểu: bit→Bool; B→Byte; W→Int nếu kind AI/AO, còn lại Word; D→DInt (Real: không có nguồn trong P2.6 — OQ-342).
+- Suy kind (khi thiếu signalType): I+bit→DI, I+W/D→AI, Q+bit→DO, Q+W/D→AO; M/DB không suy được → IO-E003. Kind suy ra được ghi `derivedKind: true` + đếm `stats.inferredKinds`.
+- IO-E013 (type vs width): kind rõ ràng mâu thuẫn width → lỗi. DI/DO đòi bit; AI/AO đòi W/D (không phải bit, không phải B); B-width + bất kỳ kind nào → lỗi. Kind suy từ địa chỉ không bao giờ mâu thuẫn (suy nhất quán theo construction).
+- IO-E012 (hướng): DI/AI đòi area I; DO/AO đòi area Q; M/DB + kind bất kỳ → lỗi.
+- IO-W003 (alignment): W đòi byte offset chẵn; D đòi byte offset chia hết cho 4 (kể cả DBW/DBD trong DB).
+- IO-W010 (range): I/Q byte offset 0–1023, M 0–1023, DB không giới hạn (controllers không khai báo vùng — OQ-349).
+- IO-E001 (dup tag): kiểm trên tên ĐÃ normalize, case-insensitive; báo dòng sau (mirror PRJ-E004), message nêu dòng đầu. IO-E011 (dup/overlap): báo CẢ HAI dòng (spec nói rõ); overlap = giao khoảng bit (xem bảng dưới).
+- IO-W002: tên có ký tự ngoài `[A-Za-z0-9_.-]` hoặc bắt đầu bằng số → làm sạch (ký tự lạ → `_`, bắt đầu bằng số → thêm `_` đầu); rỗng sau làm sạch hoặc dài > 128 → IO-E002. Tên đã làm sạch có thể đụng tag khác → IO-E001 kiểm SAU làm sạch. `--commit` ghi tên ĐÃ làm sạch + liệt kê trong report (OQ-351).
+- IO-W040: engMin ≥ engMax hoặc non-number → warn; non-number → bỏ range, AI/AO khi đó thêm IO-W001; engMin === engMax thì safety net `tagsFileSchema.parse` (PRJ-E012) chặn commit (OQ-352).
+- IO-I001: dòng trong vùng data mà tag/address/signalType/description/equipment đều trống → bỏ qua + info (không phải record). Có field nhưng thiếu tag → IO-E002 (OQ-353).
+- `addressDerive`: moduleStart từ cột `moduleStartColumn` — parse số byte nguyên HOẶC địa chỉ (`%IB8` → byte 8); không parse được → IO-E010 dòng đó; byte = moduleStart + floor(ch/8), bit = ch % 8 (DI/DQ); AI/AQ byte = moduleStart + ch×2; channelBase mặc định 0 (spec: VERIFY với project thật). Fixture không có cột module/rack/slot/channel → test addressDerive bằng grid tổng hợp (OQ-347).
+- Diff: khóa = tag đã normalize (case-insensitive); so sánh field: type, area, address, controller, description, signal.kind, signal.scaling (engMin/engMax/unit/rawMin/rawMax), equipment, role. origin KHÔNG so sánh; tag unchanged giữ nguyên TagDef cũ (kể cả origin) để re-import cho tags.yaml byte-identical. Scope diff/commit = controller có trong file; tag của controller khác không đụng. Removed chỉ xóa tag provenance `import` (hoặc không có); tag `manual` không xóa, không ghi đè trừ `--overwrite-manual` (OQ-354/355).
+- Commit ghi tags.yaml sort: controller, area (I/Q/M/DB), address (sort số học byte/bit, không sort chuỗi — `%I10.0` sau `%I2.0`).
+- Report: JSON `{generatedAt, file, sheet, profile?, stats, diagnostics, diff, filesWritten?}` + HTML cùng dữ liệu (template chuỗi, escape HTML, không dep). `--commit` luôn ghi report; `--report` một mình ghi report, không ghi tags.yaml; không có `vcs.project.yaml` → `--commit` exit 2, `--report` vẫn chạy với baseline rỗng + warn stderr (OQ-356).
+- Severity: `rules.overrides[code]` > khóa nhóm (`duplicateTag`→IO-E001, `duplicateAddress`→IO-E011, `missingType`→IO-E003, `missingRange`→IO-W001) > mặc định catalog. `'ignore'` = không emit diagnostic đó. Lưu ý: hạ IO-E001 xuống warn vẫn bị safety net chặn (tags.yaml sẽ fail PRJ-E004) — test tương tác này rõ ràng (OQ-348).
+
+### Bảng tính tay
+
+**Bảng 1 — Normalize địa chỉ (55 case; spec yêu cầu ≥ 40).** Tính tay theo §8.5 + OQ-341/342/349/358. "Kiểu suy ra" là khi kind chưa biết; nếu kind đã biết (AI/AO) thì W→Int.
+
+| # | Đầu vào | Chuẩn hóa | Area | Kiểu suy ra | Ghi chú / diagnostic |
+|---|---|---|---|---|---|
+| 1 | `I0.0` | `%I0.0` | I | Bool | infer DI |
+| 2 | `I 0.0` | `%I0.0` | I | Bool | strip space |
+| 3 | `%I0.0` | `%I0.0` | I | Bool | — |
+| 4 | `E0.0` | `%I0.0` | I | Bool | E→I |
+| 5 | `E 0.0` | `%I0.0` | I | Bool | E→I + space |
+| 6 | `Q0.0` | `%Q0.0` | Q | Bool | infer DO |
+| 7 | `A0.0` | `%Q0.0` | Q | Bool | A→Q |
+| 8 | `O0.0` | `%Q0.0` | Q | Bool | O→Q (§8.5 bảng; lưu ý regex sniff P2.5 thiếu O — commit 1 sửa) |
+| 9 | `%Q0.0` | `%Q0.0` | Q | Bool | — |
+| 10 | `IB0` | `%IB0` | I | Byte | — |
+| 11 | `EB0` | `%IB0` | I | Byte | E→I |
+| 12 | `IW64` | `%IW64` | I | Word (Int nếu AI/AO) | infer AI nếu kind thiếu |
+| 13 | `EW64` | `%IW64` | I | Word/Int | E→I |
+| 14 | `PIW64` | `%IW64` | I | Word/Int | strip P + IO-W030 |
+| 15 | `PEW64` | `%IW64` | I | Word/Int | P+E→I + IO-W030 |
+| 16 | `QW64` | `%QW64` | Q | Word/Int | infer AO nếu kind thiếu |
+| 17 | `AW64` | `%QW64` | Q | Word/Int | A→Q |
+| 18 | `PQW64` | `%QW64` | Q | Word/Int | strip P + IO-W030 |
+| 19 | `PAW64` | `%QW64` | Q | Word/Int | P+A→Q + IO-W030 |
+| 20 | `ID0` | `%ID0` | I | DInt | — |
+| 21 | `ED0` | `%ID0` | I | DInt | E→I |
+| 22 | `QD0` | `%QD0` | Q | DInt | — |
+| 23 | `AD0` | `%QD0` | Q | DInt | A→Q |
+| 24 | `M0.0` | `%M0.0` | M | Bool | kind thiếu → IO-E003; kind có → IO-E012 |
+| 25 | `MW10` | `%MW10` | M | Word | kind thiếu → IO-E003 |
+| 26 | `MD20` | `%MD20` | M | DInt | kind thiếu → IO-E003 |
+| 27 | `MB5` | `%MB5` | M | Byte | kind bất kỳ → IO-E013 |
+| 28 | `DB1.DBX0.0` | `DB1.DBX0.0` | DB | Bool | giữ nguyên dạng (không `%`); kind thiếu → IO-E003 |
+| 29 | `DB1.DBW4` | `DB1.DBW4` | DB | Word/Int | — |
+| 30 | `DB1.DBD8` | `DB1.DBD8` | DB | DInt | — |
+| 31 | `DB1.DBB2` | `DB1.DBB2` | DB | Byte | kind bất kỳ → IO-E013 |
+| 32 | `%I0.0:P` | `%I0.0` | I | Bool | strip `:P` + IO-W030 |
+| 33 | `i0.0` | `%I0.0` | I | Bool | case-insensitive |
+| 34 | `%iw64` | `%IW64` | I | Word/Int | case-insensitive |
+| 35 | `  %I0.0  ` | `%I0.0` | I | Bool | trim |
+| 36 | `I0.8` | — | — | — | **IO-E010** (bit > 7) |
+| 37 | `I0.9` | — | — | — | **IO-E010** |
+| 38 | `DB1.DBX0.8` | — | — | — | **IO-E010** (bit > 7) |
+| 39 | `I-1.0` | — | — | — | **IO-E010** (byte âm) |
+| 40 | `X0.0` | — | — | — | **IO-E010** (area lạ) |
+| 41 | `T1` | — | — | — | **IO-E010** |
+| 42 | `` (rỗng, không derive) | — | — | — | **IO-E010** |
+| 43 | `IW64.0` | — | — | — | **IO-E010** (W không lấy phần bit) |
+| 44 | `IB0.1` | — | — | — | **IO-E010** |
+| 45 | `DB1.DBW4.0` | — | — | — | **IO-E010** |
+| 46 | `I0.0.0` | — | — | — | **IO-E010** (thừa phần) |
+| 47 | `%` | — | — | — | **IO-E010** |
+| 48 | `sym:DB1.MyTag` | `sym:DB1.MyTag` | — | — | passthrough nguyên văn; kind thiếu → IO-E003 |
+| 49 | `%IW65` | `%IW65` | I | Word/Int | **IO-W003** (W offset lẻ) |
+| 50 | `%ID66` | `%ID66` | I | DInt | **IO-W003** (D offset 66 không chia hết cho 4) |
+| 51 | `%IW1024` | `%IW1024` | I | Word/Int | **IO-W010** (byte 1024–1025 vượt I 1024) |
+| 52 | `%I1023.7` | `%I1023.7` | I | Bool | bit cuối hợp lệ, không warn |
+| 53 | `%I1024.0` | `%I1024.0` | I | Bool | **IO-W010** |
+| 54 | `PEW70` | `%IW70` | I | Word/Int | **IO-W030** |
+| 55 | `PQW64` | `%QW64` | Q | Word/Int | **IO-W030** |
+
+Kiểm tra thêm bằng property test: `normalizeAddress(normalizeAddress(x)) === normalizeAddress(x)` với mọi input hợp lệ (idempotent); và `normalizeAddress` không bao giờ trả về dạng mà `isValidAddressLight` từ chối (trừ `sym:` — `isValidAddressLight` đã nhận `sym:`).
+
+**Bảng 2 — Chồng lấn (khoảng bit).** Khoảng tính theo bit trong (controller, area): bit→[8b+f, 8b+f+1); B→[8b, 8b+8); W→[8b, 8b+16); D→[8b, 8b+32); DB tách theo số DB.
+
+| A | B | Giao nhau? | Kết quả |
+|---|---|---|---|
+| `%IB0` | `%I0.3` | có (bit 3 ∈ byte 0) | IO-E011 cả hai dòng |
+| `%IW64` | `%IB65` | có (byte 65 ∈ word 64–65) | IO-E011 cả hai dòng |
+| `%IW64` | `%IB66` | không (66 ∉ 64–65) | OK |
+| `%ID0` | `%IW2` | có (bytes 2–3 ∈ 0–3) | IO-E011 cả hai dòng |
+| `%ID0` | `%IW4` | không (4 ∉ 0–3) | OK |
+| `%I0.0` | `%I0.1` | không | OK |
+| `%I0.0` | `%I0.0` | có (trùng hẳn) | IO-E011 cả hai dòng |
+| `%Q0.0` | `%I0.0` | không (area khác) | OK |
+| `%M0.0` | `%I0.0` | không (area khác) | OK |
+| `DB1.DBW0` | `DB1.DBW2` | không (bytes 0–1 vs 2–3) | OK |
+| `DB1.DBX0.0` | `DB1.DBB0` | có | IO-E011 cả hai dòng |
+| `DB1.DBW0` | `DB2.DBW0` | không (DB khác) | OK |
+| `%IB0` (PLC1) | `%IB0` (PLC2) | không (controller khác) | OK |
+| `%IW64` | `%IB64` | có (byte 64 ∈ word 64–65) | IO-E011 cả hai dòng |
+| `%ID64` | `%IW66` | có (bytes 66–67 ∈ 64–67) | IO-E011 cả hai dòng |
+
+Property test: overlap của implementation khớp mô hình tham chiếu bitmap brute-force (Set bit) viết độc lập trong test file.
+
+**Bảng 3 — Normalize tên tag (§8.6).** Mặc định `replaceSpaces: '_'` (bật).
+
+| Đầu vào | Đầu ra | Diagnostic |
+|---|---|---|
+| ` RUN_CMD ` | `RUN_CMD` | — (trim) |
+| `M01 RUN FB` | `M01_RUN_FB` | — (space → `_`) |
+| `M01  RUN   FB` | `M01_RUN_FB` | — (nhiều space → 1 `_`) |
+| `RUN-CMD` | `RUN-CMD` | — (`-` hợp lệ) |
+| `RUN.CMD` | `RUN.CMD` | — (`.` hợp lệ) |
+| `RUN!CMD` | `RUN_CMD` | IO-W002 (đề xuất đã làm sạch) |
+| `1RUN_CMD` | `_1RUN_CMD` | IO-W002 (bắt đầu bằng số → thêm `_`) |
+| `RUN@CMD#1` | `RUN_CMD_1` | IO-W002 |
+| `` (rỗng) | — | IO-E002 |
+| `A` × 129 | — | IO-E002 (quá 128 ký tự) |
+| `M01_RUN_CMD` vs `m01_run_cmd` (2 dòng) | — | IO-E001 (dup case-insensitive, báo dòng sau) |
+
+**Bảng 4 — Diff (ví dụ tính tay).**
+- Cũ (tags.yaml): A=`%I0.0` DI; B=`%I0.1` DI (provenance manual); C=`%Q0.0` DO.
+- Mới (import): A=`%I0.0` DI (y hệt); B=`%I0.1` DI description đổi; D=`%I0.2` DI.
+- Kỳ vọng: added [D], removed [C], changed [], unchanged [A], skippedManual [B (description)], renamedCandidates [].
+- Ví dụ rename: cũ E=`%I1.0` DI; mới F=`%I1.0` DI (E không còn) → renamedCandidates [{from: E, to: F, address: `%I1.0`}], removed [E], added [F]; commit áp removed+added (E xóa, F thêm) và báo candidate trong report.
+- Ví dụ changed: cũ G=`%IW64` AI range 0–100; mới G=`%IW64` AI range 0–27648 → changed [{tag: G, field: `signal.scaling.engMax`, old: 100, next: 27648}].
+
+**Bảng 5 — Kỳ vọng validate trên fixture 300 (để implementer assert trong test; ĐẾM BẰNG SCRIPT trước khi code validate, ghi số thật vào STATE commit 4).**
+- Đã tính tay từ dirty list P2.5: IO-E001 ×6 (dup-tag, báo dòng sau); IO-E011 ×12 (6 cặp dup-address × cả hai dòng — gồm dòng 50 `%IW96 → %IW74` trùng dòng 23; kiểm tra 5 cặp còn lại bằng script); IO-E003 ×0 (15 dòng thiếu type đều suy được kind từ địa chỉ — script kiểm tra từng dòng vs ground truth trong expected.yaml, nếu có dòng suy sai thì đó là lỗi fixture, báo lại, không sửa validate cho vừa); 9 dòng suffix-variant → 0 diagnostic ở P2.6 (P2.7 mới xử lý role).
+- Chưa đếm — script đếm trước khi code, rồi assert đúng số đó: IO-W001 (AI thiếu Range Lo/Hi), IO-W003 (offset lẻ trong file), IO-W030 (số địa chỉ P-prefix/`:P`), IO-W040 (engMin ≥ engMax / non-number), IO-W010 (vượt range — dự kiến 0, địa chỉ lớn nhất ~%IW214), IO-W020 (controller chưa khai báo — dự kiến 0 trong examples/motor-interlock vì PLC1 đã khai báo), IO-W002 (ký tự lạ trong tag — dự kiến 0).
+- Script đếm: tsx nhỏ đọc `fixtures/io-list-300.csv` + `fixtures/expected.yaml` (dùng `readXlsx`/`readCsv` + `gridToRecords` có sẵn), in ra các số trên; chạy TRƯỚC commit 4 và ghi kết quả vào STATE (không đoán số trong test).
+
+### Mơ hồ (tier A/B/C)
+
+**Tier A (tự quyết, ghi trong code/test):**
+- Diagnostics sort (row, code) để output xác định; report JSON key order ổn định (insertion order, không sort lại).
+- HTML report: template chuỗi thuần, escape HTML cho mọi giá trị từ file; không dùng CSS framework, không dep.
+- Normalized CSV: cột canonical (tag, description, signalType, address, controller, engMin, engMax, unit, equipment, polarity, rack, slot, channel, module) — cùng thứ tự cột với mapping canonical §8.3, giá trị ĐÃ normalize.
+- Import profile đã lưu (`io/import-profile.yaml`): ghi profile ĐÃ DÙNG (kể cả profile tự suy ra từ mapping gợi ý) để lần sau `--profile` tái dùng được.
+
+**Tier B (mặc định + ghi OQ, tiếp tục):** OQ-341…360 (đầy đủ ở `open-questions.md`).
+- OQ-341 normalize địa chỉ: canonical/parse/lỗi/`sym:` passthrough; regex sniff `mapping.ts` thiếu `O` (fix 1 dòng ở commit 1).
+- OQ-342 suy kiểu: D→DInt (Real không có nguồn trong P2.6).
+- OQ-343 overlap bitmap khoảng bit (DB/controller tách riêng).
+- OQ-344 IO-E012 vs PRJ-E010 (validate báo IO, load kiểm lại PRJ, không báo trùng).
+- OQ-345 IO-E013: trigger = kind rõ ràng mâu thuẫn width.
+- OQ-346 IO-E003: suy kind từ I/Q + width; M/DB không suy được.
+- OQ-347 addressDerive: moduleStart parse số hoặc địa chỉ; channelBase mặc định 0; test bằng grid tổng hợp (fixture không có dữ liệu).
+- OQ-348 rules: thêm `overrides` theo mã; precedence override > nhóm > catalog; safety net chặn hạ cấp IO-E001.
+- OQ-349 IO-W010: mặc định I/Q 1024, M 1024, DB không giới hạn (controllers không khai báo vùng).
+- OQ-350 IO-W020: chỉ warn + gợi ý, không tự tạo controller.
+- OQ-351 IO-W002/IO-E002: `--commit` ghi tên đã làm sạch + liệt kê report; rỗng/quá dài → lỗi chặn.
+- OQ-352 IO-W040: non-number → bỏ range (+ IO-W001 nếu analog); `=` thì safety net chặn.
+- OQ-353 IO-I001: dòng toàn trống → skip + info; có field nhưng thiếu tag → IO-E002.
+- OQ-354 diff/commit scope theo controller trong file; removed chỉ xóa provenance import; renamed chỉ đề xuất.
+- OQ-355 `skippedManual` bucket + unchanged giữ nguyên TagDef cũ (idempotence byte-identical).
+- OQ-356 report JSON+HTML; `--commit` luôn ghi report; `--report` không project → baseline rỗng + warn stderr.
+- OQ-357 perf §12: smoke P2.6 (read→validate→diff, chưa suggest) ≤ 10 s làm regression guard; ngưỡng chính thức (có suggest) chốt ở P2.7.
+- OQ-358 IO-W003: W chẵn, D chia hết cho 4 (kể cả DB).
+- OQ-359 PL-W010 đăng ký (spec đã có) + PL-E001 title drift (ghi nhận, không sửa).
+- OQ-360 controller mặc định: `defaults.controller` → controller đầu tiên trong `vcs.project.yaml` → `'PLC1'`.
+
+**Tier C (dừng phần bị chặn, báo owner):**
+- **TC-1 — Mâu thuẫn spec:** ground truth (expected.yaml) hoặc §8.5/§8.7 mâu thuẫn nhau theo cách làm đổi số acceptance (vd một quy tắc normalize làm sai > 0 dòng ground truth mà không phải lỗi fixture) → SCR + OWNER-INBOX mục S, tiếp tục theo spec hiện hành, không tự chọn.
+- **TC-2 — Baseline không load được / validate và load bất đồng:** tags.yaml hiện có của project không load được (lỗi PRJ-*) → DỪNG phần diff/commit (không có baseline an toàn); phần normalize/validate trên file mới vẫn làm tiếp. Hoặc: `tagsFileSchema.parse` (safety net) từ chối một tags.yaml mà validate đã pass → DỪNG, tìm nguyên nhân gốc trước khi viết thêm đường commit nào (không sửa safety net cho vừa).
+- **TC-3 — Perf smoke > 10 s sau 3 lần tối ưu:** smoke 20k (read→validate→diff) vượt 10 s sau 3 lần sửa có đo → DỪNG, báo owner + đề xuất thu hẹp (vd kiểm overlap chỉ trong controller, hoặc streaming read) — không hạ ngưỡng âm thầm.
+
+### Test target + gate
+
+- Mới ≥ 100 test (tổng → ~2660): address 55 (bảng 1 — mỗi dòng 1 case) + property idempotent + overlap 15 (bảng 2) + property bitmap tham chiếu; normalize tag 11 (bảng 3) + property; validate: mỗi mã IO-* ≥ 1 + PL-W010 ≥ 1 + fixture counts (bảng 5) + severity rules (override/nhóm/mặc định/ignore + tương tác IO-E001 hạ cấp) + rowNumbers/origin link-back; diff: bảng 4 + idempotent (commit 2 lần → diff rỗng + tags.yaml byte-identical) + manual-skipped + renamed; commit: ghi file sort đúng + safety net + report json+html + PL-W010 với examples/motor-interlock; CLI: `--commit` thành công / bị từ chối (exit 1, tags.yaml không đổi) / `--report` một mình / `--overwrite-manual` / không project (exit 2) / sai tham số (exit 3).
+- Smoke 20k: `generateIoFixture({signalCount: 20000})` → read → mapping → transform → normalize → validate → diff (baseline = tags.yaml 20k sinh từ cùng fixture) → assert ≤ 10 s (guard, OQ-357) + ghi số thật vào STATE.
+- Gate: `lint && typecheck && depcheck && test && review:cheats` + `docs:diagnostics --check` + build 3/3. Không e2e (không có UI). Coverage importers giữ lines 85 (không đổi config). Không sửa ngưỡng/golden hiện có.
+
+### Rủi ro (top 3)
+
+1. **Overlap sai (false positive/negative)** — bitmap tính sai width/offset → commit từ chối file đúng hoặc cho qua file trùng. Mitigate: bảng 2 + property test vs bitmap tham chiếu brute-force + fixture 6 cặp dup (IO-E011 ×12).
+2. **Commit ghi tags.yaml mà load fail** — validate và `tagsFileSchema` bất đồng (vd IO-E012/E013 thiếu case). Mitigate: safety net `tagsFileSchema.parse` bắt buộc trước mọi lần ghi + test commit với fixture dirty (phải từ chối) + test idempotence.
+3. **Severity rules tương tác xấu** — user hạ IO-E001 xuống warn rồi commit vẫn bị chặn (safety net), gây khó hiểu. Mitigate: ghi rõ trong docs + test tương tác + message của safety net nêu rõ "đã hạ cấp nhưng tags.yaml vẫn không load được (PRJ-E004)".
+
+### Kết quả triển khai (điền sau khi implement — commit 7)
+
+#### Kết quả commit 1 — `feat(importers): chuẩn hóa địa chỉ (§8.5)`
+- `address.ts`: `normalizeAddress` (55 case bảng 1), `deriveKindFromAddress`, `deriveType`, `addressBitRange`/`rangesOverlap` (bảng 2), `parseModuleStart`/`deriveFromModule` (OQ-347). `mapping.ts`: regex sniff thêm `O` (1 dòng, OQ-341) + test `O0.0` → address.
+- Test: `address.test.ts` **102 passed** (55 bảng 1 + property canonical-idempotent + property isValidAddressLight + 12 deriveKind + 15 bảng 2 + property bitmap brute-force 22×22 cặp + 9 deriveFromModule + 10 parseModuleStart); `mapping.test.ts` +1 test O0.0. Lint + typecheck xanh.
+- Lệch tier A (ghi lại): property idempotent trong plan (`norm(norm(x)) === norm(x)`) KHÔNG đúng theo nghĩa đen với địa chỉ peripheral — P bị strip ở lần đầu nên lần 2 cho `peripheral: false`; test assert tính chất đúng: canonical là fixed point, area/size/byte/bit/db giữ nguyên. Không sửa implementation cho vừa test.
+- OQ-341/342/343/358: code xong, đóng ở commit 7 (theo plan).
+
+#### Kết quả commit 2 — `feat(importers): chuẩn hóa tên tag + dựng normalized record (§8.6)`
+- `normalize.ts`: `normalizeTagName` (bảng 3), `parseSignalType` (DI/DO/AI/AO + DE/DA/AE/AA), `parsePolarity`, `normalizeImport` → `NormalizedSignal` (TagDef + metadata: address/kind/engMin/engMax/controller/record gốc), `extractDeriveColumns` (trích cột addressDerive từ lưới theo tên header, căn hàng với gridToRecords).
+- Test: `normalize.test.ts` **39 passed** (11 bảng 3 + property TAG_NAME_RE + parseSignalType/Polarity + 9 normalizeImport + 6 addressDerive). Lint + typecheck xanh.
+- Lệch/quyết định tier A (ghi lại):
+  - `NormalizedSignal.tagDef: TagDef | null` (plan ghi `TagDef` không-null): record lỗi (tên rỗng/>128, địa chỉ lỗi, sym: thiếu kind, thiếu type) không thể dựng TagDef hợp lệ — bịa một TagDef giả còn tệ hơn; các record này luôn kèm diagnostic lỗi nên commit bị chặn.
+  - `NormalizedSignal` mở rộng thêm `address/addressError/kind/givenKind/engMin/engMax/rangeNonNumeric/controller/record` so với sketch trong plan — validate/diff/commit cần các trường đã parse này, không parse lại từ record thô.
+  - `deriveType` với sym:: DI/DO→Bool, AI/AO→Int, thiếu kind→null (sym: không có width; nếu không suy type thì tag sym: có kind cũng không commit được).
+  - signalType Đức DE/DA/AE/AA được nhận trực tiếp (spec §4.4 ví dụ transform map DE→DI…); dạng lạ → coi như thiếu kind.
+  - scaling: dựng khi AI/AO + engMin/engMax đều là số, raw 0..27648 (chuẩn Siemens — file không có cột raw range); engMin===engMax vẫn dựng để safety net PRJ-E012 chặn commit (OQ-352); non-number → bỏ range.
+  - addressDerive: cột là TÊN HEADER (§4.4: "Module Start"/"Channel"/"Module"); CLI trích từ lưới qua `extractDeriveColumns` đưa vào `opts.deriveColumns`; fallback đọc `record[column]` (record tự dựng trong test). Thiếu moduleType → suy area/size từ kind (DI/DO→bit, AI/AO→word) vì cỡ module không ảnh hưởng công thức địa chỉ. Hạn chế: cột "Module Start" chưa map vào canonical field thì CLI chỉ lấy được qua deriveColumns (đã làm) — không cần map thêm.
+- OQ-346/351/360: code xong, đóng ở commit 7.
+
+#### Kết quả commit 4 — `feat(importers): validate mã IO-* (§8.7) + rules.overrides`
+- `validate.ts`: `validateImport` (records+rowNumbers → signals+diagnostics sort (row, code)+stats), `resolveSeverity` (overrides theo mã > khóa nhóm rules > catalog), `recordRowNumbers` (căn với gridToRecords), `isEmptyRow`. `import-profile.ts`: `rules.overrides` (`z.partialRecord(ioCodeSchema, ruleSeveritySchema)`, OQ-348) + export `ioCodeSchema`.
+- Số đếm fixture 300 (assert trong test, KHỚP script đếm độc lập trước commit 4): **IO-E001 ×6, IO-E011 ×12** (dòng 23, 31, 50, 78, 116, 131, 137, 158, 163, 223, 255, 289), **IO-W030 ×23**; IO-E003/IO-W001/IO-W002/IO-W003/IO-W010/IO-W020/IO-W040 ×0. Tổng 41 diagnostic (error 18, warning 23, info 0); records 300, skipped 0, inferredKinds 15.
+- Test: `validate.test.ts` **24 passed** (mỗi mã ≥ 1 + mức độ + sort/stats + fixture). Lint + typecheck xanh.
+- Lệch/quyết định tier A (ghi lại):
+  - `RuleSeverity` của profile là `'error'|'warn'|'ignore'`, còn `Diagnostic.severity` là `'error'|'warning'|'info'` — `resolveSeverity` map `'warn' → 'warning'` qua `toEffective` (không đổi schema rules đã có từ P2.5).
+  - IO-E012/E013 không kiểm với sym: (không có area/width); IO-E003 chỉ khi địa chỉ parse được mà kind null (địa chỉ lỗi → chỉ IO-E010, không kèm IO-E003).
+  - IO-E011: một diagnostic cho MỖI cặp chồng lấn × cả hai dòng (3 dòng cùng địa chỉ → 6 diagnostic).
+  - PL-W010 emit không gắn dòng file (`line` undefined — không có dòng nguồn); assignedTags do CLI lọc theo tags.yaml hiện có (chỉ tag đang tồn tại mới tính là "bị xóa").
+  - Dòng trống lọc TRƯỚC normalize (chỉ IO-I001, không kèm lỗi khác); deriveColumns lọc cùng chỉ số để không lệch hàng.
+  - Bug do test tìm ra (implementation đúng theo plan, test sai): test IO-W002 dùng tag `'PUMP 1'` (space) — bảng 3 plan nói space → `_` KHÔNG diagnostic; đã sửa test dùng `'PUMP!1'` + thêm case space không báo.
+- OQ-344/345/347/348/349/350/352/353: code xong, đóng ở commit 7.
+
+#### Kết quả commit 5 — `feat(importers): diff + commit + report (§8.8)`
+- `diff.ts`: 5 bucket spec + `skippedManual` (OQ-355, kèm `reason: 'changed'|'removed'`); scope = controller có trong file (OQ-354); tag manual không ghi đè/xóa trừ `--overwrite-manual`; `renamedCandidates` chỉ đề xuất (ghép tham lam theo tên tag, tất định); so sánh field: type/area/address/controller/description/signal.kind/signal.polarity/signal.scaling.* (không so initial/equipment/role/origin/provenance — import không cung cấp, giữ nguyên khi commit).
+- `commit.ts`: `applyCommit` thuần (không ghi file — ghi ở biên CLI); tag changed/added lấy TagDef mới nhưng giữ initial/equipment/role cũ; sort ổn định controller → area → địa chỉ (byte/size/bit; DB theo số DB); `serializeTags` (yaml stringify, round-trip qua tagsFileSchema bằng); `safetyNetCheck` qua `tagsFileSchema` (PRJ-E003 mặc định, mã từ zod params) — chặn commit trước khi ghi (TC-2).
+- `report.ts`: `buildReport` + JSON + HTML (template chuỗi, escape HTML, không dep; `generatedAt` inject).
+- Test: `diff.test.ts` 7 + `commit.test.ts` 8 + `report.test.ts` 7 = **22 passed** (bảng 4 cả 3 ví dụ, idempotence commit 2 lần → diff rỗng + YAML byte-identical, safety net PRJ-E004/E010/E011/E012, PL-W010 ×3 với examples/motor-interlock thật, report JSON/HTML + escape). Lint + typecheck xanh.
+- Lệch/quyết định tier A (ghi lại):
+  - `normalizeAddress` trả union phân biệt `{ok, address} | {ok: false, reason}` (không phải `{address: ParsedAddress | null}`) — `compareTagDefs` dùng `pa.ok && pb.ok`; địa chỉ không parse được/sym: → so chuỗi.
+  - Safety net: scaling trên DI là **PRJ-E011** (không phải E012 như test viết ban đầu — E012 là engMin==engMax); đã sửa test + thêm case engMin==engMax → PRJ-E012 (validate warn IO-W040, safety net chặn ở commit — đúng OQ-352).
+  - Test report: tag manual không vào bảng changed nên description không render trong HTML — thêm tag E không manual cho case escape.
+- OQ-354/355/356: code xong, đóng ở commit 7.
+
+#### Kết quả commit 6 — `feat(cli): vcs import-io --commit/--report [--overwrite-manual]`
+- `import-io.ts`: flow mới sau transform khi `--commit`/`--report` — tìm project đi lên từ file import (`vcs.project.yaml`); `loadProject` (baseline hỏng → exit 1, TC-2); validate (§8.7) với declaredControllers/assignedTags/defaultController từ project; diff (§8.8); gate: lỗi validate hoặc safety net → từ chối exit 1 (tags.yaml không đổi, report vẫn ghi kèm lý do); `--commit` ghi tags.yaml + `io/io-list.normalized.csv` + `io/import-profile.yaml` + `reports/import-<timestamp>.json|html`; `--report` chỉ ghi report. Exit: 0 ok, 1 từ chối, 2 không project cho --commit/lỗi đọc, 3 sai tham số. `--json` mở rộng thêm validate/diff/commit (tương thích P2.5).
+- `index.ts`: 3 flag mới (`--commit`, `--report`, `--overwrite-manual`).
+- Test: `import-io.test.ts` +6 = **17 passed** (commit thành công motor-interlock: +NEW_TAG/−6/unchanged 2/PL-W010 ×1; commit bị từ chối exit 1 + tags.yaml byte-identical; report một mình; overwrite-manual 2 lượt; không project exit 2; report --json).
+- Lệch/quyết định tier A (ghi lại):
+  - **Bug thật tìm ra khi debug test đỏ**: `project.config.controllers` là `ControllerDef[]` ({id, mode, vendor…}), KHÔNG phải `string[]` — CLI ban đầu truyền nguyên object làm controller → diff sai (controller changed, removed 0) và safety net từ chối (controller không phải string). Sửa: `.map(c => c.id)` cho declaredControllers/defaultController.
+  - Project không khai báo controller nào → bỏ qua kiểm IO-W020 (không có cơ sở để kiểm) thay vì warn mọi record.
+  - `--report` một mình exit 0 kể cả khi validate có lỗi (report là đầu ra, không phải gate); chỉ `--commit` mới exit 1 khi có lỗi. `--report` không ghi normalized CSV/profile (chỉ report) — tách bạch dry-run vs commit.
+  - Safety-net diagnostics được gộp vào report diagnostics (stats tính lại) để report ghi rõ lý do từ chối.
+- OQ-339 follow-up: code xong, đóng ở commit 7.
+
+#### Kết quả commit 7 — `docs(m2): P2.6 kết quả + perf smoke 20k + đóng OQ-341…360`
+- OQ-341…360: **đóng cả 20** trong `docs/open-questions.md` (mỗi dòng ghi commit + bằng chứng).
+- Smoke 20k (script tạm `scripts/tmp-p26-smoke.mts`, đã xóa sau khi chạy): sinh fixture 20k → read→validate→diff **420 ms ≤ 10 s** (OQ-357, TC-3 không nổ). Phân rã: readCsv 74 ms, header/mapping/transform 27 ms, validate 169 ms, diff 149 ms. Số đếm smoke (fixture tổng hợp tràn không gian I/Q 1024 byte nên nhiều lỗi — không phải lỗi validate): records 20000, errors 28478 (IO-E011 ×28478), warnings 9350 (IO-W030 ×1134, IO-W010 ×8216), diff added 20000.
+- Lệch so với plan (ghi lại):
+  - Thêm 1 commit fix perf giữa commit 6 và 7 (`b9681f6`): smoke lần đầu 4925 ms (validate 2501 ms + diff 2323 ms) do 2 vòng lặp O(n²) — `added.includes()` trong filter của diff và so từng cặp địa chỉ ở IO-E011. Sửa: sweep-line cho IO-E011 + Set cho renamed-candidates → 420 ms; số diagnostic giống hệt, test fixture không đổi (286/286 io-list xanh sau sửa).
+  - Thêm 1 sửa test ripple trong commit 7 (`packages/plant/src/engine.test.ts`): test ghim PL_CATALOG 7 mã, commit 3 thêm PL-W010 → cập nhật thành 8 mã + tiêu đề (58 → 74 mã tổng). Đây là kỳ vọng cũ theo catalog cũ, không phải sửa test cho xanh: PL-W010 do spec §9.4 định nghĩa, plan commit 3 yêu cầu đăng ký.
+  - Plan nói 7 commit; thực tế 9 commit (7 + fix perf + docs commit 7 chứa cả fix test ripple). Nội dung các commit 1–6 đúng plan.
+- Gate đầy đủ trên cây live (HEAD `b9681f6` + sửa engine.test.ts + STATE/OQ của commit 7, nội dung đúng như sẽ commit):
+  - `pnpm lint` — exit 0. `pnpm typecheck` — exit 0. `pnpm depcheck` — exit 0 (175 modules, 397 dependencies, no violations).
+  - `pnpm test` — **2761/2761 passed, 118 files** (2 lần chạy đầy đủ liên tiếp đều xanh; lần 1: 2760/2761 — 1 lỗi PL_CATALOG ripple ở trên, đã sửa; lần 2 và 3: 2761/2761). Tổng mới +198 test so với P2.5 (2563): address 102, normalize 39, validate 24, diff 7, commit 9, report 6, diagnostics-catalog +4, import-io +6, mapping +1. Coverage `packages/importers/src/**` lines **92,69%** (ngưỡng 85).
+  - `pnpm review:cheats` — SẠCH (282 file). `pnpm docs:diagnostics --check` — khớp (74 mã). `pnpm build` — 3/3 tasks thành công.
+  - TC-1/TC-2/TC-3: **không nổ**.
+- OQ-341…360: đóng ở commit 7 (cả 20).
+
+#### Kết quả commit 3 — `feat(schemas): đăng ký mã IO-* + PL-W010`
+- `IO_CATALOG` (15 mã §8.7) + `PL-W010` vào `PL_CATALOG`; `IO_CODES`/`IoCode` export từ `@vcs/schemas`; `gen-diagnostics.ts` CATALOGS += IO; `DIAGNOSTIC_CODE_RE` thêm `I` (cho IO-I001 — đã grep: chưa có mã `-I###` nào khác trong source nên không phát sinh mã lạ).
+- `pnpm docs:diagnostics` tái sinh: 74 mã (+16: 15 IO + PL-W010); `--check` khớp. PL-E001 drift chỉ ghi nhận (OQ-359), không sửa.
+- Test: `diagnostics-catalog.test.ts` **13 passed** (đủ 15 mã IO + mức độ + title/hint + PL-W010). Lint + typecheck xanh.
+
+### Commit plan (7 commit, mỗi commit gate xanh)
+
+1. `feat(importers): chuẩn hóa địa chỉ (§8.5) + bảng ≥ 40 test` — `address.ts` (normalize/derive kind/type/bit-range/deriveFromModule) + `address.test.ts` (bảng 1 + property idempotent + bảng 2 + property bitmap) + fix regex sniff thiếu `O` (`mapping.ts` 1 dòng + test). OQ-341/342/343/358.
+2. `feat(importers): chuẩn hóa tên tag + dựng normalized record (§8.6)` — `normalize.ts` + `normalize.test.ts` (bảng 3 + property). OQ-346/351/360.
+3. `feat(schemas): đăng ký mã IO-* + PL-W010` — `IO_CATALOG` + PL-W010 vào `PL_CATALOG`, `gen-diagnostics.ts` CATALOGS += IO, `pnpm docs:diagnostics` tái sinh, test mỗi mã có entry. OQ-359 (ghi nhận drift, không sửa PL-E001).
+4. `feat(importers): validate mã IO-* (§8.7)` — `validate.ts` + `validate.test.ts` (mỗi mã ≥ 1, fixture counts bảng 5 — ĐẾM BẰNG SCRIPT TRƯỚC, severity rules). OQ-344/345/347/348/349/350/352/353.
+5. `feat(importers): diff + commit + report (§8.8)` — `diff.ts`, `commit.ts`, `report.ts` + test (bảng 4, idempotence, safety net, PL-W010 với motor-interlock, report json+html). OQ-354/355/356.
+6. `feat(cli): vcs import-io --commit/--report [--overwrite-manual]` — `import-io.ts` + `index.ts` + `import-io.test.ts` (exit 0/1/2/3, report paths). OQ-339 follow-up.
+7. `docs(m2): P2.6 kết quả + perf smoke 20k + đóng OQ-341…360` — chỉ docs: số test, smoke thật, OQ đóng/mở, lệch.
+
+### File mới/sửa
+
+- Mới: `packages/importers/src/io-list/{address,normalize,validate,diff,commit,report}.ts` + test tương ứng; `apps/cli/src/commands/import-io.test.ts` (mở rộng).
+- Sửa: `packages/schemas/src/diagnostics-catalog.ts`, `scripts/gen-diagnostics.ts`, `docs/diagnostics.md` (tái sinh), `packages/importers/src/io-list/mapping.ts` (1 dòng regex), `apps/cli/src/commands/{import-io.ts,index.ts}`, `docs/STATE.md` §30, `docs/open-questions.md` (OQ-341…360).
+- Không sửa: `packages/schemas/src/tags.ts`, `packages/project/src/load.ts`, `packages/plant/*`, ngưỡng/golden hiện có, `docs/verify-owner-guide.md`.
+
+### OQ mới (OQ-341…360) + tier C còn mở
+
+- OQ-341…360: tier B, xem `open-questions.md` (đầy đủ ở dưới).
+- OWNER-INBOX: **không thêm mục mới** — P2.6 không cần quyết định owner; X-003/D-003 đã có (chặn P2.7, không chặn P2.6); PL-E001 drift chỉ ghi nhận (OQ-359), không cần owner quyết ở P2.6.
+- Đề xuất ngoài phạm vi (ghi lại, không làm): suggest/apply (P2.7); UI wizard (P2.8); streaming read file > 20k nếu smoke đỏ (TC-3); tự tạo controller khi IO-W020 (P2.8 hoặc flag CLI sau).
+

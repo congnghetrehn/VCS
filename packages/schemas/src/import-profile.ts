@@ -8,7 +8,11 @@
 
 import { z } from 'zod';
 
+import { IO_CODES } from './diagnostics-catalog.js';
 import { namingConfigSchema } from './naming.js';
+
+/** Mã chẩn đoán IO-* (§8.7) — dùng cho `rules.overrides` (OQ-348). */
+export const ioCodeSchema = z.enum(IO_CODES);
 
 /** Canonical field trong mapping §4.4 + §8.3 (rack/slot/channel/module
  *  phục vụ addressDerive §8.5). */
@@ -93,6 +97,9 @@ export const importProfileSchema = z.object({
       duplicateAddress: ruleSeveritySchema.optional(),
       missingType: ruleSeveritySchema.optional(),
       missingRange: ruleSeveritySchema.optional(),
+      /** Ghi đè mức độ theo từng mã (OQ-348): ưu tiên cao nhất,
+       *  'ignore' = không emit diagnostic đó. */
+      overrides: z.partialRecord(ioCodeSchema, ruleSeveritySchema).optional(),
     })
     .default({}),
   defaults: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).default({}),

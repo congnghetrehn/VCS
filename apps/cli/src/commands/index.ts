@@ -100,12 +100,15 @@ export function createProgram(): Command {
 
   program
     .command('import-io')
-    .description('Đọc I/O list CSV/XLSX, xem trước 50 dòng + mapping JSON (M2 §8; exit 0 ok, 2 lỗi đọc/header/profile, 3 sai tham số)')
+    .description('Đọc I/O list CSV/XLSX, xem trước 50 dòng + mapping JSON (M2 §8; exit 0 ok, 1 commit bị từ chối, 2 lỗi đọc/header/profile, 3 sai tham số)')
     .argument('[file]', 'file CSV/XLSX')
     .option('--sheet <name>', 'tên sheet (XLSX)')
     .option('--profile <yaml>', 'file import-profile.yaml')
     .option('--json', 'in JSON thay cho text')
-    .action(async (file: string | undefined, opts: { sheet?: string; profile?: string; json?: boolean }) => {
+    .option('--commit', 'ghi tags.yaml + normalized CSV + profile + report (cần vcs.project.yaml)')
+    .option('--report', 'chỉ validate + diff + report, không ghi tags.yaml')
+    .option('--overwrite-manual', 'ghi đè tag provenance manual (với --commit/--report)')
+    .action(async (file: string | undefined, opts: { sheet?: string; profile?: string; json?: boolean; commit?: boolean; report?: boolean; overwriteManual?: boolean }) => {
       process.exitCode = await importIoCommand(file, opts);
     });
 

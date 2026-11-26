@@ -4,6 +4,21 @@
 
 | Mã | Mức | Tiêu đề | Gợi ý |
 | --- | --- | --- | --- |
+| `IO-E001` | error | Trùng tag (không phân biệt hoa/thường) | Đổi tên một trong các tag trùng. |
+| `IO-E002` | error | Tag trống hoặc quá dài | Đặt tên tag khác rỗng, ≤ 128 ký tự, bắt đầu bằng chữ hoặc _. |
+| `IO-E003` | error | Thiếu signalType và không suy ra được từ địa chỉ | Ghi signalType (DI/DO/AI/AO) hoặc dùng địa chỉ I/Q để suy kind. |
+| `IO-E010` | error | Địa chỉ không hợp lệ | Sửa địa chỉ theo dạng %I0.0 / %IW64 / DB1.DBX0.0 (xem M2 §8.5). |
+| `IO-E011` | error | Trùng/chồng địa chỉ trong cùng controller | Đổi địa chỉ của một trong hai tín hiệu chồng lấn. |
+| `IO-E012` | error | Hướng sai (DI/AI ở vùng Q, DO/AO ở vùng I) | DI/AI phải ở area I; DO/AO phải ở area Q. |
+| `IO-E013` | error | Kiểu dữ liệu không khớp độ rộng địa chỉ | DI/DO cần địa chỉ bit; AI/AO cần Word/DWord. |
+| `IO-I001` | info | Dòng bị bỏ qua (dòng trống/tiêu đề phụ) | Dòng trống trong vùng dữ liệu được bỏ qua. |
+| `IO-W001` | warning | Tín hiệu analog thiếu engMin/engMax | Ghi Range Lo/Hi cho tín hiệu AI/AO. |
+| `IO-W002` | warning | Tên tag có ký tự không chuẩn | Dùng tên đã làm sạch trong báo cáo import. |
+| `IO-W003` | warning | Địa chỉ Word/DWord ở offset lẻ | Word cần byte chẵn; DWord cần byte chia hết cho 4. |
+| `IO-W010` | warning | Địa chỉ nằm ngoài vùng khai báo của controller | Kiểm tra vùng địa chỉ của controller (mặc định I/Q 1024 byte). |
+| `IO-W020` | warning | Controller chưa khai báo trong vcs.project.yaml | Khai báo controller trong vcs.project.yaml. |
+| `IO-W030` | warning | Có tiền tố peripheral (P/:P) | Địa chỉ peripheral đã được strip về dạng chuẩn; M1 chưa mô phỏng khác biệt. |
+| `IO-W040` | warning | engMin ≥ engMax hoặc giá trị không phải số | Kiểm tra Range Lo/Hi: phải là số và Lo < Hi (trừ range đảo có chủ đích). |
 | `LAD-S001` | error | Schema/cấu trúc LAD không hợp lệ | Kiểm tra JSON theo M1 §5.1: rung/parallel không rỗng, key đúng tên, FC/OB không có VAR (static). |
 | `LAD-T001` | error | Tên chưa khai báo | Khai báo tag/biến/DB trước khi dùng, kiểm tra chính tả. |
 | `LAD-T002` | error | Kiểu không khớp | Đổi kiểu operand hoặc giá trị cho khớp; thu hẹp phải dùng box CONVERT. |
@@ -19,6 +34,7 @@
 | `PL-E012` | error | Không xác định được dải đo cho role analog | Khai báo engMin/engMax trong params, hoặc scaling trong tag, hoặc unit "%" cho role. |
 | `PL-E020` | error | Chu trình link giữa các thiết bị | Bỏ một liên kết link để phá chu trình (thứ tự topo phải không có chu trình). |
 | `PL-W001` | warning | Cảnh báo cấu hình plant | Kiểm tra cấu hình plant: gán tag cho role; plcScanMs (nếu có) phải là số nguyên ≥ stepMs. |
+| `PL-W010` | warning | Tham chiếu treo sau khi re-import I/O list | Tag đã gán thiết bị bị xóa/đổi tên — cập nhật equipment.yaml. |
 | `PL-W020` | warning | Hành vi chưa kiểm chứng | Hành vi này chưa được kiểm chứng với PLC thật; xem docs/semantics.md. |
 | `PRJ-E001` | error | Thiếu file bắt buộc | Tạo vcs.project.yaml ở thư mục gốc của dự án. |
 | `PRJ-E002` | error | Cú pháp YAML sai | Sửa cú pháp YAML tại dòng/cột đã báo (chú ý thụt đầu dòng bằng khoảng trắng, không dùng tab). |
