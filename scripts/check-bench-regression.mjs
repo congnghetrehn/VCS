@@ -24,6 +24,7 @@ const METRICS = {
   setGetOpsPerSec: true,
   orchestratorStepsPerSec: true,
   plantStepsPerSec: true,
+  closedLoopStepsPerSec: true,
   flushNoChangeUs: false,
   flushChangesMs: false,
 };
