@@ -144,6 +144,7 @@ export async function createServer(
   registerRestRoutes(fastify, projectInfo, {
     hasWebBuild,
     plc: { dir, tags: model.catalog.all() },
+    service,
   });
   let url = `http://${config.host}:${String(config.port)}/`;
   let started = false;

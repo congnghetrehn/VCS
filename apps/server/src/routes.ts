@@ -10,6 +10,7 @@ import { resolve, sep } from 'node:path';
 import type { FastifyInstance } from 'fastify';
 import { hasErrors, type Diagnostic, type TagDef } from '@vcs/schemas';
 import { loadPlcProgram, savePlcFile } from './plc.js';
+import type { SimulationService } from './sim-service.js';
 import { VERSION } from './version.js';
 
 export interface ProjectInfo {
@@ -35,7 +36,12 @@ export interface PlcRoutesContext {
 export function registerRestRoutes(
   fastify: FastifyInstance,
   project: ProjectInfo,
-  opts?: { hasWebBuild?: boolean; plc?: PlcRoutesContext },
+  opts?: {
+    hasWebBuild?: boolean;
+    plc?: PlcRoutesContext;
+    /** P2.4 (OQ-318): service cho GET /api/plant + GET /api/sim/hash. */
+    service?: SimulationService;
+  },
 ): void {
   fastify.get('/api/health', () => ({ ok: true, version: VERSION }));
   fastify.get('/api/project', () => ({
@@ -46,6 +52,21 @@ export function registerRestRoutes(
     tagCount: project.tagCount,
     diagnostics: project.diagnostics,
   }));
+  if (opts?.service !== undefined) {
+    const service = opts.service;
+    // P2.4 (OQ-318): snapshot plant (equipment + faults + observables +
+    // fault/preset model khai báo); project không plant → {equipment: []}.
+    fastify.get('/api/plant', () => {
+      const snap = service.plantSnapshot();
+      return { equipment: snap?.equipment ?? [] };
+    });
+    // P2.4 (OQ-318): hash trace hiện tại — e2e so với hash CLI `plant run`.
+    fastify.get('/api/sim/hash', () => ({
+      hash: service.simHash(),
+      simTimeMs: service.simTimeMs,
+      stepCount: service.stepCount,
+    }));
+  }
   if (opts?.plc !== undefined) {
     const plcCtx = opts.plc;
     // P1.7 (OQ-208): compile-check plc/ hiện tại trên đĩa; KHÔNG hot reload
