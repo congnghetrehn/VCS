@@ -11,7 +11,7 @@ Phiên bản: `1.0.0`
 | Role | Kind | Kiểu | Bắt buộc | Synonyms |
 | --- | --- | --- | --- | --- |
 | `runCmd` | DO | Bool | có | `RUN_CMD`, `START_CMD`, `RUN`, `START`, `CMD`, `BETRIEB_BEFEHL` |
-| `runFb` | DI | Bool | có | `RUN_FB`, `RUNNING`, `RUN_ST`, `AUX`, `RUN_FBK`, `RUECKMELDUNG` |
+| `runFb` | DI | Bool | có | `RUN_FB`, `RUNNING`, `RUN_ST`, `AUX`, `RUN_FBK`, `RUECKMELDUNG`, `FB` |
 | `ready` | DI | Bool | không | `READY`, `RDY`, `MCB_OK`, `BREAKER_ON` |
 | `remote` | DI | Bool | không | `REMOTE`, `REM`, `AUTO_SEL` |
 | `overloadOk` | DI | Bool | không | `OVL_OK`, `OL_OK`, `THERMAL_OK`, `OVERLOAD_OK`, `OVL` |

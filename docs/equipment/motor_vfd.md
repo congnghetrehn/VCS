@@ -12,7 +12,7 @@ Phiên bản: `1.0.0`
 | --- | --- | --- | --- | --- |
 | `runCmd` | DO | Bool | có | `RUN_CMD`, `START_CMD`, `RUN`, `START`, `CMD` |
 | `speedRef` | AO | Int (%) | có | `SPEED_REF`, `SPEED_SP`, `SPEED_SET`, `SOLLWERT` |
-| `runFb` | DI | Bool | có | `RUN_FB`, `RUNNING`, `RUN_ST`, `AUX`, `RUN_FBK` |
+| `runFb` | DI | Bool | có | `RUN_FB`, `RUNNING`, `RUN_ST`, `AUX`, `RUN_FBK`, `FB` |
 | `speedFb` | AI | Int (%) | có | `SPEED_FB`, `SPEED`, `SPEED_ACT`, `SPEED_FBK`, `ISTWERT` |
 | `ready` | DI | Bool | không | `READY`, `RDY`, `MCB_OK`, `BREAKER_ON` |
 | `vfdFaultOk` | DI | Bool | không | `VFD_OK`, `VFD_FAULT_OK`, `DRIVE_OK`, `FAULT_OK` |
