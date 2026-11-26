@@ -39,7 +39,7 @@ function helloProject(controllers: ControllerDef[] = []): SimulationProject {
     language: 'vi',
     seed: 1,
     simulation: { stepMs: 10, plcScanMs: 10, timeScale: 1 },
-    files: { tags: 'tags/tags.yaml', comms: 'comms/comms.yaml', hmi: 'hmi/' },
+    files: { tags: 'tags/tags.yaml', comms: 'comms/comms.yaml', hmi: 'hmi/', plant: 'plant/equipment.yaml' },
     controllers,
   };
   return { config, tags, catalog: createTagCatalog(tags), diagnostics: [] };
