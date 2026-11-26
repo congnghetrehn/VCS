@@ -15,6 +15,7 @@
     "dependency-cruiser": "18.7.2",
     "eslint": "10.14.0",
     "eslint-config-prettier": "10.1.8",
+    "esbuild": "0.28.2",
     "fast-check": "4.10.2",
     "prettier": "3.9.10",
     "tsup": "9.0.0",
@@ -22,7 +23,8 @@
     "turbo": "2.11.10",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.2",
-    "vitest": "4.1.12"
+    "vitest": "4.1.12",
+    "yaml": "2.9.1"
   },
   "engines": {
     "node": ">=20.11",
@@ -33,7 +35,7 @@
   "packageManager": "pnpm@10.15.0",
   "private": true,
   "scripts": {
-    "bench": "cross-env NODE_OPTIONS=--expose-gc tsx bench/tagdb.bench.ts && cross-env NODE_OPTIONS=--expose-gc tsx bench/orchestrator.bench.ts && cross-env NODE_OPTIONS=--expose-gc tsx bench/softplc.bench.ts && cross-env NODE_OPTIONS=--expose-gc tsx bench/plant.bench.ts",
+    "bench": "node bench/run-all-benches.mjs",
     "build": "turbo run build",
     "depcheck": "depcruise --validate .dependency-cruiser.cjs packages apps",
     "dev": "turbo run dev",
