@@ -3,6 +3,7 @@
 
 import { z } from 'zod';
 import { dataTypeSchema, diagnosticSchema, tagValueSchema } from './common.js';
+import { sourceSpecSchema } from './equipment.js';
 import { faultRequestSchema, faultTimingSchema } from './fault.js';
 
 export const PROTOCOL_VERSION = 1;
@@ -113,6 +114,34 @@ export type PlantFaultInjectMessage = z.infer<typeof plantFaultInjectSchema>;
 export type PlantFaultClearMessage = z.infer<typeof plantFaultClearSchema>;
 export type PlantFaultPresetMessage = z.infer<typeof plantFaultPresetSchema>;
 
+/**
+ * P2.8 (OQ-388): đặt giá trị manual cho source của thiết bị (named source
+ * qua `name`, không có → source chính). Validate bằng tagValueSchema ở đây;
+ * engine kiểm tra thiết bị có source không → lỗi PL-E001 qua WS error.
+ */
+const plantManualSetSchema = z.object({
+  type: z.literal('plant.manual.set'),
+  equipment: z.string().min(1),
+  // engine.setManual chỉ nhận number | boolean (string không phải giá trị
+  // nguồn hợp lệ) — chặn ngay ở schema, không để lọt vào engine.
+  value: z.union([z.number(), z.boolean()]),
+  name: z.string().min(1).optional(),
+});
+
+/**
+ * P2.8 (OQ-388): đổi spec source của thiết bị (named source qua `name`).
+ * Validate bằng sourceSpecSchema ở đây; engine kiểm tra thiết bị/model.
+ */
+const plantSourceSetSchema = z.object({
+  type: z.literal('plant.source.set'),
+  equipment: z.string().min(1),
+  source: sourceSpecSchema,
+  name: z.string().min(1).optional(),
+});
+
+export type PlantManualSetMessage = z.infer<typeof plantManualSetSchema>;
+export type PlantSourceSetMessage = z.infer<typeof plantSourceSetSchema>;
+
 export const clientMessageSchema = z.discriminatedUnion('type', [
   helloSchema,
   simCommandSchema,
@@ -128,6 +157,8 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
   plantFaultInjectSchema,
   plantFaultClearSchema,
   plantFaultPresetSchema,
+  plantManualSetSchema,
+  plantSourceSetSchema,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
