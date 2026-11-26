@@ -11,6 +11,7 @@ import {
   type FaultRequest,
   type FaultTiming,
   type ServerMessage,
+  type SourceSpec,
   type TagValue,
 } from '@vcs/schemas';
 
@@ -193,6 +194,17 @@ export class WsClient {
       return this.send({ type: 'plant.fault.preset', equipment, preset });
     }
     return this.send({ type: 'plant.fault.preset', equipment, preset, when });
+  }
+
+  /** P2.8 (OQ-388) — đặt giá trị manual cho source chính của thiết bị
+   *  (clientMessageSchema chặn value string — chỉ number | boolean). */
+  plantManualSet(equipment: string, value: number | boolean): boolean {
+    return this.send({ type: 'plant.manual.set', equipment, value });
+  }
+
+  /** P2.8 (OQ-388) — đổi spec source chính của thiết bị (const/ramp/...). */
+  plantSourceSet(equipment: string, source: SourceSpec): boolean {
+    return this.send({ type: 'plant.source.set', equipment, source });
   }
 
   #handleText(text: string | null): void {
