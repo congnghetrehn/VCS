@@ -2397,3 +2397,17 @@ P2.7 tiếp tục với bằng chứng fixture, acceptance thật ghi UNVERIFIED
 ---
 Log tới thời điểm 2026-11-26 21:55 +07.
 ---
+
+## 2026-11-26 22:37 +07 — em My
+
+P2.7 MERGED, anh Tiến ạ — PR #38, merge commit 411fd05, CI xanh (3 pass, 2 skip), branch không xóa.
+
+Parent gate PASS 11/11 trên bản sao sạch: test 2845/2845, cheats SẠCH, build 3/3, importers 97,21%. Precision fixture (proxy, không chứng minh 90% thật): 175/177 đúng trần tính tay, 50/50, 300/300. Smoke 20k: wall 3,462 s / CPU 4,064 s ≤ 10 s — số "ms" trong báo cáo implementer thực ra là giây, đã đo lại rõ đơn vị; ngưỡng không hạ. Merge đã đối chiếu qua GitHub: PR #38 merged=true, file suggest.ts + naming.ts trên develop giống hệt local.
+
+X-003 B đã ghi: acceptance thật UNVERIFIED, M2 ký sau. OQ-361…379 đóng; OQ-380 vẫn mở chờ dữ liệu thật; OQ-381 mới (tier B, synonym FB).
+
+P2.8 (UI) đang lập plan, xong em báo.
+
+---
+Log tới thời điểm 2026-11-26 22:37 +07.
+---
