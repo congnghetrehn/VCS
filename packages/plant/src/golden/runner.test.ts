@@ -4,7 +4,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-import { makeMotorDolSetup } from '../test-helpers.js';
+import type { TagHandle } from '@vcs/kernel';
+import { makeModelSetup, makeMotorDolSetup, modelEquipmentId } from '../test-helpers.js';
 import {
   GoldenError,
   parseGoldenYaml,
@@ -196,5 +197,49 @@ describe('runPlantGoldenCase (OQ-254/257)', () => {
         ],
       }),
     );
+  });
+
+  it('cmd AO viết bằng eng, đổi sang raw theo scaling tag (OQ-299)', () => {
+    const setup = makeModelSetup('motor_vfd', { stepMs: 10, seed: 42 });
+    const ctx: GoldenRunContext = {
+      engine: setup.engine,
+      tags: setup.tags,
+      equipmentId: modelEquipmentId('motor_vfd'),
+      signals: setup.signals,
+      defs: setup.defMap,
+      stepMs: 10,
+    };
+    runPlantGoldenCase(ctx, {
+      id: 'ao-eng',
+      description: 'cmd speedRef eng 50 → raw 13824 → model thấy 50',
+      steps: [
+        { t: 100, cmd: { runCmd: true, speedRef: 50 }, expect: { state: 'STOPPED' } },
+        { t: 110, expect: { state: 'RAMP_UP', speedPct: 0.1, targetPct: 50 } },
+      ],
+    });
+    // Tag speedRef giữ raw 13824 (50% của 0..27648).
+    const refH = setup.handles['speedRef'] as TagHandle;
+    expect(setup.tags.get(refH)).toBe(13824);
+  });
+
+  it('fault equipment có params đi qua engine (speedDeviation pct)', () => {
+    const setup = makeModelSetup('motor_vfd', { stepMs: 10, seed: 42 });
+    const ctx: GoldenRunContext = {
+      engine: setup.engine,
+      tags: setup.tags,
+      equipmentId: modelEquipmentId('motor_vfd'),
+      signals: setup.signals,
+      defs: setup.defMap,
+      stepMs: 10,
+    };
+    runPlantGoldenCase(ctx, {
+      id: 'eq-params',
+      description: 'speedDeviation pct=10 lệch target 50→60',
+      steps: [
+        { t: 100, cmd: { runCmd: true, speedRef: 50 } },
+        { t: 200, fault: { id: 'speedDeviation', params: { pct: 10 } } },
+        { t: 300, expect: { targetPct: 60, speedPct: 2 } },
+      ],
+    });
   });
 });
