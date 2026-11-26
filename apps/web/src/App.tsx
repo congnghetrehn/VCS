@@ -6,9 +6,13 @@
 import { useEffect, useRef, useState } from 'react';
 import type { TagValue } from '@vcs/schemas';
 import { DiagnosticsPanel } from './components/DiagnosticsPanel.js';
+import { EquipmentInspector } from './components/EquipmentInspector.js';
+import { EventLog } from './components/EventLog.js';
+import { ImportWizard } from './components/ImportWizard.js';
+import { PlantDesigner } from './components/PlantDesigner.js';
 import { PlcWorkspace } from './components/PlcWorkspace.js';
 import { SimBar } from './components/SimBar.js';
-import { TagTable } from './components/TagTable.js';
+import { TagManager } from './components/TagManager.js';
 import { effectiveLang, useSimSnapshot, useSimStore, type Theme } from './store.js';
 import { t, type Lang } from './i18n/index.js';
 import { wakeLockAvailable } from './pwa.js';
@@ -48,7 +52,7 @@ export function App() {
   const s = useSimSnapshot();
   const lang = effectiveLang(s);
   const clientRef = useRef<WsClient | null>(null);
-  const [view, setView] = useState<'tags' | 'plc'>('tags');
+  const [view, setView] = useState<'tags' | 'plc' | 'import' | 'plant'>('tags');
 
   useEffect(() => {
     const store = useSimStore.getState();
@@ -298,10 +302,55 @@ export function App() {
           >
             {t(lang, 'nav.plc')}
           </button>
+          <button
+            data-testid="nav-import"
+            onClick={() => {
+              setView('import');
+            }}
+            type="button"
+            className={view === 'import' ? 'font-bold underline' : undefined}
+          >
+            {t(lang, 'nav.import')}
+          </button>
+          <button
+            data-testid="nav-plant"
+            onClick={() => {
+              setView('plant');
+            }}
+            type="button"
+            className={view === 'plant' ? 'font-bold underline' : undefined}
+          >
+            {t(lang, 'nav.plant')}
+          </button>
         </nav>
       )}
-      {view === 'tags' ? (
-        <TagTable
+      {view === 'import' ? (
+        <ImportWizard lang={lang} />
+      ) : view === 'plant' ? (
+        <>
+          <PlantDesigner lang={lang} />
+          <EquipmentInspector
+            lang={lang}
+            onPlantManualSet={(equipment, value) => {
+              clientRef.current?.plantManualSet(equipment, value);
+            }}
+            onPlantSourceSet={(equipment, source) => {
+              clientRef.current?.plantSourceSet(equipment, source);
+            }}
+            onPlantFaultClear={(id) => {
+              clientRef.current?.plantFaultClear(id);
+            }}
+            onPlantFaultInject={(request) => {
+              clientRef.current?.plantFaultInject(request);
+            }}
+            onPlantFaultPreset={(equipment, preset, when) => {
+              clientRef.current?.plantFaultPreset(equipment, preset, when);
+            }}
+          />
+          <EventLog lang={lang} />
+        </>
+      ) : view === 'tags' ? (
+        <TagManager
           lang={lang}
           onWriteTag={(name: string, value: TagValue) => {
             const sent = clientRef.current?.writeTag(name, value) ?? false;

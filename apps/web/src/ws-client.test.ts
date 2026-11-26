@@ -267,6 +267,30 @@ describe('WsClient', () => {
         when: { at: 'time', timeMs: 1000 },
       }),
     );
+    // P2.8 (OQ-388): manual/source gửi đúng type + payload; value string bị
+    // clientMessageSchema chặn → false, không gửi.
+    expect(client.plantManualSet('CR01_FT01', 42)).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({ type: 'plant.manual.set', equipment: 'CR01_FT01', value: 42 }),
+    );
+    expect(client.plantManualSet('CR01_SS01', true)).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({ type: 'plant.manual.set', equipment: 'CR01_SS01', value: true }),
+    );
+    expect(
+      client.plantManualSet(
+        'CR01_FT01',
+        'x' as unknown as Parameters<typeof client.plantManualSet>[1],
+      ),
+    ).toBe(false);
+    expect(client.plantSourceSet('CR01_FT01', { kind: 'const', value: 10 })).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({
+        type: 'plant.source.set',
+        equipment: 'CR01_FT01',
+        source: { kind: 'const', value: 10 },
+      }),
+    );
     // FaultRequest thiếu target → safeParse fail → false, không gửi.
     expect(
       client.plantFaultInject({ when: { at: 'now' } } as unknown as Parameters<

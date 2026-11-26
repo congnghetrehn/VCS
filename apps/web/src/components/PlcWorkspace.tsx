@@ -4,11 +4,13 @@
 // web-deps): mọi biên dịch/Watch qua server. Build chỉ compile-check,
 // KHÔNG hot reload PLC đang chạy (OQ-208).
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FaultRequest, FaultTiming, TagValue } from '@vcs/schemas';
+import { createImportClient } from '../api/import.js';
 import { t, type Lang } from '../i18n/index.js';
 import { isValidPlcFileName, isValidWatchRef, parseWatchValue } from '../plc-helpers.js';
 import { useSimSnapshot, useSimStore, type WsDiagnostic } from '../store.js';
+import { buildTagMetaMap, type TagMetaMap } from '../tag-manager.js';
 import { PlcEditor } from './PlcEditor.js';
 import { PlantFaultPanel } from './PlantFaultPanel.js';
 
@@ -71,6 +73,9 @@ export function PlcWorkspace({
   const [newRef, setNewRef] = useState('');
   const [writeInputs, setWriteInputs] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  // Watch hiểu tag plant (OQ-385/395): equipment/role join từ GET /api/tags.
+  const [tagMeta, setTagMeta] = useState<TagMetaMap>(new Map());
+  const [watchEquipmentFilter, setWatchEquipmentFilter] = useState('all');
 
   // Mở workspace → nạp danh sách file (Build cũng là compile-check).
   useEffect(() => {
@@ -85,6 +90,23 @@ export function PlcWorkspace({
       .catch((err: unknown) => {
         if (!alive) return;
         useSimStore.getState().setLastError(err instanceof Error ? err.message : String(err));
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Nạp equipment/role cho Watch (GET /api/tags, file trên đĩa — lỗi thì
+  // Watch vẫn chạy, 2 cột hiện '—').
+  useEffect(() => {
+    let alive = true;
+    void createImportClient()
+      .getTags()
+      .then((tags) => {
+        if (alive) setTagMeta(buildTagMetaMap(tags));
+      })
+      .catch(() => {
+        // Giữ map rỗng — cột equipment/role hiện '—'.
       });
     return () => {
       alive = false;
@@ -170,6 +192,18 @@ export function PlcWorkspace({
   }
 
   const buildFailed = s.plcDiagnostics.some((d) => d.severity === 'error');
+
+  // Watch: thiết bị distinct (từ meta) + danh sách ref sau lọc thiết bị.
+  const watchEquipments = useMemo(() => {
+    const seen = new Set<string>();
+    for (const m of tagMeta.values()) {
+      if (m.equipment !== undefined && m.equipment !== '') seen.add(m.equipment);
+    }
+    return [...seen].sort();
+  }, [tagMeta]);
+  const shownWatchRefs = s.plcWatchRefs.filter(
+    (ref) => watchEquipmentFilter === 'all' || (tagMeta.get(ref)?.equipment ?? '') === watchEquipmentFilter,
+  );
 
   return (
     <div className="flex flex-1 flex-col gap-3 overflow-auto p-4" data-testid="plc-workspace">
@@ -282,97 +316,132 @@ export function PlcWorkspace({
         {s.plcWatchRefs.length === 0 ? (
           <p>{t(lang, 'plc.noWatch')}</p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>{t(lang, 'plc.col.ref')}</th>
-                <th>{t(lang, 'plc.col.value')}</th>
-                <th>{t(lang, 'plc.write')}</th>
-                <th>{t(lang, 'plc.force')}</th>
-                <th>{t(lang, 'plc.remove')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {s.plcWatchRefs.map((ref, i) => {
-                const v = s.plcWatchValues.get(i);
-                const forced = s.plcForced.has(ref);
-                return (
-                  <tr key={ref}>
-                    <td data-testid={`plc-watch-ref-${ref}`}>
-                      {ref}
-                      {forced ? ` (${t(lang, 'plc.forced')})` : ''}
-                    </td>
-                    <td data-testid={`plc-watch-value-${ref}`}>{v === undefined ? '—' : String(v)}</td>
-                    <td>
-                      <input
-                        aria-label={`${t(lang, 'plc.write')} ${ref}`}
-                        data-testid={`plc-watch-write-input-${ref}`}
-                        onChange={(e) => {
-                          setWriteInputs((prev) => ({ ...prev, [ref]: e.target.value }));
-                        }}
-                        value={writeInputs[ref] ?? ''}
-                      />
-                      <button
-                        data-testid={`plc-watch-write-${ref}`}
-                        onClick={() => {
-                          if (v === undefined) return;
-                          try {
-                            const parsed = parseWatchValue(v, writeInputs[ref] ?? '');
-                            onPlcWrite(ref, parsed);
-                          } catch (err) {
-                            useSimStore.getState().setLastError(
-                              err instanceof Error ? err.message : String(err),
-                            );
-                          }
-                        }}
-                        type="button"
-                      >
-                        {t(lang, 'plc.write')}
-                      </button>
-                    </td>
-                    <td>
-                      {forced ? (
+          <>
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              <label>
+                {t(lang, 'plc.watchFilterEquipment')}{' '}
+                <select
+                  data-testid="plc-watch-filter-equipment"
+                  value={watchEquipmentFilter}
+                  onChange={(e) => {
+                    setWatchEquipmentFilter(e.target.value);
+                  }}
+                >
+                  <option value="all">{t(lang, 'tags.filter.allEquipment')}</option>
+                  <option value="">{t(lang, 'tags.filter.unassigned')}</option>
+                  {watchEquipments.map((e) => (
+                    <option key={e} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th className="px-2 py-1 text-left">{t(lang, 'plc.col.ref')}</th>
+                  <th className="px-2 py-1 text-left">{t(lang, 'plc.col.value')}</th>
+                  <th className="whitespace-nowrap px-2 py-1 text-left">{t(lang, 'tags.col.equipment')}</th>
+                  <th className="whitespace-nowrap px-2 py-1 text-left">{t(lang, 'tags.col.role')}</th>
+                  <th className="whitespace-nowrap px-2 py-1 text-left">{t(lang, 'plc.write')}</th>
+                  <th className="whitespace-nowrap px-2 py-1 text-left">{t(lang, 'plc.force')}</th>
+                  <th className="whitespace-nowrap px-2 py-1 text-left">{t(lang, 'plc.remove')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {shownWatchRefs.map((ref) => {
+                  const i = s.plcWatchRefs.indexOf(ref);
+                  const v = s.plcWatchValues.get(i);
+                  const forced = s.plcForced.has(ref);
+                  const meta = tagMeta.get(ref);
+                  return (
+                    <tr key={ref}>
+                      <td className="px-2 py-1" data-testid={`plc-watch-ref-${ref}`}>
+                        {ref}
+                        {forced ? ` (${t(lang, 'plc.forced')})` : ''}
+                      </td>
+                      <td className="px-2 py-1" data-testid={`plc-watch-value-${ref}`}>{v === undefined ? '—' : String(v)}</td>
+                      <td className="whitespace-nowrap px-2 py-1" data-testid={`plc-watch-equipment-${ref}`}>
+                        {meta?.equipment ?? '—'}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-1" data-testid={`plc-watch-role-${ref}`}>
+                        {meta?.role ?? '—'}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-1">
+                        <span className="inline-flex items-center gap-1">
+                          <input
+                            aria-label={`${t(lang, 'plc.write')} ${ref}`}
+                            className="w-20"
+                            data-testid={`plc-watch-write-input-${ref}`}
+                            onChange={(e) => {
+                              setWriteInputs((prev) => ({ ...prev, [ref]: e.target.value }));
+                            }}
+                            value={writeInputs[ref] ?? ''}
+                          />
+                          <button
+                            data-testid={`plc-watch-write-${ref}`}
+                            onClick={() => {
+                              if (v === undefined) return;
+                              try {
+                                const parsed = parseWatchValue(v, writeInputs[ref] ?? '');
+                                onPlcWrite(ref, parsed);
+                              } catch (err) {
+                                useSimStore.getState().setLastError(
+                                  err instanceof Error ? err.message : String(err),
+                                );
+                              }
+                            }}
+                            type="button"
+                          >
+                            {t(lang, 'plc.write')}
+                          </button>
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-1">
+                        {forced ? (
+                          <button
+                            data-testid={`plc-watch-unforce-${ref}`}
+                            onClick={() => {
+                              useSimStore.getState().markPlcForced(ref, false);
+                              onPlcUnforce(ref);
+                            }}
+                            type="button"
+                          >
+                            {t(lang, 'plc.unforce')}
+                          </button>
+                        ) : (
+                          <button
+                            data-testid={`plc-watch-force-${ref}`}
+                            disabled={v === undefined}
+                            onClick={() => {
+                              if (v === undefined) return;
+                              useSimStore.getState().markPlcForced(ref, true);
+                              onPlcForce(ref, v);
+                            }}
+                            type="button"
+                          >
+                            {t(lang, 'plc.force')}
+                          </button>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap px-2 py-1">
                         <button
-                          data-testid={`plc-watch-unforce-${ref}`}
+                          data-testid={`plc-watch-remove-${ref}`}
                           onClick={() => {
-                            useSimStore.getState().markPlcForced(ref, false);
-                            onPlcUnforce(ref);
+                            removeRef(ref);
                           }}
                           type="button"
                         >
-                          {t(lang, 'plc.unforce')}
+                          {t(lang, 'plc.remove')}
                         </button>
-                      ) : (
-                        <button
-                          data-testid={`plc-watch-force-${ref}`}
-                          disabled={v === undefined}
-                          onClick={() => {
-                            if (v === undefined) return;
-                            useSimStore.getState().markPlcForced(ref, true);
-                            onPlcForce(ref, v);
-                          }}
-                          type="button"
-                        >
-                          {t(lang, 'plc.force')}
-                        </button>
-                      )}
-                    </td>
-                    <td>
-                      <button
-                        data-testid={`plc-watch-remove-${ref}`}
-                        onClick={() => {
-                          removeRef(ref);
-                        }}
-                        type="button"
-                      >
-                        {t(lang, 'plc.remove')}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </>
         )}
       </section>
       <PlantFaultPanel

@@ -1,0 +1,4441 @@
+tags:
+  - name: CR01_M01_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.0"
+    controller: PLC1
+    description: Laufbefehl
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 7
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M01_RUN_FBK
+    type: Bool
+    area: I
+    address: "%I0.0"
+    controller: PLC1
+    description: Run feedback
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 8
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M01_READY
+    type: Bool
+    area: I
+    address: "%I0.1"
+    controller: PLC1
+    description: San sang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 9
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M01_REMOTE
+    type: Bool
+    area: I
+    address: "%I0.2"
+    controller: PLC1
+    description: Remote mode
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 10
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M01_OVL_OK
+    type: Bool
+    area: I
+    address: "%I0.3"
+    controller: PLC1
+    description: Overload OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 11
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M01_CUR
+    type: Int
+    area: I
+    address: "%IW64"
+    controller: PLC1
+    description: Dong dong co
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 12
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M01_TEMP
+    type: Int
+    area: I
+    address: "%IW66"
+    controller: PLC1
+    description: Temperature
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 13
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M01_VIB
+    type: Int
+    area: I
+    address: "%IW68"
+    controller: PLC1
+    description: Vibration
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 14
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M01_PWR
+    type: Int
+    area: I
+    address: "%IW70"
+    controller: PLC1
+    description: Leistung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 15
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M01_ESTOP
+    type: Bool
+    area: I
+    address: "%I0.4"
+    controller: PLC1
+    description: Dung khan cap
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 16
+    provenance: import
+    equipment: CR01_M01
+  - name: CR01_M02_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.1"
+    controller: PLC1
+    description: Run command
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 17
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M02_RUNNING
+    type: Bool
+    area: I
+    address: "%I0.5"
+    controller: PLC1
+    description: Phan hoi chay
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 18
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M02_READY
+    type: Bool
+    area: I
+    address: "%I0.6"
+    controller: PLC1
+    description: San sang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 19
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M02_REMOTE
+    type: Bool
+    area: I
+    address: "%I0.7"
+    controller: PLC1
+    description: Che do tu xa
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 20
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M02_OVL_OK
+    type: Bool
+    area: I
+    address: "%I1.0"
+    controller: PLC1
+    description: Overload OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 21
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M02_CUR
+    type: Int
+    area: I
+    address: "%IW72"
+    controller: PLC1
+    description: Motor current
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 22
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M02_TEMP
+    type: Int
+    area: I
+    address: "%IW74"
+    controller: PLC1
+    description: Nhiet do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 23
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M02_VIB
+    type: Int
+    area: I
+    address: "%IW76"
+    controller: PLC1
+    description: Do rung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 24
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M02_PWR
+    type: Int
+    area: I
+    address: "%IW78"
+    controller: PLC1
+    description: Cong suat
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 25
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M02_ESTOP
+    type: Bool
+    area: I
+    address: "%I1.1"
+    controller: PLC1
+    description: Emergency stop
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 26
+    provenance: import
+    equipment: CR01_M02
+  - name: CR01_M03_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.2"
+    controller: PLC1
+    description: Run command
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 27
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M03_RUN_ST
+    type: Bool
+    area: I
+    address: "%I1.2"
+    controller: PLC1
+    description: Run feedback
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 28
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M03_READY
+    type: Bool
+    area: I
+    address: "%I1.3"
+    controller: PLC1
+    description: Bereit
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 29
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M03_REMOTE
+    type: Bool
+    area: I
+    address: "%I1.4"
+    controller: PLC1
+    description: Fernbetrieb
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 30
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M03_OVL_OK
+    type: Bool
+    area: I
+    address: "%I1.5"
+    controller: PLC1
+    description: Qua tai OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 31
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M03_CUR
+    type: Int
+    area: I
+    address: "%IW80"
+    controller: PLC1
+    description: Dong dong co
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 32
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M03_TEMP
+    type: Int
+    area: I
+    address: "%IW82"
+    controller: PLC1
+    description: Nhiet do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 33
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M03_VIB
+    type: Int
+    area: I
+    address: "%IW84"
+    controller: PLC1
+    description: Do rung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 34
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M03_PWR
+    type: Int
+    area: I
+    address: "%IW86"
+    controller: PLC1
+    description: Leistung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 35
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M03_ESTOP
+    type: Bool
+    area: I
+    address: "%I1.6"
+    controller: PLC1
+    description: Dung khan cap
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 36
+    provenance: import
+    equipment: CR01_M03
+  - name: CR01_M04_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.3"
+    controller: PLC1
+    description: Lenh chay
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 37
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_M04_RUN_FBK
+    type: Bool
+    area: I
+    address: "%I1.7"
+    controller: PLC1
+    description: Run feedback
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 38
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_M04_READY
+    type: Bool
+    area: I
+    address: "%I2.0"
+    controller: PLC1
+    description: San sang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 39
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_M04_REMOTE
+    type: Bool
+    area: I
+    address: "%I2.1"
+    controller: PLC1
+    description: Fernbetrieb
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 40
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_M04_OVL_OK
+    type: Bool
+    area: I
+    address: "%I2.2"
+    controller: PLC1
+    description: Qua tai OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 41
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_M04_CUR
+    type: Int
+    area: I
+    address: "%IW88"
+    controller: PLC1
+    description: Motorstrom
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 42
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_M04_TEMP
+    type: Int
+    area: I
+    address: "%IW90"
+    controller: PLC1
+    description: Nhiet do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 43
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_M04_VIB
+    type: Int
+    area: I
+    address: "%IW92"
+    controller: PLC1
+    description: Vibration
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 44
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_M04_PWR
+    type: Int
+    area: I
+    address: "%IW94"
+    controller: PLC1
+    description: Leistung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 45
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_M04_ESTOP
+    type: Bool
+    area: I
+    address: "%I2.3"
+    controller: PLC1
+    description: Dung khan cap
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 46
+    provenance: import
+    equipment: CR01_M04
+  - name: CR01_MV01_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.4"
+    controller: PLC1
+    description: Run command
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 47
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_SPEED_REF
+    type: Int
+    area: Q
+    address: "%QW64"
+    controller: PLC1
+    description: Speed setpoint
+    signal:
+      kind: AO
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 48
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_RUNNING
+    type: Bool
+    area: I
+    address: "%I2.4"
+    controller: PLC1
+    description: Run feedback
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 49
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_SPEED_FB
+    type: Int
+    area: I
+    address: "%IW74"
+    controller: PLC1
+    description: Speed feedback
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 50
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_READY
+    type: Bool
+    area: I
+    address: "%I2.5"
+    controller: PLC1
+    description: Ready
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 51
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_VFD_OK
+    type: Bool
+    area: I
+    address: "%I2.6"
+    controller: PLC1
+    description: VFD fault OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 52
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_REMOTE
+    type: Bool
+    area: I
+    address: "%I2.7"
+    controller: PLC1
+    description: Remote mode
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 53
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_CUR
+    type: Int
+    area: I
+    address: "%IW98"
+    controller: PLC1
+    description: Dong dong co
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 54
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_TEMP
+    type: Int
+    area: I
+    address: "%IW100"
+    controller: PLC1
+    description: Temperature
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 55
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_VIB
+    type: Int
+    area: I
+    address: "%IW102"
+    controller: PLC1
+    description: Do rung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 56
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV01_PWR
+    type: Int
+    area: I
+    address: "%IW104"
+    controller: PLC1
+    description: Cong suat
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 57
+    provenance: import
+    equipment: CR01_MV01
+  - name: CR01_MV02_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.5"
+    controller: PLC1
+    description: Lenh chay
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 58
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_SPEED_REF
+    type: Int
+    area: Q
+    address: "%QW66"
+    controller: PLC1
+    description: Dat toc do
+    signal:
+      kind: AO
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 59
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_RUN_ST
+    type: Bool
+    area: I
+    address: "%I3.0"
+    controller: PLC1
+    description: Phan hoi chay
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 60
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_SPEED_FB
+    type: Int
+    area: I
+    address: "%IW106"
+    controller: PLC1
+    description: Phan hoi toc do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 61
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_READY
+    type: Bool
+    area: I
+    address: "%I3.1"
+    controller: PLC1
+    description: San sang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 62
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_VFD_OK
+    type: Bool
+    area: I
+    address: "%I3.2"
+    controller: PLC1
+    description: FU Storung OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 63
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_REMOTE
+    type: Bool
+    area: I
+    address: "%I3.3"
+    controller: PLC1
+    description: Remote mode
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 64
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_CUR
+    type: Int
+    area: I
+    address: "%IW108"
+    controller: PLC1
+    description: Dong dong co
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 65
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_TEMP
+    type: Int
+    area: I
+    address: "%IW110"
+    controller: PLC1
+    description: Temperature
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 66
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_VIB
+    type: Int
+    area: I
+    address: "%IW112"
+    controller: PLC1
+    description: Do rung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 67
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_MV02_PWR
+    type: Int
+    area: I
+    address: "%IW114"
+    controller: PLC1
+    description: Cong suat
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 68
+    provenance: import
+    equipment: CR01_MV02
+  - name: CR01_XV01_OPEN_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.6"
+    controller: PLC1
+    description: Lenh mo
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 69
+    provenance: import
+    equipment: CR01_XV01
+  - name: CR01_XV01_CLOSE_CMD
+    type: Bool
+    area: Q
+    address: "%Q0.7"
+    controller: PLC1
+    description: Schließen Befehl
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 70
+    provenance: import
+    equipment: CR01_XV01
+  - name: CR01_XV01_OPEN_LS
+    type: Bool
+    area: I
+    address: "%I3.4"
+    controller: PLC1
+    description: Cong tac gioi han mo
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 71
+    provenance: import
+    equipment: CR01_XV01
+  - name: CR01_XV01_CLOSED_LS
+    type: Bool
+    area: I
+    address: "%I3.5"
+    controller: PLC1
+    description: Cong tac gioi han dong
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 72
+    provenance: import
+    equipment: CR01_XV01
+  - name: CR01_XV01_FAULT
+    type: Bool
+    area: I
+    address: "%I3.6"
+    controller: PLC1
+    description: Loi
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 73
+    provenance: import
+    equipment: CR01_XV01
+  - name: CR01_XV01_TORQ
+    type: Int
+    area: I
+    address: "%IW116"
+    controller: PLC1
+    description: Drehmoment
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: Nm
+    origin:
+      file: io-list-300.csv
+      row: 74
+    provenance: import
+    equipment: CR01_XV01
+  - name: CR01_XV02_OPEN_CMD
+    type: Bool
+    area: Q
+    address: "%Q1.0"
+    controller: PLC1
+    description: Offnen Befehl
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 76
+    provenance: import
+    equipment: CR01_XV02
+  - name: CR01_XV02_CLOSE_CMD
+    type: Bool
+    area: Q
+    address: "%Q1.1"
+    controller: PLC1
+    description: Lenh dong
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 77
+    provenance: import
+    equipment: CR01_XV02
+  - name: CR01_XV02_OPEN_LS
+    type: Bool
+    area: I
+    address: "%I1.5"
+    controller: PLC1
+    description: Open limit switch
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 78
+    provenance: import
+    equipment: CR01_XV02
+  - name: CR01_XV02_CLOSED_LS
+    type: Bool
+    area: I
+    address: "%I4.1"
+    controller: PLC1
+    description: Cong tac gioi han dong
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 79
+    provenance: import
+    equipment: CR01_XV02
+  - name: CR01_XV02_FAULT
+    type: Bool
+    area: I
+    address: "%I4.2"
+    controller: PLC1
+    description: Loi
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 80
+    provenance: import
+    equipment: CR01_XV02
+  - name: CR01_XV02_LOCAL
+    type: Bool
+    area: I
+    address: "%I4.3"
+    controller: PLC1
+    description: Dieu khien tai cho
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 82
+    provenance: import
+    equipment: CR01_XV02
+  - name: CR01_XV03_OPEN_CMD
+    type: Bool
+    area: Q
+    address: "%Q1.2"
+    controller: PLC1
+    description: Open command
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 83
+    provenance: import
+    equipment: CR01_XV03
+  - name: CR01_XV03_CLOSE_CMD
+    type: Bool
+    area: Q
+    address: "%Q1.3"
+    controller: PLC1
+    description: Lenh dong
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 84
+    provenance: import
+    equipment: CR01_XV03
+  - name: CR01_XV03_OPEN_LS
+    type: Bool
+    area: I
+    address: "%I4.4"
+    controller: PLC1
+    description: Cong tac gioi han mo
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 85
+    provenance: import
+    equipment: CR01_XV03
+  - name: CR01_XV03_CLOSED_LS
+    type: Bool
+    area: I
+    address: "%I4.5"
+    controller: PLC1
+    description: Endschalter Zu
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 86
+    provenance: import
+    equipment: CR01_XV03
+  - name: CR01_XV03_FAULT
+    type: Bool
+    area: I
+    address: "%I4.6"
+    controller: PLC1
+    description: Storung
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 87
+    provenance: import
+    equipment: CR01_XV03
+  - name: CR01_XV03_TORQ
+    type: Int
+    area: I
+    address: "%IW120"
+    controller: PLC1
+    description: Mo-men
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: Nm
+    origin:
+      file: io-list-300.csv
+      row: 88
+    provenance: import
+    equipment: CR01_XV03
+  - name: CR01_XV03_LOCAL
+    type: Bool
+    area: I
+    address: "%I4.7"
+    controller: PLC1
+    description: Dieu khien tai cho
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 89
+    provenance: import
+    equipment: CR01_XV03
+  - name: CR01_FCV01_POS_REF
+    type: Int
+    area: Q
+    address: "%QW68"
+    controller: PLC1
+    description: Dat vi tri
+    signal:
+      kind: AO
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 90
+    provenance: import
+    equipment: CR01_FCV01
+  - name: CR01_FCV01_FAULT
+    type: Bool
+    area: I
+    address: "%I5.0"
+    controller: PLC1
+    description: Storung
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 92
+    provenance: import
+    equipment: CR01_FCV01
+  - name: CR01_FCV01_CLOSED_LS
+    type: Bool
+    area: I
+    address: "%I5.1"
+    controller: PLC1
+    description: Closed limit switch
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 93
+    provenance: import
+    equipment: CR01_FCV01
+  - name: CR01_FCV01_OPEN_LS
+    type: Bool
+    area: I
+    address: "%I5.2"
+    controller: PLC1
+    description: Open limit switch
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 94
+    provenance: import
+    equipment: CR01_FCV01
+  - name: CR01_FCV01_TORQ
+    type: Int
+    area: I
+    address: "%IW124"
+    controller: PLC1
+    description: Torque
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: Nm
+    origin:
+      file: io-list-300.csv
+      row: 95
+    provenance: import
+    equipment: CR01_FCV01
+  - name: CR01_FCV01_LOCAL
+    type: Bool
+    area: I
+    address: "%I5.3"
+    controller: PLC1
+    description: Dieu khien tai cho
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 96
+    provenance: import
+    equipment: CR01_FCV01
+  - name: CR01_FCV02_POS_REF
+    type: Int
+    area: Q
+    address: "%QW70"
+    controller: PLC1
+    description: Position setpoint
+    signal:
+      kind: AO
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 97
+    provenance: import
+    equipment: CR01_FCV02
+  - name: CR01_FCV02_POS_FB
+    type: Int
+    area: I
+    address: "%IW126"
+    controller: PLC1
+    description: Phan hoi vi tri
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 98
+    provenance: import
+    equipment: CR01_FCV02
+  - name: CR01_FCV02_FAULT
+    type: Bool
+    area: I
+    address: "%I5.4"
+    controller: PLC1
+    description: Loi
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 99
+    provenance: import
+    equipment: CR01_FCV02
+  - name: CR01_FCV02_CLOSED_LS
+    type: Bool
+    area: I
+    address: "%I5.5"
+    controller: PLC1
+    description: Closed limit switch
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 100
+    provenance: import
+    equipment: CR01_FCV02
+  - name: CR01_FCV02_OPEN_LS
+    type: Bool
+    area: I
+    address: "%I5.6"
+    controller: PLC1
+    description: Open limit switch
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 101
+    provenance: import
+    equipment: CR01_FCV02
+  - name: CR01_FCV02_TORQ
+    type: Int
+    area: I
+    address: "%IW128"
+    controller: PLC1
+    description: Mo-men
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: Nm
+    origin:
+      file: io-list-300.csv
+      row: 102
+    provenance: import
+    equipment: CR01_FCV02
+  - name: CR01_FCV02_LOCAL
+    type: Bool
+    area: I
+    address: "%I5.7"
+    controller: PLC1
+    description: Local control
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 103
+    provenance: import
+    equipment: CR01_FCV02
+  - name: CR01_PT01_RAW
+    type: Int
+    area: I
+    address: "%IW130"
+    controller: PLC1
+    description: Measured value
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 10
+        unit: bar
+    origin:
+      file: io-list-300.csv
+      row: 104
+    provenance: import
+    equipment: CR01_PT01
+  - name: CR01_PT01_BYPASS
+    type: Bool
+    area: I
+    address: "%I6.0"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 105
+    provenance: import
+    equipment: CR01_PT01
+  - name: CR01_PT02_RAW
+    type: Int
+    area: I
+    address: "%IW132"
+    controller: PLC1
+    description: Gia tri do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 10
+        unit: bar
+    origin:
+      file: io-list-300.csv
+      row: 106
+    provenance: import
+    equipment: CR01_PT02
+  - name: CR01_PT02_BYPASS
+    type: Bool
+    area: I
+    address: "%I6.1"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 107
+    provenance: import
+    equipment: CR01_PT02
+  - name: CR01_TT01_RAW
+    type: Int
+    area: I
+    address: "%IW134"
+    controller: PLC1
+    description: Gia tri do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 108
+    provenance: import
+    equipment: CR01_TT01
+  - name: CR01_TT01_BYPASS
+    type: Bool
+    area: I
+    address: "%I6.2"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 109
+    provenance: import
+    equipment: CR01_TT01
+  - name: CR01_TT02_RAW
+    type: Int
+    area: I
+    address: "%IW136"
+    controller: PLC1
+    description: Measured value
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 110
+    provenance: import
+    equipment: CR01_TT02
+  - name: CR01_TT02_BYPASS
+    type: Bool
+    area: I
+    address: "%I6.3"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 111
+    provenance: import
+    equipment: CR01_TT02
+  - name: CR01_LT01_RAW
+    type: Int
+    area: I
+    address: "%IW138"
+    controller: PLC1
+    description: Measured value
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 112
+    provenance: import
+    equipment: CR01_LT01
+  - name: CR01_LT01_BYPASS
+    type: Bool
+    area: I
+    address: "%I6.4"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 113
+    provenance: import
+    equipment: CR01_LT01
+  - name: CR01_LT02_RAW
+    type: Int
+    area: I
+    address: "%IW140"
+    controller: PLC1
+    description: Gia tri do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 114
+    provenance: import
+    equipment: CR01_LT02
+  - name: CR01_LT02_BYPASS
+    type: Bool
+    area: I
+    address: "%I6.5"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 115
+    provenance: import
+    equipment: CR01_LT02
+  - name: CR01_FT01_RAW
+    type: Int
+    area: I
+    address: "%IW142"
+    controller: PLC1
+    description: Gia tri do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 500
+        unit: t/h
+    origin:
+      file: io-list-300.csv
+      row: 116
+    provenance: import
+    equipment: CR01_FT01
+  - name: CR01_FT01_BYPASS
+    type: Bool
+    area: I
+    address: "%I6.6"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 117
+    provenance: import
+    equipment: CR01_FT01
+  - name: CR01_LSH01_DI
+    type: Bool
+    area: I
+    address: "%I6.7"
+    controller: PLC1
+    description: Digital input
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 118
+    provenance: import
+    equipment: CR01_LSH01
+  - name: CR01_LSH01_TEST
+    type: Bool
+    area: I
+    address: "%I7.0"
+    controller: PLC1
+    description: Nut kiem tra
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 119
+    provenance: import
+    equipment: CR01_LSH01
+  - name: CR01_LSH01_BYPASS
+    type: Bool
+    area: I
+    address: "%I7.1"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 120
+    provenance: import
+    equipment: CR01_LSH01
+  - name: CR01_LSL01_DI
+    type: Bool
+    area: I
+    address: "%I7.2"
+    controller: PLC1
+    description: Dau vao so
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 121
+    provenance: import
+    equipment: CR01_LSL01
+  - name: CR01_LSL01_TEST
+    type: Bool
+    area: I
+    address: "%I7.3"
+    controller: PLC1
+    description: Test button
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 122
+    provenance: import
+    equipment: CR01_LSL01
+  - name: CR01_LSL01_BYPASS
+    type: Bool
+    area: I
+    address: "%I7.4"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 123
+    provenance: import
+    equipment: CR01_LSL01
+  - name: CR01_ZS01_DI
+    type: Bool
+    area: I
+    address: "%I7.5"
+    controller: PLC1
+    description: Dau vao so
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 124
+    provenance: import
+    equipment: CR01_ZS01
+  - name: CR01_ZS01_TEST
+    type: Bool
+    area: I
+    address: "%I7.6"
+    controller: PLC1
+    description: Nut kiem tra
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 125
+    provenance: import
+    equipment: CR01_ZS01
+  - name: CR01_ZS01_BYPASS
+    type: Bool
+    area: I
+    address: "%I7.7"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 126
+    provenance: import
+    equipment: CR01_ZS01
+  - name: CR01_ZS02_DI
+    type: Bool
+    area: I
+    address: "%I8.0"
+    controller: PLC1
+    description: Digital input
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 127
+    provenance: import
+    equipment: CR01_ZS02
+  - name: CR01_ZS02_TEST
+    type: Bool
+    area: I
+    address: "%I8.1"
+    controller: PLC1
+    description: Test button
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 128
+    provenance: import
+    equipment: CR01_ZS02
+  - name: CR01_ZS02_BYPASS
+    type: Bool
+    area: I
+    address: "%I8.2"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 129
+    provenance: import
+    equipment: CR01_ZS02
+  - name: CR01_SS01_DI
+    type: Bool
+    area: I
+    address: "%I8.3"
+    controller: PLC1
+    description: Digital input
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 130
+    provenance: import
+    equipment: CR01_SS01
+  - name: CR01_SS01_TEST
+    type: Bool
+    area: I
+    address: "%I8.4"
+    controller: PLC1
+    description: Nut kiem tra
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 131
+    provenance: import
+    equipment: CR01_SS01
+  - name: CR01_SS01_BYPASS
+    type: Bool
+    area: I
+    address: "%I8.5"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 132
+    provenance: import
+    equipment: CR01_SS01
+  - name: CR01_BIN01_LEVEL_RAW
+    type: Int
+    area: I
+    address: "%IW144"
+    controller: PLC1
+    description: Fullstand
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 133
+    provenance: import
+    equipment: CR01_BIN01
+  - name: CR01_BIN01_LEVEL_HIGH
+    type: Bool
+    area: I
+    address: "%I8.6"
+    controller: PLC1
+    description: High level
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 134
+    provenance: import
+    equipment: CR01_BIN01
+  - name: CR01_BIN01_LEVEL_LOW
+    type: Bool
+    area: I
+    address: "%I8.7"
+    controller: PLC1
+    description: Low level
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 135
+    provenance: import
+    equipment: CR01_BIN01
+  - name: CR01_BIN01_LEVEL_HIGH_HIGH
+    type: Bool
+    area: I
+    address: "%I9.0"
+    controller: PLC1
+    description: High-high level
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 136
+    provenance: import
+    equipment: CR01_BIN01
+  - name: CR01_BIN01_WEIGHT
+    type: Int
+    area: I
+    address: "%IW142"
+    controller: PLC1
+    description: Khoi luong
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: t
+    origin:
+      file: io-list-300.csv
+      row: 137
+    provenance: import
+    equipment: CR01_BIN01
+  - name: CR01_BIN01_TEMP
+    type: Int
+    area: I
+    address: "%IW148"
+    controller: PLC1
+    description: Nhiet do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 138
+    provenance: import
+    equipment: CR01_BIN01
+  - name: CR01_BIN01_DUST
+    type: Bool
+    area: I
+    address: "%I9.1"
+    controller: PLC1
+    description: Bao bui
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 139
+    provenance: import
+    equipment: CR01_BIN01
+  - name: CR01_BIN02_LEVEL_RAW
+    type: Int
+    area: I
+    address: "%IW150"
+    controller: PLC1
+    description: Level
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 140
+    provenance: import
+    equipment: CR01_BIN02
+  - name: CR01_BIN02_LEVEL_HIGH
+    type: Bool
+    area: I
+    address: "%I9.2"
+    controller: PLC1
+    description: Muc cao
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 141
+    provenance: import
+    equipment: CR01_BIN02
+  - name: CR01_BIN02_LEVEL_LOW
+    type: Bool
+    area: I
+    address: "%I9.3"
+    controller: PLC1
+    description: Low level
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 142
+    provenance: import
+    equipment: CR01_BIN02
+  - name: CR01_BIN02_LEVEL_HIGH_HIGH
+    type: Bool
+    area: I
+    address: "%I9.4"
+    controller: PLC1
+    description: Fullstand Hoch-Hoch
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 143
+    provenance: import
+    equipment: CR01_BIN02
+  - name: CR01_BIN02_TEMP
+    type: Int
+    area: I
+    address: "%IW154"
+    controller: PLC1
+    description: Nhiet do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 145
+    provenance: import
+    equipment: CR01_BIN02
+  - name: CR01_BIN02_DUST
+    type: Bool
+    area: I
+    address: "%I9.5"
+    controller: PLC1
+    description: Bao bui
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 146
+    provenance: import
+    equipment: CR01_BIN02
+  - name: CR01_BC01_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q1.4"
+    controller: PLC1
+    description: Lenh chay
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 147
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_RUN_FBK
+    type: Bool
+    area: I
+    address: "%I9.6"
+    controller: PLC1
+    description: Phan hoi chay
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 148
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_READY
+    type: Bool
+    area: I
+    address: "%I9.7"
+    controller: PLC1
+    description: Ready
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 149
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_REMOTE
+    type: Bool
+    area: I
+    address: "%I10.0"
+    controller: PLC1
+    description: Remote mode
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 150
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_OVL_OK
+    type: Bool
+    area: I
+    address: "%I10.1"
+    controller: PLC1
+    description: Qua tai OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 151
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_CUR
+    type: Int
+    area: I
+    address: "%IW156"
+    controller: PLC1
+    description: Motorstrom
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 152
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_ZERO_SPEED
+    type: Bool
+    area: I
+    address: "%I10.2"
+    controller: PLC1
+    description: Bang dung yen
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 153
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_PULL_CORD
+    type: Bool
+    area: I
+    address: "%I10.3"
+    controller: PLC1
+    description: Day giat khan cap
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 154
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_TEMP
+    type: Int
+    area: I
+    address: "%IW158"
+    controller: PLC1
+    description: Temperature
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 155
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_VIB
+    type: Int
+    area: I
+    address: "%IW160"
+    controller: PLC1
+    description: Vibration
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 156
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_PWR
+    type: Int
+    area: I
+    address: "%IW162"
+    controller: PLC1
+    description: Cong suat
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 157
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_LOAD
+    type: Int
+    area: I
+    address: "%IW214"
+    controller: PLC1
+    description: Luu luong
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 500
+        unit: t/h
+    origin:
+      file: io-list-300.csv
+      row: 158
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_SPEED
+    type: Int
+    area: I
+    address: "%IW166"
+    controller: PLC1
+    description: Bandgeschwindigkeit
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 5
+        unit: m/s
+    origin:
+      file: io-list-300.csv
+      row: 159
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_TRACK
+    type: Bool
+    area: I
+    address: "%I10.4"
+    controller: PLC1
+    description: Lech bang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 160
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_RIP
+    type: Bool
+    area: I
+    address: "%I10.5"
+    controller: PLC1
+    description: Rach bang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 161
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_BLOCK
+    type: Bool
+    area: I
+    address: "%I10.6"
+    controller: PLC1
+    description: Chute blocked
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 162
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR01_BC01_SLIP
+    type: Bool
+    area: I
+    address: "%I8.4"
+    controller: PLC1
+    description: Truot bang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 163
+    provenance: import
+    equipment: CR01_BC01
+  - name: CR02_M01_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q1.5"
+    controller: PLC1
+    description: Lenh chay
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 164
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M01_RUNNING
+    type: Bool
+    area: I
+    address: "%I11.0"
+    controller: PLC1
+    description: Phan hoi chay
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 165
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M01_READY
+    type: Bool
+    area: I
+    address: "%I11.1"
+    controller: PLC1
+    description: San sang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 166
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M01_REMOTE
+    type: Bool
+    area: I
+    address: "%I11.2"
+    controller: PLC1
+    description: Che do tu xa
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 167
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M01_OVL_OK
+    type: Bool
+    area: I
+    address: "%I11.3"
+    controller: PLC1
+    description: Overload OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 168
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M01_CUR
+    type: Int
+    area: I
+    address: "%IW168"
+    controller: PLC1
+    description: Dong dong co
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 169
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M01_TEMP
+    type: Int
+    area: I
+    address: "%IW170"
+    controller: PLC1
+    description: Nhiet do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 170
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M01_VIB
+    type: Int
+    area: I
+    address: "%IW172"
+    controller: PLC1
+    description: Vibration
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 171
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M01_PWR
+    type: Int
+    area: I
+    address: "%IW174"
+    controller: PLC1
+    description: Cong suat
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 172
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M01_ESTOP
+    type: Bool
+    area: I
+    address: "%I11.4"
+    controller: PLC1
+    description: Dung khan cap
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 173
+    provenance: import
+    equipment: CR02_M01
+  - name: CR02_M02_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q1.6"
+    controller: PLC1
+    description: Lenh chay
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 174
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M02_RUN_ST
+    type: Bool
+    area: I
+    address: "%I11.5"
+    controller: PLC1
+    description: Phan hoi chay
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 175
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M02_READY
+    type: Bool
+    area: I
+    address: "%I11.6"
+    controller: PLC1
+    description: San sang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 176
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M02_REMOTE
+    type: Bool
+    area: I
+    address: "%I11.7"
+    controller: PLC1
+    description: Fernbetrieb
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 177
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M02_OVL_OK
+    type: Bool
+    area: I
+    address: "%I12.0"
+    controller: PLC1
+    description: Overload OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 178
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M02_CUR
+    type: Int
+    area: I
+    address: "%IW176"
+    controller: PLC1
+    description: Motor current
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 179
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M02_TEMP
+    type: Int
+    area: I
+    address: "%IW178"
+    controller: PLC1
+    description: Temperature
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 180
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M02_VIB
+    type: Int
+    area: I
+    address: "%IW180"
+    controller: PLC1
+    description: Vibration
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 181
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M02_PWR
+    type: Int
+    area: I
+    address: "%IW182"
+    controller: PLC1
+    description: Cong suat
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 182
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M02_ESTOP
+    type: Bool
+    area: I
+    address: "%I12.1"
+    controller: PLC1
+    description: Not-Halt
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 183
+    provenance: import
+    equipment: CR02_M02
+  - name: CR02_M03_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q1.7"
+    controller: PLC1
+    description: Laufbefehl
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 184
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M03_RUN_FB
+    type: Bool
+    area: I
+    address: "%I12.2"
+    controller: PLC1
+    description: Run feedback
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 185
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M03_READY
+    type: Bool
+    area: I
+    address: "%I12.3"
+    controller: PLC1
+    description: San sang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 186
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M03_REMOTE
+    type: Bool
+    area: I
+    address: "%I12.4"
+    controller: PLC1
+    description: Remote mode
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 187
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M03_OVL_OK
+    type: Bool
+    area: I
+    address: "%I12.5"
+    controller: PLC1
+    description: Qua tai OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 188
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M03_CUR
+    type: Int
+    area: I
+    address: "%IW184"
+    controller: PLC1
+    description: Dong dong co
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 189
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M03_TEMP
+    type: Int
+    area: I
+    address: "%IW186"
+    controller: PLC1
+    description: Nhiet do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 190
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M03_VIB
+    type: Int
+    area: I
+    address: "%IW188"
+    controller: PLC1
+    description: Vibration
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 191
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M03_PWR
+    type: Int
+    area: I
+    address: "%IW190"
+    controller: PLC1
+    description: Power
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 192
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M03_ESTOP
+    type: Bool
+    area: I
+    address: "%I12.6"
+    controller: PLC1
+    description: Emergency stop
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 193
+    provenance: import
+    equipment: CR02_M03
+  - name: CR02_M04_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q2.0"
+    controller: PLC1
+    description: Lenh chay
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 194
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_M04_RUN_FB
+    type: Bool
+    area: I
+    address: "%I12.7"
+    controller: PLC1
+    description: Phan hoi chay
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 195
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_M04_READY
+    type: Bool
+    area: I
+    address: "%I13.0"
+    controller: PLC1
+    description: San sang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 196
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_M04_REMOTE
+    type: Bool
+    area: I
+    address: "%I13.1"
+    controller: PLC1
+    description: Remote mode
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 197
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_M04_OVL_OK
+    type: Bool
+    area: I
+    address: "%I13.2"
+    controller: PLC1
+    description: Qua tai OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 198
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_M04_CUR
+    type: Int
+    area: I
+    address: "%IW192"
+    controller: PLC1
+    description: Motorstrom
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 199
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_M04_TEMP
+    type: Int
+    area: I
+    address: "%IW194"
+    controller: PLC1
+    description: Temperature
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 200
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_M04_VIB
+    type: Int
+    area: I
+    address: "%IW196"
+    controller: PLC1
+    description: Do rung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 201
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_M04_PWR
+    type: Int
+    area: I
+    address: "%IW198"
+    controller: PLC1
+    description: Leistung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 202
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_M04_ESTOP
+    type: Bool
+    area: I
+    address: "%I13.3"
+    controller: PLC1
+    description: Dung khan cap
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 203
+    provenance: import
+    equipment: CR02_M04
+  - name: CR02_MV01_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q2.1"
+    controller: PLC1
+    description: Laufbefehl
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 204
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_SPEED_REF
+    type: Int
+    area: Q
+    address: "%QW72"
+    controller: PLC1
+    description: Speed setpoint
+    signal:
+      kind: AO
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 205
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_RUN_FB
+    type: Bool
+    area: I
+    address: "%I13.4"
+    controller: PLC1
+    description: Ruckmeldung Lauf
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 206
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_SPEED_FB
+    type: Int
+    area: I
+    address: "%IW200"
+    controller: PLC1
+    description: Phan hoi toc do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 207
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_READY
+    type: Bool
+    area: I
+    address: "%I13.5"
+    controller: PLC1
+    description: San sang
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 208
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_VFD_OK
+    type: Bool
+    area: I
+    address: "%I13.6"
+    controller: PLC1
+    description: VFD fault OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 209
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_REMOTE
+    type: Bool
+    area: I
+    address: "%I13.7"
+    controller: PLC1
+    description: Remote mode
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 210
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_CUR
+    type: Int
+    area: I
+    address: "%IW202"
+    controller: PLC1
+    description: Dong dong co
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 211
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_TEMP
+    type: Int
+    area: I
+    address: "%IW204"
+    controller: PLC1
+    description: Nhiet do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 212
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_VIB
+    type: Int
+    area: I
+    address: "%IW206"
+    controller: PLC1
+    description: Vibration
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 213
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV01_PWR
+    type: Int
+    area: I
+    address: "%IW208"
+    controller: PLC1
+    description: Cong suat
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 214
+    provenance: import
+    equipment: CR02_MV01
+  - name: CR02_MV02_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q2.2"
+    controller: PLC1
+    description: Lenh chay
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 215
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_SPEED_REF
+    type: Int
+    area: Q
+    address: "%QW74"
+    controller: PLC1
+    description: Speed setpoint
+    signal:
+      kind: AO
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 216
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_RUN_FB
+    type: Bool
+    area: I
+    address: "%I14.0"
+    controller: PLC1
+    description: Ruckmeldung Lauf
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 217
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_SPEED_FB
+    type: Int
+    area: I
+    address: "%IW210"
+    controller: PLC1
+    description: Phan hoi toc do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 218
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_READY
+    type: Bool
+    area: I
+    address: "%I14.1"
+    controller: PLC1
+    description: Ready
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 219
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_VFD_OK
+    type: Bool
+    area: I
+    address: "%I14.2"
+    controller: PLC1
+    description: FU Storung OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 220
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_REMOTE
+    type: Bool
+    area: I
+    address: "%I14.3"
+    controller: PLC1
+    description: Che do tu xa
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 221
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_CUR
+    type: Int
+    area: I
+    address: "%IW212"
+    controller: PLC1
+    description: Motor current
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 222
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_TEMP
+    type: Int
+    area: I
+    address: "%IW214"
+    controller: PLC1
+    description: Temperatur
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 223
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_VIB
+    type: Int
+    area: I
+    address: "%IW216"
+    controller: PLC1
+    description: Vibration
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 224
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_MV02_PWR
+    type: Int
+    area: I
+    address: "%IW218"
+    controller: PLC1
+    description: Cong suat
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 225
+    provenance: import
+    equipment: CR02_MV02
+  - name: CR02_XV01_OPEN_CMD
+    type: Bool
+    area: Q
+    address: "%Q2.3"
+    controller: PLC1
+    description: Offnen Befehl
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 226
+    provenance: import
+    equipment: CR02_XV01
+  - name: CR02_XV01_CLOSE_CMD
+    type: Bool
+    area: Q
+    address: "%Q2.4"
+    controller: PLC1
+    description: Lenh dong
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 227
+    provenance: import
+    equipment: CR02_XV01
+  - name: CR02_XV01_OPEN_LS
+    type: Bool
+    area: I
+    address: "%I14.4"
+    controller: PLC1
+    description: Endschalter Auf
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 228
+    provenance: import
+    equipment: CR02_XV01
+  - name: CR02_XV01_CLOSED_LS
+    type: Bool
+    area: I
+    address: "%I14.5"
+    controller: PLC1
+    description: Closed limit switch
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 229
+    provenance: import
+    equipment: CR02_XV01
+  - name: CR02_XV01_FAULT
+    type: Bool
+    area: I
+    address: "%I14.6"
+    controller: PLC1
+    description: Loi
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 230
+    provenance: import
+    equipment: CR02_XV01
+  - name: CR02_XV01_TORQ
+    type: Int
+    area: I
+    address: "%IW220"
+    controller: PLC1
+    description: Mo-men
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: Nm
+    origin:
+      file: io-list-300.csv
+      row: 231
+    provenance: import
+    equipment: CR02_XV01
+  - name: CR02_XV01_LOCAL
+    type: Bool
+    area: I
+    address: "%I14.7"
+    controller: PLC1
+    description: Dieu khien tai cho
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 232
+    provenance: import
+    equipment: CR02_XV01
+  - name: CR02_XV02_OPEN_CMD
+    type: Bool
+    area: Q
+    address: "%Q2.5"
+    controller: PLC1
+    description: Lenh mo
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 233
+    provenance: import
+    equipment: CR02_XV02
+  - name: CR02_XV02_CLOSE_CMD
+    type: Bool
+    area: Q
+    address: "%Q2.6"
+    controller: PLC1
+    description: Schließen Befehl
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 234
+    provenance: import
+    equipment: CR02_XV02
+  - name: CR02_XV02_OPEN_LS
+    type: Bool
+    area: I
+    address: "%I15.0"
+    controller: PLC1
+    description: Cong tac gioi han mo
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 235
+    provenance: import
+    equipment: CR02_XV02
+  - name: CR02_XV02_CLOSED_LS
+    type: Bool
+    area: I
+    address: "%I15.1"
+    controller: PLC1
+    description: Cong tac gioi han dong
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 236
+    provenance: import
+    equipment: CR02_XV02
+  - name: CR02_XV02_FAULT
+    type: Bool
+    area: I
+    address: "%I15.2"
+    controller: PLC1
+    description: Storung
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 237
+    provenance: import
+    equipment: CR02_XV02
+  - name: CR02_XV02_TORQ
+    type: Int
+    area: I
+    address: "%IW222"
+    controller: PLC1
+    description: Mo-men
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: Nm
+    origin:
+      file: io-list-300.csv
+      row: 238
+    provenance: import
+    equipment: CR02_XV02
+  - name: CR02_XV02_LOCAL
+    type: Bool
+    area: I
+    address: "%I15.3"
+    controller: PLC1
+    description: Dieu khien tai cho
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 239
+    provenance: import
+    equipment: CR02_XV02
+  - name: CR02_XV03_OPEN_CMD
+    type: Bool
+    area: Q
+    address: "%Q2.7"
+    controller: PLC1
+    description: Open command
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 240
+    provenance: import
+    equipment: CR02_XV03
+  - name: CR02_XV03_CLOSE_CMD
+    type: Bool
+    area: Q
+    address: "%Q3.0"
+    controller: PLC1
+    description: Lenh dong
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 241
+    provenance: import
+    equipment: CR02_XV03
+  - name: CR02_XV03_OPEN_LS
+    type: Bool
+    area: I
+    address: "%I15.4"
+    controller: PLC1
+    description: Endschalter Auf
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 242
+    provenance: import
+    equipment: CR02_XV03
+  - name: CR02_XV03_CLOSED_LS
+    type: Bool
+    area: I
+    address: "%I15.5"
+    controller: PLC1
+    description: Cong tac gioi han dong
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 243
+    provenance: import
+    equipment: CR02_XV03
+  - name: CR02_XV03_FAULT
+    type: Bool
+    area: I
+    address: "%I15.6"
+    controller: PLC1
+    description: Fault
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 244
+    provenance: import
+    equipment: CR02_XV03
+  - name: CR02_XV03_TORQ
+    type: Int
+    area: I
+    address: "%IW224"
+    controller: PLC1
+    description: Drehmoment
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: Nm
+    origin:
+      file: io-list-300.csv
+      row: 245
+    provenance: import
+    equipment: CR02_XV03
+  - name: CR02_XV03_LOCAL
+    type: Bool
+    area: I
+    address: "%I15.7"
+    controller: PLC1
+    description: Local control
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 246
+    provenance: import
+    equipment: CR02_XV03
+  - name: CR02_FCV01_POS_REF
+    type: Int
+    area: Q
+    address: "%QW76"
+    controller: PLC1
+    description: Position setpoint
+    signal:
+      kind: AO
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 247
+    provenance: import
+    equipment: CR02_FCV01
+  - name: CR02_FCV01_POS_FB
+    type: Int
+    area: I
+    address: "%IW226"
+    controller: PLC1
+    description: Position feedback
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 248
+    provenance: import
+    equipment: CR02_FCV01
+  - name: CR02_FCV01_FAULT
+    type: Bool
+    area: I
+    address: "%I16.0"
+    controller: PLC1
+    description: Loi
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 249
+    provenance: import
+    equipment: CR02_FCV01
+  - name: CR02_FCV01_CLOSED_LS
+    type: Bool
+    area: I
+    address: "%I16.1"
+    controller: PLC1
+    description: Closed limit switch
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 250
+    provenance: import
+    equipment: CR02_FCV01
+  - name: CR02_FCV01_OPEN_LS
+    type: Bool
+    area: I
+    address: "%I16.2"
+    controller: PLC1
+    description: Cong tac gioi han mo
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 251
+    provenance: import
+    equipment: CR02_FCV01
+  - name: CR02_FCV01_TORQ
+    type: Int
+    area: I
+    address: "%IW228"
+    controller: PLC1
+    description: Mo-men
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: Nm
+    origin:
+      file: io-list-300.csv
+      row: 252
+    provenance: import
+    equipment: CR02_FCV01
+  - name: CR02_FCV01_LOCAL
+    type: Bool
+    area: I
+    address: "%I16.3"
+    controller: PLC1
+    description: Vor-Ort-Steuerung
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 253
+    provenance: import
+    equipment: CR02_FCV01
+  - name: CR02_PT03_RAW
+    type: Int
+    area: I
+    address: "%IW230"
+    controller: PLC1
+    description: Measured value
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 10
+        unit: bar
+    origin:
+      file: io-list-300.csv
+      row: 254
+    provenance: import
+    equipment: CR02_PT03
+  - name: CR02_PT03_BYPASS
+    type: Bool
+    area: I
+    address: "%I19.5"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 255
+    provenance: import
+    equipment: CR02_PT03
+  - name: CR02_TT03_RAW
+    type: Int
+    area: I
+    address: "%IW232"
+    controller: PLC1
+    description: Measured value
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 256
+    provenance: import
+    equipment: CR02_TT03
+  - name: CR02_TT03_BYPASS
+    type: Bool
+    area: I
+    address: "%I16.5"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 257
+    provenance: import
+    equipment: CR02_TT03
+  - name: CR02_LT03_RAW
+    type: Int
+    area: I
+    address: "%IW234"
+    controller: PLC1
+    description: Gia tri do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 258
+    provenance: import
+    equipment: CR02_LT03
+  - name: CR02_LT03_BYPASS
+    type: Bool
+    area: I
+    address: "%I16.6"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 259
+    provenance: import
+    equipment: CR02_LT03
+  - name: CR02_FT02_RAW
+    type: Int
+    area: I
+    address: "%IW236"
+    controller: PLC1
+    description: Gia tri do
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 500
+        unit: t/h
+    origin:
+      file: io-list-300.csv
+      row: 260
+    provenance: import
+    equipment: CR02_FT02
+  - name: CR02_FT02_BYPASS
+    type: Bool
+    area: I
+    address: "%I16.7"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 261
+    provenance: import
+    equipment: CR02_FT02
+  - name: CR02_WT01_RAW
+    type: Int
+    area: I
+    address: "%IW238"
+    controller: PLC1
+    description: Messwert
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: t
+    origin:
+      file: io-list-300.csv
+      row: 262
+    provenance: import
+    equipment: CR02_WT01
+  - name: CR02_WT01_BYPASS
+    type: Bool
+    area: I
+    address: "%I17.0"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 263
+    provenance: import
+    equipment: CR02_WT01
+  - name: CR02_ST01_RAW
+    type: Int
+    area: I
+    address: "%IW240"
+    controller: PLC1
+    description: Measured value
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 264
+    provenance: import
+    equipment: CR02_ST01
+  - name: CR02_ST01_BYPASS
+    type: Bool
+    area: I
+    address: "%I17.1"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 265
+    provenance: import
+    equipment: CR02_ST01
+  - name: CR02_FT03_RAW
+    type: Int
+    area: I
+    address: "%IW242"
+    controller: PLC1
+    description: Measured value
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 500
+        unit: t/h
+    origin:
+      file: io-list-300.csv
+      row: 266
+    provenance: import
+    equipment: CR02_FT03
+  - name: CR02_FT03_BYPASS
+    type: Bool
+    area: I
+    address: "%I17.2"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 267
+    provenance: import
+    equipment: CR02_FT03
+  - name: CR02_SS02_DI
+    type: Bool
+    area: I
+    address: "%I17.3"
+    controller: PLC1
+    description: Dau vao so
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 268
+    provenance: import
+    equipment: CR02_SS02
+  - name: CR02_SS02_TEST
+    type: Bool
+    area: I
+    address: "%I17.4"
+    controller: PLC1
+    description: Testtaster
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 269
+    provenance: import
+    equipment: CR02_SS02
+  - name: CR02_PC01_DI
+    type: Bool
+    area: I
+    address: "%I17.6"
+    controller: PLC1
+    description: Digital input
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 271
+    provenance: import
+    equipment: CR02_PC01
+  - name: CR02_PC01_TEST
+    type: Bool
+    area: I
+    address: "%I17.7"
+    controller: PLC1
+    description: Nut kiem tra
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 272
+    provenance: import
+    equipment: CR02_PC01
+  - name: CR02_PC01_BYPASS
+    type: Bool
+    area: I
+    address: "%I18.0"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 273
+    provenance: import
+    equipment: CR02_PC01
+  - name: CR02_PC02_DI
+    type: Bool
+    area: I
+    address: "%I18.1"
+    controller: PLC1
+    description: Digital input
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 274
+    provenance: import
+    equipment: CR02_PC02
+  - name: CR02_PC02_TEST
+    type: Bool
+    area: I
+    address: "%I18.2"
+    controller: PLC1
+    description: Nut kiem tra
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 275
+    provenance: import
+    equipment: CR02_PC02
+  - name: CR02_PC02_BYPASS
+    type: Bool
+    area: I
+    address: "%I18.3"
+    controller: PLC1
+    description: Bo qua
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 276
+    provenance: import
+    equipment: CR02_PC02
+  - name: CR02_LSH02_DI
+    type: Bool
+    area: I
+    address: "%I18.4"
+    controller: PLC1
+    description: Digital input
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 277
+    provenance: import
+    equipment: CR02_LSH02
+  - name: CR02_LSH02_TEST
+    type: Bool
+    area: I
+    address: "%I18.5"
+    controller: PLC1
+    description: Nut kiem tra
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 278
+    provenance: import
+    equipment: CR02_LSH02
+  - name: CR02_LSH02_BYPASS
+    type: Bool
+    area: I
+    address: "%I18.6"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 279
+    provenance: import
+    equipment: CR02_LSH02
+  - name: CR02_ZS03_DI
+    type: Bool
+    area: I
+    address: "%I18.7"
+    controller: PLC1
+    description: Dau vao so
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 280
+    provenance: import
+    equipment: CR02_ZS03
+  - name: CR02_ZS03_TEST
+    type: Bool
+    area: I
+    address: "%I19.0"
+    controller: PLC1
+    description: Test button
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 281
+    provenance: import
+    equipment: CR02_ZS03
+  - name: CR02_ZS03_BYPASS
+    type: Bool
+    area: I
+    address: "%I19.1"
+    controller: PLC1
+    description: Bypass
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 282
+    provenance: import
+    equipment: CR02_ZS03
+  - name: CR02_SILO01_LEVEL_RAW
+    type: Int
+    area: I
+    address: "%IW244"
+    controller: PLC1
+    description: Level
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: "%"
+    origin:
+      file: io-list-300.csv
+      row: 283
+    provenance: import
+    equipment: CR02_SILO01
+  - name: CR02_SILO01_LEVEL_HIGH
+    type: Bool
+    area: I
+    address: "%I19.2"
+    controller: PLC1
+    description: Muc cao
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 284
+    provenance: import
+    equipment: CR02_SILO01
+  - name: CR02_SILO01_LEVEL_LOW
+    type: Bool
+    area: I
+    address: "%I19.3"
+    controller: PLC1
+    description: Low level
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 285
+    provenance: import
+    equipment: CR02_SILO01
+  - name: CR02_SILO01_LEVEL_HIGH_HIGH
+    type: Bool
+    area: I
+    address: "%I19.4"
+    controller: PLC1
+    description: High-high level
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 286
+    provenance: import
+    equipment: CR02_SILO01
+  - name: CR02_SILO01_WEIGHT
+    type: Int
+    area: I
+    address: "%IW246"
+    controller: PLC1
+    description: Khoi luong
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 100
+        unit: t
+    origin:
+      file: io-list-300.csv
+      row: 287
+    provenance: import
+    equipment: CR02_SILO01
+  - name: CR02_SILO01_TEMP
+    type: Int
+    area: I
+    address: "%IW248"
+    controller: PLC1
+    description: Temperature
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 288
+    provenance: import
+    equipment: CR02_SILO01
+  - name: CR02_SILO01_DUST
+    type: Bool
+    area: I
+    address: "%I19.5"
+    controller: PLC1
+    description: Bao bui
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 289
+    provenance: import
+    equipment: CR02_SILO01
+  - name: CR02_BC02_RUN_CMD
+    type: Bool
+    area: Q
+    address: "%Q3.1"
+    controller: PLC1
+    description: Run command
+    signal:
+      kind: DO
+    origin:
+      file: io-list-300.csv
+      row: 290
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_RUN_FB
+    type: Bool
+    area: I
+    address: "%I19.6"
+    controller: PLC1
+    description: Phan hoi chay
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 291
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_READY
+    type: Bool
+    area: I
+    address: "%I19.7"
+    controller: PLC1
+    description: Bereit
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 292
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_REMOTE
+    type: Bool
+    area: I
+    address: "%I20.0"
+    controller: PLC1
+    description: Fernbetrieb
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 293
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_OVL_OK
+    type: Bool
+    area: I
+    address: "%I20.1"
+    controller: PLC1
+    description: Overload OK
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 294
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_CUR
+    type: Int
+    area: I
+    address: "%IW250"
+    controller: PLC1
+    description: Dong dong co
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: A
+    origin:
+      file: io-list-300.csv
+      row: 295
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_PULL_CORD
+    type: Bool
+    area: I
+    address: "%I20.3"
+    controller: PLC1
+    description: Pull cord
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 297
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_TEMP
+    type: Int
+    area: I
+    address: "%IW252"
+    controller: PLC1
+    description: Temperature
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 150
+        unit: °C
+    origin:
+      file: io-list-300.csv
+      row: 298
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_VIB
+    type: Int
+    area: I
+    address: "%IW254"
+    controller: PLC1
+    description: Do rung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 25
+        unit: mm/s
+    origin:
+      file: io-list-300.csv
+      row: 299
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_PWR
+    type: Int
+    area: I
+    address: "%IW256"
+    controller: PLC1
+    description: Power
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 200
+        unit: kW
+    origin:
+      file: io-list-300.csv
+      row: 300
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_LOAD
+    type: Int
+    area: I
+    address: "%IW258"
+    controller: PLC1
+    description: Forderleistung
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 500
+        unit: t/h
+    origin:
+      file: io-list-300.csv
+      row: 301
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_SPEED
+    type: Int
+    area: I
+    address: "%IW260"
+    controller: PLC1
+    description: Toc do bang
+    signal:
+      kind: AI
+      scaling:
+        rawMin: 0
+        rawMax: 27648
+        engMin: 0
+        engMax: 5
+        unit: m/s
+    origin:
+      file: io-list-300.csv
+      row: 302
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_TRACK
+    type: Bool
+    area: I
+    address: "%I20.4"
+    controller: PLC1
+    description: Belt tracking
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 303
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_RIP
+    type: Bool
+    area: I
+    address: "%I20.5"
+    controller: PLC1
+    description: Belt rip
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 304
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_BLOCK
+    type: Bool
+    area: I
+    address: "%I20.6"
+    controller: PLC1
+    description: Chute blocked
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 305
+    provenance: import
+    equipment: CR02_BC02
+  - name: CR02_BC02_SLIP
+    type: Bool
+    area: I
+    address: "%I20.7"
+    controller: PLC1
+    description: Belt slip
+    signal:
+      kind: DI
+    origin:
+      file: io-list-300.csv
+      row: 306
+    provenance: import
+    equipment: CR02_BC02

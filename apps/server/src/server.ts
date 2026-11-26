@@ -18,6 +18,9 @@ import { isOriginAllowed, resolveServerConfig, type ServerConfigInput } from './
 import { SERVER_EXTENSIONS } from './extensions.js';
 import { loadPlcProgram, plcExtension } from './plc.js';
 import { registerRestRoutes, type ProjectInfo } from './routes.js';
+import { ImportSessionStore } from './import-session.js';
+import { registerImportRoutes } from './import-routes.js';
+import { registerPlantRoutes } from './plant-routes.js';
 import { SimulationService } from './sim-service.js';
 import { WsHub } from './ws.js';
 
@@ -140,12 +143,24 @@ export async function createServer(
     }),
     tagCount: model.catalog.all().length,
     diagnostics: model.diagnostics,
+    // P2.8 (AMENDMENTS B9, OQ-398): equipment static từ plant/equipment.yaml
+    // trên đĩa (model.plant); project không plant → [].
+    equipment: (model.plant ?? []).map((inst) => ({
+      id: inst.id,
+      model: inst.model,
+      roles: Object.entries(inst.signals ?? {}).map(([role, tag]) => ({ role, tag })),
+    })),
   };
   registerRestRoutes(fastify, projectInfo, {
     hasWebBuild,
     plc: { dir, tags: model.catalog.all() },
     service,
   });
+  // P2.8 (OQ-382): session import trong bộ nhớ — 1 store cho đời server.
+  // projectDir cho validate/diff/commit đọc baseline + ghi file (commit 4).
+  registerImportRoutes(fastify, new ImportSessionStore(), dir);
+  // P2.8 (commit 5): suggest/apply/tags/models/equipment (Designer).
+  registerPlantRoutes(fastify, dir);
   let url = `http://${config.host}:${String(config.port)}/`;
   let started = false;
   let stopped = false;

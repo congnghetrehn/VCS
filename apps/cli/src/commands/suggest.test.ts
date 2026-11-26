@@ -104,16 +104,22 @@ const M01_TAGS_YAML = `tags:
 `;
 
 describe('vcs suggest — dry-run trên motor-interlock', () => {
-  // Hành vi thật (đo 2026-11-26): 8 tag không khớp pattern → LCP fallback,
-  // 7 nhóm, 0 tag gán. RUN_CMD gán được (token CMD là synonym runCmd)
-  // nhưng RUN_FB không (token FB không có trong synonyms runFb — xem
-  // OQ-381); START/STOP dính tiền tố 'ST' → analog_sensor (quy tắc
-  // prefix dài nhất OQ-369 trên từ tự do). Tất cả đều review/unmatched,
-  // không confident — đúng theo spec hiện hành, không sửa synonym ở P2.7.
-  it('exit 0, 8 tags → 7 thiết bị (0 confident, 6 review, 1 unmatched), 0 tags gán', async () => {
+  // Hành vi thật (đo lại 2026-11-26, sau OQ-391): 8 tag không khớp pattern
+  // → LCP fallback, 7 nhóm, 2 tag gán. RUN_CMD gán được (token CMD là
+  // synonym runCmd, 0.8) và RUN_FB gán được (token FB thêm vào synonyms
+  // runFb ở P2.8 — OQ-381/OQ-391, 0.8). Nhóm RUN: motor_dol và
+  // conveyor_simple (kế thừa roles motor_dol) cùng 0.40 → tie → review,
+  // hòa điểm chọn tên model asc nên conveyor_simple thắng; conf 0.60.
+  // (Tính tay Bảng 3 của plan P2.8 sai ở 2 điểm: tưởng CMD không khớp
+  // synonym runCmd, và quên conveyor_simple kế thừa roles — đo thật
+  // bằng chạy CLI, không sửa test để khớp tính tay.)
+  // START/STOP dính tiền tố 'ST' → analog_sensor (quy tắc prefix dài
+  // nhất OQ-369 trên từ tự do). Tất cả đều review/unmatched, không
+  // confident — đúng theo spec hiện hành.
+  it('exit 0, 8 tags → 7 thiết bị (0 confident, 6 review, 1 unmatched), 2 tags gán', async () => {
     const { code, out } = await runCaptured(MOTOR);
     expect(code).toBe(0);
-    expect(out).toContain('suggest: 8 tags → 7 thiết bị (0 confident, 6 review, 1 unmatched), 0 tags gán');
+    expect(out).toContain('suggest: 8 tags → 7 thiết bị (0 confident, 6 review, 1 unmatched), 2 tags gán');
     expect(out).toContain('RUN');
     expect(out).toContain('silo_bin');
     expect(out).toContain('review');
@@ -139,12 +145,12 @@ describe('vcs suggest — dry-run trên motor-interlock', () => {
     expect(parsed.stats.confident).toBe(0);
     expect(parsed.stats.review).toBe(6);
     expect(parsed.stats.unmatched).toBe(1);
-    expect(parsed.stats.assignedTags).toBe(0);
+    expect(parsed.stats.assignedTags).toBe(2);
     expect(parsed.suggestions).toHaveLength(7);
     const run = parsed.suggestions.find((s) => s.equipmentId === 'RUN');
-    expect(run?.model).toBe('silo_bin');
+    expect(run?.model).toBe('conveyor_simple');
     expect(run?.status).toBe('review');
-    expect(run?.signals).toHaveLength(0);
+    expect(run?.signals).toHaveLength(2);
   });
 
   it('thư mục không tồn tại → exit 3', async () => {

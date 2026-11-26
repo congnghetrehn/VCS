@@ -1,6 +1,8 @@
 // Test SimulationService — @vcs/server (M0 §8.2; S1 §12).
 // Đồng hồ wall giả cho Pacer; chạy lát bằng runSlice() đồng bộ.
 
+import { appendFile, cp, mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -22,13 +24,18 @@ async function makeBundle(extensions?: SimulationExtension[]): Promise<Simulatio
   });
 }
 
-/** Bundle motor-interlock chỉ với plant (không PLC) cho test plant/hash. */
-async function makeMotorBundle(): Promise<SimulationBundle> {
-  const model = await loadProject(nodeFS(MOTOR));
+/** Bundle chỉ với plant (không PLC) từ một thư mục project bất kỳ. */
+async function makeBundleFrom(dir: string): Promise<SimulationBundle> {
+  const model = await loadProject(nodeFS(dir));
   return createSimulation(model, {
     extensions: [plantExtension()],
     errorPolicy: 'isolate',
   });
+}
+
+/** Bundle motor-interlock chỉ với plant (không PLC) cho test plant/hash. */
+async function makeMotorBundle(): Promise<SimulationBundle> {
+  return makeBundleFrom(MOTOR);
 }
 
 /** Controller trả Promise trong step() đồng bộ → SIM-E002 (OQ-052). */
@@ -357,8 +364,97 @@ describe('SimulationService — plant + hash (P2.4, OQ-318)', () => {
       // Obs chỉ có giá trị sau bước đầu (engine khởi tạo undefined).
       expect(m01?.observables).toEqual({});
       expect(m01?.faults).toEqual([]);
+      // P2.8 (OQ-387): signals + roleValues raw (Bool → không eng).
+      expect(m01?.signals).toEqual({ runCmd: 'RUN_CMD', runFb: 'RUN_FB', overloadOk: 'OVL_OK' });
+      expect(m01?.roleValues['runCmd']).toEqual({ tag: 'RUN_CMD', raw: false });
+      expect(m01?.roleValues['runFb']).toEqual({ tag: 'RUN_FB', raw: false });
+      expect(m01?.roleValues['overloadOk']).toEqual({ tag: 'OVL_OK', raw: false });
+      // P2.8 (OQ-389): events là mảng, ≤ 100 (chưa step → có thể rỗng).
+      expect(Array.isArray(snap?.events)).toBe(true);
+      expect((snap?.events ?? []).length).toBeLessThanOrEqual(100);
       expect(service.step(1).ok).toBe(true);
       expect(service.plantSnapshot()?.equipment[0]?.observables['state']).toBe('STOPPED');
+    } finally {
+      service.stop();
+    }
+  });
+
+  it('plantSnapshot() roleValues eng (P2.8, OQ-387, Bảng 1): raw 13824 → eng 50.0; over-range 32511 → 117.6', async () => {
+    // Project tạm: motor-interlock + 2 analog_sensor (AI có scaling, initial
+    // 13824 và 32511). Chưa step — TagDB giữ initial từ tags.yaml.
+    // (Trường hợp "không scaling → chỉ raw" không dựng được thành config
+    // hợp lệ: engine validate PL-E012 và từ chối load khi role analog
+    // không resolve được range — hành vi "chỉ raw" chỉ áp cho role Bool,
+    // đã ghim ở test snapshot motor-interlock trên.)
+    const dir = await mkdtemp(join(tmpdir(), 'vcs-p28-rolevalues-'));
+    await cp(MOTOR, dir, { recursive: true });
+    await appendFile(
+      join(dir, 'tags', 'tags.yaml'),
+      [
+        '  - name: AI1',
+        '    type: Int',
+        '    area: I',
+        '    address: "%IW10"',
+        '    controller: PLC1',
+        '    initial: 13824',
+        '    signal:',
+        '      kind: AI',
+        '      scaling: { rawMin: 0, rawMax: 27648, engMin: 0, engMax: 100, unit: "%" }',
+        '  - name: AI2',
+        '    type: Int',
+        '    area: I',
+        '    address: "%IW12"',
+        '    controller: PLC1',
+        '    initial: 32511',
+        '    signal:',
+        '      kind: AI',
+        '      scaling: { rawMin: 0, rawMax: 27648, engMin: 0, engMax: 100, unit: "%" }',
+        '',
+      ].join('\n'),
+    );
+    await appendFile(
+      join(dir, 'plant', 'equipment.yaml'),
+      [
+        '- id: AI1_EQ',
+        '  model: analog_sensor',
+        '  signals:',
+        '    raw: AI1',
+        '  params:',
+        '    engMin: 0',
+        '    engMax: 100',
+        "    unit: '%'",
+        '- id: AI2_EQ',
+        '  model: analog_sensor',
+        '  signals:',
+        '    raw: AI2',
+        '  params:',
+        '    engMin: 0',
+        '    engMax: 100',
+        "    unit: '%'",
+        '',
+      ].join('\n'),
+    );
+    const bundle = await makeBundleFrom(dir);
+    const service = new SimulationService(bundle, { now: () => 0 });
+    try {
+      const snap = service.plantSnapshot();
+      expect(snap?.equipment).toHaveLength(3);
+      const byId = new Map((snap?.equipment ?? []).map((e) => [e.id, e]));
+      // Bảng 1: raw 13824 (0..27648 → 0..100%) → eng 50.0.
+      expect(byId.get('AI1_EQ')?.roleValues['raw']).toEqual({
+        tag: 'AI1',
+        raw: 13824,
+        eng: 50,
+        unit: '%',
+      });
+      // Over-range: raw 32511 → eng = 32511/27648×100 ≈ 117.589 (Bảng 1
+      // ghi 117.6 là làm tròn 1 chữ số), không kẹp, kèm overRange.
+      const ai2 = byId.get('AI2_EQ')?.roleValues['raw'];
+      expect(ai2?.tag).toBe('AI2');
+      expect(ai2?.raw).toBe(32511);
+      expect(ai2?.eng).toBeCloseTo((32511 / 27648) * 100, 9);
+      expect(ai2?.unit).toBe('%');
+      expect(ai2?.overRange).toBe(true);
     } finally {
       service.stop();
     }

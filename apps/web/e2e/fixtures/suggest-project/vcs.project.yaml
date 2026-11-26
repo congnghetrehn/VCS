@@ -1,0 +1,13 @@
+# Project e2e cho Plant Designer — SINH TỰ ĐỘNG, không sửa tay.
+# Nguồn: fixtures/io-list-300.csv qua scripts/gen-suggest-project.ts
+# (dedupe 6 tên tag trùng; địa chỉ chồng nhau giữ nguyên — xem script).
+schemaVersion: 1
+name: Suggest Project
+language: vi
+seed: 1
+simulation: { stepMs: 100, plcScanMs: 100 }
+controllers:
+  - id: PLC1
+    mode: builtin
+    vendor: demo
+    model: loopback

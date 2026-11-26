@@ -13,16 +13,18 @@ import {
   PRJ_CATALOG,
   type DataType,
   type Diagnostic,
+  type EquipmentInstance,
   type FaultInfo,
   type FaultRequest,
   type FaultTiming,
   type SimState,
+  type SourceSpec,
   type TagDef,
   type TagValue,
 } from '@vcs/schemas';
 import { Pacer, TraceHasher, isIntrospectable, type SimulationBundle, type TagHandle } from '@vcs/kernel';
 import type { ControllerAdapter, ControllerIntrospection } from '@vcs/kernel';
-import { defaultRegistry, type PlantEngine } from '@vcs/plant';
+import { defaultRegistry, rawToEng, resolveRange, type PlantEngine, type PlantEvent } from '@vcs/plant';
 import { startPlcControllers } from './plc.js';
 
 export type ServiceState = 'IDLE' | 'RUNNING' | 'PAUSED';
@@ -63,10 +65,30 @@ export interface PlantEquipmentSnapshot {
   faultDefs: Array<{ id: string; description: string }>;
   /** Preset lỗi của model — panel dùng để áp nhanh (vd noRunFeedback). */
   presets: Array<{ name: string; description: string }>;
+  /** Gán role → tag (từ equipment.yaml, P2.8 OQ-385/387). */
+  signals: Record<string, string>;
+  /** Giá trị hiện tại từng role: raw từ TagDB + eng do server tính bằng
+   * adapter (P2.8, OQ-387, Bảng 1 STATE §32). Không resolve được range
+   * (không scaling, không params) → chỉ raw, không bịa eng. */
+  roleValues: Record<string, RoleValueSnapshot>;
+}
+
+/** Giá trị hiện tại của một role (inspector, P2.8 OQ-387). */
+export interface RoleValueSnapshot {
+  tag: string;
+  raw: TagValue;
+  /** eng = rawToEng(raw, range) — không clamp (raw ngoài dải vẫn cho eng
+   * ngoài dải, kèm overRange — Bảng 1: raw 32511 → eng 117.6). */
+  eng?: number;
+  unit?: string;
+  /** raw ngoài [rawMin, rawMax] của range đã resolve. */
+  overRange?: boolean;
 }
 
 export interface PlantSnapshotData {
   equipment: PlantEquipmentSnapshot[];
+  /** ≤ 100 event mới nhất từ engine (P2.8, OQ-389). */
+  events: PlantEvent[];
 }
 
 export interface SimulationServiceOptions {
@@ -269,6 +291,7 @@ export class SimulationService {
    * (từ project.plant) + lỗi đã inject (`listFaults()`) + snapshot
    * observables (`getObservable`) + fault/preset model khai báo (panel
    * dùng để Inject/áp preset). undefined khi project không có plant.
+   * P2.8 (OQ-387/389): thêm signals, roleValues raw/eng, events ≤ 100.
    */
   plantSnapshot(): PlantSnapshotData | undefined {
     const engine = this.plant();
@@ -276,6 +299,7 @@ export class SimulationService {
     if (engine === undefined || instances === undefined) return undefined;
     const allFaults = engine.listFaults();
     return {
+      events: engine.events().slice(-100),
       equipment: instances.map((inst) => {
         const model = defaultRegistry.get(inst.model);
         const observables: Record<string, number | boolean | string> = {};
@@ -295,11 +319,49 @@ export class SimulationService {
             name,
             description: p.description,
           })),
+          signals: { ...(inst.signals ?? {}) },
+          roleValues: this.#roleValues(inst),
         };
         if (inst.controller !== undefined) out.controller = inst.controller;
         return out;
       }),
     };
+  }
+
+  /**
+   * Giá trị hiện tại từng role của một thiết bị (P2.8, OQ-387): raw đọc
+   * từ TagDB; eng tính bằng adapter khi resolve được range (params
+   * engMin/engMax → scaling tag → mặc định %); không resolve được →
+   * chỉ raw, không bịa eng. Tag không có trong catalog → bỏ qua.
+   */
+  #roleValues(inst: EquipmentInstance): Record<string, RoleValueSnapshot> {
+    const model = defaultRegistry.get(inst.model);
+    const out: Record<string, RoleValueSnapshot> = {};
+    for (const [role, tagName] of Object.entries(inst.signals ?? {})) {
+      const h = this.#bundle.tags.handle(tagName);
+      if (h === undefined) continue;
+      const raw = this.#bundle.tags.get(h);
+      const entry: RoleValueSnapshot = { tag: tagName, raw };
+      if (typeof raw === 'number') {
+        const defIdx = this.#nameToDefIndex.get(tagName);
+        const def = defIdx !== undefined ? this.#catalogDefs[defIdx] : undefined;
+        const roleDef = model?.roles.find((r) => r.role === role);
+        const range = resolveRange(inst.params, def?.signal?.scaling, roleDef?.unit);
+        if (range !== undefined) {
+          entry.eng = rawToEng(raw, range);
+          // Đơn vị (theo thứ tự ưu tiên): params instance (analog_sensor
+          // giữ unit trong params) → scaling của tag → role def → range.
+          const paramUnit = inst.params?.['unit'];
+          if (typeof paramUnit === 'string' && paramUnit !== '') entry.unit = paramUnit;
+          else if (def?.signal?.scaling?.unit !== undefined) entry.unit = def.signal.scaling.unit;
+          else if (range.unit !== undefined) entry.unit = range.unit;
+          else if (roleDef?.unit !== undefined) entry.unit = roleDef.unit;
+          if (raw < range.rawMin || raw > range.rawMax) entry.overRange = true;
+        }
+      }
+      out[role] = entry;
+    }
+    return out;
   }
 
   /** Chèn lỗi plant qua WS `plant.fault.inject` (OQ-318): lỗi → mã PL. */
@@ -363,6 +425,52 @@ export class SimulationService {
       return { ok: true };
     } catch (err) {
       return { ok: false, code: plCodeOf(err), message: messageOf(err) };
+    }
+  }
+
+  /**
+   * Đặt giá trị manual cho source qua WS `plant.manual.set` (P2.8, OQ-388):
+   * value chỉ number | boolean (schema đã chặn string). Lỗi engine (thiết
+   * bị không có / model không có source) đều là lỗi cấu hình plant → mã
+   * PL-E001 (engine ném Error trần không mang mã, khác fault có mã nhúng
+   * trong message nên fault dùng plCodeOf).
+   */
+  plantManualSet(equipment: string, value: number | boolean, name?: string): ServiceResult {
+    const engine = this.plant();
+    if (engine === undefined) {
+      return {
+        ok: false,
+        code: 'PL-E001',
+        message: 'plant.manual.set: project không có plant',
+      };
+    }
+    try {
+      engine.setManual(equipment, value, name);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, code: 'PL-E001', message: messageOf(err) };
+    }
+  }
+
+  /**
+   * Đổi spec source qua WS `plant.source.set` (P2.8, OQ-388): spec đã
+   * validate bằng sourceSpecSchema ở protocol; lỗi engine → mã PL-E001
+   * (lý do như plantManualSet).
+   */
+  plantSourceSet(equipment: string, spec: SourceSpec, name?: string): ServiceResult {
+    const engine = this.plant();
+    if (engine === undefined) {
+      return {
+        ok: false,
+        code: 'PL-E001',
+        message: 'plant.source.set: project không có plant',
+      };
+    }
+    try {
+      engine.setSource(equipment, spec, name);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, code: 'PL-E001', message: messageOf(err) };
     }
   }
   snapshot(): TagsSnapshot {

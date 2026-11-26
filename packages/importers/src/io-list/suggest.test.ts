@@ -824,11 +824,12 @@ describe('suggest()', () => {
   });
 });
 
-// Synonym gap phát hiện ở commit 6 (OQ-381): token 'FB' trần không có
-// trong synonyms runFb → RUN_FB chỉ đạt 0.2 (kind). Ghim hành vi hiện
-// tại; sửa synonym (thêm 'FB') là quyết riêng theo quy ước OQ-301.
-describe('synonym gap FB (OQ-381)', () => {
-  it("RUN_FB (LCP, roleToken 'FB') → runFb chỉ 0.2, không khớp synonym", () => {
+// OQ-381 đã quyết ở P2.8 (OQ-391): thêm 'FB' vào synonyms runFb
+// (motor_dol + motor_vfd) → RUN_FB (roleToken 'FB') khớp synonym:
+// 0.6 synonym + 0.2 kind = 0.8, gán được. Hành vi cũ (0.2) chỉ đúng
+// trước khi quyết; không sửa test để xanh — hành vi đổi theo quyết định.
+describe('synonym gap FB (OQ-381) — đã quyết P2.8 (OQ-391)', () => {
+  it("RUN_FB (LCP, roleToken 'FB') → runFb 0.8 (synonym + kind), gán được", () => {
     const groups = groupSignals([
       mkInput({ tag: 'RUN_FB', kind: 'DI', description: '', row: 5 }),
       mkInput({ tag: 'RUN_CMD', kind: 'DO', description: '', row: 7 }),
@@ -839,7 +840,7 @@ describe('synonym gap FB (OQ-381)', () => {
     const fb = g.signals.find((s) => s.input.tag === 'RUN_FB');
     expect(fb?.parsed.roleToken).toBe('FB');
     const runFb = motorDolModel.roles.find((r) => r.role === 'runFb') as RoleDef;
-    expect(fb !== undefined ? scoreRole(runFb, fb) : -1).toBeCloseTo(0.2, 9);
+    expect(fb !== undefined ? scoreRole(runFb, fb) : -1).toBeCloseTo(0.8, 9);
     // RUN_CMD vẫn khớp (token CMD là synonym runCmd).
     const cmd = g.signals.find((s) => s.input.tag === 'RUN_CMD');
     const runCmd = motorDolModel.roles.find((r) => r.role === 'runCmd') as RoleDef;
