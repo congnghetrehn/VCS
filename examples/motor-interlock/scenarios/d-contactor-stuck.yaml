@@ -1,0 +1,23 @@
+# Demo D — contactorStuck: chạy bình thường tới RUNNING, mất lệnh nhưng
+# contactor dính → vẫn RUNNING; clear ở T=3000 → STOPPING (t1=3000),
+# STOPPED ở T=3800 (bảng D STATE §27).
+name: d-contactor-stuck
+simulation: { stepMs: 10, plcScanMs: 10 }
+steps:
+  - { at: 0, set: { STOP_OK: true, PERM: true } }
+  - { at: 100, set: { START_PB: true } }
+  - { at: 200, set: { START_PB: false } }
+  - { at: 1000, fault: { target: { equipment: M01, fault: contactorStuck } } }
+  - { at: 1100, set: { STOP_OK: false } }
+  - { at: 3000, clear: contactorStuck }
+expects:
+  - { at: 100, tags: { RUN_CMD: true } }
+  - { at: 110, observables: { M01: { state: STARTING } } }
+  - { at: 610, tags: { RUN_FB: true }, observables: { M01: { state: RUNNING } } }
+  - { at: 1000, tags: { RUN_FB: true }, observables: { M01: { state: RUNNING } } }
+  - { at: 1100, tags: { RUN_CMD: false } }
+  - { at: 1110, tags: { RUN_FB: true }, observables: { M01: { state: RUNNING } } }
+  - { at: 2000, tags: { RUN_CMD: false, RUN_FB: true, FAULT_LAMP: false }, observables: { M01: { state: RUNNING } } }
+  - { at: 3000, observables: { M01: { state: STOPPING } } }
+  - { at: 3790, tags: { RUN_FB: true }, observables: { M01: { state: STOPPING } } }
+  - { at: 3800, tags: { RUN_FB: false }, observables: { M01: { state: STOPPED } } }
