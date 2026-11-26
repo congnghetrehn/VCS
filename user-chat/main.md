@@ -2333,3 +2333,19 @@ Tiếp theo: P2.5 (đọc CSV/XLSX) đang làm plan trước, theo lệnh triể
 ---
 Log tới thời điểm 2026-11-26 17:15 +07.
 ---
+
+## 2026-11-26 19:03 +07 — Em My
+
+Em My báo: P2.5 đã merge vào develop, anh Tiến ạ.
+
+**ĐÃ CHẠY:** [PR #36](https://github.com/congnghetrehn/VCS/pull/36) — CI xanh (check + test ubuntu + e2e; Windows/bench skip theo gói A), merge commit ef853b4, 34 file, +7070/−33. Em My kiểm lại trên develop: mapping.ts và importers/package.json giống hệt local (sha256 khớp), exceljs 4.4.0 + papaparse 5.7.1 đã pin đúng.
+
+Gate đã kiểm: test 2563/2563 (mới 120), coverage importers 99,53%, CLI XLSX + CSV chạy được trên fixture 300 tín hiệu, smoke 20k dòng ~1,1 s. OQ-327…340 đóng hết.
+
+Một điểm đáng chú ý: smoke đầu đo 146 s — không phải do exceljs chậm mà do code mình truy cập ô kiểu getRow/getCell lồng nhau; đã sửa bằng eachRow/eachCell, giữ nguyên hợp đồng lưới.
+
+Tiếp theo: P2.6 (địa chỉ/validate/diff) đang làm plan trước, theo lệnh triển khai liên tục.
+
+---
+Log tới thời điểm 2026-11-26 19:03 +07.
+---
