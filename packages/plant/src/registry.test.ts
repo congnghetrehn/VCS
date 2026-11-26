@@ -1,6 +1,7 @@
 // Registry model (M2 §4.5).
 
 import { describe, expect, it } from 'vitest';
+import { z } from 'zod';
 
 import { createModelRegistry, deriveModel, defaultRegistry, ModelRegistry, type StepCtx } from './registry.js';
 import { fakeMotorModel, type FakeMotorParams, type FakeMotorState } from './test-helpers.js';
@@ -89,6 +90,22 @@ describe('deriveModel', () => {
     child.step(ctx);
     expect(calls).toEqual([]);
     expect(ctx.state).toEqual({ t0: null });
+  });
+
+  it('paramsSchema patch thay schema (chặt hơn), giữ các trường khác của base', () => {
+    const child = deriveModel(fakeMotorModel, {
+      type: 'fake_motor_strict',
+      paramsSchema: z.object({ startDelayMs: z.number().int().min(100) }),
+    });
+    expect(child.paramsSchema).not.toBe(fakeMotorModel.paramsSchema);
+    expect(child.paramsSchema.safeParse({ startDelayMs: 50 }).success).toBe(false);
+    expect(child.paramsSchema.safeParse({ startDelayMs: 500 }).success).toBe(true);
+    expect(fakeMotorModel.paramsSchema.safeParse({ startDelayMs: 50 }).success).toBe(true);
+    expect(child.roles).toBe(fakeMotorModel.roles);
+    expect(child.defaultParams).toBe(fakeMotorModel.defaultParams);
+    // init giữ nguyên của base (trả { t0: null }) — so hành vi, không tham
+    // chiếu method (lint @typescript-eslint/unbound-method).
+    expect(child.init({ startDelayMs: 500 }, () => 0)).toEqual({ t0: null });
   });
 
   it('paramsSchema của base vẫn validate defaultParams đã patch', () => {

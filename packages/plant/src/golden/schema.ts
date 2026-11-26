@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 
-import { signalFaultTypeSchema } from '@vcs/schemas';
+import { signalFaultTypeSchema, sourceSpecSchema } from '@vcs/schemas';
 
 /** Giá trị expect: Bool/string chính xác; số |a−b| ≤ 0.01 mặc định (OQ-257). */
 export const goldenExpectValueSchema = z.union([
@@ -17,9 +17,10 @@ export const goldenExpectValueSchema = z.union([
 
 export type GoldenExpectValue = z.infer<typeof goldenExpectValueSchema>;
 
-/** Lỗi trong 1 step golden (OQ-264): equipment | preset | signal | clear. */
+/** Lỗi trong 1 step golden (OQ-264): equipment | preset | signal | clear.
+ * Fault equipment có thể kèm `params` (vd `speedDeviation{pct}` — P2.3). */
 export const goldenFaultSchema = z.union([
-  z.object({ id: z.string().min(1) }),
+  z.object({ id: z.string().min(1), params: z.record(z.string(), z.unknown()).optional() }),
   z.object({ preset: z.string().min(1) }),
   z.object({
     signal: z.object({
@@ -39,6 +40,8 @@ export const goldenStepSchema = z.object({
   fault: goldenFaultSchema.optional(),
   /** Chỉ dùng với inject ({id} / {signal}) — tự clear sau chừng ấy ms. */
   durationMs: z.number().int().positive().optional(),
+  /** Đổi source của thiết bị sau step(t) (switch_di bảng E; manual → setManual). */
+  source: sourceSpecSchema.optional(),
   expect: z.record(z.string(), goldenExpectValueSchema).optional(),
 });
 
@@ -49,6 +52,10 @@ export const goldenCaseSchema = z.object({
   description: z.string().min(1),
   /** Ghi đè defaultParams của model (tùy chọn). */
   params: z.record(z.string(), z.unknown()).optional(),
+  /** Source của thiết bị cho case này (tùy chọn; model có hasSource). */
+  source: sourceSpecSchema.optional(),
+  /** Named sources của thiết bị cho case này (OQ-290; vd silo inflow/outflow). */
+  sources: z.record(z.string(), sourceSpecSchema).optional(),
   steps: z.array(goldenStepSchema).min(1),
 });
 

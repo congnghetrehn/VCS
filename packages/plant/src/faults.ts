@@ -69,6 +69,26 @@ export interface FaultManagerSnapshot {
   records: FaultRecordSnapshot[];
 }
 
+/**
+ * Kết quả `ctx.fault()` (OQ-267).
+ * FaultManager trả về CÙNG object cho mỗi (equipment, fault) — cập nhật tại
+ * chỗ, không cấp phát mỗi lần gọi. Chỉ đọc: không sửa object trả về, không
+ * giữ qua lần gọi sau (giá trị sẽ đổi khi trạng thái lỗi đổi).
+ * `params` trả by-reference (model chỉ đọc) thay vì spread mỗi lần gọi.
+ */
+export interface EquipmentFaultResult {
+  active: boolean;
+  params: Record<string, unknown>;
+  sinceMs: number;
+  clearedAtMs?: number;
+}
+
+/** Kết quả chia sẻ khi chưa có record nào cho (equipment, fault) — giá trị không đổi theo thời gian. */
+const NO_FAULT_RESULT: EquipmentFaultResult = { active: false, params: {}, sinceMs: 0 };
+
+/** Mảng rỗng chia sẻ khi không có lỗi tín hiệu active — chỉ iterate, không mutate. */
+const NO_SIGNAL_FAULTS: FaultRecord[] = [];
+
 function isSignalTarget(t: FaultTarget): t is Extract<FaultTarget, { signal: string }> {
   return 'signal' in t;
 }
@@ -84,6 +104,11 @@ export class FaultManager {
   #stepMs: number;
   #wireBreakRaw: number;
   #initialValue: FaultManagerOptions['initialValue'];
+  /** Cache kết quả equipmentFault theo `${equipment}:${fault}` (OQ-267). */
+  #faultCache = new Map<string, { record: FaultRecord; result: EquipmentFaultResult }>();
+  /** Slot tái dùng cho applyEmit (OQ-267) — chỉ dùng ngay trong bước, không giữ qua lần gọi sau. */
+  #emitValueSlot: { value: number | boolean } = { value: 0 };
+  #emitRawSlot: { rawOverride: number } = { rawOverride: 0 };
 
   constructor(options: FaultManagerOptions = {}) {
     this.#stepMs = options.stepMs ?? 10;
@@ -172,28 +197,45 @@ export class FaultManager {
     return this.#records.find((r) => r.id === id);
   }
 
-  /** Trạng thái lỗi thiết bị mới nhất của (equipment, faultId). */
-  equipmentFault(
-    equipmentId: string,
-    faultId: string,
-  ): { active: boolean; params: Record<string, unknown>; sinceMs: number; clearedAtMs?: number } {
+  /**
+   * Trạng thái lỗi thiết bị mới nhất của (equipment, faultId).
+   * OQ-267: trả về CÙNG object cho mỗi cặp (cập nhật tại chỗ) — không cấp
+   * phát mỗi lần gọi. Chỉ đọc object trả về (xem EquipmentFaultResult).
+   */
+  equipmentFault(equipmentId: string, faultId: string): EquipmentFaultResult {
+    let latest: FaultRecord | undefined;
     for (let i = this.#records.length - 1; i >= 0; i--) {
       const r = this.#records[i] as FaultRecord;
       if (!isSignalTarget(r.target) && r.target.equipment === equipmentId && r.target.fault === faultId) {
-        const out: {
-          active: boolean;
-          params: Record<string, unknown>;
-          sinceMs: number;
-          clearedAtMs?: number;
-        } = { active: r.state === 'active', params: { ...r.params }, sinceMs: r.sinceMs };
-        if (r.clearedAtMs !== undefined) out.clearedAtMs = r.clearedAtMs;
-        return out;
+        latest = r;
+        break;
       }
     }
-    return { active: false, params: {}, sinceMs: 0 };
+    if (latest === undefined) return NO_FAULT_RESULT;
+    const key = `${equipmentId}:${faultId}`;
+    const entry = this.#faultCache.get(key);
+    if (entry !== undefined && entry.record === latest) {
+      const out = entry.result;
+      out.active = latest.state === 'active';
+      out.params = latest.params;
+      out.sinceMs = latest.sinceMs;
+      if (latest.clearedAtMs !== undefined) out.clearedAtMs = latest.clearedAtMs;
+      else delete out.clearedAtMs;
+      return out;
+    }
+    const out: EquipmentFaultResult = {
+      active: latest.state === 'active',
+      params: latest.params,
+      sinceMs: latest.sinceMs,
+    };
+    if (latest.clearedAtMs !== undefined) out.clearedAtMs = latest.clearedAtMs;
+    this.#faultCache.set(key, { record: latest, result: out });
+    return out;
   }
 
   #activeSignalFaults(equipmentId: string, role: string): FaultRecord[] {
+    // OQ-267: không có record nào thì không có lỗi active — trả mảng chia sẻ, khỏi filter+sort.
+    if (this.#records.length === 0) return NO_SIGNAL_FAULTS;
     const orderOf = (t: SignalFaultType): number =>
       t === 'lost' || t === 'stuckCmd' ? 99 : SIGNAL_FAULT_ORDER[t];
     return this.#records
@@ -214,6 +256,8 @@ export class FaultManager {
   /**
    * Áp lỗi tín hiệu lên giá trị emit (DI/AI), theo thứ tự §6.2.
    * Trả về giá trị đã biến đổi, hoặc rawOverride khi lỗi chiếm raw (wireBreak/outOfRange).
+   * OQ-267: trả về slot tái dùng (`#emitValueSlot`/`#emitRawSlot`) — chỉ dùng
+   * ngay trong bước, không giữ qua lần gọi sau.
    */
   applyEmit(
     equipmentId: string,
@@ -268,9 +312,13 @@ export class FaultManager {
           break;
         }
         case 'outOfRange':
-          return { rawOverride: numParam(p, 'raw', 32511) };
+          this.#emitRawSlot.rawOverride = numParam(p, 'raw', 32511);
+          return this.#emitRawSlot;
         case 'wireBreak':
-          if (kind === 'AI') return { rawOverride: this.#wireBreakRaw };
+          if (kind === 'AI') {
+            this.#emitRawSlot.rawOverride = this.#wireBreakRaw;
+            return this.#emitRawSlot;
+          }
           v = false;
           break;
         case 'lost':
@@ -279,7 +327,8 @@ export class FaultManager {
           break;
       }
     }
-    return { value: v };
+    this.#emitValueSlot.value = v;
+    return this.#emitValueSlot;
   }
 
   /**

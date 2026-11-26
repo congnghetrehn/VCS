@@ -54,6 +54,8 @@ export const equipmentInstanceSchema = z
     params: z.record(z.string(), z.unknown()).optional(),
     signals: z.record(z.string(), z.string()).optional(),
     source: sourceSpecSchema.optional(),
+    /** Named sources (OQ-290): tên → SourceSpec (vd silo inflow/outflow). */
+    sources: z.record(z.string(), sourceSpecSchema).optional(),
   });
 
 export type EquipmentInstance = z.infer<typeof equipmentInstanceSchema>;

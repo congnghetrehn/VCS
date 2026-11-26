@@ -1111,5 +1111,23 @@ mặc định (OQ-257). Snapshot/restore: `snapshot()` deep-copy state
 cho thấy ready/remote phải đọc từ tiếp điểm ngoài thì cần SCR. Ngữ nghĩa
 thời gian (start/stop/trip delay, tốc độ tăng/giảm, inrush) chỉ có bảng
 tính tay nội bộ, chưa đối chiếu với động cơ thật. `ctx.fault()`/`ctx.emit()`
-của engine cấp phát object nhỏ mỗi bước (OQ-267) — không-cấp-phát-trong-step
-chưa đạt hoàn toàn, đo lại ở P2.3/P2.4.
+của engine cấp phát object nhỏ mỗi bước (OQ-267) — đã đo và sửa ở P2.3
+(commit 10, xem §22): cached fault result, applyEmit slot tái dùng, emit
+key tính trước; profile sau fix phẳng, ngưỡng §12 vẫn chưa đạt.
+
+## 22. Plant — 8 model còn lại (M2 §7.2–§7.8, P2.3)
+
+**VERIFIED (bảng tính tay A–K, ghim bằng 63 golden mới + unit test; tổng golden plant 77 incl. motor_dol 14).**
+- `motor_vfd`: speedRef ramp theo accel/decel, speedPct/currentFb mirror motor_dol; `faultNC` default true (OQ-275); 10 golden.
+- `valve_onoff`: state suy bằng eps 1e-9 (OQ-302 — 0.1 cộng 1000 lần = 99.9999999999986, không đạt đúng 100); `faultNC` default false; 10 golden.
+- `valve_ctrl`: deadband 0.5; posRef qua AO lượng tử hóa — dừng ở 79.5 thay vì 79.55 (OQ-303); 6 golden.
+- `damper` = deriveModel(valve_ctrl, strokeTimeS 30); 3 golden (không có tối thiểu §11.1, OQ-298).
+- `analog_sensor`: firstOrder theo tau, nhiễu Box-Muller seed 42 (OQ-285); 0 equipment fault; 10 golden.
+- `switch_di`: hysteresis + offDelay chỉ giữ khi trước đó đã active (guard); 8 golden.
+- `silo_bin`: hysteresis nghiêm ngặt (bật ≥, tắt <); 0 equipment fault; named sources inflow/outflow (OQ-290); 8 golden.
+- `conveyor_simple` = deriveModel(motor_dol) + step wrapper: delay line ring buffer inline (DelayLine không JSON-serializable trong state); beltBlocked đóng băng delay line (idx đóng băng cùng buf — vật liệu replay khi idx quay lại 0..600); pullCord hardwired chặn runCmd; zeroSpeed nghiêm ngặt `<` threshold; load source thắng loadTph (`hasSource`, OQ-294); 8 golden.
+- Named sources (OQ-290): `sources?` trong instance, `StepCtx.source(name?)`/`hasSource(name?)`, resolve mỗi bước, validate link + topo chu trình PL-E020, snapshot/restore mở rộng.
+- Hiệu năng (OQ-267/OQ-297/OQ-304, đo-trước-sửa-sau): bench plant 500 thiết bị — trước fix trung vị 128 bước/s (phạm vi 120–131); sau fix trung vị 1300 bước/s (phạm vi 1207–1394) — ×10,2 nhưng vẫn dưới ngưỡng M2 §12 (≥ 5.000 bước/s, thiếu ×3,85). Đã sửa: EventLog ring buffer (`shift()` O(n) chiếm 74,7% CPU trước fix), cached `equipmentFault` result, `applyEmit` slot tái dùng, emit key tính trước, hoist `getObs` closure. Profile sau fix phẳng (`step` 19,8%, `#emit` 19,7%, còn lại rải rác) — không còn điểm nóng đơn lẻ; heap −16,18 MB PASS (< 1 MB).
+- Synonym role (OQ-301): quy ước hậu tố mirror §7.1 (spec §7.2–§7.8 không liệt kê bảng synonym).
+
+**UNVERIFIED (chờ dữ liệu thật — S1).** Ngữ nghĩa thời gian/lượng của 8 model (tốc độ van, tau sensor, độ trễ băng tải, mức silo) chỉ có bảng tính tay nội bộ, chưa đối chiếu thiết bị thật. Nhiễu analog_sensor (OQ-285) chưa kiểm với sensor thật. `defaultRemote`/`defaultReady` vẫn như §21 (OQ-259). Synonym OQ-301 là quy ước nội bộ, chưa có trong spec — auto-suggest P2.7 dùng quy ước này, cần xác nhận khi có I/O list thật (X-003). Ngưỡng §12 ≥ 5.000 bước/s chưa đạt (xem VERIFIED) — owner quyết 2026-11-26 09:34 +07: chọn (A) chấp nhận 1300 ở P2.3, làm lại vòng nóng ở P2.4 (plan riêng); ngưỡng §12 giữ nguyên, không hạ.

@@ -6,13 +6,15 @@
 //   2. kiểm `expect` sau step(t), TRƯỚC khi áp cmd/fault của entry này;
 //   3. áp `cmd` (ghi TagDB trực tiếp) rồi `fault`/`clear` (inject với
 //      `when: {at:'now'}` → hiệu lực từ bước t+dt).
+// File golden viết bằng đơn vị eng (OQ-299): cmd cho role AO có scaling
+// được đổi eng→raw trước khi ghi tag; expect đọc tag về eng.
 
 import { parse as parseYaml } from 'yaml';
 
 import type { TagDB } from '@vcs/kernel';
 import type { TagDef } from '@vcs/schemas';
 
-import { rawToEng } from '../adapter.js';
+import { engToRaw, rawToEng } from '../adapter.js';
 import type { PlantEngine } from '../engine.js';
 import {
   goldenFileSchema,
@@ -206,6 +208,8 @@ export function runPlantGoldenCase(ctx: GoldenRunContext, c: PlantGoldenCase): v
       checkExpect(ctx, c, s.t, s.expect);
     }
     // Áp cmd/fault SAU step(t) (OQ-254) — hiệu lực từ bước t+dt.
+    // cmd viết bằng đơn vị eng (OQ-299): role AO có scaling thì đổi eng→raw
+    // trước khi ghi tag (expect vốn đã đọc về eng — file golden viết toàn eng).
     if (s.cmd !== undefined) {
       for (const [role, v] of Object.entries(s.cmd)) {
         const tagName = ctx.signals[role];
@@ -216,7 +220,19 @@ export function runPlantGoldenCase(ctx: GoldenRunContext, c: PlantGoldenCase): v
         if (h === undefined) {
           fail(c.id, s.t, `Tag ${tagName} (role ${role}) không tồn tại trong TagDB.`);
         }
-        ctx.tags.set(h, v, 'plc');
+        let toWrite: boolean | number = v;
+        if (typeof v === 'number') {
+          const scaling = ctx.defs.get(tagName)?.signal?.scaling;
+          if (scaling !== undefined) {
+            toWrite = engToRaw(v, {
+              rawMin: scaling.rawMin,
+              rawMax: scaling.rawMax,
+              engMin: scaling.engMin,
+              engMax: scaling.engMax,
+            });
+          }
+        }
+        ctx.tags.set(h, toWrite, 'plc');
       }
     }
     if (s.fault !== undefined) {
@@ -226,6 +242,7 @@ export function runPlantGoldenCase(ctx: GoldenRunContext, c: PlantGoldenCase): v
           target: { equipment: ctx.equipmentId, fault: f.id },
           when: { at: 'now' },
           ...(s.durationMs !== undefined ? { durationMs: s.durationMs } : {}),
+          ...(f.params !== undefined ? { params: f.params } : {}),
         });
         injected.set(`eq:${f.id}`, id);
       } else if ('preset' in f) {
@@ -254,6 +271,15 @@ export function runPlantGoldenCase(ctx: GoldenRunContext, c: PlantGoldenCase): v
         if (!ctx.engine.clearFault(id)) {
           fail(c.id, s.t, `clear ${f.clear}: lỗi đã clear/hết hạn trước đó.`);
         }
+      }
+    }
+    // Đổi source sau step(t) (switch_di bảng E): manual → setManual(value),
+    // còn lại → setSource (giữ manualValue cũ).
+    if (s.source !== undefined) {
+      if (s.source.kind === 'manual') {
+        ctx.engine.setManual(ctx.equipmentId, s.source.value ?? false);
+      } else {
+        ctx.engine.setSource(ctx.equipmentId, s.source);
       }
     }
   }

@@ -20,6 +20,22 @@ export type { GoldenRunContext } from './golden/runner.js';
 export type { PlantGoldenCase, PlantGoldenFile, PlantGoldenStep } from './golden/schema.js';
 export { motorDolModel } from './models/motor_dol.js';
 export type { MotorDolParams, MotorDolState } from './models/motor_dol.js';
+export { motorVfdModel } from './models/motor_vfd.js';
+export type { MotorVfdParams, MotorVfdState } from './models/motor_vfd.js';
+export { valveOnoffModel } from './models/valve_onoff.js';
+export type { ValveOnoffParams, ValveOnoffState } from './models/valve_onoff.js';
+export { valveCtrlModel } from './models/valve_ctrl.js';
+export type { ValveCtrlParams, ValveCtrlState } from './models/valve_ctrl.js';
+export { damperModel } from './models/damper.js';
+export type { DamperParams, DamperState } from './models/damper.js';
+export { analogSensorModel } from './models/analog_sensor.js';
+export type { AnalogSensorParams, AnalogSensorState } from './models/analog_sensor.js';
+export { switchDiModel } from './models/switch_di.js';
+export type { SwitchDiParams, SwitchDiState } from './models/switch_di.js';
+export { siloBinModel } from './models/silo_bin.js';
+export type { SiloBinParams, SiloBinState } from './models/silo_bin.js';
+export { conveyorSimpleModel, conveyorSimpleParamsSchema } from './models/conveyor_simple.js';
+export type { ConveyorSimpleParams, ConveyorSimpleState } from './models/conveyor_simple.js';
 export {
   defaultRegistry,
   createModelRegistry,

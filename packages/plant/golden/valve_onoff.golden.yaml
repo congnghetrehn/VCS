@@ -1,0 +1,177 @@
+# Golden timeline valve_onoff (M2 §7.3/§11.1, P2.3 — bảng B/I, STATE §26).
+# Quy ước (OQ-254): cmd/fault áp SAU engine.step(t); expect kiểm sau step(t).
+# travel 5000ms → 0.2%/bước; LS ngưỡng lsThresholdPct=1 (openLs khi pos ≥ 99).
+model: valve_onoff
+stepMs: 10
+seed: 42
+cases:
+  - id: base-travel
+    description: Mở rồi đóng (bảng B — travel 5000ms, 0.2%/bước)
+    steps:
+      - t: 0
+        expect: { state: CLOSED, posPct: 0, openLs: false, closedLs: true, fault: false, moving: false }
+      - t: 100
+        cmd: { openCmd: true }
+        expect: { state: CLOSED }
+      - t: 110
+        expect: { state: OPENING, posPct: 0.2, openLs: false, closedLs: true, moving: true }
+      - t: 5050
+        expect: { state: OPENING, posPct: 99, openLs: true, closedLs: false }
+      - t: 5100
+        expect: { state: OPEN, posPct: 100, openLs: true, closedLs: false, moving: true }
+      - t: 6000
+        # Nhả openCmd khi đóng — nếu không cả hai lệnh true → hold, van không đóng.
+        cmd: { openCmd: false, closeCmd: true }
+        expect: { state: OPEN }
+      - t: 6010
+        expect: { state: CLOSING, posPct: 99.8 }
+      - t: 10950
+        expect: { state: CLOSING, posPct: 1, openLs: false, closedLs: true }
+      - t: 11000
+        expect: { state: CLOSED, posPct: 0, openLs: false, closedLs: true, moving: true }
+
+  - id: both-cmd
+    description: Cả hai lệnh cùng true → giữ nguyên + warn 1 lần (bảng I.1, OQ-277)
+    steps:
+      - t: 0
+        expect: { state: CLOSED, posPct: 0 }
+      - t: 100
+        cmd: { openCmd: true, closeCmd: true }
+        expect: { state: CLOSED }
+      - t: 110
+        expect: { state: CLOSED, posPct: 0, moving: false }
+      - t: 5000
+        expect: { state: CLOSED, posPct: 0, moving: false }
+
+  - id: slow-travel
+    description: slowTravel factor 2 — travel hiệu dụng 10000ms, 0.1%/bước (bảng I.2, OQ-279)
+    steps:
+      - t: 0
+        expect: { state: CLOSED, posPct: 0 }
+      - t: 100
+        cmd: { openCmd: true }
+        fault: { id: slowTravel, params: { factor: 2 } }
+        expect: { state: CLOSED }
+      - t: 10000
+        expect: { state: OPENING, posPct: 99 }
+      - t: 10100
+        expect: { state: OPEN, posPct: 100 }
+
+  - id: stuck-at-pos
+    description: stuckAtPos đóng băng pos tại giá trị lúc fault bật (bảng I.3, OQ-278)
+    steps:
+      - t: 0
+        expect: { state: CLOSED, posPct: 0 }
+      - t: 100
+        cmd: { openCmd: true }
+      - t: 1000
+        fault: { id: stuckAtPos, params: { pct: 40 } }
+        expect: { posPct: 18 }
+      - t: 1010
+        expect: { state: OPENING, posPct: 18, moving: true }
+      - t: 5000
+        expect: { posPct: 18 }
+
+  - id: stuck-open
+    description: stuckOpen ép pos=100 bất chấp lệnh (OQ-278)
+    steps:
+      - t: 0
+        expect: { state: CLOSED, posPct: 0 }
+      - t: 100
+        cmd: { openCmd: true }
+      - t: 1000
+        fault: { id: stuckOpen }
+        expect: { posPct: 18 }
+      - t: 1010
+        expect: { state: OPEN, posPct: 100, openLs: true, closedLs: false, fault: true }
+      - t: 2000
+        expect: { posPct: 100, fault: true }
+      - t: 3000
+        fault: { clear: stuckOpen }
+        expect: { posPct: 100, fault: true }
+      - t: 3010
+        expect: { state: OPEN, posPct: 100, fault: false }
+
+  - id: stuck-closed
+    description: stuckClosed ép pos=0 bất chấp lệnh (OQ-278)
+    steps:
+      - t: 0
+        expect: { state: CLOSED, posPct: 0 }
+      - t: 100
+        cmd: { openCmd: true }
+      - t: 1000
+        fault: { id: stuckClosed }
+        expect: { posPct: 18 }
+      - t: 1010
+        expect: { state: CLOSED, posPct: 0, openLs: false, closedLs: true, fault: true }
+      - t: 2000
+        expect: { posPct: 0, fault: true }
+      - t: 3000
+        fault: { clear: stuckClosed }
+        expect: { posPct: 0, fault: true }
+      - t: 3010
+        expect: { state: OPENING, posPct: 0.2, fault: false }
+
+  - id: travel-timeout
+    description: travelTimeout đóng băng pos + fault=true; clear xong chạy tiếp (OQ-276)
+    steps:
+      - t: 0
+        expect: { state: CLOSED, posPct: 0 }
+      - t: 100
+        cmd: { openCmd: true }
+      - t: 1000
+        fault: { id: travelTimeout }
+        expect: { posPct: 18 }
+      - t: 1010
+        expect: { posPct: 18, fault: true, moving: true }
+      - t: 5000
+        expect: { posPct: 18, fault: true }
+      - t: 6000
+        fault: { clear: travelTimeout }
+        expect: { posPct: 18, fault: true }
+      - t: 6010
+        expect: { posPct: 18.2, fault: false }
+
+  - id: ls-open-fail
+    description: lsOpenFail — openLs luôn false dù pos=100
+    steps:
+      - t: 0
+        expect: { state: CLOSED, posPct: 0, openLs: false, closedLs: true }
+      - t: 100
+        cmd: { openCmd: true }
+        fault: { id: lsOpenFail }
+      - t: 5100
+        expect: { state: OPEN, posPct: 100, openLs: false, closedLs: false, fault: true }
+
+  - id: ls-closed-fail
+    description: lsClosedFail — closedLs luôn false dù pos=0
+    steps:
+      - t: 0
+        fault: { id: lsClosedFail }
+        # Fault áp SAU step(0) — closedLs/fault sau step(0) vẫn là giá trị cũ.
+        expect: { state: CLOSED, posPct: 0, closedLs: true, fault: false }
+      - t: 10
+        expect: { closedLs: false, fault: true }
+      - t: 100
+        cmd: { openCmd: true }
+      - t: 5100
+        expect: { state: OPEN, posPct: 100, openLs: true, closedLs: false, fault: true }
+
+  - id: single-solenoid
+    description: singleSolenoid — openCmd=false → tự đóng về vị trí an toàn
+    params:
+      singleSolenoid: true
+    steps:
+      - t: 0
+        expect: { state: CLOSED, posPct: 0 }
+      - t: 100
+        cmd: { openCmd: true }
+      - t: 5100
+        expect: { state: OPEN, posPct: 100 }
+      - t: 6000
+        cmd: { openCmd: false }
+        expect: { state: OPEN }
+      - t: 6010
+        expect: { state: CLOSING, posPct: 99.8 }
+      - t: 11000
+        expect: { state: CLOSED, posPct: 0, closedLs: true }

@@ -1,0 +1,66 @@
+# Golden timeline damper (M2 §7.4/§11.1, P2.3 — OQ-298, 3 case).
+# Quy ước (OQ-254): cmd/fault áp SAU engine.step(t); expect kiểm sau step(t).
+# stroke 30s → 0.033%/bước (chậm hơn valve_ctrl 20s); deadband 0.5.
+# posRef 80 qua AO lượng tử hóa (eng 79.9986) nên deadband dừng ở 79.5 (OQ-303).
+model: damper
+stepMs: 10
+seed: 42
+cases:
+  - id: ramp-30s
+    description: posRef=80 — ramp 0.033%/bước, dừng trong deadband ở 79.5
+    steps:
+      - t: 0
+        expect: { posPct: 0, posFb: 0, targetPct: 0, closedLs: true, openLs: false, fault: false }
+      - t: 100
+        cmd: { posRef: 80 }
+        expect: { posPct: 0, targetPct: 0 }
+      - t: 110
+        expect: { posPct: 0.0333, posFb: 0.0333, targetPct: 80 }
+      - t: 3100
+        expect: { posPct: 10, posFb: 10, targetPct: 80 }
+      - t: 23950
+        expect: { posPct: 79.5, posFb: 79.5, targetPct: 80 }
+      - t: 24100
+        expect: { posPct: 79.5, posFb: 79.5, targetPct: 79.5, closedLs: false, openLs: false }
+
+  - id: damper-deadband
+    description: Đổi posRef trong deadband → target giữ; đổi ra ngoài → chạy tiếp
+    steps:
+      - t: 0
+        expect: { posPct: 0 }
+      - t: 100
+        cmd: { posRef: 80 }
+      - t: 24100
+        expect: { posPct: 79.5, targetPct: 79.5 }
+      - t: 24200
+        cmd: { posRef: 79.8 }
+        expect: { posPct: 79.5, targetPct: 79.5 }
+      - t: 24300
+        expect: { posPct: 79.5, targetPct: 79.5 }
+      - t: 25000
+        cmd: { posRef: 80.5 }
+        expect: { posPct: 79.5, targetPct: 79.5 }
+      - t: 25100
+        expect: { posPct: 79.8333, targetPct: 80.5 }
+
+  - id: damper-signal-loss
+    description: signalLoss — failPosition=close → target 0, dừng ở 0.5 do deadband (OQ-283/303)
+    params:
+      failPosition: close
+    steps:
+      - t: 0
+        expect: { posPct: 0 }
+      - t: 100
+        cmd: { posRef: 80 }
+      - t: 1000
+        fault: { id: signalLoss }
+        expect: { posPct: 3, targetPct: 80 }
+      - t: 1010
+        expect: { posPct: 2.9667, targetPct: 0, fault: true }
+      - t: 2000
+        expect: { posPct: 0.5, posFb: 0.5, targetPct: 0.5, fault: true }
+      - t: 3000
+        fault: { clear: signalLoss }
+        expect: { posPct: 0.5, targetPct: 0.5, fault: true }
+      - t: 3010
+        expect: { posPct: 0.5333, targetPct: 80, fault: false }
