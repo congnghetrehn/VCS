@@ -27,8 +27,13 @@ import { hashSeed, rngNext, rngState, type RngState } from './rng.js';
 import {
   defaultRegistry,
   type EquipmentModel,
+  type FaultSlot,
   type ModelRegistry,
+  type ModelSlots,
+  type ObsSlot,
   type RoleDef,
+  type RoleSlot,
+  type SourceSlot,
   type StepCtx,
 } from './registry.js';
 import { evalSource, topoSort, type SourceRuntime } from './source.js';
@@ -62,24 +67,44 @@ const SIGNAL_FAULT_KINDS: Record<SignalFaultType, readonly SignalKind[]> = {
   stuckCmd: ['DO', 'AO'],
 };
 
+/** 1 record/role, tính trước ở init (P2.4 commit 4): `#cmd`/`#emit` chỉ cần
+ *  1 lookup `roleSlot` + 1 index mảng, thay vì 3–4 `Map.get` mỗi lần gọi.
+ *  `handle` undefined = role khai báo nhưng chưa gán tag (role optional). */
+interface Channel {
+  role: string;
+  handle: TagHandle | undefined;
+  kind: RoleDef['kind'];
+  dataType: RoleDef['dataType'];
+  range: Range | undefined;
+  /** Key `${id}:${role}` tính trước (OQ-267: `#emit` khỏi nối chuỗi mỗi lần gọi). */
+  emitKey: string;
+}
+
 interface RuntimeEquipment {
   id: string;
   model: EquipmentModel;
   params: Record<string, unknown>;
   state: unknown;
   rng: RngState;
-  obs: Record<string, number | boolean | string>;
+  /** Giá trị observable hiện tại, theo ObsSlot (undefined = chưa set lần nào). */
+  obs: (number | boolean | string | undefined)[];
+  /** Giá trị observable ở lần drain trước — baseline để #drainPendingObs
+   *  so sánh trực tiếp, thay Map pendingObs (A21). */
+  prevObs: (number | boolean | string | undefined)[];
   source: SourceRuntime | undefined;
   sourceValue: number | boolean;
-  /** Named sources (OQ-290): tên → runtime + giá trị đã resolve mỗi bước. */
-  namedSources: Map<string, SourceRuntime>;
-  namedSourceValues: Map<string, number | boolean>;
-  handles: Map<string, TagHandle>;
-  roles: Map<string, RoleDef>;
-  ranges: Map<string, Range>;
-  /** Key `${id}:${role}` tính trước ở init (OQ-267: #emit khỏi nối chuỗi mỗi lần gọi). */
-  emitKeys: Map<string, string>;
-  pendingObs: Map<string, { from: unknown; to: number | boolean | string }>;
+  /** Named sources theo thứ tự slot (tên → SourceSlot trong slots.source). */
+  namedSources: SourceRuntime[];
+  namedSourceValues: (number | boolean)[];
+  /** Kênh theo thứ tự `model.roles` — đọc bằng slot, không Map.get. */
+  channels: Channel[];
+  /** role → slot trong `channels` (giữ cho đường lạnh theo tên: injectFault, #initialValue). */
+  roleSlot: Map<string, number>;
+  /** Bảng slot của thiết bị (đóng băng, trừ record `source` — xem registry.ts). */
+  slots: ModelSlots;
+  /** Tên role/obs/fault theo slot — reverse map cho thông báo lỗi + tên
+   *  role truyền vào FaultManager (đường lạnh + applyCmd/applyEmit). */
+  slotNames: { role: string[]; obs: string[]; fault: string[] };
 }
 
 export interface PlantSnapshot {
@@ -266,6 +291,11 @@ export class PlantEngine implements SimComponent {
   #order: RuntimeEquipment[] = [];
   #byId = new Map<string, RuntimeEquipment>();
   #ctxs = new Map<string, StepCtx>();
+  /** Nhóm thiết bị theo model (P2.4 commit 5, OQ-310): mỗi nhóm gọi cùng 1
+   *  hàm `model.step` (monomorphic call site). Rỗng khi DAG model có chu
+   *  trình → step() dùng `#order` (fallback). */
+  #groups: Array<{ model: EquipmentModel; members: RuntimeEquipment[] }> = [];
+  #groupedByModel = false;
   #lastEmit = new Map<string, number | boolean>();
   /** Hàm getObs đóng sẵn, tái dùng cho mọi evalSource mỗi bước (OQ-267: khỏi cấp phát closure mỗi lần gọi). */
   #getObsBound = (equipmentId: string, key: string): number | boolean | string | undefined =>
@@ -284,6 +314,12 @@ export class PlantEngine implements SimComponent {
     this.#initializeEquipment();
   }
 
+  /** true khi step() chạy theo nhóm model (OQ-310); false khi DAG model có
+   *  chu trình → fallback về thứ tự topo thiết bị (không nhóm, không im lặng). */
+  get groupedByModel(): boolean {
+    return this.#groupedByModel;
+  }
+
   #makeFaultManager(): FaultManager {
     const opts: FaultManagerOptions = {
       stepMs: this.#cfg.stepMs,
@@ -295,13 +331,20 @@ export class PlantEngine implements SimComponent {
 
   /** Giá trị emit gần nhất (eng/bool) — dùng lấp DelayLine và chụp freeze. */
   #initialValue(equipmentId: string, role: string): number | boolean | undefined {
-    const v = this.#lastEmit.get(`${equipmentId}:${role}`);
-    if (v !== undefined) return v;
     const rt = this.#byId.get(equipmentId);
-    const kind = rt?.roles.get(role)?.kind;
+    const ch = rt === undefined ? undefined : this.#channelOf(rt, role);
+    const v = this.#lastEmit.get(ch?.emitKey ?? `${equipmentId}:${role}`);
+    if (v !== undefined) return v;
+    const kind = ch?.kind;
     if (kind === 'DI' || kind === 'DO') return false;
     if (kind === 'AI' || kind === 'AO') return 0;
     return undefined;
+  }
+
+  /** Channel của role — undefined khi role không khai báo trong model. */
+  #channelOf(rt: RuntimeEquipment, role: string): Channel | undefined {
+    const slot = rt.roleSlot.get(role);
+    return slot === undefined ? undefined : rt.channels[slot];
   }
 
   #initializeEquipment(): void {
@@ -326,78 +369,116 @@ export class PlantEngine implements SimComponent {
         : (mergedParams as Record<string, unknown>);
       const rng = rngState(hashSeed(cfg.seed, id));
       const state = model.init(params, () => rngNext(rng));
-      const roles = new Map(model.roles.map((r) => [r.role, r]));
-      const handles = new Map<string, TagHandle>();
-      const ranges = new Map<string, Range>();
+      const channels: Channel[] = [];
+      const roleSlot = new Map<string, number>();
       for (const role of model.roles) {
         const tagName = inst.signals?.[role.role];
-        if (tagName === undefined) continue;
-        const def = cfg.tags.get(tagName) as TagDef;
-        const h = this.#tags.handle(tagName);
-        if (h === undefined) {
-          throw new Error(`PlantEngine: tag ${tagName} không tồn tại trong TagDB (TAG-E003).`);
+        let handle: TagHandle | undefined;
+        let range: Range | undefined;
+        if (tagName !== undefined) {
+          const def = cfg.tags.get(tagName) as TagDef;
+          const h = this.#tags.handle(tagName);
+          if (h === undefined) {
+            throw new Error(`PlantEngine: tag ${tagName} không tồn tại trong TagDB (TAG-E003).`);
+          }
+          handle = h;
+          if (role.kind === 'DI' || role.kind === 'AI') {
+            this.#tags.setOwner(h, 'plant');
+          }
+          if ((role.kind === 'AI' || role.kind === 'AO') && role.dataType !== 'Real') {
+            range = resolveRange(params, def.signal?.scaling, role.unit);
+          }
         }
-        handles.set(role.role, h);
-        if (role.kind === 'DI' || role.kind === 'AI') {
-          this.#tags.setOwner(h, 'plant');
-        }
-        if ((role.kind === 'AI' || role.kind === 'AO') && role.dataType !== 'Real') {
-          const range = resolveRange(params, def.signal?.scaling, role.unit);
-          if (range !== undefined) ranges.set(role.role, range);
-        }
+        roleSlot.set(role.role, channels.length);
+        channels.push({
+          role: role.role,
+          handle,
+          kind: role.kind,
+          dataType: role.dataType,
+          range,
+          emitKey: `${id}:${role.role}`,
+        });
       }
       let source: SourceRuntime | undefined;
       if (model.hasSource === true) {
         const spec: SourceSpec = inst.source ?? { kind: 'const', value: 0 };
         source = { spec, setAtMs: 0, manualValue: 0 };
       }
-      const namedSources = new Map<string, SourceRuntime>();
+      const namedSources: SourceRuntime[] = [];
+      const namedSourceValues: (number | boolean)[] = [];
+      // Bảng slot dựng một lần ở init (OQ-320, A21): role/obs/fault theo
+      // thứ tự mảng định nghĩa; source theo thứ tự key config `sources`.
+      // RoleSlot = chỉ số kênh (bằng roleSlot đã có từ commit 4).
+      const slotNames = {
+        role: model.roles.map((r) => r.role),
+        obs: model.observables.map((o) => o.key),
+        fault: model.faults.map((f) => f.id),
+      };
+      const roleSlots: Record<string, RoleSlot> = {};
+      model.roles.forEach((r, i) => {
+        roleSlots[r.role] = i as RoleSlot;
+      });
+      const obsSlots: Record<string, ObsSlot> = {};
+      model.observables.forEach((o, i) => {
+        obsSlots[o.key] = i as ObsSlot;
+      });
+      const faultSlots: Record<string, FaultSlot> = {};
+      model.faults.forEach((f, i) => {
+        faultSlots[f.id] = i as FaultSlot;
+      });
+      const sourceSlots: Record<string, SourceSlot> = {};
       for (const [name, spec] of Object.entries(inst.sources ?? {})) {
-        namedSources.set(name, { spec, setAtMs: 0, manualValue: 0 });
+        sourceSlots[name] = namedSources.length as SourceSlot;
+        namedSources.push({ spec, setAtMs: 0, manualValue: 0 });
+        namedSourceValues.push(0);
       }
+      const slots: ModelSlots = Object.freeze({
+        role: Object.freeze(roleSlots),
+        obs: Object.freeze(obsSlots),
+        fault: Object.freeze(faultSlots),
+        source: sourceSlots,
+      });
       const rt: RuntimeEquipment = {
         id,
         model,
         params,
         state,
         rng,
-        obs: {},
+        obs: new Array<undefined>(model.observables.length).fill(undefined),
+        prevObs: new Array<undefined>(model.observables.length).fill(undefined),
         source,
         sourceValue: 0,
         namedSources,
-        namedSourceValues: new Map(),
-        handles,
-        roles,
-        ranges,
-        emitKeys: new Map(model.roles.map((r) => [r.role, `${id}:${r.role}`])),
-        pendingObs: new Map(),
+        namedSourceValues,
+        channels,
+        roleSlot,
+        slots,
+        slotNames,
       };
+      // Đăng ký fault id của thiết bị để ctx.fault(slot) khỏi quét records (A21).
+      this.#faults.registerEquipment(id, model.faults.map((f) => f.id));
       const ctx: StepCtx = {
         dtMs: cfg.stepMs,
         simTimeMs: 0,
         params: rt.params,
         state: rt.state,
-        cmd: (role) => this.#cmd(rt, role),
-        has: (role) => rt.handles.has(role),
-        emit: (role, v) => { this.#emit(rt, role, v); },
-        fault: (fid) => this.#faults.equipmentFault(rt.id, fid),
-        source: (name?: string) =>
-          name === undefined ? rt.sourceValue : (rt.namedSourceValues.get(name) ?? 0),
-        // OQ-294: phân biệt named source đã cấu hình với chưa cấu hình
-        // (source() trả 0 cho cả hai trường hợp).
-        hasSource: (name?: string) =>
-          name === undefined ? rt.source !== undefined : rt.namedSources.has(name),
+        cmd: (slot) => this.#cmd(rt, slot),
+        has: (slot) => {
+          const ch = slot === undefined ? undefined : rt.channels[slot];
+          return ch !== undefined && ch.handle !== undefined;
+        },
+        emit: (slot, v) => { this.#emit(rt, slot, v); },
+        fault: (slot) => this.#faults.equipmentFaultBySlot(rt.id, slot, rt.model.type),
+        source: (slot?) =>
+          slot === undefined ? rt.sourceValue : (rt.namedSourceValues[slot] ?? 0),
         rand: () => rngNext(rt.rng),
-        setObs: (key, v) => {
-          const prev = rt.obs[key];
-          if (prev === v) return;
-          // Gán lần đầu (chưa có giá trị trước) là baseline, không phải thay đổi.
-          if (prev !== undefined) {
-            const pending = rt.pendingObs.get(key);
-            if (pending === undefined) rt.pendingObs.set(key, { from: prev, to: v });
-            else pending.to = v;
+        setObs: (slot, v) => {
+          if (slot === undefined || slot < 0 || slot >= rt.obs.length) {
+            throw new Error(
+              `PlantEngine: slot obs ${String(slot)} không hợp lệ cho model ${rt.model.type} (thiết bị ${rt.id}) — model có ${String(rt.obs.length)} observable.`,
+            );
           }
-          rt.obs[key] = v;
+          if (rt.obs[slot] !== v) rt.obs[slot] = v;
         },
         getObs: this.#getObsBound,
         log: (level, msg, data) => {
@@ -415,65 +496,127 @@ export class PlantEngine implements SimComponent {
       this.#byId.set(id, rt);
       this.#ctxs.set(id, ctx);
     }
+    this.#buildModelGroups(instById);
+  }
+
+  /**
+   * Nhóm thiết bị theo model cho dispatch đơn hình (P2.4 commit 5, OQ-310).
+   * DAG mức model: cạnh A→B nếu có thiết bị model A link tới thiết bị model
+   * B (link cùng model KHÔNG tính — thứ tự link cùng model giữ bằng thứ tự
+   * topo thiết bị trong nhóm, đúng ý plan "giữ đúng thứ tự link cùng
+   * model"). Topo-sort model cho thứ tự nhóm; DAG có chu trình chéo model
+   * → fallback về `#order` (không nhóm) + `groupedByModel === false`.
+   * Thứ tự nhóm + thứ tự topo trong nhóm là một linear extension của thứ
+   * tự topo thiết bị nên mọi link đều đúng (link chéo model: model đích
+   * nhóm trước; link cùng model: đích trước trong nhóm).
+   */
+  #buildModelGroups(instById: Map<string, EquipmentInstance>): void {
+    const modelOf = new Map(this.#order.map((rt) => [rt.id, rt.model.type]));
+    const depsByModel = new Map<string, Set<string>>();
+    for (const rt of this.#order) {
+      let deps = depsByModel.get(rt.model.type);
+      if (deps === undefined) {
+        deps = new Set();
+        depsByModel.set(rt.model.type, deps);
+      }
+      for (const depId of linkDeps(instById.get(rt.id))) {
+        const depModel = modelOf.get(depId);
+        if (depModel !== undefined && depModel !== rt.model.type) deps.add(depModel);
+      }
+    }
+    const modelTypes = [...depsByModel.keys()];
+    const { order: modelOrder, cycle } = topoSort(modelTypes, (m) => [
+      ...(depsByModel.get(m) ?? []),
+    ]);
+    if (cycle !== undefined) {
+      this.#groups = [];
+      this.#groupedByModel = false;
+      return;
+    }
+    const membersByModel = new Map<string, RuntimeEquipment[]>();
+    for (const rt of this.#order) {
+      const list = membersByModel.get(rt.model.type);
+      if (list === undefined) membersByModel.set(rt.model.type, [rt]);
+      else list.push(rt);
+    }
+    this.#groups = modelOrder.map((type) => ({
+      model: this.#models.get(type) as EquipmentModel,
+      members: membersByModel.get(type) as RuntimeEquipment[],
+    }));
+    this.#groupedByModel = true;
   }
 
   #getObs(equipmentId: string, key: string): number | boolean | string | undefined {
-    return this.#byId.get(equipmentId)?.obs[key];
+    const rt = this.#byId.get(equipmentId);
+    if (rt === undefined) return undefined;
+    const slot = rt.slots.obs[key];
+    if (slot === undefined) return undefined;
+    return rt.obs[slot];
   }
 
-  #cmd(rt: RuntimeEquipment, role: string): boolean | number | undefined {
-    const h = rt.handles.get(role);
+  #cmd(rt: RuntimeEquipment, slot: RoleSlot | undefined): boolean | number | undefined {
+    const ch = slot === undefined ? undefined : rt.channels[slot];
+    if (ch === undefined) {
+      throw new Error(
+        `PlantEngine: slot role ${String(slot)} không hợp lệ cho model ${rt.model.type} (thiết bị ${rt.id}) — model có ${String(rt.channels.length)} role.`,
+      );
+    }
+    const h = ch.handle;
     if (h === undefined) return undefined;
-    const roleDef = rt.roles.get(role) as RoleDef;
-    const kind = roleDef.kind;
+    const kind = ch.kind;
     let v: number | boolean;
     if (kind === 'DO') {
       v = this.#tags.get(h) === true;
     } else {
       const raw = this.#tags.get(h);
       if (typeof raw !== 'number') return undefined;
-      if (roleDef.dataType === 'Real') {
+      if (ch.dataType === 'Real') {
         v = Math.fround(raw);
       } else {
-        const range = rt.ranges.get(role);
+        const range = ch.range;
         v = range !== undefined ? rawToEng(raw, range) : raw;
       }
     }
-    return this.#faults.applyCmd(rt.id, role, kind, v);
+    // FaultManager vẫn khớp signal fault theo tên role (ch.role có sẵn trên kênh).
+    return this.#faults.applyCmd(rt.id, ch.role, kind, v);
   }
 
-  #emit(rt: RuntimeEquipment, role: string, v: boolean | number): void {
-    const h = rt.handles.get(role);
+  #emit(rt: RuntimeEquipment, slot: RoleSlot | undefined, v: boolean | number): void {
+    const ch = slot === undefined ? undefined : rt.channels[slot];
+    if (ch === undefined) {
+      throw new Error(
+        `PlantEngine: slot role ${String(slot)} không hợp lệ cho model ${rt.model.type} (thiết bị ${rt.id}) — model có ${String(rt.channels.length)} role.`,
+      );
+    }
+    const h = ch.handle;
     if (h === undefined) return;
-    const roleDef = rt.roles.get(role) as RoleDef;
-    const kind = roleDef.kind;
-    const key = rt.emitKeys.get(role) ?? `${rt.id}:${role}`;
-    const result = this.#faults.applyEmit(rt.id, role, kind, v, this.#simTimeMs, this.#cfg.stepMs, rt.rng);
+    const kind = ch.kind;
+    const result = this.#faults.applyEmit(rt.id, ch.role, kind, v, this.#simTimeMs, this.#cfg.stepMs, rt.rng);
     if ('rawOverride' in result) {
-      if (roleDef.dataType === 'Real') {
-        const range = rt.ranges.get(role);
+      if (ch.dataType === 'Real') {
+        const range = ch.range;
         const eng = range !== undefined ? rawToEng(result.rawOverride, range) : result.rawOverride;
         this.#tags.set(h, Math.fround(eng), 'plant');
-        this.#lastEmit.set(key, eng);
+        this.#lastEmit.set(ch.emitKey, eng);
       } else {
         this.#tags.set(h, result.rawOverride, 'plant');
-        const range = rt.ranges.get(role);
-        this.#lastEmit.set(key, range !== undefined ? rawToEng(result.rawOverride, range) : result.rawOverride);
+        const range = ch.range;
+        this.#lastEmit.set(ch.emitKey, range !== undefined ? rawToEng(result.rawOverride, range) : result.rawOverride);
       }
       return;
     }
     const out = result.value;
     if (kind === 'DI') {
       this.#tags.set(h, out === true, 'plant');
-      this.#lastEmit.set(key, out === true);
-    } else if (roleDef.dataType === 'Real') {
+      this.#lastEmit.set(ch.emitKey, out === true);
+    } else if (ch.dataType === 'Real') {
       const eng = Math.fround(out as number);
       this.#tags.set(h, eng, 'plant');
-      this.#lastEmit.set(key, eng);
+      this.#lastEmit.set(ch.emitKey, eng);
     } else {
-      const range = rt.ranges.get(role);
+      const range = ch.range;
       this.#tags.set(h, range !== undefined ? engToRaw(out as number, range) : Math.round(out as number), 'plant');
-      this.#lastEmit.set(key, out);
+      this.#lastEmit.set(ch.emitKey, out);
     }
   }
 
@@ -488,33 +631,73 @@ export class PlantEngine implements SimComponent {
       const eq = (r.target as { equipment: string }).equipment;
       this.#events.push({ t: T, type: 'fault', equipment: eq, msg: `Lỗi ${r.id} hết hạn.` });
     }
+    if (this.#groupedByModel) {
+      // Dispatch đơn hình: `model` bất biến trong vòng trong → cùng 1 hàm
+      // `model.step` ở 1 call site (thay vì megamorphic 9 hàm ở #order trộn model).
+      for (const g of this.#groups) {
+        const model = g.model;
+        for (const rt of g.members) {
+          const ctx = this.#prepareOne(rt, T);
+          if (ctx === undefined) continue;
+          ctx.dtMs = dtMs;
+          ctx.simTimeMs = T;
+          model.step(ctx, rt.slots);
+          this.#drainPendingObs(rt, T);
+        }
+      }
+      return;
+    }
     for (const rt of this.#order) {
-      if (rt.source !== undefined) {
-        rt.sourceValue = evalSource(
-          rt.source.spec,
-          T,
-          rt.source.setAtMs,
-          rt.source.manualValue,
-          this.#getObsBound,
-        );
-      }
-      for (const [name, ns] of rt.namedSources) {
-        rt.namedSourceValues.set(
-          name,
-          evalSource(ns.spec, T, ns.setAtMs, ns.manualValue, this.#getObsBound),
-        );
-      }
-      const ctx = this.#ctxs.get(rt.id);
+      const ctx = this.#prepareOne(rt, T);
       if (ctx === undefined) continue;
       ctx.dtMs = dtMs;
       ctx.simTimeMs = T;
-      rt.model.step(ctx);
-      for (const [key, change] of rt.pendingObs) {
-        if (change.from !== change.to) {
-          this.#events.push({ t: T, type: 'state', equipment: rt.id, key, from: change.from, to: change.to });
-        }
+      rt.model.step(ctx, rt.slots);
+      this.#drainPendingObs(rt, T);
+    }
+  }
+
+  /** Resolve source (+ named sources) và lấy ctx của thiết bị cho bước T. */
+  #prepareOne(rt: RuntimeEquipment, T: number): StepCtx | undefined {
+    if (rt.source !== undefined) {
+      rt.sourceValue = evalSource(
+        rt.source.spec,
+        T,
+        rt.source.setAtMs,
+        rt.source.manualValue,
+        this.#getObsBound,
+      );
+    }
+    for (let i = 0; i < rt.namedSources.length; i++) {
+      const ns = rt.namedSources[i] as SourceRuntime;
+      rt.namedSourceValues[i] = evalSource(ns.spec, T, ns.setAtMs, ns.manualValue, this.#getObsBound);
+    }
+    return this.#ctxs.get(rt.id);
+  }
+
+  /**
+   * Phát event state cho obs đổi trong bước. So sánh trực tiếp mảng obs với
+   * mảng prevObs (baseline lần drain trước), rồi chép obs → prevObs; obs
+   * chưa set lần nào (prev undefined) là baseline, không phát event (A21 —
+   * giữ đúng ngữ nghĩa setObs cũ: gán lần đầu không phải thay đổi).
+   */
+  #drainPendingObs(rt: RuntimeEquipment, T: number): void {
+    const obs = rt.obs;
+    const prev = rt.prevObs;
+    for (let i = 0; i < obs.length; i++) {
+      const cur = obs[i];
+      const from = prev[i];
+      if (from !== undefined && cur !== undefined && from !== cur) {
+        this.#events.push({
+          t: T,
+          type: 'state',
+          equipment: rt.id,
+          key: rt.slotNames.obs[i] as string,
+          from,
+          to: cur,
+        });
       }
-      rt.pendingObs.clear();
+      prev[i] = cur;
     }
   }
 
@@ -531,6 +714,21 @@ export class PlantEngine implements SimComponent {
       version: 1,
       simTimeMs: this.#simTimeMs,
       equipment: this.#order.map((rt) => {
+        // obs/named source lưu dạng Record như trước (định dạng snapshot v1
+        // không đổi — mảng nội bộ chỉ là cách lưu runtime, A21).
+        const obsRec: Record<string, number | boolean | string> = {};
+        for (let i = 0; i < rt.obs.length; i++) {
+          const v = rt.obs[i];
+          if (v !== undefined) obsRec[rt.slotNames.obs[i] as string] = v;
+        }
+        const nsRec: Record<string, SourceRuntime> = {};
+        const nsvRec: Record<string, number | boolean> = {};
+        for (const [name, slot] of Object.entries(rt.slots.source)) {
+          const ns = rt.namedSources[slot];
+          if (ns !== undefined) nsRec[name] = { ...ns, spec: { ...ns.spec } };
+          const v = rt.namedSourceValues[slot];
+          if (v !== undefined) nsvRec[name] = v;
+        }
         const entry: PlantSnapshot['equipment'][number] = {
           id: rt.id,
           // P2.2: state PHẢI deep-copy — model mutate state tại chỗ mỗi bước
@@ -539,16 +737,11 @@ export class PlantEngine implements SimComponent {
           // S là JSON-serializable theo hợp đồng (PACKAGE-RULES §plant).
           state: structuredClone(rt.state),
           rng: { ...rt.rng },
-          obs: { ...rt.obs },
+          obs: obsRec,
           source: rt.source !== undefined ? { ...rt.source, spec: { ...rt.source.spec } } : null,
           sourceValue: rt.sourceValue,
-          namedSources: Object.fromEntries(
-            [...rt.namedSources.entries()].map(([name, ns]) => [
-              name,
-              { ...ns, spec: { ...ns.spec } },
-            ]),
-          ),
-          namedSourceValues: Object.fromEntries(rt.namedSourceValues.entries()),
+          namedSources: nsRec,
+          namedSourceValues: nsvRec,
         };
         return entry;
       }),
@@ -577,20 +770,48 @@ export class PlantEngine implements SimComponent {
       const ctx = this.#ctxs.get(es.id);
       if (ctx !== undefined) ctx.state = es.state;
       rt.rng = { ...es.rng };
-      rt.obs = { ...es.obs };
-      rt.pendingObs.clear();
+      for (let i = 0; i < rt.obs.length; i++) {
+        rt.obs[i] = es.obs[rt.slotNames.obs[i] as string];
+      }
+      // Baseline drain = giá trị vừa restore (không phát event cũ sau restore).
+      for (let i = 0; i < rt.obs.length; i++) rt.prevObs[i] = rt.obs[i];
       rt.source = es.source ?? undefined;
       rt.sourceValue = es.sourceValue;
-      rt.namedSources = new Map(
-        Object.entries(es.namedSources ?? {}).map(([name, ns]) => [
-          name,
-          { ...ns, spec: { ...ns.spec } },
-        ]),
-      );
-      rt.namedSourceValues = new Map(Object.entries(es.namedSourceValues ?? {}));
+      // Named sources: khôi phục theo tên (thứ tự slot giữ nguyên — slot
+      // của tên đã có giữ nguyên; tên lạ trong snapshot được thêm slot mới).
+      // Khởi tạo đủ chỗ cho mọi slot hiện có trước (snapshot có thể thiếu
+      // tên đã thêm lúc chạy sau thời điểm snapshot — giữ placeholder 0).
+      rt.namedSources = [];
+      rt.namedSourceValues = [];
+      for (let i = 0; i < Object.keys(rt.slots.source).length; i++) {
+        rt.namedSources.push({ spec: { kind: 'const', value: 0 }, setAtMs: 0, manualValue: 0 });
+        rt.namedSourceValues.push(0);
+      }
+      for (const [name, ns] of Object.entries(es.namedSources ?? {})) {
+        const slot = this.#ensureSourceSlot(rt, name);
+        rt.namedSources[slot] = { ...ns, spec: { ...ns.spec } };
+        rt.namedSourceValues[slot] = es.namedSourceValues?.[name] ?? 0;
+      }
     }
     this.#faults.restore(snap.faults);
     this.#lastEmit = new Map(snap.lastEmit);
+  }
+
+  /**
+   * Slot cho named source `name` — tạo mới khi chưa có (setSource/setManual
+   * với tên mới lúc chạy, restore snapshot có tên lạ). Thứ tự slot = thứ tự
+   * tạo: key config `sources` ở init, rồi tên thêm lúc chạy (tất định theo
+   * trình tự action).
+   */
+  #ensureSourceSlot(rt: RuntimeEquipment, name: string): SourceSlot {
+    let slot = rt.slots.source[name];
+    if (slot === undefined) {
+      slot = rt.namedSources.length as SourceSlot;
+      rt.slots.source[name] = slot;
+      rt.namedSources.push({ spec: { kind: 'const', value: 0 }, setAtMs: 0, manualValue: 0 });
+      rt.namedSourceValues.push(0);
+    }
+    return slot;
   }
 
   /** Validate lại cấu hình hiện tại (không fail-fast). */
@@ -607,10 +828,11 @@ export class PlantEngine implements SimComponent {
   getObservable(equipmentId: string, key: string): number | boolean | string | undefined {
     const rt = this.#byId.get(equipmentId);
     if (rt === undefined) throw new Error(`PlantEngine: thiết bị ${equipmentId} không tồn tại.`);
-    if (!rt.model.observables.some((o) => o.key === key)) {
+    const slot = rt.slots.obs[key];
+    if (slot === undefined) {
       throw new Error(`PlantEngine: observable ${key} không khai báo trong model ${rt.model.type}.`);
     }
-    return rt.obs[key];
+    return rt.obs[slot];
   }
 
   setSource(equipmentId: string, spec: SourceSpec, name?: string): void {
@@ -624,12 +846,13 @@ export class PlantEngine implements SimComponent {
       rt.source = { spec: parsed, setAtMs: this.#simTimeMs, manualValue: rt.source?.manualValue ?? 0 };
       return;
     }
-    const prev = rt.namedSources.get(name);
-    rt.namedSources.set(name, {
+    const slot = this.#ensureSourceSlot(rt, name);
+    const prev = rt.namedSources[slot];
+    rt.namedSources[slot] = {
       spec: parsed,
       setAtMs: this.#simTimeMs,
       manualValue: prev?.manualValue ?? 0,
-    });
+    };
   }
 
   setManual(equipmentId: string, value: number | boolean, name?: string): void {
@@ -642,7 +865,8 @@ export class PlantEngine implements SimComponent {
       rt.source = { spec: { kind: 'manual' }, setAtMs: this.#simTimeMs, manualValue: value };
       return;
     }
-    rt.namedSources.set(name, { spec: { kind: 'manual' }, setAtMs: this.#simTimeMs, manualValue: value });
+    const slot = this.#ensureSourceSlot(rt, name);
+    rt.namedSources[slot] = { spec: { kind: 'manual' }, setAtMs: this.#simTimeMs, manualValue: value };
   }
 
   injectFault(req: FaultRequest): string {
@@ -653,21 +877,21 @@ export class PlantEngine implements SimComponent {
       throw new Error(`PlantEngine: thiết bị ${target.equipment} không tồn tại (PL-E001).`);
     }
     if ('signal' in target) {
-      const role = rt.roles.get(target.signal);
-      if (role === undefined) {
+      const ch = this.#channelOf(rt, target.signal);
+      if (ch === undefined) {
         throw new Error(
           `PlantEngine: role ${target.signal} không khai báo trong model ${rt.model.type} (PL-E001).`,
         );
       }
-      if (!SIGNAL_FAULT_KINDS[target.type].includes(role.kind)) {
+      if (!SIGNAL_FAULT_KINDS[target.type].includes(ch.kind)) {
         throw new Error(
-          `PlantEngine: lỗi ${target.type} không áp dụng cho role kind ${role.kind} (role ${target.signal}).`,
+          `PlantEngine: lỗi ${target.type} không áp dụng cho role kind ${ch.kind} (role ${target.signal}).`,
         );
       }
       if ((target.type === 'stuck' || target.type === 'stuckCmd') && parsed.params !== undefined) {
         const pv = parsed.params['value'];
         if (pv !== undefined) {
-          const wantBool = role.dataType === 'Bool';
+          const wantBool = ch.dataType === 'Bool';
           if ((wantBool && typeof pv !== 'boolean') || (!wantBool && typeof pv !== 'number')) {
             throw new Error(
               `PlantEngine: params.value của lỗi ${target.type} phải là ${wantBool ? 'boolean' : 'number'} cho role ${target.signal}.`,
@@ -699,7 +923,7 @@ export class PlantEngine implements SimComponent {
     if (rt === undefined) throw new Error(`PlantEngine: thiết bị ${equipmentId} không tồn tại (PL-E001).`);
     const preset = rt.model.presets?.[name];
     if (preset === undefined) {
-      throw new Error(`PlantEngine: preset ${name} không tồn tại trong model ${rt.model.type}.`);
+      throw new Error(`PlantEngine: preset ${name} không tồn tại trong model ${rt.model.type} (PL-E001).`);
     }
     const when: FaultTiming = at ?? { at: 'now' };
     if (preset.signalFault !== undefined) {
@@ -723,8 +947,17 @@ export class PlantEngine implements SimComponent {
     throw new Error(`PlantEngine: preset ${name} không khai báo lỗi nào.`);
   }
 
-  clearFault(id: string): boolean {
-    return this.#faults.clear(id, this.#simTimeMs);
+  /**
+   * Clear tay một lỗi. `atMs` (tùy chọn): thời điểm clear ghi vào
+   * `clearedAtMs` — mặc định là `#simTimeMs` hiện tại của engine. Runner
+   * scenario truyền `atMs = T` khi clear trước bước T (P2.4: bảng A cần
+   * clearedAtMs đúng 2000, bảng D cần lỗi hết hiệu lực trong bước 3000 —
+   * clear sau bước cho clearedAtMs đúng nhưng trễ 1 bước, clear trước
+   * bước không `atMs` cho clearedAtMs = T−dt; chỉ `atMs` tường minh thỏa
+   * cả hai — xem STATE §27 "Lệch so với plan").
+   */
+  clearFault(id: string, atMs?: number): boolean {
+    return this.#faults.clear(id, atMs ?? this.#simTimeMs);
   }
 
   listFaults(): FaultInfo[] {

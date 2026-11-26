@@ -89,18 +89,24 @@ export const fakeMotorModel: EquipmentModel<FakeMotorParams, FakeMotorState> = {
     },
   },
   init: () => ({ t0: null }),
-  step: (ctx) => {
-    const cmd = ctx.cmd('runCmd');
+  step: (ctx, slots) => {
+    const runCmdSlot = slots.role.runCmd;
+    const runFbSlot = slots.role.runFb;
+    const currentFbSlot = slots.role.currentFb;
+    const runningSlot = slots.obs.running;
+    const currentSlot = slots.obs.current;
+    const noStartSlot = slots.fault.noStart;
+    const cmd = ctx.cmd(runCmdSlot);
     const s = ctx.state;
     if (cmd === true && s.t0 === null) s.t0 = ctx.simTimeMs;
     if (cmd !== true) s.t0 = null;
-    const noStart = ctx.fault('noStart');
+    const noStart = ctx.fault(noStartSlot);
     const running =
       s.t0 !== null && ctx.simTimeMs - s.t0 >= ctx.params.startDelayMs && !noStart.active;
-    ctx.setObs('running', running);
-    ctx.setObs('current', running ? 42 : 0);
-    ctx.emit('runFb', running);
-    ctx.emit('currentFb', running ? 42 : 0);
+    ctx.setObs(runningSlot, running);
+    ctx.setObs(currentSlot, running ? 42 : 0);
+    ctx.emit(runFbSlot, running);
+    ctx.emit(currentFbSlot, running ? 42 : 0);
   },
 };
 
@@ -134,13 +140,15 @@ export const fakeSensorModel: EquipmentModel<FakeSensorParams, FakeSensorState> 
   faults: [],
   hasSource: true,
   init: () => ({ y: 0 }),
-  step: (ctx) => {
+  step: (ctx, slots) => {
+    const valueSlot = slots.role.value;
+    const rawSlot = slots.obs.raw;
     const src = ctx.source();
     const target = typeof src === 'number' ? src : 0;
     const y = lagStep(ctx.state.y, target, ctx.dtMs, ctx.params.tauMs);
     ctx.state.y = y;
-    ctx.setObs('raw', y);
-    ctx.emit('value', y);
+    ctx.setObs(rawSlot, y);
+    ctx.emit(valueSlot, y);
   },
 };
 

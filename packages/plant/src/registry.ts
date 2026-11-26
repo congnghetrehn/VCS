@@ -39,37 +39,61 @@ export interface FaultPreset {
   equipmentFault?: { fault: string; params?: Record<string, unknown> };
 }
 
-/** Bối cảnh một bước của model — các hàm do engine cung cấp. */
+/** Slot số vào bảng kênh/observable/fault/source của thiết bị — brand theo
+ *  miền (OQ-322, A21): trộn miền là lỗi typecheck. Slot là chỉ số vào mảng
+ *  của engine (channels/obs/faults/namedSources), dựng một lần ở init. */
+export type RoleSlot = number & { readonly __roleSlot: unique symbol };
+export type ObsSlot = number & { readonly __obsSlot: unique symbol };
+export type FaultSlot = number & { readonly __faultSlot: unique symbol };
+export type SourceSlot = number & { readonly __sourceSlot: unique symbol };
+
+/**
+ * Bảng slot của một thiết bị, dựng một lần ở init (OQ-320) — object đóng
+ * băng, model chỉ đọc. `role`/`obs`/`fault` suy từ định nghĩa model
+ * (thứ tự = thứ tự mảng trong định nghĩa); `source` suy từ key config
+ * `sources` (thứ tự chèn). `RoleSlot` chính là chỉ số kênh của commit 4.
+ * Record `source` KHÔNG đóng băng: `setSource`/`setManual` với tên mới
+ * thêm slot lúc chạy (xem engine) — model không được sửa bảng này.
+ */
+export interface ModelSlots {
+  readonly role: Readonly<Record<string, RoleSlot>>;
+  readonly obs: Readonly<Record<string, ObsSlot>>;
+  readonly fault: Readonly<Record<string, FaultSlot>>;
+  readonly source: Record<string, SourceSlot>;
+}
+
+/** Bối cảnh một bước của model — các hàm do engine cung cấp, gọi bằng slot số (A21).
+ *  Slot nhận `| undefined`: tra bảng mà key không có (model dùng role/obs/
+ *  fault chưa khai báo trong định nghĩa) cho `undefined` — engine ném lỗi
+ *  nêu tên model/thiết bị ở lần dùng đầu (fail-fast), không im lặng.
+ *  Brand type vẫn cấm trộn miền (không đưa ObsSlot vào cmd()). */
 export interface StepCtx<P = unknown, S = unknown> {
   dtMs: number;
   simTimeMs: number;
   params: P;
   state: S;
   /** Đọc role input (DO/AO); undefined khi role chưa gán. */
-  cmd(role: string): boolean | number | undefined;
+  cmd(slot: RoleSlot | undefined): boolean | number | undefined;
   /** true khi role đã gán tag. */
-  has(role: string): boolean;
+  has(slot: RoleSlot | undefined): boolean;
   /** Ghi role output (DI/AI); không làm gì khi role chưa gán. */
-  emit(role: string, v: boolean | number): void;
+  emit(slot: RoleSlot | undefined, v: boolean | number): void;
   /** Trạng thái lỗi thiết bị (không active → active=false, sinceMs=0). */
-  fault(id: string): {
+  fault(slot: FaultSlot | undefined): {
     active: boolean;
     params: Record<string, unknown>;
     sinceMs: number;
     clearedAtMs?: number;
   };
-  /** Giá trị nguồn đã resolve (0 khi model không có source). */
-  source(name?: string): number | boolean;
   /**
-   * true khi source (chính, không đối số) hoặc named source `name` đã được
-   * cấu hình cho thiết bị (OQ-294: conveyor phân biệt "load source đã cấu
-   * hình" với "không cấu hình → dùng param loadTph"). Tùy chọn — ctx do
-   * engine tạo luôn cung cấp; ctx dựng tay trong test có thể không có.
+   * Giá trị nguồn đã resolve. Không đối số → source chính; có slot →
+   * named source. Tên chưa cấu hình → `slots.source.<tên> === undefined`
+   * (kiểm trước khi gọi — thay cho `hasSource` đã bỏ, xem OQ-320).
    */
-  hasSource?(name?: string): boolean;
+  source(slot?: SourceSlot): number | boolean;
   /** Số giả ngẫu nhiên [0,1) từ PRNG riêng của thiết bị. */
   rand(): number;
-  setObs(key: string, v: number | boolean | string): void;
+  setObs(slot: ObsSlot | undefined, v: number | boolean | string): void;
   getObs(equipmentId: string, key: string): number | boolean | string | undefined;
   log(level: 'info' | 'warn', msg: string, data?: Record<string, unknown>): void;
 }
@@ -97,7 +121,12 @@ export interface EquipmentModel<P = unknown, S = unknown> {
   /** Tài liệu cho docgen — additive, không breaking (OQ-260). */
   docs?: ModelDocs;
   init(params: P, rng: () => number): S;
-  step(ctx: StepCtx<P, S>): void;
+  /**
+   * Một bước mô phỏng. `slots` là bảng slot của thiết bị (đóng băng, dựng
+   * ở init) — model destructure slot cần dùng thành local số ở đầu step
+   * rồi gọi ctx bằng slot, không tra tên role trong vòng nóng (A21).
+   */
+  step(ctx: StepCtx<P, S>, slots: ModelSlots): void;
 }
 
 /** Registry model: map type → model, fail-fast khi đăng ký sai. */

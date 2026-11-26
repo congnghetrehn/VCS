@@ -1,13 +1,23 @@
 // PlantEngine (M2 §5, bảng D) — validate, step tất định, lỗi, snapshot/restore.
 
 import { describe, expect, it } from 'vitest';
+import { z } from 'zod';
 
 import { PL_CATALOG } from '@vcs/schemas';
 import { ManualClock, TagDB, TraceHasher, type TagDBSnapshot, type TagHandle } from '@vcs/kernel';
 import type { EquipmentInstance, SourceSpec, TagDef } from '@vcs/schemas';
 
 import { PlantEngine, validatePlantConfig, type PlantConfig, type PlantSnapshot } from './engine.js';
-import { createModelRegistry, deriveModel, type ModelRegistry } from './registry.js';
+// Import qua package entry để side-effect đăng ký 9 model thật vào
+// defaultRegistry chạy (models/index.ts) — test mix dùng model thật.
+import './index.js';
+import {
+  createModelRegistry,
+  defaultRegistry,
+  deriveModel,
+  type EquipmentModel,
+  type ModelRegistry,
+} from './registry.js';
 import {
   fakeMotorModel,
   fakeSensorModel,
@@ -556,6 +566,18 @@ describe('PlantEngine faults', () => {
     expect(tags.get(fbH)).toBe(true);
   });
 
+  it('clearFault(id, atMs): clearedAtMs đúng thời điểm truyền vào', () => {
+    const { engine } = makeMotorSetup();
+    const id = engine.injectFault({ target: { equipment: 'CR01_M01', fault: 'noStart' }, when: { at: 'now' } });
+    expect(engine.clearFault(id, 500)).toBe(true);
+    expect(engine.listFaults()[0]?.clearedAtMs).toBe(500);
+    expect(engine.listFaults()[0]?.state).toBe('cleared');
+    // Mặc định (không atMs): dùng #simTimeMs hiện tại (0 trước bước đầu).
+    const id2 = engine.injectFault({ target: { equipment: 'CR01_M01', fault: 'noStart' }, when: { at: 'now' } });
+    expect(engine.clearFault(id2)).toBe(true);
+    expect(engine.listFaults()[1]?.clearedAtMs).toBe(0);
+  });
+
   it('preset stuckOn: runFb=1 ngay từ đầu', () => {
     const { engine, tags, fbH } = makeMotorSetup();
     engine.applyPreset('CR01_M01', 'stuckOn');
@@ -722,5 +744,480 @@ describe('PlantEngine events / snapshot / reset (bảng D)', () => {
   it('validate() của engine trả lại diagnostics hiện tại', () => {
     const { engine } = makeMotorSetup();
     expect(engine.validate()).toEqual([]);
+  });
+});
+
+/** Model thăm dò kênh (P2.4 commit 4): AO/Real + AI/Int có scaling + AI/Real + DI optional chưa gán. */
+interface ProbeParams {
+  echoMeas: number;
+}
+interface ProbeState {
+  n: number;
+}
+const probeModel: EquipmentModel<ProbeParams, ProbeState> = {
+  type: 'probe',
+  version: '0.1.0',
+  description: 'Model thăm dò kênh (test commit 4).',
+  roles: [
+    { role: 'ref', kind: 'AO', dataType: 'Real', description: 'Tham chiếu Real', synonyms: [], descKeywords: [] },
+    { role: 'meas', kind: 'AI', dataType: 'Int', unit: '%', description: 'Đo Int có scaling', synonyms: [], descKeywords: [] },
+    { role: 'speed', kind: 'AI', dataType: 'Real', description: 'Tốc độ Real', synonyms: [], descKeywords: [] },
+    { role: 'opt', kind: 'DI', dataType: 'Bool', optional: true, description: 'Tùy chọn chưa gán', synonyms: [], descKeywords: [] },
+  ],
+  paramsSchema: z.object({ echoMeas: z.number() }),
+  defaultParams: { echoMeas: 25 },
+  observables: [
+    { key: 'refSeen', description: 'ref đọc qua cmd' },
+    { key: 'measSeen', description: 'meas đọc qua cmd' },
+    { key: 'hasOpt', description: 'opt có gán không' },
+  ],
+  faults: [],
+  init: () => ({ n: 0 }),
+  step: (ctx, slots) => {
+    const refSlot = slots.role.ref;
+    const measSlot = slots.role.meas;
+    const speedSlot = slots.role.speed;
+    const optSlot = slots.role.opt;
+    const refSeenSlot = slots.obs.refSeen;
+    const measSeenSlot = slots.obs.measSeen;
+    const hasOptSlot = slots.obs.hasOpt;
+    ctx.state.n += 1;
+    ctx.setObs(refSeenSlot, ctx.cmd(refSlot) ?? -1);
+    ctx.setObs(measSeenSlot, ctx.cmd(measSlot) ?? -1);
+    ctx.setObs(hasOptSlot, ctx.has(optSlot));
+    ctx.emit(measSlot, ctx.params.echoMeas);
+    ctx.emit(speedSlot, 33.3);
+    ctx.emit(optSlot, true); // chưa gán → no-op, không ném
+  },
+};
+
+function probeTagDefs(): TagDef[] {
+  return [
+    { name: 'PRB_REF', type: 'Real', area: 'Q', address: '%QD8', controller: 'PLC1', signal: { kind: 'AO' } },
+    {
+      name: 'PRB_MEAS',
+      type: 'Int',
+      area: 'I',
+      address: '%IW68',
+      controller: 'PLC1',
+      signal: {
+        kind: 'AI',
+        scaling: { rawMin: 0, rawMax: 27648, engMin: 0, engMax: 100, unit: '%' },
+      },
+    },
+    { name: 'PRB_SPEED', type: 'Real', area: 'I', address: '%ID72', controller: 'PLC1', signal: { kind: 'AI' } },
+  ];
+}
+
+function probeWorld(): { cfg: PlantConfig; tags: TagDB; models: ModelRegistry } {
+  const defs = probeTagDefs();
+  const tags = new TagDB(defs, new ManualClock());
+  const models = createModelRegistry();
+  models.register(probeModel);
+  const cfg: PlantConfig = {
+    stepMs: 10,
+    seed: 42,
+    equipment: [
+      {
+        id: 'PRB01',
+        model: 'probe',
+        signals: { ref: 'PRB_REF', meas: 'PRB_MEAS', speed: 'PRB_SPEED' },
+      },
+    ],
+    tags: new Map(defs.map((d) => [d.name, d])),
+  };
+  return { cfg, tags, models };
+}
+
+describe('channels (P2.4 commit 4 — 4 Map → channels[] + roleSlot)', () => {
+  it('role không gán → has false, emit no-op, model vẫn chạy', () => {
+    const { cfg, tags, models } = motorWorld((c) => {
+      const eq = c.equipment[0];
+      if (eq !== undefined) {
+        eq.signals = { runCmd: 'CR01_M01_RUN_CMD', runFb: 'CR01_M01_RUN_FB' };
+      }
+    });
+    const engine = new PlantEngine(cfg, tags, models);
+    const cmdH = mustHandle(tags, 'CR01_M01_RUN_CMD');
+    const fbH = mustHandle(tags, 'CR01_M01_RUN_FB');
+    const curH = mustHandle(tags, 'CR01_M01_CUR');
+    tags.set(cmdH, true, 'plc');
+    runSteps(engine, tags, 0, 600);
+    expect(engine.getObservable('CR01_M01', 'running')).toBe(true);
+    expect(engine.getObservable('CR01_M01', 'current')).toBe(42);
+    expect(tags.get(fbH)).toBe(true);
+    // emit currentFb (không gán) là no-op — tag không bị chạm.
+    expect(tags.get(curH)).toBe(0);
+  });
+
+  it('kind Real — cmd fround, emit eng trực tiếp (không range)', () => {
+    const { cfg, tags, models } = probeWorld();
+    const engine = new PlantEngine(cfg, tags, models);
+    const refH = mustHandle(tags, 'PRB_REF');
+    const speedH = mustHandle(tags, 'PRB_SPEED');
+    tags.set(refH, 12.5, 'plc');
+    runSteps(engine, tags, 0, 10);
+    expect(engine.getObservable('PRB01', 'refSeen')).toBe(12.5);
+    expect(engine.getObservable('PRB01', 'hasOpt')).toBe(false);
+    expect(tags.get(speedH)).toBe(Math.fround(33.3));
+  });
+
+  it('kind Int có scaling — cmd rawToEng, emit engToRaw', () => {
+    const { cfg, tags, models } = probeWorld();
+    const measH = mustHandle(tags, 'PRB_MEAS');
+    // Ghi trước khi dựng engine, nguồn 'system' (tag free chỉ cho test/hmi/gateway/system;
+    // AI thuộc owner 'plant' sau init nên 'plc' không ghi được cả trước lẫn sau).
+    tags.set(measH, 13824, 'system'); // 50 eng
+    const engine = new PlantEngine(cfg, tags, models);
+    runSteps(engine, tags, 0, 0);
+    expect(engine.getObservable('PRB01', 'measSeen')).toBe(50);
+    // emit 25 eng → raw 6912.
+    expect(tags.get(measH)).toBe(6912);
+    runSteps(engine, tags, 10, 10);
+    expect(engine.getObservable('PRB01', 'measSeen')).toBe(25);
+  });
+
+  it('restore giữ channels: chạy tiếp sau restore cho cùng observable', () => {
+    const build = (): { engine: PlantEngine; tags: TagDB } => {
+      const { cfg, tags, models } = probeWorld();
+      // Ghi trước khi dựng engine, nguồn 'system' (xem ghi chú test Int scaling).
+      tags.set(mustHandle(tags, 'PRB_REF'), 12.5, 'system');
+      tags.set(mustHandle(tags, 'PRB_MEAS'), 13824, 'system');
+      const engine = new PlantEngine(cfg, tags, models);
+      return { engine, tags };
+    };
+    const ref = build();
+    runSteps(ref.engine, ref.tags, 0, 90);
+    const test = build();
+    runSteps(test.engine, test.tags, 0, 40);
+    const snap = test.engine.snapshot();
+    runSteps(test.engine, test.tags, 50, 90);
+    test.engine.restore(snap);
+    runSteps(test.engine, test.tags, 50, 90);
+    for (const key of ['refSeen', 'measSeen', 'hasOpt']) {
+      expect(test.engine.getObservable('PRB01', key)).toBe(ref.engine.getObservable('PRB01', key));
+    }
+    expect(test.tags.get(mustHandle(test.tags, 'PRB_MEAS'))).toBe(
+      ref.tags.get(mustHandle(ref.tags, 'PRB_MEAS')),
+    );
+    expect(test.tags.get(mustHandle(test.tags, 'PRB_SPEED'))).toBe(
+      ref.tags.get(mustHandle(ref.tags, 'PRB_SPEED')),
+    );
+  });
+
+  it('2 thiết bị cùng model không chia sẻ channels', () => {
+    const defs = motorTagDefs();
+    const defs2: TagDef[] = defs.map((d) => {
+      if (d.name === 'CR01_M01_RUN_CMD') {
+        return { ...d, name: 'CR01_M02_RUN_CMD', address: '%Q0.1' };
+      }
+      if (d.name === 'CR01_M01_RUN_FB') {
+        return { ...d, name: 'CR01_M02_RUN_FB', address: '%I0.1' };
+      }
+      return { ...d, name: 'CR01_M02_CUR', address: '%IW66' };
+    });
+    const allDefs = [...defs, ...defs2];
+    const tags = new TagDB(allDefs, new ManualClock());
+    const models = createModelRegistry();
+    models.register(fakeMotorModel);
+    const cfg: PlantConfig = {
+      stepMs: 10,
+      seed: 42,
+      equipment: [
+        {
+          id: 'CR01_M01',
+          model: 'fake_motor',
+          params: { startDelayMs: 500 },
+          signals: { runCmd: 'CR01_M01_RUN_CMD', runFb: 'CR01_M01_RUN_FB', currentFb: 'CR01_M01_CUR' },
+        },
+        {
+          id: 'CR01_M02',
+          model: 'fake_motor',
+          params: { startDelayMs: 500 },
+          signals: { runCmd: 'CR01_M02_RUN_CMD', runFb: 'CR01_M02_RUN_FB', currentFb: 'CR01_M02_CUR' },
+        },
+      ],
+      tags: new Map(allDefs.map((d) => [d.name, d])),
+    };
+    const engine = new PlantEngine(cfg, tags, models);
+    // Chỉ M01 có lệnh chạy.
+    tags.set(mustHandle(tags, 'CR01_M01_RUN_CMD'), true, 'plc');
+    runSteps(engine, tags, 0, 600);
+    expect(engine.getObservable('CR01_M01', 'running')).toBe(true);
+    expect(engine.getObservable('CR01_M02', 'running')).toBe(false);
+    expect(tags.get(mustHandle(tags, 'CR01_M01_RUN_FB'))).toBe(true);
+    expect(tags.get(mustHandle(tags, 'CR01_M02_RUN_FB'))).toBe(false);
+    expect(tags.get(mustHandle(tags, 'CR01_M02_CUR'))).toBe(0);
+  });
+
+  it('determinism engine-alone (OQ-317 mở rộng): config hỗn hợp 2 lần + restore → cùng hash', () => {
+    const build = (): { engine: PlantEngine; tags: TagDB; hasher: TraceHasher } => {
+      const defs = [...motorTagDefs(), ...sensorTagDefs(), ...probeTagDefs()];
+      const tags = new TagDB(defs, new ManualClock());
+      const models = createModelRegistry();
+      models.register(fakeMotorModel);
+      models.register(fakeSensorModel);
+      models.register(probeModel);
+      const cfg: PlantConfig = {
+        stepMs: 10,
+        seed: 42,
+        equipment: [
+          {
+            id: 'CR01_M01',
+            model: 'fake_motor',
+            params: { startDelayMs: 500 },
+            signals: { runCmd: 'CR01_M01_RUN_CMD', runFb: 'CR01_M01_RUN_FB', currentFb: 'CR01_M01_CUR' },
+          },
+          {
+            id: 'CR01_TT01',
+            model: 'fake_sensor',
+            source: { kind: 'const', value: 50 },
+            signals: { value: 'CR01_TT01' },
+          },
+          {
+            id: 'PRB01',
+            model: 'probe',
+            signals: { ref: 'PRB_REF', meas: 'PRB_MEAS', speed: 'PRB_SPEED' },
+          },
+        ],
+        tags: new Map(defs.map((d) => [d.name, d])),
+      };
+      // PRB_MEAS (AI) phải ghi trước khi dựng engine, nguồn 'system'
+      // (thuộc owner 'plant' sau init; tag free cũng không cho 'plc' ghi).
+      tags.set(mustHandle(tags, 'PRB_MEAS'), 13824, 'system');
+      const engine = new PlantEngine(cfg, tags, models);
+      tags.set(mustHandle(tags, 'CR01_M01_RUN_CMD'), true, 'plc');
+      tags.set(mustHandle(tags, 'PRB_REF'), 12.5, 'plc');
+      return { engine, tags, hasher: new TraceHasher(tags) };
+    };
+    // A: chạy liền 100 bước, hash đoạn 50→100.
+    const a = build();
+    runSteps(a.engine, a.tags, 0, 490);
+    a.hasher.reset();
+    runSteps(a.engine, a.tags, 500, 990);
+    const hashA = a.hasher.hash();
+    // B: chạy 50, snapshot, chạy 50 → hash đoạn; restore, chạy lại 50 → cùng hash.
+    const b = build();
+    runSteps(b.engine, b.tags, 0, 490);
+    const snapE = b.engine.snapshot();
+    const snapT = b.tags.snapshot();
+    b.hasher.reset();
+    runSteps(b.engine, b.tags, 500, 990);
+    const hashB1 = b.hasher.hash();
+    b.engine.restore(snapE);
+    b.tags.restore(snapT);
+    b.tags.flush();
+    b.hasher.reset();
+    runSteps(b.engine, b.tags, 500, 990);
+    const hashB2 = b.hasher.hash();
+    expect(hashB1).toBe(hashA);
+    expect(hashB2).toBe(hashA);
+  });
+});
+
+describe('model grouping (P2.4 commit 5 — dispatch đơn hình, OQ-310)', () => {
+  it('link chéo model: analog đọc silo cùng bước sau khi nhóm', () => {
+    const defs: TagDef[] = [
+      {
+        name: 'TT01_RAW',
+        type: 'Int',
+        area: 'I',
+        address: '%IW0',
+        controller: 'PLC1',
+        signal: {
+          kind: 'AI',
+          scaling: { rawMin: 0, rawMax: 27648, engMin: 0, engMax: 100, unit: '%' },
+        },
+      },
+    ];
+    const tags = new TagDB(defs, new ManualClock());
+    const cfg: PlantConfig = {
+      stepMs: 10,
+      seed: 42,
+      equipment: [
+        // Khai báo ngược thứ tự topo (analog trước silo) — nhóm vẫn xếp silo trước.
+        {
+          id: 'TT01',
+          model: 'analog_sensor',
+          params: { engMin: 0, engMax: 100, unit: '%' },
+          source: { kind: 'link', equipment: 'SIL01', observable: 'massT' },
+          signals: { raw: 'TT01_RAW' },
+        },
+        {
+          id: 'SIL01',
+          model: 'silo_bin',
+          sources: {
+            inflow: { kind: 'const', value: 3600 },
+            outflow: { kind: 'const', value: 1800 },
+          },
+        },
+      ],
+      tags: new Map(defs.map((d) => [d.name, d])),
+    };
+    const engine = new PlantEngine(cfg, tags);
+    expect(engine.groupedByModel).toBe(true);
+    for (let t = 0; t <= 100; t += 10) {
+      engine.step(t, 10);
+      tags.flush();
+      // Analog bước sau silo trong cùng bước T → pv == massT cùng bước
+      // (đi trước 1 bước sẽ lệch đúng 0,005 t).
+      expect(engine.getObservable('TT01', 'pv')).toBe(engine.getObservable('SIL01', 'massT'));
+    }
+    expect(engine.getObservable('SIL01', 'massT') as number).toBeGreaterThan(30);
+  });
+
+  it('chu trình mức model → fallback topo thiết bị, groupedByModel false, kết quả vẫn đúng', () => {
+    const sensor2 = deriveModel(fakeSensorModel, { type: 'fake_sensor2' });
+    const defs: TagDef[] = ['A1', 'B1', 'A2', 'B2'].map((id, i) => ({
+      name: `TT_${id}`,
+      type: 'Int' as const,
+      area: 'I' as const,
+      address: `%IW${String(i * 2)}`,
+      controller: 'PLC1',
+      signal: { kind: 'AI' as const },
+    }));
+    const tags = new TagDB(defs, new ManualClock());
+    const models = createModelRegistry();
+    models.register(fakeSensorModel);
+    models.register(sensor2);
+    const cfg: PlantConfig = {
+      stepMs: 10,
+      seed: 42,
+      equipment: [
+        // Model DAG: fake_sensor → fake_sensor2 (A1→B1) + ngược lại (B2→A2) = chu trình.
+        { id: 'A1', model: 'fake_sensor', source: { kind: 'link', equipment: 'B1', observable: 'raw' }, signals: { value: 'TT_A1' } },
+        { id: 'B1', model: 'fake_sensor2', source: { kind: 'const', value: 50 }, signals: { value: 'TT_B1' } },
+        { id: 'A2', model: 'fake_sensor', source: { kind: 'const', value: 70 }, signals: { value: 'TT_A2' } },
+        { id: 'B2', model: 'fake_sensor2', source: { kind: 'link', equipment: 'A2', observable: 'raw' }, signals: { value: 'TT_B2' } },
+      ],
+      tags: new Map(defs.map((d) => [d.name, d])),
+    };
+    const engine = new PlantEngine(cfg, tags, models);
+    expect(engine.groupedByModel).toBe(false);
+    engine.step(0, 10);
+    tags.flush();
+    // Thứ tự topo thiết bị vẫn đúng: B1 trước A1, A2 trước B2 (cùng bước).
+    expect(engine.getObservable('A1', 'raw')).toBe(50);
+    expect(engine.getObservable('B2', 'raw')).toBe(70);
+  });
+
+  it('link cùng model: nhóm vẫn giữ thứ tự topo trong nhóm', () => {
+    const defs: TagDef[] = ['S1', 'S2'].map((id, i) => ({
+      name: `TT_${id}`,
+      type: 'Int' as const,
+      area: 'I' as const,
+      address: `%IW${String(i * 2)}`,
+      controller: 'PLC1',
+      signal: { kind: 'AI' as const },
+    }));
+    const tags = new TagDB(defs, new ManualClock());
+    const models = createModelRegistry();
+    models.register(fakeSensorModel);
+    const cfg: PlantConfig = {
+      stepMs: 10,
+      seed: 42,
+      equipment: [
+        // Khai báo ngược (S2 trước S1) — cùng model nên cùng nhóm, topo trong nhóm xếp S1 trước.
+        { id: 'S2', model: 'fake_sensor', source: { kind: 'link', equipment: 'S1', observable: 'raw' }, signals: { value: 'TT_S2' } },
+        { id: 'S1', model: 'fake_sensor', source: { kind: 'const', value: 50 }, signals: { value: 'TT_S1' } },
+      ],
+      tags: new Map(defs.map((d) => [d.name, d])),
+    };
+    const engine = new PlantEngine(cfg, tags, models);
+    expect(engine.groupedByModel).toBe(true);
+    engine.step(0, 10);
+    tags.flush();
+    expect(engine.getObservable('S2', 'raw')).toBe(50);
+  });
+
+  it('mix 9 model thật, không link → groupedByModel true + tất định', () => {
+    const build = (): { engine: PlantEngine; tags: TagDB; hasher: TraceHasher } => {
+      const defs: TagDef[] = [];
+      const equipment: EquipmentInstance[] = [];
+      const counters = { iBit: 0, qBit: 0, iWord: 0, qWord: 0 };
+      const nextAddress = (roleKind: string, dataType: string): string => {
+        if (dataType === 'Bool') {
+          if (roleKind === 'DI' || roleKind === 'AI') {
+            const n = counters.iBit;
+            counters.iBit += 1;
+            return `%I${String(Math.floor(n / 8))}.${String(n % 8)}`;
+          }
+          const n = counters.qBit;
+          counters.qBit += 1;
+          return `%Q${String(Math.floor(n / 8))}.${String(n % 8)}`;
+        }
+        if (dataType === 'Real') {
+          if (roleKind === 'AI') {
+            const n = counters.iWord;
+            counters.iWord += 4;
+            return `%ID${String(n)}`;
+          }
+          const n = counters.qWord;
+          counters.qWord += 4;
+          return `%QD${String(n)}`;
+        }
+        if (roleKind === 'AI') {
+          const n = counters.iWord;
+          counters.iWord += 2;
+          return `%IW${String(n)}`;
+        }
+        const n = counters.qWord;
+        counters.qWord += 2;
+        return `%QW${String(n)}`;
+      };
+      const paramsOverride: Record<string, Record<string, unknown>> = {
+        analog_sensor: { engMin: 0, engMax: 100, unit: '%' },
+        switch_di: { kind: 'generic' },
+      };
+      for (const type of defaultRegistry.list()) {
+        const model = defaultRegistry.get(type) as EquipmentModel;
+        const id = `${type}_01`;
+        const signals: Record<string, string> = {};
+        for (const role of model.roles) {
+          if (role.optional === true) continue;
+          const tagName = `${id}_${role.role.toUpperCase()}`;
+          const area = role.kind === 'DI' || role.kind === 'AI' ? 'I' : 'Q';
+          defs.push({
+            name: tagName,
+            type: role.dataType,
+            area,
+            address: nextAddress(role.kind, role.dataType),
+            controller: 'PLC1',
+            signal: {
+              kind: role.kind,
+              ...(role.dataType === 'Int' && (role.kind === 'AI' || role.kind === 'AO')
+                ? {
+                    scaling: { rawMin: 0, rawMax: 27648, engMin: 0, engMax: 100, unit: role.unit ?? '%' },
+                  }
+                : {}),
+            },
+          });
+          signals[role.role] = tagName;
+        }
+        equipment.push({
+          id,
+          model: type,
+          ...(paramsOverride[type] !== undefined ? { params: paramsOverride[type] } : {}),
+          signals,
+        });
+      }
+      const tags = new TagDB(defs, new ManualClock());
+      const cfg: PlantConfig = {
+        stepMs: 10,
+        seed: 42,
+        equipment,
+        tags: new Map(defs.map((d) => [d.name, d])),
+      };
+      const engine = new PlantEngine(cfg, tags);
+      return { engine, tags, hasher: new TraceHasher(tags) };
+    };
+    const a = build();
+    expect(a.engine.groupedByModel).toBe(true);
+    runSteps(a.engine, a.tags, 0, 990);
+    const hashA = a.hasher.hash();
+    const b = build();
+    expect(b.engine.groupedByModel).toBe(true);
+    runSteps(b.engine, b.tags, 0, 990);
+    expect(b.hasher.hash()).toBe(hashA);
   });
 });
