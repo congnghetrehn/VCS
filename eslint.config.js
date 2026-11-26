@@ -111,13 +111,14 @@ export default tseslint.config(
       'scripts/**/*.mjs',
       'scripts/**/*.cjs',
       'bench/**/*.ts',
+      'bench/**/*.mjs',
       'tests/**/*.ts',
     ],
     rules: { 'no-console': 'off' },
   },
   // Globals Node cho file JS (scripts ESM + eslint.config.js) — `no-undef` cần biết chúng.
   {
-    files: ['scripts/**/*.mjs', 'eslint.config.js'],
+    files: ['scripts/**/*.mjs', 'bench/**/*.mjs', 'eslint.config.js'],
     languageOptions: {
       globals: {
         process: 'readonly',
