@@ -146,29 +146,72 @@ describe('namingConfigSchema', () => {
 });
 
 describe('importProfileSchema', () => {
+  // OQ-332: test cập nhật theo hình §4.4 (thay `columns`/`strip` bằng
+  // `mapping`/...) — §4.4 là nguồn sự thật, không phải sửa test để xanh.
   const base = {
-    name: 'Siemens IO',
-    format: 'csv' as const,
-    columns: { tagName: 'Tag', address: 'Address', type: 'Type' },
+    name: 'Project X IO list',
+    format: 'xlsx' as const,
+    file: 'io/IO_list_rev3.xlsx',
+    sheet: 'IO List',
+    headerRow: 6,
+    firstDataRow: 7,
+    lastDataRow: null,
+    mapping: { tag: 'Tag Name', address: 'Address', signalType: 'Type' },
     naming: { template: 'CR01_{n:02}' },
   };
 
-  it('csv hợp lệ, strip mặc định []', () => {
+  it('profile §4.4 hợp lệ, mặc định đầy đủ', () => {
     const p = importProfileSchema.parse(base);
-    expect(p.format).toBe('csv');
-    expect(p.strip).toEqual([]);
+    expect(p.format).toBe('xlsx');
+    expect(p.mapping.tag).toBe('Tag Name');
+    expect(p.transforms).toEqual([]);
+    expect(p.fillDownColumns).toEqual([]);
+    expect(p.encoding).toBe('auto');
+    expect(p.delimiter).toBe('auto');
+    expect(p.rules).toEqual({});
+    expect(p.defaults).toEqual({});
+    expect(p.skipRowsWhen).toEqual([]);
   });
 
-  it('xlsx hợp lệ', () => {
-    expect(importProfileSchema.parse({ ...base, format: 'xlsx' }).format).toBe('xlsx');
+  it('profile tối thiểu (chỉ name + mapping) vẫn parse, naming không bắt buộc', () => {
+    const p = importProfileSchema.parse({ name: 'Tối thiểu', mapping: { tag: 'Tag' } });
+    expect(p.naming).toBeUndefined();
+    expect(p.format).toBeUndefined();
+    expect(p.lastDataRow).toBeUndefined();
   });
 
-  it('thiếu columns.tagName → lỗi', () => {
-    expect(() => importProfileSchema.parse({ ...base, columns: { address: 'Address' } })).toThrow();
+  it('mapping key lạ → lỗi', () => {
+    expect(() => importProfileSchema.parse({ ...base, mapping: { tga: 'Tag' } })).toThrow();
+  });
+
+  it('thiếu name → lỗi', () => {
+    expect(() => importProfileSchema.parse({ mapping: { tag: 'Tag' } })).toThrow();
   });
 
   it('format lạ → lỗi', () => {
     expect(() => importProfileSchema.parse({ ...base, format: 'pdf' })).toThrow();
+  });
+
+  it('transform replace + map parse được', () => {
+    const p = importProfileSchema.parse({
+      ...base,
+      transforms: [
+        { field: 'tag', op: 'replace', pattern: '\\s+', with: '_' },
+        { field: 'signalType', op: 'map', table: { DE: 'DI', DA: 'DO' } },
+      ],
+    });
+    expect(p.transforms).toHaveLength(2);
+    expect(p.transforms[0]?.op).toBe('replace');
+  });
+
+  it('addressDerive + rules parse được, channelBase mặc định 0', () => {
+    const p = importProfileSchema.parse({
+      ...base,
+      addressDerive: { moduleStartColumn: 'Module Start', channelColumn: 'Channel' },
+      rules: { duplicateTag: 'error', missingRange: 'warn' },
+    });
+    expect(p.addressDerive?.channelBase).toBe(0);
+    expect(p.rules.missingRange).toBe('warn');
   });
 });
 
