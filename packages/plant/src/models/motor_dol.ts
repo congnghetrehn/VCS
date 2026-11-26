@@ -61,7 +61,7 @@ export const motorDolModel: EquipmentModel<MotorDolParams, MotorDolState> = {
       kind: 'DI',
       dataType: 'Bool',
       description: 'Phản hồi đang chạy',
-      synonyms: ['RUN_FB', 'RUNNING', 'RUN_ST', 'AUX', 'RUN_FBK', 'RUECKMELDUNG'],
+      synonyms: ['RUN_FB', 'RUNNING', 'RUN_ST', 'AUX', 'RUN_FBK', 'RUECKMELDUNG', 'FB'],
       descKeywords: ['run', 'feedback', 'phản hồi chạy', 'đang chạy', 'rückmeldung', 'läuft'],
     },
     {

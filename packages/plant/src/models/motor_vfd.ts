@@ -73,7 +73,7 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
       kind: 'DI',
       dataType: 'Bool',
       description: 'Phản hồi đang chạy',
-      synonyms: ['RUN_FB', 'RUNNING', 'RUN_ST', 'AUX', 'RUN_FBK'],
+      synonyms: ['RUN_FB', 'RUNNING', 'RUN_ST', 'AUX', 'RUN_FBK', 'FB'],
       descKeywords: ['run', 'feedback', 'phản hồi chạy', 'đang chạy', 'rückmeldung', 'läuft'],
     },
     {

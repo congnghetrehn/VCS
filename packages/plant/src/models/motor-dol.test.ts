@@ -63,7 +63,10 @@ describe('motor_dol — định nghĩa (M2 §7.1)', () => {
     ]);
     const byRole = new Map(motorDolModel.roles.map((r) => [r.role, r]));
     expect(byRole.get('runCmd')?.synonyms).toEqual(['RUN_CMD', 'START_CMD', 'RUN', 'START', 'CMD', 'BETRIEB_BEFEHL']);
-    expect(byRole.get('runFb')?.synonyms).toEqual(['RUN_FB', 'RUNNING', 'RUN_ST', 'AUX', 'RUN_FBK', 'RUECKMELDUNG']);
+    // 'FB' thêm ở P2.8 (OQ-381 đã quyết, OQ-391): token FB trần trong
+    // tags thật (RUN_FB) — synonym theo quy ước OQ-301, không phải §7.1
+    // nguyên văn; docgen đã sinh lại docs/equipment/motor_dol.md.
+    expect(byRole.get('runFb')?.synonyms).toEqual(['RUN_FB', 'RUNNING', 'RUN_ST', 'AUX', 'RUN_FBK', 'RUECKMELDUNG', 'FB']);
     expect(byRole.get('ready')?.synonyms).toEqual(['READY', 'RDY', 'MCB_OK', 'BREAKER_ON']);
     expect(byRole.get('remote')?.synonyms).toEqual(['REMOTE', 'REM', 'AUTO_SEL']);
     expect(byRole.get('overloadOk')?.synonyms).toEqual(['OVL_OK', 'OL_OK', 'THERMAL_OK', 'OVERLOAD_OK', 'OVL']);
