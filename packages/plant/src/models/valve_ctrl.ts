@@ -4,7 +4,7 @@
 import { z } from 'zod';
 
 import { lagStep, rateLimitStep } from '../delay.js';
-import type { EquipmentModel, StepCtx } from '../registry.js';
+import type { EquipmentModel, ModelSlots, StepCtx } from '../registry.js';
 
 export const valveCtrlParamsSchema = z.object({
   strokeTimeS: z.number().positive(),
@@ -123,21 +123,32 @@ export const valveCtrlModel: EquipmentModel<ValveCtrlParams, ValveCtrlState> = {
     latchedTarget: null,
     frozenFb: null,
   }),
-  step(ctx: StepCtx<ValveCtrlParams, ValveCtrlState>): void {
+  step(ctx: StepCtx<ValveCtrlParams, ValveCtrlState>, slots: ModelSlots): void {
     const p = ctx.params;
     const s = ctx.state;
+    const posRefSlot = slots.role.posRef;
+    const posFbSlot = slots.role.posFb;
+    const faultSlot = slots.role.fault;
+    const closedLsSlot = slots.role.closedLs;
+    const openLsSlot = slots.role.openLs;
+    const posPctSlot = slots.obs.posPct;
+    const targetPctSlot = slots.obs.targetPct;
+    const stuckSlot = slots.fault.stuck;
+    const driftSlot = slots.fault.drift;
+    const positionerFailSlot = slots.fault.positionerFail;
+    const signalLossSlot = slots.fault.signalLoss;
 
-    const signalLoss = ctx.fault('signalLoss').active;
-    const positionerFail = ctx.fault('positionerFail');
-    const stuck = ctx.fault('stuck').active;
-    const drift = ctx.fault('drift');
+    const signalLoss = ctx.fault(signalLossSlot).active;
+    const positionerFail = ctx.fault(positionerFailSlot);
+    const stuck = ctx.fault(stuckSlot).active;
+    const drift = ctx.fault(driftSlot);
 
     // posRef hiệu dụng (OQ-283): mất tín hiệu → failPosition.
     let ref: number;
     if (signalLoss) {
       ref = p.failPosition === 'close' ? 0 : p.failPosition === 'open' ? 100 : s.posPct;
     } else {
-      const cmdRef = ctx.cmd('posRef');
+      const cmdRef = ctx.cmd(posRefSlot);
       ref = typeof cmdRef === 'number' ? cmdRef : s.posPct;
     }
 
@@ -173,12 +184,12 @@ export const valveCtrlModel: EquipmentModel<ValveCtrlParams, ValveCtrlState> = {
     const anyFault = stuck || drift.active || positionerFail.active || signalLoss;
     const fault = p.faultNC ? !anyFault : anyFault;
 
-    ctx.emit('posFb', s.posFb);
-    ctx.emit('fault', fault);
-    ctx.emit('closedLs', s.posPct <= 1);
-    ctx.emit('openLs', s.posPct >= 99);
+    ctx.emit(posFbSlot, s.posFb);
+    ctx.emit(faultSlot, fault);
+    ctx.emit(closedLsSlot, s.posPct <= 1);
+    ctx.emit(openLsSlot, s.posPct >= 99);
 
-    ctx.setObs('posPct', s.posPct);
-    ctx.setObs('targetPct', s.targetPct);
+    ctx.setObs(posPctSlot, s.posPct);
+    ctx.setObs(targetPctSlot, s.targetPct);
   },
 };

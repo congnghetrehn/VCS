@@ -179,17 +179,36 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
     ],
   },
   init: () => ({ state: 'STOPPED', speedPct: 0, speedFb: 0, latched: undefined, frozenFb: undefined }),
-  step: (ctx) => {
+  step: (ctx, slots) => {
     const p = ctx.params;
     const s = ctx.state;
-    const vfdTrip = ctx.fault('vfdTrip');
-    const rampFail = ctx.fault('rampFail');
-    const speedDeviation = ctx.fault('speedDeviation');
-    const commLoss = ctx.fault('commLoss');
-    const notReady = ctx.fault('notReady');
-    const localMode = ctx.fault('localMode');
-    const cmdRun = ctx.cmd('runCmd') === true;
-    const cmdRefRaw = ctx.cmd('speedRef');
+    const runCmdSlot = slots.role.runCmd;
+    const speedRefSlot = slots.role.speedRef;
+    const runFbSlot = slots.role.runFb;
+    const speedFbSlot = slots.role.speedFb;
+    const readySlot = slots.role.ready;
+    const vfdFaultOkSlot = slots.role.vfdFaultOk;
+    const remoteSlot = slots.role.remote;
+    const currentFbSlot = slots.role.currentFb;
+    const speedPctSlot = slots.obs.speedPct;
+    const targetPctSlot = slots.obs.targetPct;
+    const currentASlot = slots.obs.currentA;
+    const runningSlot = slots.obs.running;
+    const stateSlot = slots.obs.state;
+    const vfdTripSlot = slots.fault.vfdTrip;
+    const rampFailSlot = slots.fault.rampFail;
+    const speedDeviationSlot = slots.fault.speedDeviation;
+    const commLossSlot = slots.fault.commLoss;
+    const notReadySlot = slots.fault.notReady;
+    const localModeSlot = slots.fault.localMode;
+    const vfdTrip = ctx.fault(vfdTripSlot);
+    const rampFail = ctx.fault(rampFailSlot);
+    const speedDeviation = ctx.fault(speedDeviationSlot);
+    const commLoss = ctx.fault(commLossSlot);
+    const notReady = ctx.fault(notReadySlot);
+    const localMode = ctx.fault(localModeSlot);
+    const cmdRun = ctx.cmd(runCmdSlot) === true;
+    const cmdRefRaw = ctx.cmd(speedRefSlot);
     const cmdRef = typeof cmdRefRaw === 'number' ? cmdRefRaw : 0;
     // commLoss (OQ-271): latch lệnh + đóng băng speedFb tại giá trị lúc fault bật.
     if (commLoss.active) {
@@ -244,16 +263,16 @@ export const motorVfdModel: EquipmentModel<MotorVfdParams, MotorVfdState> = {
     const ready = !notReady.active && !vfdTrip.active && !commLoss.active;
     const remote = !localMode.active;
     const tripped = s.state === 'TRIPPED';
-    ctx.setObs('speedPct', s.speedPct);
-    ctx.setObs('targetPct', target);
-    ctx.setObs('currentA', currentA);
-    ctx.setObs('running', runFb);
-    ctx.setObs('state', s.state);
-    ctx.emit('runFb', runFb);
-    ctx.emit('speedFb', s.speedFb);
-    ctx.emit('ready', ready);
-    ctx.emit('remote', remote);
-    ctx.emit('vfdFaultOk', p.faultNC ? !tripped : tripped);
-    ctx.emit('currentFb', currentA);
+    ctx.setObs(speedPctSlot, s.speedPct);
+    ctx.setObs(targetPctSlot, target);
+    ctx.setObs(currentASlot, currentA);
+    ctx.setObs(runningSlot, runFb);
+    ctx.setObs(stateSlot, s.state);
+    ctx.emit(runFbSlot, runFb);
+    ctx.emit(speedFbSlot, s.speedFb);
+    ctx.emit(readySlot, ready);
+    ctx.emit(remoteSlot, remote);
+    ctx.emit(vfdFaultOkSlot, p.faultNC ? !tripped : tripped);
+    ctx.emit(currentFbSlot, currentA);
   },
 };
