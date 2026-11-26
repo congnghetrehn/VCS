@@ -2,12 +2,12 @@
 // Demo A–D qua CLI thật (exit 0 + hash ổn định), expect sai → 1, lỗi → 2,
 // sai tham số → 3, smoke mode, spawn pnpm vcs thật.
 import { execFile } from 'node:child_process';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { describe, expect, it, vi } from 'vitest';
-import { plantRunCommand } from './plant.js';
+import { plantRunCommand, plantValidateCommand } from './plant.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -189,4 +189,78 @@ describe('vcs plant run — spawn pnpm vcs thật', () => {
     expect(hashA).toMatch(/^[0-9a-f]{64}$/);
     expect(hashB).toBe(hashA);
   }, 120_000);
+});
+
+describe('vcs plant validate (M2 §10, P2.7 commit 5, OQ-376)', () => {
+  async function runValidateCaptured(
+    dir: string | undefined,
+    opts?: Parameters<typeof plantValidateCommand>[1],
+  ): Promise<{ code: number; out: string }> {
+    const c = capture();
+    try {
+      const code = await plantValidateCommand(dir, opts);
+      return { code, out: c.lines.join('\n') };
+    } finally {
+      c.restore();
+    }
+  }
+
+  it('examples/motor-interlock → exit 0, in OK + PL-W001 (role optional chưa gán)', async () => {
+    const { code, out } = await runValidateCaptured(MOTOR);
+    expect(code).toBe(0);
+    expect(out).toContain('OK: Motor Interlock — 1 thiết bị, 8 tags');
+    expect(out).toContain('PL-W001');
+  });
+
+  it('--json → JSON parse được, valid true, equipment 1', async () => {
+    const { code, out } = await runValidateCaptured(MOTOR, { json: true });
+    expect(code).toBe(0);
+    const parsed = JSON.parse(out) as {
+      name: string;
+      valid: boolean;
+      equipment: number;
+      tags: number;
+      diagnostics: unknown[];
+    };
+    expect(parsed.name).toBe('Motor Interlock');
+    expect(parsed.valid).toBe(true);
+    expect(parsed.equipment).toBe(1);
+    expect(parsed.tags).toBe(8);
+  });
+
+  it('thiếu [dir] → exit 3', async () => {
+    const { code } = await runValidateCaptured(undefined);
+    expect(code).toBe(3);
+  });
+
+  it('thư mục không tồn tại → exit 3', async () => {
+    const { code } = await runValidateCaptured(join(tmpdir(), 'vcs-khong-ton-tai-p27'));
+    expect(code).toBe(3);
+  });
+
+  it('project không có plant (hello-tags) → exit 2', async () => {
+    const { code, out } = await runValidateCaptured(
+      join(ROOT, 'examples', 'hello-tags'),
+    );
+    expect(code).toBe(2);
+    expect(out).toContain('không có plant');
+  });
+
+  it('plant model không tồn tại → exit 2 + PL-E001', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'vcs-plant-validate-'));
+    try {
+      await cp(join(ROOT, 'examples', 'hello-tags'), dir, { recursive: true });
+      await mkdir(join(dir, 'plant'), { recursive: true });
+      await writeFile(
+        join(dir, 'plant', 'equipment.yaml'),
+        '- id: X01\n  model: no_such_model\n  signals:\n    runCmd: BTN_START\n',
+        'utf8',
+      );
+      const { code, out } = await runValidateCaptured(dir);
+      expect(code).toBe(2);
+      expect(out).toContain('PL-E001');
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
 });

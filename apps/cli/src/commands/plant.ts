@@ -7,7 +7,14 @@
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { basename, dirname } from 'node:path';
 import { createSimulation, TraceHasher, type TagChange } from '@vcs/kernel';
-import { parseScenarioYaml, runScenario, type PlantEngine, type Scenario } from '@vcs/plant';
+import {
+  parseScenarioYaml,
+  runScenario,
+  validatePlantConfig,
+  type PlantConfig,
+  type PlantEngine,
+  type Scenario,
+} from '@vcs/plant';
 import { loadProject, nodeFS, type ProjectModel } from '@vcs/project';
 import { formatDiagnostic, hasErrors, parseDuration, type TagValue } from '@vcs/schemas';
 import { loadPlcProgram, plcExtension, startPlcControllers, type PlcLoadResult } from '@vcs/server';
@@ -380,4 +387,78 @@ async function plantSmoke(
     if (parsed.hash === true) console.log(`hash: ${hash}`);
   }
   return 0;
+}
+
+export interface PlantValidateOptions {
+  json?: boolean;
+}
+
+/**
+ * Dựng PlantConfig từ ProjectModel đã nạp (seed ở config gốc, stepMs/
+ * plcScanMs ở config.simulation — mirror plantExtension). Trả undefined
+ * khi project không có file plant (plant là opt-in).
+ */
+export function buildPlantConfig(model: ProjectModel): PlantConfig | undefined {
+  if (model.plant === undefined) return undefined;
+  return {
+    stepMs: model.config.simulation.stepMs,
+    seed: model.config.seed,
+    equipment: model.plant,
+    tags: new Map(model.tags.map((t) => [t.name, t])),
+    // plcScanMs sau transform luôn có (mặc định = stepMs, project.ts:59).
+    plcScanMs: model.config.simulation.plcScanMs,
+  };
+}
+
+/** Lệnh `vcs plant validate [dir] [--json]` (M2 §10, P2.7 commit 5, OQ-376).
+ *  Chỉ kiểm tra cấu hình plant bằng `validatePlantConfig` (không chạy).
+ *  Exit: 0 ok (warning vẫn 0), 2 có error / không project / không plant,
+ *  3 sai tham số. */
+export async function plantValidateCommand(
+  dir: string | undefined,
+  opts?: PlantValidateOptions,
+): Promise<number> {
+  if (dir === undefined || dir === '') {
+    console.error('vcs plant validate: thiếu [dir] — dùng: vcs plant validate <dir> [--json]');
+    return 3;
+  }
+  if (!(await isDirectory(dir))) {
+    console.error(`vcs plant validate: không tìm thấy thư mục '${dir}'`);
+    return 3;
+  }
+  const model = await loadProject(nodeFS(dir));
+  if (hasErrors(model.diagnostics)) {
+    for (const d of model.diagnostics) console.log(formatDiagnostic(d));
+    return 2;
+  }
+  const cfg = buildPlantConfig(model);
+  if (cfg === undefined) {
+    console.error('vcs plant validate: project không có plant (thêm plant/equipment.yaml rồi chạy lại).');
+    return 2;
+  }
+  const diagnostics = validatePlantConfig(cfg, cfg.tags);
+  if (opts?.json === true) {
+    console.log(
+      JSON.stringify(
+        {
+          name: model.config.name,
+          valid: !hasErrors(diagnostics),
+          equipment: cfg.equipment.length,
+          tags: cfg.tags.size,
+          diagnostics,
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    for (const d of model.diagnostics) console.log(formatDiagnostic(d));
+    for (const d of diagnostics) console.log(formatDiagnostic(d));
+    if (!hasErrors(diagnostics)) {
+      console.log(
+        `OK: ${model.config.name} — ${String(cfg.equipment.length)} thiết bị, ${String(cfg.tags.size)} tags`,
+      );
+    }
+  }
+  return hasErrors(diagnostics) ? 2 : 0;
 }
