@@ -4,6 +4,7 @@
 
 import { Command } from 'commander';
 import { goldenRunCommand } from './golden.js';
+import { plantRunCommand } from './plant.js';
 import { runCommand } from './run.js';
 import { serveCommand } from './serve.js';
 import { validateCommand } from './validate.js';
@@ -95,6 +96,39 @@ export function createProgram(): Command {
     .action(async (path: string | undefined) => {
       process.exitCode = await goldenRunCommand(path);
     });
+
+  const plant = program.command('plant').description('Lệnh liên quan tới plant vòng kín (M2 §11.4)');
+  plant
+    .command('run')
+    .description('Chạy kịch bản vòng kín (exit 0 pass, 1 có expect fail, 2 không chạy được, 3 sai tham số)')
+    .argument('[dir]', 'thư mục dự án')
+    .option('--scenario <file>', 'file scenario YAML (lặp được)', (v: string, acc: string[]) => [...acc, v], [] as string[])
+    .option('--until <duration>', 'chạy tới thời gian mô phỏng (vd 5s)')
+    .option('--steps <n>', 'số bước chạy')
+    .option('--step-ms <n>', 'ghi đè stepMs của project/scenario')
+    .option('--plc-scan-ms <n>', 'ghi đè plcScanMs của project/scenario')
+    .option('--watch <tags>', 'tag cần in, ngăn bằng dấu phẩy')
+    .option('--csv <file>', 'ghi chuỗi thay đổi ra file CSV')
+    .option('--hash', 'in TraceHasher.hash() sau khi chạy')
+    .option('--json', 'in JSON thay cho text')
+    .action(
+      async (
+        dir: string | undefined,
+        opts: {
+          scenario?: string[];
+          until?: string;
+          steps?: string;
+          stepMs?: string;
+          plcScanMs?: string;
+          watch?: string;
+          csv?: string;
+          hash?: boolean;
+          json?: boolean;
+        },
+      ) => {
+        process.exitCode = await plantRunCommand(dir, opts);
+      },
+    );
 
   return program;
 }
