@@ -1,11 +1,13 @@
 {
   "generated": "2026-11-24",
-  "note": "Baseline bench M0 §12.4 (P0.7): trung vị 5 lần chạy `pnpm bench` trên VM chia sẻ (1,5 CPU). Mỗi lần chạy bench đã lấy trung vị mẫu nội bộ. Độ dao động giữa 5 lần chạy lớn (xem ranges) — so sánh hồi quy > 20% chỉ là CẢNH BÁO, không fail. bench/results.json vẫn gitignore (D8), không commit.",
+  "note": "Baseline bench M0 §12.4 (P0.7): trung vị 5 lần chạy `pnpm bench` trên VM chia sẻ (1,5 CPU). Mỗi lần chạy bench đã lấy trung vị mẫu nội bộ. Độ dao động giữa 5 lần chạy lớn (xem ranges) — so sánh hồi quy > 20% chỉ là CẢNH BÁO, không fail. bench/results.json vẫn gitignore (D8), không commit. P2.3 (2026-11-26): thêm key plant — baseline trước fix 128 bước/s (phạm vi 120–131); sau fix OQ-267/commit 10 cập nhật baseline mới: trung vị 5 runs 1300 bước/s (phạm vi 1207–1394), heap −16,18 MB. Ngưỡng M2 §12 (≥ 5000 bước/s) vẫn chưa đạt — không đổi ngưỡng, chờ quyết định owner.",
   "ranges": {
     "flushChangesMs": [0.061, 0.105],
     "flushNoChangeUs": [0.14, 0.27],
     "heapIncreaseMB": [-0.05, -0.04],
     "orchestratorStepsPerSec": [337259, 488762],
+    "plantHeapIncreaseMB": [-16.22, -16.18],
+    "plantStepsPerSec": [1207, 1394],
     "setGetOpsPerSec": [36915506, 52181321]
   },
   "results": {
@@ -13,6 +15,8 @@
     "flushNoChangeUs": 0.15,
     "heapIncreaseMB": -0.04,
     "orchestratorStepsPerSec": 411614,
+    "plantHeapIncreaseMB": -16.18,
+    "plantStepsPerSec": 1300,
     "setGetOpsPerSec": 45354782
   },
   "runs": 5
