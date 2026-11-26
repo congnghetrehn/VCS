@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { equipmentInstanceSchema, sourceSpecSchema } from './equipment.js';
+import { equipmentFileSchema, equipmentInstanceSchema, sourceSpecSchema } from './equipment.js';
 import { faultInfoSchema, faultRequestSchema, faultTimingSchema, signalFaultTypeSchema } from './fault.js';
 import { importProfileSchema } from './import-profile.js';
 import { namingConfigSchema } from './naming.js';
@@ -76,6 +76,49 @@ describe('equipmentInstanceSchema', () => {
 
   it('id rỗng → lỗi', () => {
     expect(() => equipmentInstanceSchema.parse({ id: '', model: 'motor_dol' })).toThrow();
+  });
+
+  it('controller §4.2 được giữ (optional)', () => {
+    const e = equipmentInstanceSchema.parse({
+      id: 'CR01_M01',
+      model: 'motor_dol',
+      controller: 'PLC1',
+    });
+    expect(e.controller).toBe('PLC1');
+  });
+
+  it('khóa lạ (description/initial §4.2) bị strip', () => {
+    const e = equipmentInstanceSchema.parse({
+      id: 'CR01_M01',
+      model: 'motor_dol',
+      description: 'Crusher main motor',
+      initial: {},
+    });
+    expect('description' in e).toBe(false);
+    expect('initial' in e).toBe(false);
+  });
+});
+
+describe('equipmentFileSchema — plant/equipment.yaml (M2 §4.2, P2.4)', () => {
+  it('danh sách 2 thiết bị hợp lệ (kèm controller)', () => {
+    const f = equipmentFileSchema.parse([
+      { id: 'CR01_M01', model: 'motor_dol', controller: 'PLC1', params: { startDelayMs: 500 } },
+      { id: 'CR01_LT01', model: 'analog_sensor', source: { kind: 'const', value: 0 } },
+    ]);
+    expect(f).toHaveLength(2);
+    expect(f[0]?.controller).toBe('PLC1');
+  });
+
+  it('danh sách rỗng hợp lệ', () => {
+    expect(equipmentFileSchema.parse([])).toEqual([]);
+  });
+
+  it('phần tử thiếu model → lỗi', () => {
+    expect(() => equipmentFileSchema.parse([{ id: 'X' }])).toThrow();
+  });
+
+  it('không phải mảng → lỗi', () => {
+    expect(() => equipmentFileSchema.parse({ id: 'CR01_M01', model: 'motor_dol' })).toThrow();
   });
 });
 

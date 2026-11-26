@@ -3,6 +3,7 @@
 
 import { z } from 'zod';
 import { dataTypeSchema, diagnosticSchema, tagValueSchema } from './common.js';
+import { faultRequestSchema, faultTimingSchema } from './fault.js';
 
 export const PROTOCOL_VERSION = 1;
 
@@ -83,6 +84,35 @@ const plcUnforceSchema = z.object({
   ref: z.string().min(1),
 });
 
+/** P2.4 (OQ-318): chèn lỗi plant qua WS — validate bằng faultRequestSchema. */
+const plantFaultInjectSchema = z.object({
+  type: z.literal('plant.fault.inject'),
+  request: faultRequestSchema,
+});
+
+/** P2.4 (OQ-318): clear tay một lỗi plant (id record từ inject/listFaults). */
+const plantFaultClearSchema = z.object({
+  type: z.literal('plant.fault.clear'),
+  id: z.string().min(1),
+});
+
+/**
+ * P2.4 (OQ-318, tier B): áp preset lỗi của model (vd noRunFeedback của
+ * motor_dol) — kịch bản B (§11.4) chỉ lái tay được qua preset; `when`
+ * mặc định {at:'now'} (panel truyền {at:'time', timeMs: simTimeMs} như
+ * inject để khớp mốc scenario).
+ */
+const plantFaultPresetSchema = z.object({
+  type: z.literal('plant.fault.preset'),
+  equipment: z.string().min(1),
+  preset: z.string().min(1),
+  when: faultTimingSchema.optional(),
+});
+
+export type PlantFaultInjectMessage = z.infer<typeof plantFaultInjectSchema>;
+export type PlantFaultClearMessage = z.infer<typeof plantFaultClearSchema>;
+export type PlantFaultPresetMessage = z.infer<typeof plantFaultPresetSchema>;
+
 export const clientMessageSchema = z.discriminatedUnion('type', [
   helloSchema,
   simCommandSchema,
@@ -95,6 +125,9 @@ export const clientMessageSchema = z.discriminatedUnion('type', [
   plcWriteSchema,
   plcForceSchema,
   plcUnforceSchema,
+  plantFaultInjectSchema,
+  plantFaultClearSchema,
+  plantFaultPresetSchema,
 ]);
 
 export type ClientMessage = z.infer<typeof clientMessageSchema>;

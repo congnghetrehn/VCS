@@ -142,7 +142,7 @@ describe('migrateProject', () => {
   });
 });
 
-describe('projectSchema — files.comms/hmi (P0.8, B5)', () => {
+describe('projectSchema — files.comms/hmi/plant (P0.8, B5; P2.4 files.plant)', () => {
   it('vắng files → defaults đầy đủ', () => {
     const r = projectSchema.safeParse(BASE);
     expect(r.success).toBe(true);
@@ -151,11 +151,12 @@ describe('projectSchema — files.comms/hmi (P0.8, B5)', () => {
         tags: 'tags/tags.yaml',
         comms: 'comms/comms.yaml',
         hmi: 'hmi/',
+        plant: 'plant/equipment.yaml',
       });
     }
   });
 
-  it('files chỉ có tags → comms/hmi lấy default', () => {
+  it('files chỉ có tags → comms/hmi/plant lấy default', () => {
     const r = projectSchema.safeParse({ ...BASE, files: { tags: 't/tags.yaml' } });
     expect(r.success).toBe(true);
     if (r.success) {
@@ -163,6 +164,7 @@ describe('projectSchema — files.comms/hmi (P0.8, B5)', () => {
         tags: 't/tags.yaml',
         comms: 'comms/comms.yaml',
         hmi: 'hmi/',
+        plant: 'plant/equipment.yaml',
       });
     }
   });
@@ -174,8 +176,22 @@ describe('projectSchema — files.comms/hmi (P0.8, B5)', () => {
     });
     expect(r.success).toBe(true);
     if (r.success) {
-      expect(r.data.files).toEqual({ tags: 't/tags.yaml', comms: 'c/c.yaml', hmi: 'h/' });
+      expect(r.data.files).toEqual({
+        tags: 't/tags.yaml',
+        comms: 'c/c.yaml',
+        hmi: 'h/',
+        plant: 'plant/equipment.yaml',
+      });
     }
+  });
+
+  it('files.plant tường minh được giữ', () => {
+    const r = projectSchema.safeParse({
+      ...BASE,
+      files: { plant: 'p/eq.yaml' },
+    });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.files.plant).toBe('p/eq.yaml');
   });
 
   it('files.comms/hmi không báo PRJ-W001', () => {
@@ -194,6 +210,20 @@ files:
       tags: 'tags/tags.yaml',
       comms: 'comms/comms.yaml',
       hmi: 'hmi/',
+      plant: 'plant/equipment.yaml',
     });
+  });
+
+  it('files.plant không báo PRJ-W001 (khóa lạ)', () => {
+    const text = `schemaVersion: 1
+name: Demo
+files:
+  plant: plant/eq.yaml
+`;
+    const r = parseYamlWithSchema('vcs.project.yaml', text, projectSchema, {
+      shape: PROJECT_SHAPE,
+    });
+    expect(r.diagnostics.map((d) => d.code)).not.toContain('PRJ-W001');
+    expect(r.value?.files.plant).toBe('plant/eq.yaml');
   });
 });
