@@ -23,6 +23,7 @@ const THRESHOLD = 0.2; // 20%
 const METRICS = {
   setGetOpsPerSec: true,
   orchestratorStepsPerSec: true,
+  plantStepsPerSec: true,
   flushNoChangeUs: false,
   flushChangesMs: false,
 };
@@ -81,6 +82,16 @@ function main() {
     );
   } else {
     console.log(`check-bench-regression: heapIncreaseMB OK (${String(heap)} MB).`);
+  }
+  // heap plant: chỉ cảnh báo khi vượt ngưỡng tuyệt đối M2 §12 (< 1 MB).
+  const plantHeap = current.plantHeapIncreaseMB;
+  if (typeof plantHeap === 'number' && plantHeap >= 1) {
+    warned += 1;
+    console.log(
+      `::warning::check-bench-regression: plantHeapIncreaseMB ${plantHeap} MB vượt ngưỡng M2 §12 (< 1 MB).`,
+    );
+  } else {
+    console.log(`check-bench-regression: plantHeapIncreaseMB OK (${String(plantHeap)} MB).`);
   }
   if (warned > 0) {
     console.log(`check-bench-regression: ${warned} cảnh báo hồi quy (không fail).`);
