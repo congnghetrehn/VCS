@@ -8,6 +8,8 @@ import {
   PROTOCOL_VERSION,
   serverMessageSchema,
   type ClientMessage,
+  type FaultRequest,
+  type FaultTiming,
   type ServerMessage,
   type TagValue,
 } from '@vcs/schemas';
@@ -173,6 +175,24 @@ export class WsClient {
 
   plcUnforce(ref: string): boolean {
     return this.send({ type: 'plc.unforce', ref });
+  }
+
+  /** P2.4 (OQ-318) — chèn lỗi plant (validate faultRequestSchema ở server). */
+  plantFaultInject(request: FaultRequest): boolean {
+    return this.send({ type: 'plant.fault.inject', request });
+  }
+
+  /** P2.4 (OQ-318) — clear tay lỗi plant (id record). */
+  plantFaultClear(id: string): boolean {
+    return this.send({ type: 'plant.fault.clear', id });
+  }
+
+  /** P2.4 (OQ-318, tier B) — áp preset lỗi của model (vd noRunFeedback). */
+  plantFaultPreset(equipment: string, preset: string, when?: FaultTiming): boolean {
+    if (when === undefined) {
+      return this.send({ type: 'plant.fault.preset', equipment, preset });
+    }
+    return this.send({ type: 'plant.fault.preset', equipment, preset, when });
   }
 
   #handleText(text: string | null): void {

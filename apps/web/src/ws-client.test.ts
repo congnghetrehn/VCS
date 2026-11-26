@@ -225,4 +225,55 @@ describe('WsClient', () => {
     expect(client.plcWatch([])).toBe(false);
     client.stop();
   });
+
+  it('plant.fault.* gửi đúng JSON; inject sai schema → false (P2.4, OQ-318)', () => {
+    const sockets: FakeWebSocket[] = [];
+    const client = new WsClient('ws://x/ws', () => {
+      const s = new FakeWebSocket();
+      sockets.push(s);
+      return s;
+    }, {
+      onMessage: () => {},
+      onConnectionChange: () => {},
+    });
+    client.connect();
+    sockets[0]?.open();
+    expect(
+      client.plantFaultInject({
+        target: { equipment: 'M01', fault: 'overload' },
+        when: { at: 'now' },
+      }),
+    ).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({
+        type: 'plant.fault.inject',
+        request: { target: { equipment: 'M01', fault: 'overload' }, when: { at: 'now' } },
+      }),
+    );
+    expect(client.plantFaultClear('F-0001')).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({ type: 'plant.fault.clear', id: 'F-0001' }),
+    );
+    expect(client.plantFaultPreset('M01', 'noRunFeedback')).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({ type: 'plant.fault.preset', equipment: 'M01', preset: 'noRunFeedback' }),
+    );
+    expect(client.plantFaultPreset('M01', 'noRunFeedback', { at: 'time', timeMs: 1000 })).toBe(true);
+    expect(sockets[0]?.sent.at(-1)).toBe(
+      JSON.stringify({
+        type: 'plant.fault.preset',
+        equipment: 'M01',
+        preset: 'noRunFeedback',
+        when: { at: 'time', timeMs: 1000 },
+      }),
+    );
+    // FaultRequest thiếu target → safeParse fail → false, không gửi.
+    expect(
+      client.plantFaultInject({ when: { at: 'now' } } as unknown as Parameters<
+        typeof client.plantFaultInject
+      >[0]),
+    ).toBe(false);
+    expect(client.plantFaultClear('')).toBe(false);
+    client.stop();
+  });
 });
