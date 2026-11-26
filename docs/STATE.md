@@ -11,9 +11,9 @@
 ## 1. Vị trí hiện tại
 
 - Milestone: **M1 — ĐÃ KÝ 2026-11-25** (M0 đã ký 2026-11-24, trên main `31c7200`; P1.1–P1.7 + G1 đã merge vào `develop` qua PR #20–#27; M1 đã đẩy main PR #29 `1a2beed3`; P0.9 đã merge PR #30 `6a9d083` vào `develop`)
-- Prompt đang làm / vừa xong: P2.1 — **✔ đã merge PR #31 `348f4dd` vào `develop` 2026-11-26 03:49 +07**. Tiếp theo: P2.2 (plan §25, bản này).
-- Nhánh: `m2/p2.2-motor-dol` (từ `598618f` = P2.1 trên `develop` `348f4dd`)
-- Cập nhật lần cuối: 2026-11-26 bởi AI (P2.1 đã merge PR #31; P2.2 plan §25)
+- Prompt đang làm / vừa xong: P2.2 — **✔ đã merge PR #32 `6e5505c` vào `develop` 2026-11-26 04:59 +07**. Tiếp theo: P2.3 (plan §26, bản này).
+- Nhánh: `m2/p2.3-other-models` (từ `52b9fbb` = P2.2 trên `develop` `6e5505c`)
+- Cập nhật lần cuối: 2026-11-26 bởi AI (P2.2 đã merge PR #32; P2.3 plan §26)
 
 ## 2. Tiến độ prompt
 
@@ -38,8 +38,8 @@
 | P1.7   | ✔ xong (gate xanh local; đã merge PR #26 `7a927e1` vào `develop` 2026-11-25 16:23 +07, CI 8 successful + 2 skipped) | PR #26, nhánh `m1/p1.7-golden-runner` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-25 (1927 test, 76 file; 178 test mới) + build xanh + bench softplc 1738 scan/s (parent) / 1664 scan/s (G1) | xem §22; OQ-197…216 đóng, OQ-217 mới, OQ-161 mở |
 | G1     | ✔ đã ký 2026-11-25 (gói nghiệm thu `docs/acceptance/M1.md`, 9/9 §16 ĐẠT; probe bổ sung 4/4 PASS; §16.5 + OQ-161 chưa quyết, giữ mặc định) | nhánh `m1/g1-acceptance` (đã merge PR #27 `85ab770`) | gate xanh 2026-11-25 ở bản sao sạch `/tmp/vcs-g1` (1927 test + coverage PASS, e2e 6/6, bench softplc 1664 scan/s) | gói nghiệm thu M1; ký là tier C |
 | P2.1   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #31 `348f4dd` vào `develop` 2026-11-26 03:49 +07, CI 8 successful + 2 skipped) | PR #31, nhánh `m2/p2.1-plant-foundation` (đã merge) | lint/typecheck/depcheck/test/review:cheats xanh 2026-11-26 (2121 test, 87 file; 175 test mới) + build xanh + bench softplc 1677 scan/s (parent) | xem §24; OQ-235…252 đóng |
-| P2.2   | ◐ đang làm (plan §25, 2026-11-26; 14 OQ tier B OQ-253…266, không có tier C chặn) | nhánh `m2/p2.2-motor-dol` (plan) |                                                                                                                                                                           | ⚠ plan-first; X-003 không chặn P2.2 (chỉ chặn P2.7) |
-| P2.3   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
+| P2.2   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #32 `6e5505c` vào `develop` 2026-11-26 04:59 +07, CI 8 successful + 2 skipped) | PR #32, nhánh `m2/p2.2-motor-dol` (đã merge) | lint/typecheck/depcheck/test/review:cheats xanh 2026-11-26 (2171 test, 91 file; 50 test mới) + build xanh + bench softplc 1708 scan/s (parent) | xem §25; OQ-253…266 đóng, OQ-267 mở |
+| P2.3   | ◐ đang làm (plan §26, 2026-11-26; 33 OQ tier B OQ-268…300, không có tier C chặn) | nhánh `m2/p2.3-other-models` (plan) | | ⚠ plan-first; X-003 không chặn P2.3 (chỉ chặn P2.7) |
 | P2.4   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P2.5   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | P2.6   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
@@ -3369,7 +3369,7 @@ TRƯỚC KHI CODE: tự tính tay bảng timeline M2 §11.1 (startDelayMs 500, s
 Gate: ≥ 14 golden motor_dol; mỗi fault/preset có test.
 ```
 **Nhánh:** `m2/p2.2-motor-dol` (từ `598618f`, nội dung = develop sau PR #31).
-**Trạng thái:** ☑ plan → ☑ implement → ☑ gate (xanh, bản sao sạch `~/.cache/vcs-p22`) → ☐ PR → ☐ merge.
+**Trạng thái:** ☑ plan → ☑ implement → ☑ gate (xanh, bản sao sạch `~/.cache/vcs-p22`) → ☑ PR #32 → ☑ merge `6e5505c` vào `develop` 2026-11-26 04:59 +07.
 
 ### Đọc
 - AGENTS.md (luật, gate, tier A/B/C); PROMPTS M2 phase P2.2; M2 spec §2
@@ -3759,3 +3759,576 @@ motor_dol.md` sinh bằng `pnpm docs:equipment` (4623 bytes).
    (chạy dài tới 2000 kẹp 100; dừng ở 2010, về 0 ở 5100).
 8. **Test `currentFb` tag round-trip:** đọc lại qua adapter cho 53.53 ±
    0.01 (sai số làm tròn raw 1 đơn vị ≈ 0.0036 A) — ghim ở OQ-258.
+
+## 26. P2.3 — các model còn lại (plan)
+
+**Prompt (PROMPTS M2, phase P2.3 — nguyên văn):**
+```
+Làm P2.3 theo AGENTS.md §9. Đọc: … → M2 §7.2–7.8, 11.1.
+Nhiệm vụ: motor_vfd, valve_onoff, valve_ctrl + damper (deriveModel), analog_sensor, switch_di, silo_bin, conveyor_simple. Mỗi model 1 commit; golden timeline + test fault; docgen.
+Gate: số golden theo M2 §11.1; docs/equipment/*.md sinh tự động và CI --check khớp.
+```
+**Nhánh:** `m2/p2.3-other-models` (từ `52b9fbb`, nội dung = develop sau PR #32).
+**Trạng thái:** ☑ plan → ☐ implement → ☐ gate → ☐ PR → ☐ merge.
+
+### Đọc
+- AGENTS.md (luật, gate, tier A/B/C); docs/agent/SOUL.md; docs/AUTONOMY.md;
+  PROMPTS M2 phase P2.3; M2 spec §7.2–7.8 (model), §11.1 (golden tối thiểu),
+  §11.2 (engine), §12 (bench), §15 (mặc định); STATE §25 (P2.2);
+  AMENDMENTS (không mục nào đổi M2 §7/§11); OWNER-INBOX (§6 R-007);
+  PACKAGE-RULES.md §`@vcs/plant`.
+- Điểm xuất phát P2.2 (đã merge PR #32 `6e5505c`, 2026-11-26 04:59 +07):
+  `@vcs/plant` (registry + `deriveModel`, engine, FaultManager, adapter,
+  delay/lag/rate-limit/hysteresis/on-off-delay/`DelayLine`, rng mulberry32,
+  EventLog, source manual/const/ramp/sine/link + topo, snapshot/restore
+  deep-copy state, golden runner + schema, docgen + `docs:equipment` +
+  CI `--check`), model `motor_dol` (6 role, 15 param, 5 state, 6 luật),
+  2171 test (91 file), plant coverage 94.06% lines, diagnostics 58 mã,
+  lint heap 4096 (script `lint` đã có NODE_OPTIONS).
+- Đã kiểm code thật (không suy đoán): `registry.ts` (`deriveModel` spread
+  base + patch, không override `paramsSchema`); `engine.ts` (1 source/thiết
+  bị qua `inst.source`, `setSource`/`setManual`, `ctx` ổn định identity mỗi
+  bước, `#emit` tạo key `${id}:${role}` + object kết quả `applyEmit`,
+  `equipmentFault()` spread params — OQ-267); `source.ts` (`evalSource`
+  thuần, nhận `getObs`); `delay.ts` (`DelayLine` ring buffer n bước +
+  snapshot/restore — chỉ FaultManager dùng, KHÔNG ở được trong state model
+  vì class instance không JSON-serializable); `golden/runner.ts`
+  (expect resolve role trước rồi observable; số `|a−b| ≤ 0.01`);
+  `golden/motor-dol.test.ts` (inventory assert đúng 1 file/14 case — sẽ vỡ
+  khi thêm file golden thứ 2, OQ-295); `scripts/gen-equipment-docs.ts`
+  (lặp `defaultRegistry.list()` — model mới tự vào docs);
+  `scripts/check-bench-regression.mjs` (METRICS hardcode 4 key +
+  heap tuyệt đối, chưa có key plant); `bench/*.bench.ts` (mỗi file merge
+  key riêng vào `bench/results.json`); `fault.ts` (14 loại signal fault).
+
+### Tóm tắt hiểu biết (≤ 8 dòng)
+1. P2.3 = 7 model mới + `damper` (derive từ `valve_ctrl`): `motor_vfd`,
+   `valve_onoff`, `valve_ctrl`, `damper`, `analog_sensor`, `switch_di`,
+   `silo_bin`, `conveyor_simple` (M2 §7.2–7.8); mỗi model 1 commit.
+2. Tái dùng toàn bộ nền P2.1/P2.2: golden runner/schema, docgen, helpers
+   (`lagStep`/`rateLimitStep`/`hysteresisStep`/on-off-delay), adapter,
+   FaultManager, source engine. Chỉ mở rộng nền ở 2 chỗ (đều additive):
+   named sources cho `silo_bin`/`conveyor_simple` (OQ-290), harness golden
+   tổng quát (OQ-295).
+3. Golden tối thiểu §11.1: vfd 10, valve_onoff 10, valve_ctrl 6, damper 3
+   (không có trong §11.1 — OQ-298), analog_sensor 8, switch_di 8,
+   silo_bin 6, conveyor_simple 8 = **59 case**; mỗi fault ≥ 1 test.
+4. Bench plant §12 (OQ-245 hoãn từ P2.1): 500 thiết bị hỗn hợp, ≥ 5000
+   bước/s, heap < 1 MB sau 100 000 bước — đo ở P2.3 (OQ-296).
+5. OQ-267 (ctx.fault/emit cấp phát mỗi bước): đo bằng bench trước, sửa
+   sau, ghi số trước/sau (OQ-297) — không sửa mù.
+6. Không cần I/O list thật (X-003 chỉ chặn P2.7); không chạm OQ-161
+   (không FB lồng); không đổi spec M1 → không SCR.
+7. Không mã diagnostic mới (dùng PL-E001/E003/E012/E020 có sẵn);
+   coverage plant giữ 85 lines; diagnostics giữ 58 mã.
+8. Test target ≥ 150 mới (59 golden + ~83 unit + ~18 nền/harness/bench),
+   tổng ≥ 2321.
+
+### Phạm vi
+**Làm:**
+- 8 model mới (`packages/plant/src/models/<model>.ts` + test + golden YAML
+  + đăng ký `defaultRegistry` trong `models/index.ts` + export qua
+  `index.ts`): `motor_vfd`, `valve_onoff`, `valve_ctrl`, `damper`
+  (deriveModel từ `valve_ctrl`), `analog_sensor`, `switch_di`,
+  `silo_bin`, `conveyor_simple` (deriveModel từ `motor_dol` + step wrapper).
+- Nền additive (2 chỗ): named sources (OQ-290, trong commit `silo_bin`);
+  harness golden tổng quát (OQ-295, trong commit `motor_vfd`).
+- Bench plant `bench/plant.bench.ts` + nối vào script `pnpm bench` +
+  `check-bench-regression.mjs` mở rộng + `bench/baseline.json` thêm key
+  plant (OQ-296); sửa OQ-267 (OQ-297) — 2 commit riêng (bench, rồi fix).
+- `docs/equipment/<model>.md` × 8 (sinh bằng `pnpm docs:equipment`,
+  commit); `docs/semantics.md` §22 mới; STATE §26 + OQ-268…300 + R-008.
+- Thứ tự commit (PROMPTS: mỗi model 1 commit): (1) `motor_vfd`,
+  (2) `valve_onoff`, (3) `valve_ctrl`, (4) `damper`, (5) `analog_sensor`,
+  (6) `switch_di`, (7) `silo_bin`, (8) `conveyor_simple`,
+  (9) bench plant, (10) OQ-267 fix.
+**Không làm (out of scope):** loader file `plant/*.yaml` (P2.4, OQ-252);
+vòng kín + CLI `plant run` (P2.4); import CSV/XLSX (P2.5);
+address/validate/diff (P2.6); auto-suggest (P2.7, X-003); UI (P2.8);
+model P1 (crusher, mill, fan+damper, kiln drive, clinker cooler — ngoài M2,
+chỉ cần framework cho phép thêm bằng `registerModel`); sửa nền P2.1/P2.2
+(engine/FaultManager/adapter) trừ 2 chỗ ghi trên + khi test chỉ ra lỗi —
+khi đó sửa nền + ghi vào §26 "Lệch so với plan".
+
+### Thiết kế
+**0. Nguyên tắc chung (tái dùng P2.2, không phát minh lại):** mỗi model là
+`EquipmentModel` (`paramsSchema` zod không `.strict()` — quy ước P2.1;
+unknown key bị strip, test ghim); roles + synonyms **nguyên văn §7.2–7.8**
+(không tự bịa); `docs` (states/transitions/notes, OQ-260) cho docgen;
+`version: '1.0.0'` string (theo registry, spec §4.5 ghi `version: number`
+là lệch đã biết từ P2.2, không đổi registry); state JSON-serializable;
+step không cấp phát (trừ 1 ngoại lệ có ghi OQ: proxy ctx của conveyor,
+OQ-292); cmd/fault áp sau step(t), expect sau step(t) (OQ-254); số so
+`|a−b| ≤ 0.01` (OQ-257); 1 file golden/model, harness dựng fresh engine
+mỗi case (OQ-253/295). Harness test-helpers: thêm `make<Model>Setup`
+mỗi model + dispatcher `makeModelSetup(model, …)` (OQ-295); tag harness
+gán đủ role (OQ-258); AO scaling 0..100 % (OQ-299).
+**1. `motor_vfd` (§7.2):** 8 role (runCmd DO bắt buộc; speedRef AO % bắt
+buộc; runFb DI bắt buộc; speedFb AI % bắt buộc; ready/vfdFaultOk/remote DI
+tùy chọn; currentFb AI A tùy chọn); 9 tham số (`accelTimeS 10`,
+`decelTimeS 10`, `minSpeedPct 0`, `maxSpeedPct 100`, `runThresholdPct 2`,
+`speedFbLagMs 200`, `coastTimeS 20`, `ratedCurrentA 0`, `loadFraction 0.7`).
+`target = runCmd && canRun ? clamp(speedRef, min, max) : 0`; `speed` đuổi
+`target` bằng `rateLimitStep` (up `100/(accelTimeS×1000)`,
+down `100/(decelTimeS×1000)` mỗi ms); `runFb = speed > runThresholdPct`;
+`speedFb = lag(speed, speedFbLagMs)` (+ offset fault = 0, OQ-268);
+`currentA` theo OQ-274. States `STOPPED/RAMP_UP/AT_SPEED/RAMP_DOWN/TRIPPED`,
+chuyển đổi + thoát TRIPPED theo OQ-273 (so bằng `|speed−target| ≤ 1e-9`,
+không `===` float). Faults: `vfdTrip` (target=0, decel coast
+`100/(coastTimeS×1000)`, `ready=false`, `vfdFaultOk=false`),
+`rampFail` (OQ-272), `speedDeviation{pct}` (OQ-270), `commLoss` (OQ-271),
+`notReady`, `localMode`. Emit mỗi bước: runFb/speedFb/ready/remote/
+vfdFaultOk/currentFb (ready/remote/vfdFaultOk theo OQ-269).
+Observables: `speedPct`, `targetPct`, `currentA`, `running`, `state`.
+**2. `valve_onoff` (§7.3):** 5 role (openCmd DO bắt buộc; closeCmd DO tùy
+chọn; openLs/closedLs DI bắt buộc; fault DI tùy chọn); 5 tham số
+(`travelTimeMs 5000`, `singleSolenoid false`, `lsThresholdPct 1`,
+`initialPosPct 0`, `bothCmdPolicy 'hold'`). `dir = +1` nếu openCmd (và
+!closeCmd khi double), `−1` nếu closeCmd hoặc (single && !openCmd), `0`
+nếu hold; `pos += dir × 100/travelTimeMs × dt` (clamp 0..100);
+`openLs = pos ≥ 100−thr`, `closedLs = pos ≤ thr`. States
+`CLOSED/OPENING/OPEN/CLOSING/INTERMEDIATE` suy từ pos + dir
+(pos==0 → CLOSED; pos==100 → OPEN; dir +1 → OPENING; dir −1 → CLOSING;
+còn lại INTERMEDIATE). Faults: `stuckOpen`/`stuckClosed` (OQ-278),
+`stuckAtPos{pct}` (pos đóng băng tại giá trị khi fault bật — lưu vào
+state `frozenPos`), `slowTravel{factor}` (OQ-279), `travelTimeout`
+(OQ-276), `lsOpenFail`/`lsClosedFail` (LS tương ứng luôn false).
+`fault` DI = OR các equipment fault đang active, polarity theo OQ-275.
+`bothCmdPolicy` chỉ `'hold'` (OQ-277, warn 1 lần qua `ctx.log('warn')`
++ flag state `warnedBothCmd`). Observables: `posPct`, `moving`
+(dir != 0), `state`.
+**3. `valve_ctrl` + `damper` (§7.4):** 5 role (posRef AO % bắt buộc;
+posFb AI % bắt buộc; fault DI tùy chọn; closedLs/openLs DI tùy chọn);
+6 tham số (`strokeTimeS 20`, `lagMs 0`, `deadbandPct 0.5`,
+`failPosition 'hold'|'close'|'open'`, `initialPosPct 0`,
+`posFbRange {engMin:0, engMax:100}`). `target = |posRef−pos| >
+deadband ? clamp(posRef,0,100) : pos`; `rateLimitStep` với
+`100/(strokeTimeS×1000)`; `posFb = lag(pos, lagMs)` (lagMs=0 → bám ngay).
+closedLs/openLs ngưỡng cố định 1% (OQ-280). Faults: `stuck` (pos đóng
+băng), `drift{pctPerHour}` (OQ-281), `positionerFail` (OQ-282),
+`signalLoss` (OQ-283). `fault` DI theo OQ-275. Observables: `posPct`,
+`targetPct`. `damper = deriveModel(valve_ctrl, {type:'damper',
+defaultParams:{strokeTimeS:30}, description, docs})` — cùng
+`paramsSchema` (deriveModel không override schema, đã kiểm code);
+golden riêng 3 case (OQ-298).
+**4. `analog_sensor` (§7.5):** 1 role (`raw` AI Int bắt buộc, unit theo
+param); 6 tham số (`engMin`, `engMax`, `unit` — bắt buộc, OQ-284;
+`tauMs 0`, `noiseStd 0`, `initialValue` — OQ-286); `hasSource: true`
+(bắt buộc có source: manual/const/ramp/sine/link — engine mặc định
+`const 0` khi không cấu hình, như `fake_sensor` P2.1). `pv_target =
+ctx.source()`; `pv = lag(pv, pv_target, tauMs)`; `eng_out = pv + noise`
+(noise Gaussian Box-Muller, OQ-285; `noiseStd==0` → không gọi `rand()`
+để khỏi trôi PRNG stream); `emit('raw', eng_out)` (engine scale về raw
+theo `engMin/engMax`, clamp raw [−4864, 32511]). Không có equipment fault
+riêng — dùng signal fault (`drift`, `stuck`, `freeze`, `noise`, `spike`,
+`wireBreak`, `offset`, `gain` — 8/14 loại của `signalFaultTypeSchema`,
+mỗi loại ≥ 1 golden). Preset: `wireBreak`/`drift`/`stuck`/`noisy` →
+signal fault tương ứng trên role `raw`, không params (dùng mặc định
+FaultManager); drift rate cụ thể thì dùng entry `{signal}` trực tiếp
+trong golden. Observables: `pv` (eng), `raw` (int).
+**5. `switch_di` (§7.6):** 1 role (`di` DI Bool bắt buộc); 8 tham số
+(`kind` — bắt buộc, enum `level_high|level_low|zero_speed|pull_cord|
+limit|generic`; `invert false`; `onDelayMs 0`; `offDelayMs 0`;
+`threshold` — mặc định 0 khi không cho; `hysteresis 0`;
+`condition` — mặc định `'gt'`; `initialActive false`);
+`hasSource: true` (manual bool, hoặc link tới observable số/bool).
+`cond`: source bool → `cond = value`; source số → so theo `condition`
+(`gt/ge/lt/le`) + hysteresis qua `hysteresisStep` (bật khi vượt
+`threshold`, tắt khi trở lại qua `threshold ∓ hysteresis` — `gt/ge`:
+tắt khi `≤ threshold − hysteresis`; `lt/le`: tắt khi
+`≥ threshold + hysteresis`). `cond` → on/off-delay qua
+`onDelayStep`/`offDelayStep` (state `DelayTimerState`) → `active` →
+fault `stuckActive`/`stuckInactive` (OQ-289) → `chatter{periodMs}`
+(OQ-288) → `di = invert ? !active : active`. Mặc định theo `kind`
+(OQ-287): `pull_cord` ép `invert=true` (params.invert bị bỏ qua, ghi
+docs); `zero_speed` ép `condition='lt'`; các kind khác dùng params.
+Observables: `active`, `di`.
+**6. `silo_bin` (§7.7):** 4 role (đều tùy chọn: `levelRaw` AI,
+`levelHigh`/`levelLow`/`levelHighHigh` DI); 9 tham số (`capacityT 100`,
+`initialLevelPct 30`, `highPct 90`, `lowPct 10`, `highHighPct 97`,
+`hystPct 2`, `engMin 0`, `engMax 100`, `levelLagMs 0`); KHÔNG có
+equipment fault (spec không liệt kê — chỉ signal fault trên `levelRaw`).
+Nguồn vào/ra là **named sources** `inflow`/`outflow` (OQ-290, mặc định
+`const 0` khi không cấu hình). `mass += (inflow − outflow) ×
+dt/3 600 000` (t/h × ms), clamp `[0, capacityT]`; `levelPct =
+mass/capacityT×100`; `levelPct` báo cáo = lag(levelPct, levelLagMs),
+`massT` không lag (OQ-291). Switch có hysteresis: `levelHigh` bật khi
+`≥ highPct`, tắt khi `< highPct − hystPct`; `levelLow` bật khi
+`≤ lowPct`, tắt khi `> lowPct + hystPct`; `levelHighHigh` mirror
+levelHigh (OQ-291). `emit('levelRaw', levelPct_lagged)` (adapter scale
+theo `engMin/engMax` của params). Observables: `levelPct`, `massT`,
+`inflowTph`, `outflowTph`.
+**7. `conveyor_simple` (§7.8):** `deriveModel(motorDolModel, …)` + step
+wrapper (OQ-292): 8 role (6 của motor_dol + `zeroSpeed` DI tùy chọn +
+`pullCord` DI tùy chọn); 19 tham số (15 của motor_dol +
+`zeroSpeedThresholdPct 5`, `transportDelayMs 20000`, `loadTph 0`,
+`pullCordHardwired true`). Step: (1) `inhibited = fault('pullCordTrip')
+.active && pullCordHardwired` → gọi `motorDolModel.step(proxyCtx)` với
+proxy `cmd('runCmd')` ép `false` khi inhibited (1 object/step/conveyor —
+ngoại lệ không-cấp-phát duy nhất, OQ-292, bench đo); (2)
+`beltSpeed = fault('beltSlip').active ? 0 : state.speedPct` (speedPct
+của motor sau step); `zeroSpeed = beltSpeed < threshold`;
+(3) `load = named source 'load' nếu có, ngược lại params.loadTph`
+(OQ-294); `deliveredTph = delayLine(load × beltSpeed/100,
+transportDelayMs)` — delay line là **ring buffer inline trong state**
+`{buf: number[], idx: number}` (KHÔNG dùng class `DelayLine` — instance
+class không JSON-serializable cho state model; OQ-292); `n =
+transportDelayMs/stepMs` bước, output = input của n bước trước, khởi
+tạo 0. (4) `pullCord = !fault('pullCordTrip').active` (emit mỗi bước).
+Faults: 5 của motor_dol + `beltSlip`, `pullCordTrip`, `beltBlocked`
+(OQ-293: deliveredTph=0 + delay line đóng băng). Observables: của
+motor_dol + `beltSpeedPct`, `deliveredTph`.
+**8. Named sources (OQ-290, landing ở commit `silo_bin`):**
+`equipmentInstanceSchema` thêm `sources?: Record<string, SourceSpec>`
+(additive, `@vcs/schemas`); engine: `rt.namedSources: Map<string,
+SourceRuntime>` + `rt.namedSourceValues`, resolve mỗi bước bằng
+`evalSource` (như source chính); `StepCtx.source(name?: string)`
+(additive — không đối số = source chính, không đổi hành vi);
+`validatePlantConfig` + topo sort bao cả link của named sources
+(chu trình → PL-E020); snapshot/restore mở rộng entry equipment với
+named sources (deep-copy như source chính, theo mẫu P2.2);
+`setSource(equipmentId, spec, name?)` + `setManual(equipmentId, value,
+name?)` (tham số `name?` additive). Unit test riêng cho named sources
+(const/ramp/link + topo + snapshot/restore + validate lỗi link treo).
+**9. Harness golden tổng quát (OQ-295, landing ở commit `motor_vfd`):**
+thay `packages/plant/src/golden/motor-dol.test.ts` bằng
+`packages/plant/src/golden/golden.test.ts`: `readdirSync` mọi
+`*.golden.yaml` + `describe.each` chạy mọi case + inventory test
+assert tối thiểu §11.1 theo model (motor_dol 14, motor_vfd 10,
+valve_onoff 10, valve_ctrl 6, damper 3, analog_sensor 8, switch_di 8,
+silo_bin 6, conveyor_simple 8), stepMs 10, seed 42, id duy nhất;
+dispatch setup theo model qua `makeModelSetup(model, …)` trong
+`test-helpers.ts` (mỗi model có `make<Model>Setup` riêng, mẫu
+`makeMotorDolSetup`: signals/defMap/tagDefs).
+**10. Bench plant (OQ-296, commit 9):** `bench/plant.bench.ts` (mẫu
+`bench/softplc.bench.ts`: warm-up + trung vị + ngưỡng + exit ≠ 0 khi
+FAIL): 500 thiết bị hỗn hợp, mix ×10 của fixture §11.3 (80 motor_dol,
+40 motor_vfd, 60 valve_onoff, 30 valve_ctrl, 140 analog_sensor,
+100 switch_di, 30 silo_bin, 20 conveyor_simple); stepMs 10; ngưỡng §12:
+**≥ 5000 bước/s** và **heap < 1 MB sau 100 000 bước**; nối vào script
+`pnpm bench` (bước thứ 4, sau softplc); kết quả merge key
+`plantStepsPerSec` + `plantHeapIncreaseMB` vào `bench/results.json`
+(theo mẫu merge của `orchestrator.bench.ts`); `check-bench-regression.mjs`
+thêm `plantStepsPerSec` (higherIsBetter) + kiểm heap plant tuyệt đối
+(< 1 MB); `bench/baseline.json` thêm key plant sau khi đo trung vị
+5 lần chạy trên VM (implementer đo + ghi median + ranges, mẫu P0.7).
+**11. OQ-267 fix (OQ-297, commit 10):** đo trước bằng bench plant (ghi
+số baseline vào §26), rồi sửa 2 điểm nóng: (a)
+`FaultManager.equipmentFault()` trả về **object kết quả cache theo
+record** (cập nhật tại chỗ khi advance/inject/clear; `params` trả về
+tham chiếu, hợp đồng chỉ-đọc — ghi chú trong code, không spread mỗi
+lần gọi); (b) `PlantEngine.#emit` precompute key `${id}:${role}` lúc
+init (cache theo role trên RuntimeEquipment) + `applyEmit` ghi vào
+slot kết quả tái dùng thay vì tạo object mới mỗi emit. Kiểm lại: bench
+chạy lại (ghi số trước/sau), determinism không đổi (toàn bộ golden
+xanh — hành vi giống hệt), gate đủ xanh. Nếu bench cho thấy heap đã
+< 1 MB với biên lớn VÀ steps/s ≥ 5000 với biên lớn thì vẫn sửa (cấp
+phát là lãng phí rõ ràng, không phải tối ưu mù) — ghi rõ số đo.
+
+### Bảng tính tay A–K (script tham chiếu độc lập `/tmp/p23-ref.mjs` — chỉ cài luật spec, không import code repo; giá trị dưới đây là output của script, implementer dùng làm kỳ vọng golden)
+Quy ước chung: stepMs 10; cmd/fault áp SAU step(t) (OQ-254); expect kiểm
+sau step(t). Giá trị số làm tròn 4 chữ số thập phân (golden so ±0.01).
+- **A — motor_vfd cơ bản** (accel 10s, decel 10s, speedRef 50, lag 200,
+  thr 2, rated 10, load 0.7; runCmd=1 + speedRef=50 áp sau step(100),
+  runCmd=0 áp sau step(6000)):
+
+  | T | speed | speedFb | runFb | currentA | state |
+  |---|---|---|---|---|---|
+  | 110 | 0.1 | 0.0049 | false | 0.007 | RAMP_UP |
+  | 300 | 2.0 | 0.7671 | **true** | 0.14 | RAMP_UP |
+  | 310 | 2.1 | 0.8321 | true | 0.147 | RAMP_UP |
+  | 5100 | 50 | 48.0496 | true | 3.5 | AT_SPEED |
+  | 6010 | 49.9 | 49.9745 | true | 3.493 | RAMP_DOWN |
+  | 11000 | 0 | 1.9504 | false | 0 | STOPPED |
+
+  **Bẫy float (ghi rõ để implementer KHÔNG "sửa" theo toán exact):**
+  T=300 speed tích lũy float = 2.0000000000000004 > 2 → `runFb=true`
+  (toán exact cho 2.0 → false). Golden ghim `true` (script đã kiểm).
+  T=11000 speedFb vẫn 1.9504 (lag tụt sau speed — speed về 0 dần trong
+  5 s, không phải tức thì).
+- **B — valve_onoff cơ bản** (travel 5000ms, 0.2%/bước; openCmd=1 sau
+  step(100), closeCmd=1 sau step(6000)):
+
+  | T | pos | openLs | closedLs | state |
+  |---|---|---|---|---|
+  | 110 | 0.2 | false | true | OPENING |
+  | 5050 | 99 | true | false | OPENING |
+  | 5100 | 100 | true | false | OPEN |
+  | 10950 | 1 | false | true | CLOSING |
+  | 11000 | 0 | false | true | CLOSED |
+- **C — valve_ctrl cơ bản** (stroke 20s, 0.05%/bước, deadband 0.5;
+  posRef=80 sau step(100)):
+
+  | T | pos | ghi chú |
+  |---|---|---|
+  | 110 | 0.05 | — |
+  | 16100 | **79.55** | **dừng trong deadband, KHÔNG đạt 80** (|80−79.55|=0.45 ≤ 0.5 → target giữ 79.55); implementer KHÔNG sửa thành 80 |
+
+  Deadband: pos=80, posRef=80.3 → |80.3−80|=0.3 ≤ 0.5 → target giữ 80.
+- **D — analog_sensor cơ bản** (source const 50, tau 100, noise 0,
+  eng 0..100; raw = round(pv×276.48)):
+
+  | T | pv | raw |
+  |---|---|---|
+  | 10 | 9.0635 | 2506 |
+  | 100 | 33.3564 | 9222 |
+  | 200 | 43.8772 | 12131 |
+  | 500 | 49.6952 | 13740 |
+
+  (T=10 là sau 2 bước T=0,10 — lag factor 1−exp(−0.1)=0.095163/bước.)
+- **E — switch_di cơ bản** (gt, thr 50, hyst 5, onDelay 100, offDelay 200;
+  source link số: 60 từ sau step(100), 40 từ sau step(1000)):
+
+  | T | value | cond | active | di |
+  |---|---|---|---|---|
+  | 110 | 60 | true | false | false |
+  | 200 | 60 | true | true | true |
+  | 1010 | 40 | false | true | true |
+  | 1200 | 40 | false | false | false |
+
+  (onDelay đủ 100 ms tại T=200 — elapsed tích từ T=110; off-delay giữ
+  active tới T=1200. cond tắt khi value < 45 = thr − hyst.)
+- **F — silo_bin cơ bản** (capacity 100t, init 30t; inflow 3600 t/h =
+  0.01 t/bước; outflow 3600 t/h = 0.01 t/bước):
+
+  | Case | T | mass | levelPct | switch |
+  |---|---|---|---|---|
+  | inflow 3600, outflow 0 | 1000 | 31.01 | 31.01 | — |
+  | inflow 3600, outflow 0 | 59990 | 90.0 | 90.0 | levelHigh=true (≥ 90) |
+  | inflow 3600, outflow 0 | 60000 | 90.01 | 90.01 | levelHigh=true |
+  | inflow 0, outflow 3600 | 19990 | 10.0 | 10.0 | levelLow=true (≤ 10) |
+  | inflow 0, outflow 3600 | 20000 | 9.99 | 9.99 | levelLow=true |
+- **G — conveyor_simple cơ bản** (motor_dol mặc định: accel 1500,
+  coast 3000, startDelay 500; loadTph 100; transportDelay 20000ms =
+  2000 bước; threshold 5; runCmd=1 sau step(100)):
+
+  | T | state | speedPct | beltSpeed | zeroSpeed | deliveredTph |
+  |---|---|---|---|---|---|
+  | 110 | STARTING | 0.6667 | 0.6667 | true | 0 |
+  | 180 | STARTING | 5.3333 | 5.3333 | false | 0 |
+  | 610 | RUNNING | 34 | 34 | false | 0 |
+  | 1610 | RUNNING | 100 | 100 | false | 0 |
+  | 20110 | RUNNING | 100 | 100 | false | 0.6667 (= input T=110) |
+  | 20610 | RUNNING | 100 | 100 | false | 34 (= input T=610) |
+  | 21610 | RUNNING | 100 | 100 | false | 100 (= input T=1610) |
+- **H — motor_vfd trip/coast** (đang chạy speed 50, vfdTrip áp sau
+  step(6000), coast 20s = 0.05%/bước): T=6010 speed 49.95, ready=false,
+  vfdFaultOk=false; T=11010 speed 24.95; T=16010 speed 0 (50/0.05 =
+  1000 bước).
+- **I — valve_onoff fault/edge** (travel 5000): (1) bothCmd: openCmd=1
+  + closeCmd=1 sau step(100) → pos giữ 0, warn 1 lần, state
+  INTERMEDIATE (pos 0 nhưng dir 0 — CLOSED hay INTERMEDIATE? pos==0 →
+  CLOSED theo định nghĩa §Thiết kế.2 — golden ghim CLOSED + warn);
+  (2) slowTravel factor 2 (travel hiệu dụng 10000ms, 0.1%/bước):
+  openCmd=1 sau step(100) → pos 99 tại T=10000, pos 100 tại T=10100;
+  (3) stuckAtPos 40: pos đóng băng 40 dù openCmd=1 (fault áp sau
+  step(1000) khi pos=18 — frozenPos=18, golden ghim pos=18 sau đó).
+  (Lưu ý (3): frozenPos lấy giá trị pos TẠI LÚC fault bật — implementer
+  lưu `frozenPos` trong state khi fault chuyển active.)
+- **J — analog_sensor signal fault** (source const 50, tau 0, noise 0):
+  wireBreak preset → raw=32767 (wireBreakRaw mặc định); stuck →
+  pv đóng băng tại giá trị khi fault bật; drift → pv trôi (rate theo
+  params của FaultManager — golden dùng entry `{signal}` explicit);
+  noise σ=1 → giá trị pv từng bước theo Box-Muller — implementer tính
+  bằng script tham chiếu mở rộng (cùng PRNG mulberry32 seed 42) rồi
+  ghim, không đoán.
+- **K — switch_di kind/chatter:** (1) pull_cord (manual bool):
+  manual=false → di=true (bình thường); manual=true áp sau step(100)
+  → active=true → di=false tại T=110 (onDelay 0); (2) chatter
+  periodMs=100 (fault áp sau step(100), cond=true từ trước): di lật
+  mỗi 100 ms — T=200 di=false, T=300 di=true, T=400 di=false
+  (toggle theo `floor((T−sinceMs)/100) % 2`).
+
+### Mơ hồ (phân loại)
+**Tier A (tự quyết):** tên file model/golden (`<model>.ts`,
+`<model>.golden.yaml`); tên helper test-helpers (`make<Model>Setup`);
+cấu trúc `bench/plant.bench.ts` theo mẫu softplc; key results
+`plantStepsPerSec`/`plantHeapIncreaseMB`; thứ tự 10 commit (§Phạm vi);
+bố cục `docs/semantics.md` §22 theo mẫu §21.
+**Tier B (mặc định + ghi OQ):** OQ-268…300 dưới đây (33 mục) — tóm tắt:
+OQ-268 speedFb offset=0; OQ-269 faultNC vfd + ready/remote/vfdFaultOk;
+OQ-270 speedDeviation = target lệch; OQ-271 commLoss latch lệnh +
+speedFb freeze; OQ-272 rampFail đóng băng speed; OQ-273 state vfd +
+eps 1e-9; OQ-274 currentA vfd; OQ-275 fault DI valve = OR + faultNC
+default false; OQ-276 travelTimeout inject (đóng băng pos);
+OQ-277 bothCmdPolicy chỉ 'hold' + warn 1 lần; OQ-278 stuckOpen/Closed
+ép pos 100/0; OQ-279 slowTravel nhân travelTime; OQ-280 LS valve_ctrl
+cố định 1%; OQ-281 drift; OQ-282 positionerFail; OQ-283 signalLoss;
+OQ-284 analog_sensor engMin/engMax/unit bắt buộc; OQ-285 noise
+Gaussian + presets; OQ-286 initialValue; OQ-287 switch_di kind
+defaults + threshold default 0; OQ-288 chatter toggle mỗi periodMs;
+OQ-289 stuckActive/Inactive ở mức active; OQ-290 named sources;
+OQ-291 levelLag + levelHighHigh hyst; OQ-292 conveyor derive + proxy
+ctx + ring buffer inline; OQ-293 beltBlocked đóng băng delay line;
+OQ-294 loadTph vs loadSource; OQ-295 harness tổng quát; OQ-296 bench
+plant; OQ-297 OQ-267 fix; OQ-298 damper 3 golden; OQ-299 AO scaling
+harness; OQ-300 ngưỡng/diagnostics không đổi.
+**Tier C (chặn — KHÔNG CÓ):** không mục nào chặn P2.3. X-003 chỉ chặn
+P2.7; OQ-161 không chạm (không FB lồng); D-006/D-007 không liên quan;
+không đổi spec M1 → không SCR; không dep mới (yaml đã có, không thêm
+dep); không hạ ngưỡng. Plan → triển khai liên tục theo quyết định
+2026-11-25.
+
+### Test target + gate
+- **Golden:** 59 case tối thiểu (§11.1 + OQ-298): motor_vfd 10,
+  valve_onoff 10, valve_ctrl 6, damper 3, analog_sensor 8, switch_di 8,
+  silo_bin 6, conveyor_simple 8. Mỗi fault của model ≥ 1 test
+  (vfd 6, valve_onoff 7, valve_ctrl 4, switch_di 3, conveyor 3 mới +
+  5 motor_dol kế thừa, silo 0, analog_sensor 0 equipment);
+  mỗi signal fault dùng bởi analog_sensor ≥ 1 test (8 loại).
+- **Unit (ước ~83):** vfd 12, valve_onoff 12, valve_ctrl 10, damper 3,
+  analog_sensor 12, switch_di 12, silo_bin 10, conveyor_simple 12
+  (params validation, edge ngoài golden, presets, snapshot/restore,
+  docs). **Nền/harness (~18):** named sources 6, ring buffer inline 3,
+  harness tổng quát 4, registry/deriveModel 2, docgen 2, bench smoke 1
+  (bench exit 0 + key plant trong results.json — kiểm bằng test gọi
+  script? Không: bench chạy trong gate, không phải vitest — ghi 0 test
+  vitest cho bench, thay bằng gate `pnpm bench`).
+- **Tổng mới ≥ 150, tổng ≥ 2321** (2171 + 150). Coverage plant giữ 85
+  lines (OQ-300); diagnostics giữ 58 mã (OQ-300).
+- **Gate (chạy thật):** `lint && typecheck && depcheck && test &&
+  docs:diagnostics --check && docs:equipment --check && review:cheats &&
+  build && test:e2e && bench` (bench: TagDB + orchestrator + softplc
+  cũ vẫn PASS + plant mới PASS). e2e không chạm web nhưng chạy lại
+  theo chuẩn parent re-verify (11/11 + 1 skipped). Gate đỏ 3 lần cùng
+  lỗi → dừng, báo nguyên nhân gốc + đề xuất thu hẹp.
+
+### Rủi ro top-3
+1. **Sai ngữ nghĩa timing 1 bước / float** (OQ-254/273, bẫy bảng A/C) —
+   sai cả 59 golden. Giảm: bảng A–K từ script tham chiếu độc lập +
+   ghi rõ 2 bẫy float/deadband, test ghim.
+2. **Named sources chạm nền engine** (OQ-290) — sai validate/topo/
+   snapshot sẽ vỡ test P2.1/P2.2. Giảm: thay đổi additive, test riêng
+   6 mục, gate đủ chạy lại toàn bộ 2171 test cũ.
+3. **Bench plant không đạt §12** (500 thiết bị, ≥ 5000 bước/s) do
+   OQ-267 chưa sửa hoặc proxy ctx conveyor — giảm: bench đo trước
+   (commit 9), sửa OQ-267 sau (commit 10), ghi số trước/sau; không hạ
+   ngưỡng.
+
+### Kết quả triển khai
+*(Implementer điền: commit SHA, số test mới/tổng, kết quả từng bước gate,
+bằng chứng bench trước/sau OQ-267 fix.)*
+
+**Commit 1 — motor_vfd + harness golden tổng quát (2026-11-26, xong local — CHƯA mở PR):**
+- Model `motor_vfd` (10 params incl. `faultNC` default true, 8 roles, 5 states, 6 faults) + 10 golden case (§11.1 đủ tối thiểu) + 15 unit test; harness tổng quát `golden.test.ts` (readdirSync + describe.each + inventory theo model, id duy nhất toàn cục) thay `motor-dol.test.ts`; runner đổi cmd AO eng→raw theo scaling tag (OQ-299) + fault equipment truyền `params` (OQ-270/…); test-helpers `makeMotorVfdSetup` + `makeModelSetup` dispatcher; `docs/equipment/motor_vfd.md` sinh bằng docgen.
+- **Test mới viết 42, net +27 (trừ 15 của harness cũ), tổng 2198/2198 (92 file)** — plant 224 test, coverage plant 95,6% lines (ngưỡng 85). Diagnostics khớp 58 mã, không mã mới.
+- Gate xanh ở bản sao sạch `~/.cache/vcs-p23` (install `--frozen-lockfile` thật): lint 0, typecheck 0, depcheck "no violations" (146 modules, 305 deps), test 2198/2198, diagnostics --check khớp, equipment --check khớp, review:cheats SẠCH (228 file), build 3/3, e2e 11/11 + 1 skipped (E7.6), bench TagDB 36,9M ops/s + orchestrator 368.584 bước/s + softplc 1.231 scan/s — đều PASS (số tuyệt đối thấp hơn P2.2 do VM chia sẻ tải cao, vẫn trên ngưỡng).
+- OQ-268…274, OQ-295, OQ-299 đóng (đã áp dụng ở commit 1); OQ-301 mới (tier B, mở): spec §7.2–§7.8 không có bảng synonym — dùng quy ước hậu tố mirror §7.1.
+
+**Commit 2 — valve_onoff (2026-11-26, xong local — CHƯA mở PR):**
+- Model `valve_onoff` (6 params incl. `faultNC` default false thêm theo OQ-275, 5 roles, 5 states, 7 faults) + 10 golden case (§11.1 đủ tối thiểu) + 13 unit test; `docs/equipment/valve_onoff.md` sinh bằng docgen.
+- **Test mới 23, tổng 2221/2221 (92 file)** — plant 247 test. Diagnostics khớp 58 mã, không mã mới.
+- Gate xanh ở bản sao sạch `~/.cache/vcs-p23` (install `--frozen-lockfile` thật): lint 0, typecheck 0, depcheck "no violations", test 2221/2221, diagnostics --check khớp, equipment --check khớp, review:cheats SẠCH, build 3/3, e2e 11/11 + 1 skipped, bench TagDB + orchestrator + softplc PASS.
+- OQ-275…279 đóng (đã áp dụng ở commit 2); OQ-302 mới (tier B, mở): state van suy bằng eps 1e-9 (xem "Lệch so với plan").
+
+**Commit 3 — valve_ctrl (2026-11-26, xong local — CHƯA mở PR):**
+- Model `valve_ctrl` (7 params incl. `faultNC` default false theo OQ-275, 5 roles, 4 faults) + 6 golden case (§11.1 đủ tối thiểu) + 11 unit test; `docs/equipment/valve_ctrl.md` sinh bằng docgen.
+- **Test mới 17, tổng 2238/2238 (93 file)** — plant 264 test. Diagnostics khớp 58 mã, không mã mới.
+- Gate xanh ở bản sao sạch `~/.cache/vcs-p23` (install `--frozen-lockfile` thật): lint 0, typecheck 0, depcheck "no violations", test 2238/2238, diagnostics --check khớp, equipment --check khớp, review:cheats SẠCH, build 3/3, e2e 11/11 + 1 skipped, bench TagDB + orchestrator + softplc PASS.
+- OQ-280…283 đóng (đã áp dụng ở commit 3); OQ-303 mới (tier B, mở): bảng C 79.55 → 79.5 do lượng tử hóa AO (xem "Lệch so với plan").
+
+**Commit 4 — damper (2026-11-26, xong local — CHƯA mở PR):**
+- Model `damper = deriveModel(valve_ctrl, {type:'damper', defaultParams:{strokeTimeS:30}})` (cùng paramsSchema/roles/faults/step với valve_ctrl) + 3 golden case (OQ-298) + 6 unit test; `docs/equipment/damper.md` sinh bằng docgen.
+- **Test mới 9, tổng 2247/2247 (94 file)** — plant 273 test. Diagnostics khớp 58 mã, không mã mới.
+- Gate xanh ở bản sao sạch `~/.cache/vcs-p23` (install `--frozen-lockfile` thật): lint 0, typecheck 0, depcheck "no violations", test 2247/2247, diagnostics --check khớp, equipment --check khớp, review:cheats SẠCH, build 3/3, e2e 11/11 + 1 skipped, bench TagDB + orchestrator + softplc PASS.
+- OQ-298 đóng (đã áp dụng ở commit 4).
+
+**Commit 5 — analog_sensor (2026-11-26, xong local — CHƯA mở PR):**
+- Model `analog_sensor` (1 role `raw` AI Int, 6 params, 0 equipment fault, 4 preset signal; `hasSource: true`) + 10 golden case (tối thiểu §11.1 là 8: base bảng D + noisy + 8 signal fault drift/stuck/freeze/noise/spike/wireBreak/offset/gain) + 10 unit test; `docs/equipment/analog_sensor.md` sinh bằng docgen; harness golden thêm `source` theo case (schema + test-helpers passthrough).
+- **Test mới 20, tổng 2267/2267 (96 file)** — plant 293 test, coverage plant 96,57% lines (ngưỡng 85). Diagnostics khớp 58 mã, không mã mới.
+- Gate xanh ở bản sao sạch `~/.cache/vcs-p23` (install `--frozen-lockfile` thật): lint 0, typecheck 0, depcheck "no violations" (150 modules, 322 deps), test 2267/2267, diagnostics --check khớp, equipment --check khớp (6 model), review:cheats SẠCH, build 3/3, e2e 11/11 + 1 skipped, bench TagDB 35,8M ops/s + orchestrator 320.772 bước/s + softplc 1.244 scan/s — đều PASS (số tuyệt đối thấp hơn P2.2 do VM chia sẻ tải cao, vẫn trên ngưỡng).
+- OQ-284…286 đóng (đã áp dụng ở commit 5; OQ-285 vẫn UNVERIFIED chờ S1). Giá trị noisy/signal-noise tính bằng script tham chiếu độc lập `/tmp/p25-ref.mjs` (FNV-1a + mulberry32 seed 42 + Box-Muller; bảng D khớp plan: pv 9.0635/33.3564/43.8772/49.6952, raw 2506/9222/12131/13740).
+
+**Commit 6 — switch_di (2026-11-26, xong local — CHƯA mở PR):**
+- Model `switch_di` (1 role `di` DI Bool, 8 params, 3 faults stuckActive/stuckInactive/chatter, `hasSource: true`) + 8 golden case (§11.1 đủ tối thiểu: bảng E + K(1)(2) + zero-speed + stuck×2 + hysteresis-lt + invert) + 12 unit test; harness golden thêm `source` theo step (schema + runner: manual → setManual, còn lại → setSource); `docs/equipment/switch_di.md` sinh bằng docgen.
+- **Test mới 20, tổng 2287 (2286/2287 full run — 1 lỗi là flaky đã biết sim-service 8ms, 83 bước, họ OQ-055; chạy riêng 12/12 xanh; 97 file)** — plant 313 test, coverage plant 96,66% lines (ngưỡng 85). Diagnostics khớp 58 mã, không mã mới.
+- Gate xanh ở bản sao sạch `~/.cache/vcs-p23` (install `--frozen-lockfile` thật): lint 0, typecheck 0, depcheck "no violations" (151 modules, 326 deps), test 2286/2287 (flaky trên), diagnostics --check khớp, equipment --check khớp (7 model), review:cheats SẠCH, build 3/3, e2e 11/11 + 1 skipped, bench TagDB + orchestrator 383.830 bước/s + softplc 1.185 scan/s PASS.
+- OQ-287…289 đóng (đã áp dụng ở commit 6).
+
+**Commit 7 — silo_bin + named sources (2026-11-26, xong local — CHƯA mở PR):**
+- Model `silo_bin` (4 role đều tùy chọn, 9 params, 0 equipment fault, `hasSource: true` — source chính không dùng) + 8 golden case (§11.1 đủ tối thiểu: bảng F inflow/outflow + highhigh + clamp×2 + lag + hysteresis-high-off + signal-wirebreak) + 12 unit test; named sources OQ-290 (engine-native: `sources?` trong `equipmentInstanceSchema`, `StepCtx.source(name?)`, resolve mỗi bước, validate link + topo chu trình PL-E020, snapshot/restore mở rộng, `setSource`/`setManual` thêm `name?`); harness golden thêm `sources` theo case.
+- **Test mới 20, tổng 2307/2307 (98 file)** — plant 333 test, coverage plant 96,83% lines (ngưỡng 85). Diagnostics khớp 58 mã, không mã mới.
+- Gate xanh ở bản sao sạch `~/.cache/vcs-p23` (install `--frozen-lockfile` thật): lint 0, typecheck 0, depcheck "no violations", test 2307/2307, diagnostics --check khớp, equipment --check khớp (8 model), review:cheats SẠCH, build 3/3, e2e 11/11 + 1 skipped, bench TagDB 32,6M ops/s + orchestrator 367.133 bước/s + softplc 1.262 scan/s PASS.
+- OQ-290…291 đóng (đã áp dụng ở commit 7).
+
+**Commit 8 — conveyor_simple (2026-11-26, xong local — CHƯA mở PR):**
+- Model `conveyor_simple = deriveModel(motor_dol, …)` (8 role, 19 param, 5 state kế thừa, 8 fault, 7 observable, `hasSource: true`) + 8 golden case (§11.1 đủ tối thiểu: bảng G start-delay + pullcord-hardwired/not-hardwired + beltslip + beltblocked + loadsource + overload-trip + stop-zerospeed) + 13 unit test + 1 test deriveModel paramsSchema; `docs/equipment/conveyor_simple.md` sinh bằng docgen; harness golden thêm 'conveyor_simple' vào EXPECTED_MODELS.
+- **Test mới 22, tổng 2329/2329 (99 file)** — plant 355 test, coverage plant 96,91% lines (ngưỡng 85). Diagnostics khớp 58 mã, không mã mới.
+- Gate xanh ở bản sao sạch `~/.cache/vcs-p23b` (install `--frozen-lockfile` thật): lint 0, typecheck 0, depcheck "no violations" (153 modules, 334 deps), test 2329/2329, diagnostics --check khớp, equipment --check khớp (9 model), review:cheats SẠCH (242 file), build 3/3, e2e 11/11 + 1 skipped, bench TagDB 35,6M ops/s + orchestrator 372.256 bước/s + softplc 1.200 scan/s PASS (lần chạy bench đầu softplc 663 FAIL do VM tải cao — load 5,48, chạy lại 1.200 PASS; commit 8 không chạm đường softplc).
+- OQ-292…294 đóng (đã áp dụng ở commit 8); OQ-301…303 vẫn mở.
+
+**Commit 9 — bench plant (2026-11-26, xong local — CHƯA mở PR):**
+- Bench `bench/plant.bench.ts` (mẫu softplc: warm-up 200 + trung vị 5 mẫu × 2000 bước + heap 100 000 bước, `--expose-gc`): 500 thiết bị mix ×10 fixture §11.3 (80 motor_dol, 40 motor_vfd, 60 valve_onoff, 30 valve_ctrl, 140 analog_sensor, 100 switch_di, 30 silo_bin, 20 conveyor_simple), stepMs 10, engine-alone (không `tags.flush()` — flush là việc của TagDB, đo riêng bằng bench tagdb; `TagDB.#applyWrite` chỉ đưa mỗi handle vào dirty list tối đa 1 lần nên không flush vẫn bị chặn bộ nhớ theo số tag ~1770); nối vào `pnpm bench` (bước thứ 4); key `plantStepsPerSec` + `plantHeapIncreaseMB` merge vào `bench/results.json`; `check-bench-regression.mjs` thêm `plantStepsPerSec` (higherIsBetter) + kiểm heap plant tuyệt đối (< 1 MB); `bench/baseline.json` thêm key plant (trung vị 5 runs).
+- **Baseline trước fix (trung vị 5 lần chạy trên VM, 2026-11-26 00:32–01:03 +07): 128 bước/s (phạm vi 120–131; ngưỡng M2 §12 ≥ 5.000) — FAIL, thiếu ~39×; heap −16,18 MB / 100.000 bước (ngưỡng < 1 MB) — PASS.** Heap âm ổn định (−16,176 ở cả 5 lần): GC thu hồi ~16 MB giữ từ pha xây dựng/mẫu trước khi đo heap.
+- cpu-prof (bản rút gọn 3.800 bước, 90 bước/s): **EventLog.push 74,7% CPU** — `shift()` O(n) trên mảng 100k khi log đầy (log đầy sau ~400 bước, ~250 push/bước); `#emit` 4,7%, `applyEmit` 0,6%, `step` 2,0%. Đây là nguyên nhân chính của FAIL — sửa ở commit 10 (OQ-304) cùng 2 điểm nóng OQ-267.
+- **Test mới 0, tổng 2329/2329 (99 file)** — bench không thêm test (số đo là bằng chứng). Diagnostics khớp 58 mã, không mã mới.
+- Gate xanh ở bản sao sạch `~/.cache/vcs-p23b` (install `--frozen-lockfile` thật): lint 0 (sau 1 fix: bỏ `as string` thừa ở `bench/plant.bench.ts:88` theo `@typescript-eslint/no-unnecessary-type-assertion`), typecheck 0, depcheck "no violations" (153 modules, 335 deps), test 2329/2329, diagnostics --check khớp, equipment --check khớp (9 model), review:cheats SẠCH (242 file), build 3/3, e2e 11/11 + 1 skipped, bench TagDB 50.243.252 ops/s + orchestrator 518.428 bước/s + softplc 1.746 scan/s PASS, **bench plant 129 bước/s FAIL (kỳ vọng — baseline trước fix, trong phạm vi 120–131; heap −16,18 MB PASS)**.
+- OQ-296 đóng (đã áp dụng ở commit 9); OQ-301…303 vẫn mở; OQ-304 mới (tier B, mở → commit 10): EventLog `shift()` O(n) mỗi push khi log đầy.
+
+**Commit 10 — OQ-267 fix, đo-trước-sửa-sau (2026-11-26, xong local — CHƯA mở PR):**
+- Sửa 4 điểm (đo bằng cpu-prof trước fix): (1) EventLog ring buffer `#buf`/`#head`/`#count`, push O(1), không cấp phát sau khi đầy (OQ-304 — ngoài 2 điểm nóng của plan; cpu-prof: `shift()` O(n) chiếm 74,7% CPU); (2) `FaultManager.equipmentFault()` trả cùng object theo `(equipment, fault)` — cập nhật tại chỗ khi advance/inject/clear, `params` by-reference (hợp đồng chỉ-đọc, model chỉ đọc), chưa có record → hằng số chia sẻ; (3) `applyEmit` ghi vào slot tái dùng (`#emitValueSlot`/`#emitRawSlot`) + `#activeSignalFaults` trả mảng chia sẻ khi 0 record; (4) `PlantEngine.#emit` precompute key `${id}:${role}` lúc init (`emitKeys`) + hoist `getObs` closure (`#getObsBound`, khỏi ~350 closure/bước). `restore()` thay `#records` mới → cache miss, tạo result mới (đúng).
+- **Bench plant trước/sau (trung vị 5 runs trên VM): 128 → 1300 bước/s (phạm vi trước 120–131, sau 1207–1394) — ×10,2; heap −16,18 MB cả trước/sau — PASS.** Ngưỡng M2 §12 ≥ 5.000 vẫn FAIL (thiếu ×3,85) — KHÔNG hạ ngưỡng; profile sau fix phẳng (`step` 19,8%, `#emit` 19,7%, tsx `runCallSync` 7,4%, closure engine 6,1%, GC 4,5%) — không còn điểm nóng đơn lẻ; nguyên nhân gốc + đề xuất thu hẹp xem "Lệch so với plan" + semantics §22 (tier C — owner chọn A 2026-11-26 09:34 +07: chấp nhận 1300 ở P2.3, làm lại vòng nóng ở P2.4; ngưỡng §12 giữ nguyên).
+- **Test mới 4, tổng 2333/2333 (99 file)** — plant 359 test, coverage plant 97,13% lines (ngưỡng 85). Diagnostics khớp 58 mã, không mã mới. Toàn bộ golden xanh (hành vi giống hệt trước fix).
+- Gate ở bản sao sạch `~/.cache/vcs-p23b` (install `--frozen-lockfile` thật): lint 0 (sau 1 fix: bỏ `as PlantEvent` thừa ở `events.ts:42`), typecheck 0, depcheck "no violations" (153 modules, 335 deps), test 2333/2333, diagnostics --check khớp, equipment --check khớp (9 model), review:cheats SẠCH (242 file), build 3/3, e2e 11/11 + 1 skipped, bench TagDB 30.570.640 ops/s + orchestrator 300.731 bước/s + softplc 1.110 scan/s PASS, **bench plant 1.367 bước/s FAIL (ngưỡng ≥ 5000; heap −16,18 MB PASS)** — số gate trùng run sau-fix thứ 2 (trung vị 5 runs sau fix: 1300).
+- OQ-297 + OQ-304 đóng (đã áp dụng ở commit 10); OQ-300 đóng (ngưỡng giữ nguyên); OQ-301…303 vẫn mở (tier B).
+
+**Tổng phase P2.3 (10 commit):**
+- Test: 2171 → 2333 (**+162 mới**, vượt mục tiêu ≥150; tổng ≥2321 ✓); 99 file (91 → 99); plant 359 test, coverage plant 97,13% lines (P2.2: 94,06%).
+- Golden: 14 → 77 case (63 mới: vfd 10, valve_onoff 10, valve_ctrl 6, damper 3, analog 10, switch 8, silo 8, conveyor 8); §11.1 tối thiểu đủ cho cả 8 model.
+- Model: 1 → 9 (motor_dol + 8 mới); docs/equipment 9 model, --check khớp; semantics thêm §22.
+- Diagnostics: 58 mã, không mã mới. OQ: plan 268…300 (33) + mới 301…304; đóng hết trừ 301/302/303 còn mở (tier B).
+- Bench plant: 128 → 1300 bước/s (×10,2), heap −16,18 MB PASS; ngưỡng §12 ≥ 5000 **CHƯA ĐẠT** (tier C — owner chọn A 2026-11-26 09:34 +07: chấp nhận 1300 ở P2.3, làm lại vòng nóng ở P2.4, xem "Lệch so với plan" + semantics §22).
+
+### Lệch so với plan
+*(Implementer điền tier B — test/bảng tính tay chứng minh, không đổi spec.)*
+
+- **Commit 2 (OQ-302, tier B):** state van suy bằng eps 1e-9 thay vì `pos==0/100` exact — 0.1 cộng 1000 lần = 99.9999999999986, van không đạt đúng 100 với slowTravel factor 2, state kẹt OPENING dù bảng I.2 ghim OPEN tại T=10100 (mirror OQ-273 vfd; posPct giữ nguyên giá trị tích lũy). Bằng chứng: `node -e` tính tay + golden slow-travel xanh sau sửa.
+- **Commit 2 (tier B):** `faultNC` là param thứ 6 của valve_onoff (default false) — plan §26 mục Thiết kế.2 chỉ liệt kê 5 param của spec §7.3, nhưng OQ-275 yêu cầu polarity `faultNC` và plan phần tóm tắt đã nói "plan adds faultNC param (vfd default true, valve default false)".
+- **Commit 2 (tier B):** golden base-travel nhả `openCmd=false` cùng lúc đặt `closeCmd=true` tại t=6000 — bảng B chỉ ghi "closeCmd=1 sau step(6000)" nhưng số liệu đóng (pos 1 tại 10950, 0 tại 11000) yêu cầu dir −1, tức openCmd phải nhả (nếu không cả hai lệnh true → hold).
+- **Commit 3 (OQ-303, tier B):** bảng C ghim pos dừng 79.55 với posRef=80 exact; thực tế posRef qua AO lượng tử hóa (raw 22118 → eng 79.9986) nên deadband dừng sớm hơn một bước ở 79.5. Golden ghim hành vi thật (79.5); tương tự signalLoss failPosition=close dừng ở 0.5 (deadband giữ), không về 0. Không đổi model — deadband áp dụng đúng như spec §7.4; script tham chiếu của plan không mô hình hóa lượng tử hóa AO.
+- **Commit 5 (tier B):** golden schema + harness thêm `source` theo case (`sourceSpecSchema`, passthrough qua `makeModelSetup`) — plan không nêu nhưng analog_sensor bắt buộc có source (bảng D cần const 50, case freeze cần ramp); `ModelSetupOverrides.source` đã có sẵn từ P2.1, chỉ thiếu passthrough ở harness.
+- **Commit 5 (OQ-284, tier B):** `engMin`/`engMax`/`unit` bắt buộc bằng zod `.optional()` + `.refine` (bắt buộc có mặt, engMin<engMax) vì `defaultParams` không thể chứa giá trị mặc định cho trường "không default"; thiếu → validatePlantConfig báo PL-E001; `init` throw phòng vệ nếu tới được đây.
+- **Commit 5 (tier B):** signal `spike` lấy `durationMs` từ params của fault (mặc định = dtMs), không phải duration của record — golden spike phải truyền cả hai (`params.durationMs=100` + `durationMs=100` ở step); nếu chỉ truyền record duration thì cửa sổ spike chỉ 10 ms, tag không lên 60.
+- **Commit 5 (tier B):** `clear` trong runner golden không tra được signal fault (chỉ tra `eq:`/`preset:`) — golden freeze dùng `durationMs=5000` thay clear (hết hạn tại T=6000, emit tại T=6000 đã sạch). Sửa runner để clear được signal fault là việc ngoài phạm vi commit 5, ghi lại làm đề xuất.
+- **Commit 5 (ghi chú — sửa hiểu lầm):** `rngGaussian` của FaultManager dùng `u = rngNext` trực tiếp + vòng do-while tránh 0 (không phải `1−u`); chỉ model noise của analog_sensor dùng `u1' = 1−u1` theo OQ-285. Script tham chiếu ban đầu dùng nhầm biến thể 1−u cho signal-noise nên golden lệch (51.7361 thực tế vs 50.2966 dự đoán); đã sửa script theo code thật của `rng.ts` và ghim lại 4 giá trị (51.7361/48.5135/50.4702/51.7542).
+- **Commit 6 (tier B):** harness golden thêm `source` theo step (schema + runner) — bảng E đổi source giữa case (0 → 60 sau step(100) → 40 sau step(1000)); golden bảng E dùng const thay cho "link số" của plan (harness 1 thiết bị không có đích link để đổi giữa case; link được kiểm bằng unit test 2 thiết bị analog_sensor → switch_di).
+- **Commit 6 (tier B):** off-delay chỉ giữ khi active trước đó đã true (guard trong model) — `offDelayStep` giữ true trong `delayMs` đầu dù output chưa từng true, trái bảng E (T=0..110 active=false); bảng E bắt buộc guard này.
+- **Commit 6 (tier B):** `manualValue` mặc định của engine là số 0, không phải `false` — case pull-cord dùng source const `false` cho giá trị ban đầu (đường bool), rồi đổi sang manual `true` giữa case qua step-`source` (runner gọi setManual); unit test đặt `setManual(false)` tường minh trước bước 0.
+- **Commit 6 (tier B):** `initialActive=true` + offDelay 200 hết hạn tại T=190, không phải T=200 — bước false đầu tiên (T=0) đã tính 10 ms theo quy ước `offDelayStep` (cùng quy ước bảng E: cond tắt tại step T=1010, hết hạn T=1200).
+- **Commit 7 (tier B):** ngưỡng tắt hysteresis của silo nghiêm ngặt (`<` / `>`) theo đúng §7.7 — khác `hysteresisStep` (tắt tại `≤`); model dùng helper riêng `highHysteresis` (bật ≥, tắt <). Unit test ghim đúng biên 12.00 (low giữ true) / 12.01 (tắt).
+- **Commit 7 (tier B):** golden bảng F dùng named sources const qua field `sources` của case (thay "link số" — harness 1 thiết bị); link qua named source được kiểm bằng unit test (analog_sensor pv × 72 → inflow 3600).
+- **Commit 8 (OQ-292, tier B):** `deriveModel` ở P2.1/P2.2 không hỗ trợ patch `paramsSchema` — zod strip unknown key nên 4 param thêm của conveyor sẽ mất. Mở rộng `deriveModel` thêm field `paramsSchema?` (additive) + cast base `as unknown as EquipmentModel<ConveyorSimpleParams, ConveyorSimpleState>` (patch thay cả init lẫn step nên init/step của base không chạy trên model dẫn xuất). Bằng chứng: unit test paramsSchema (motor schema strip 4 param; conveyor schema validate đủ 19).
+- **Commit 8 (OQ-294, tier B):** `ctx.source('load')` trả 0 cả khi chưa cấu hình lẫn khi cấu hình const 0 — model không phân biệt được "source thắng" với "dùng param". Thêm `StepCtx.hasSource?(name?: string)` (optional, additive — ctx dựng tay trong test không có vẫn compile) + engine implement (`rt.namedSources.has(name)`); conveyor: `hasSource('load') ? source('load') : loadTph`.
+- **Commit 8 (tier B):** case golden `base` đổi tên thành `start-delay` — id `base` đã có ở analog_sensor, inventory yêu cầu id duy nhất toàn cục.
+- **Commit 8 (tier B):** golden case phải khai `params: { loadTph: 100 }` tường minh — loadTph mặc định 0 nên bảng G (tính với loadTph 100) cho deliveredTph=0 nếu không khai; case loadsource khai cả loadTph 100 + sources load 50 để ghim "source thắng param khác 0".
+- **Commit 8 (tier B):** `beltBlocked` resume — idx đóng băng cùng buf nên vật liệu "trong ống" chỉ replay khi idx quay lại 0..600 (T≈35000), không phải ngay sau clear; golden ghim T=36000 → 60 (= in T=1000), T=36110 → 67.3333 (= in T=1110), T=41010 → 100 (= in T=21010). Script tham chiếu `/tmp/p23b-ref.mjs` tính độc lập.
+- **Commit 8 (tier B):** zeroSpeed so sánh nghiêm ngặt `<` — T=8850 speed 5.0 → false, T=8860 4.6667 → true (286 bước coast).
+- **Commit 8 (ghi chú):** bench lần 1 softplc 663 scan/s FAIL do VM tải cao (load 5,48 — tiến trình Chromium/dashboard khác chạy cùng lúc); chạy lại 1.200 PASS. Commit 8 không chạm runtime-iec/vendor-siemens nên không phải hồi quy code.
+- **Commit 9 (tier B):** `packages/plant/src/index.ts` (follow-up commit 8) — `models/index.ts` đã export `conveyorSimpleModel` nhưng index gốc của package chưa export; bench plant import từ `@vcs/plant` nên cần thêm export này. Không đổi hành vi, chỉ thiếu export.
+- **Commit 9 (tier B):** bench đo engine-alone (không `tags.flush()` mỗi bước) — flush là việc của TagDB, đã đo riêng bằng bench tagdb (`flushChangesMs`); `TagDB.#applyWrite` chỉ đưa mỗi handle vào dirty list tối đa 1 lần nên không flush vẫn bị chặn bộ nhớ theo số tag (~1770).
+- **Commit 10 (OQ-304, tier B):** EventLog ring buffer — ngoài phạm vi 2 điểm nóng của plan; cpu-prof chứng minh `shift()` chiếm 74,7% CPU, là nguyên nhân chính của FAIL (128 bước/s). Ring buffer giữ nguyên API (push/length/entries/toJSON/clear) + thứ tự chèn; 2 test vòng tròn mới (2×MAX, clear-sau-khi-đầy).
+- **Commit 10 (tier B):** hoist `getObs` closure (`#getObsBound`) — ngoài 2 điểm nóng của plan; mỗi `evalSource` trước đây cấp phát 1 closure (~350/bước). Không đổi hành vi.
+- **Commit 10 (tier B — kết quả đo, không phải lệch thiết kế):** sau fix 1300 bước/s, vẫn thiếu ×3,85 so với ngưỡng §12. Profile sau fix phẳng, không còn điểm nóng đơn lẻ. Nguyên nhân gốc: chi phí rải theo kiến trúc vòng nóng (closure dispatch qua StepCtx, Map lookup mỗi emit/cmd, gọi đa hình 8 model step, tsx loader ~7%). Đề xuất thu hẹp (tier C — owner chọn A 2026-11-26 09:34 +07: chấp nhận 1300 ở P2.3, làm lại vòng nóng ở P2.4 — cần plan riêng; ngưỡng §12 giữ nguyên, KHÔNG hạ): (A) chấp nhận 1300 ở P2.3, làm lại vòng nóng ở P2.4 (kênh emit/cmd tính trước, dispatch đơn hình theo model, pool event object) — cần plan riêng; (B) đo lại trên máy chuyên dụng / biên dịch JS trước thay vì tsx (tsx `runCallSync` ~7%); (C) owner hạ ngưỡng §12 với lý do ghi lại. Ghi ở semantics §22.
+
+### File (mới/sửa)
+| File | Nội dung |
+|---|---|
+| `packages/plant/src/models/motor_vfd.ts` + `.test.ts` | Model vfd + unit test |
+| `packages/plant/src/models/valve_onoff.ts` + `.test.ts` | Model valve_onoff + unit test |
+| `packages/plant/src/models/valve_ctrl.ts` + `.test.ts` | Model valve_ctrl + unit test |
+| `packages/plant/src/models/damper.ts` + `.test.ts` | deriveModel từ valve_ctrl + unit test |
+| `packages/plant/src/models/analog_sensor.ts` + `.test.ts` | Model analog_sensor + unit test |
+| `packages/plant/src/models/switch_di.ts` + `.test.ts` | Model switch_di + unit test |
+| `packages/plant/src/models/silo_bin.ts` + `.test.ts` | Model silo_bin + unit test |
+| `packages/plant/src/models/conveyor_simple.ts` + `.test.ts` | Model conveyor_simple + unit test |
+| `packages/plant/src/models/index.ts` | Đăng ký 8 model vào defaultRegistry + export |
+| `packages/plant/golden/<model>.golden.yaml` × 8 | 59 golden case |
+| `packages/plant/src/golden/golden.test.ts` | Harness tổng quát (thay motor-dol.test.ts) |
+| `packages/plant/src/test-helpers.ts` | `make<Model>Setup` × 8 + dispatcher |
+| `packages/plant/src/engine.ts` + `packages/schemas/src/equipment.ts` | Named sources (OQ-290) + OQ-267 fix (OQ-297) |
+| `packages/plant/src/faults.ts` | OQ-267 fix (cached fault result, applyEmit slot) |
+| `packages/plant/src/events.ts` + `.test.ts` | Ring buffer O(1) (OQ-304) + 2 test vòng tròn |
+| `bench/plant.bench.ts` + `package.json` + `bench/baseline.json` + `scripts/check-bench-regression.mjs` | Bench plant (OQ-296) |
+| `docs/equipment/<model>.md` × 8 | Sinh bằng `pnpm docs:equipment` (commit) |
+| `docs/semantics.md` | §22 mới (P2.3) |
+| `docs/STATE.md` (§26), `docs/open-questions.md` (OQ-268…300), `docs/OWNER-INBOX.md` (R-008) | Plan này |
