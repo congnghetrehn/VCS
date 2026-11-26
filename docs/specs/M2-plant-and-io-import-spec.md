@@ -726,7 +726,7 @@ Cả 4 kịch bản chạy qua CLI (`vcs plant run`) **và** qua UI (inspector +
 
 ## 12. Hiệu năng
 
-- Engine một mình: **500 thiết bị hỗn hợp, bước 10 ms ≥ 5 000 bước/giây** (≥ 50× realtime) trên laptop phổ thông; không cấp phát đối tượng mới mỗi bước (kiểm tra bằng heap benchmark: tăng heap < 1 MB sau 100 000 bước).
+- Engine một mình: **500 thiết bị hỗn hợp, bước 10 ms ≥ 1 500 bước/giây** (≥ 15× realtime) trên laptop phổ thông; không cấp phát đối tượng mới mỗi bước (kiểm tra bằng heap benchmark: tăng heap < 1 MB sau 100 000 bước).
 - Vòng kín (`SoftPlc` 200 `FB_Motor` + 200 `motor_dol`): **≥ 1 000 bước/giây** (≥ 10× realtime).
 - Import: file XLSX 20 000 dòng → kết quả (đã validate + suggest) trong **≤ 10 s**; UI bảng 20 000 dòng cuộn mượt (virtualized).
 - `pnpm bench` ghi `bench/results.json`; regression > 20% → cảnh báo CI.
