@@ -1,0 +1,16 @@
+# Demo C — localMode từ T=0: plant không chạy được (canRun false) nhưng
+# PLC không biết → seal lên, timer đếm như bảng B → trip ở T=3110
+# (bảng C STATE §27).
+name: c-local-mode
+simulation: { stepMs: 10, plcScanMs: 10 }
+steps:
+  - { at: 0, set: { STOP_OK: true, PERM: true }, fault: { target: { equipment: M01, fault: localMode } } }
+  - { at: 100, set: { START_PB: true } }
+  - { at: 200, set: { START_PB: false } }
+expects:
+  - { at: 0, tags: { RUN_FB: false }, observables: { M01: { state: STOPPED } } }
+  - { at: 100, tags: { RUN_CMD: true } }
+  - { at: 110, observables: { M01: { state: STOPPED } } }
+  - { at: 3100, tags: { RUN_CMD: true, RUN_FB: false }, observables: { M01: { state: STOPPED } } }
+  - { at: 3110, tags: { FAULT_LAMP: true, RUN_CMD: false } }
+  - { at: 3120, tags: { RUN_CMD: false, FAULT_LAMP: true, RUN_FB: false }, observables: { M01: { state: STOPPED } } }
