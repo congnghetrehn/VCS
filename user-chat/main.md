@@ -2383,3 +2383,17 @@ Em đề xuất A, vì đây là dữ liệu quan trọng nhất để M2 sát t
 ---
 Log tới thời điểm 2026-11-26 20:44 +07.
 ---
+
+## 2026-11-26 21:55 +07 — anh Tiến
+
+B — Chưa có file, hoãn đo acceptance
+
+## 2026-11-26 21:55 +07 — TraMuse
+
+TraMuse ghi nhận: anh chọn B, hoãn đo acceptance, anh Tiến ạ.
+
+P2.7 tiếp tục với bằng chứng fixture, acceptance thật ghi UNVERIFIED tới khi có dữ liệu, M2 ký sau. Em đã chuyển quyết định B cho bên đang làm P2.7 để ghi vào OWNER-INBOX và cập nhật plan; phần code vẫn chạy tiếp, chỉ hoãn bước đo thật.
+
+---
+Log tới thời điểm 2026-11-26 21:55 +07.
+---
