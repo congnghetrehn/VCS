@@ -59,7 +59,14 @@ export interface StepCtx<P = unknown, S = unknown> {
     clearedAtMs?: number;
   };
   /** Giá trị nguồn đã resolve (0 khi model không có source). */
-  source(): number | boolean;
+  source(name?: string): number | boolean;
+  /**
+   * true khi source (chính, không đối số) hoặc named source `name` đã được
+   * cấu hình cho thiết bị (OQ-294: conveyor phân biệt "load source đã cấu
+   * hình" với "không cấu hình → dùng param loadTph"). Tùy chọn — ctx do
+   * engine tạo luôn cung cấp; ctx dựng tay trong test có thể không có.
+   */
+  hasSource?(name?: string): boolean;
   /** Số giả ngẫu nhiên [0,1) từ PRNG riêng của thiết bị. */
   rand(): number;
   setObs(key: string, v: number | boolean | string): void;
@@ -132,7 +139,10 @@ export function createModelRegistry(): ModelRegistry {
 
 /**
  * Tạo model mới từ model gốc (spread base + patch; roles thay nếu cho).
- * paramsSchema được kế thừa từ base.
+ * paramsSchema được kế thừa từ base, trừ khi patch cho schema mới
+ * (conveyor_simple mở rộng params của motor_dol — OQ-292, tier B:
+ * deriveModel ở P2.1/P2.2 không hỗ trợ patch schema, zod strip unknown
+ * key nên 4 param thêm sẽ mất nếu không có patch này).
  */
 export function deriveModel<P extends object, S>(
   base: EquipmentModel<P, S>,
@@ -141,6 +151,8 @@ export function deriveModel<P extends object, S>(
     version?: string;
     description?: string;
     roles?: RoleDef[];
+    /** Schema params mới (mở rộng schema của base). */
+    paramsSchema?: ZodType<P>;
     defaultParams?: Partial<P>;
     observables?: ObsDef[];
     faults?: FaultDef[];
@@ -157,6 +169,7 @@ export function deriveModel<P extends object, S>(
     ...(patch.version !== undefined ? { version: patch.version } : {}),
     ...(patch.description !== undefined ? { description: patch.description } : {}),
     ...(patch.roles !== undefined ? { roles: patch.roles } : {}),
+    ...(patch.paramsSchema !== undefined ? { paramsSchema: patch.paramsSchema } : {}),
     ...(patch.defaultParams !== undefined
       ? { defaultParams: { ...base.defaultParams, ...patch.defaultParams } }
       : {}),

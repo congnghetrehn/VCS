@@ -85,6 +85,30 @@ describe('inject / advance / clear', () => {
     expect(f.params).toEqual({ x: 1 });
     expect(f.clearedAtMs).toBeUndefined();
   });
+
+  it('equipmentFault trả cùng object, cập nhật tại chỗ (OQ-267)', () => {
+    const m = makeManager();
+    // Chưa có record: hằng số chia sẻ.
+    expect(m.equipmentFault('E1', 'noStart')).toBe(m.equipmentFault('E1', 'noStart'));
+    const id = m.inject(
+      { target: { equipment: 'E1', fault: 'noStart' }, when: { at: 'now' }, params: { x: 1 } },
+      200,
+    );
+    m.advance(200);
+    const a = m.equipmentFault('E1', 'noStart');
+    const b = m.equipmentFault('E1', 'noStart');
+    expect(a).toBe(b);
+    expect(a.active).toBe(true);
+    expect(a.sinceMs).toBe(200);
+    expect(a.params).toEqual({ x: 1 });
+    expect(a.clearedAtMs).toBeUndefined();
+    // Clear tay: cùng object, giá trị cập nhật tại chỗ (không giữ giá trị cũ).
+    m.clear(id, 300);
+    const c = m.equipmentFault('E1', 'noStart');
+    expect(c).toBe(a);
+    expect(c.active).toBe(false);
+    expect(c.clearedAtMs).toBe(300);
+  });
 });
 
 describe('applyEmit — từng loại (bảng B)', () => {
@@ -191,6 +215,19 @@ describe('applyEmit — từng loại (bảng B)', () => {
     const m = makeManager({ wireBreakRaw: 32000 });
     injectActive(m, { ...AI, type: 'wireBreak' });
     expect(m.applyEmit('CR01_M01', 'currentFb', 'AI', 40, 0, 10, rng())).toEqual({ rawOverride: 32000 });
+  });
+
+  it('applyEmit trả slot tái dùng (OQ-267)', () => {
+    const m = makeManager();
+    const v1 = m.applyEmit('CR01_M01', 'currentFb', 'AI', 40, 0, 10, rng());
+    const v2 = m.applyEmit('CR01_M01', 'currentFb', 'AI', 50, 0, 10, rng());
+    expect(v1).toBe(v2);
+    expect(v2).toEqual({ value: 50 });
+    injectActive(m, { ...AI, type: 'wireBreak' });
+    const r1 = m.applyEmit('CR01_M01', 'currentFb', 'AI', 40, 0, 10, rng());
+    const r2 = m.applyEmit('CR01_M01', 'currentFb', 'AI', 41, 0, 10, rng());
+    expect(r1).toBe(r2);
+    expect(r2).toEqual({ rawOverride: 32767 });
   });
 
   it('lost/stuckCmd phía emit bị bỏ qua', () => {

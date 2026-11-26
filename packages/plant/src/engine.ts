@@ -71,9 +71,14 @@ interface RuntimeEquipment {
   obs: Record<string, number | boolean | string>;
   source: SourceRuntime | undefined;
   sourceValue: number | boolean;
+  /** Named sources (OQ-290): tên → runtime + giá trị đã resolve mỗi bước. */
+  namedSources: Map<string, SourceRuntime>;
+  namedSourceValues: Map<string, number | boolean>;
   handles: Map<string, TagHandle>;
   roles: Map<string, RoleDef>;
   ranges: Map<string, Range>;
+  /** Key `${id}:${role}` tính trước ở init (OQ-267: #emit khỏi nối chuỗi mỗi lần gọi). */
+  emitKeys: Map<string, string>;
   pendingObs: Map<string, { from: unknown; to: number | boolean | string }>;
 }
 
@@ -87,6 +92,9 @@ export interface PlantSnapshot {
     obs: Record<string, number | boolean | string>;
     source: SourceRuntime | null;
     sourceValue: number | boolean;
+    /** Named sources (OQ-290) — optional để snapshot cũ (v1 trước P2.3) vẫn restore được. */
+    namedSources?: Record<string, SourceRuntime>;
+    namedSourceValues?: Record<string, number | boolean>;
   }>;
   faults: FaultManagerSnapshot;
   lastEmit: Array<[string, number | boolean]>;
@@ -101,6 +109,17 @@ function isInt(v: unknown): v is number {
  * (model/link-target/role không tồn tại, trùng id, params sai schema);
  * tag không tồn tại dùng TAG-E003; stepMs sai dùng PRJ-E007.
  */
+/** Các id thiết bị mà `inst` phụ thuộc qua link (source chính + named sources). */
+function linkDeps(inst: EquipmentInstance | undefined): string[] {
+  if (inst === undefined) return [];
+  const out: string[] = [];
+  const specs: Array<SourceSpec | undefined> = [inst.source, ...Object.values(inst.sources ?? {})];
+  for (const spec of specs) {
+    if (spec?.kind === 'link' && spec.equipment !== undefined) out.push(spec.equipment);
+  }
+  return out;
+}
+
 export function validatePlantConfig(
   cfg: PlantConfig,
   tags: Map<string, TagDef>,
@@ -203,18 +222,24 @@ export function validatePlantConfig(
         }
       }
     }
-    if (inst.source?.kind === 'link') {
-      const targetId = inst.source.equipment ?? '';
+    const linkSpecs: Array<{ name: string; spec: SourceSpec }> = [];
+    if (inst.source !== undefined) linkSpecs.push({ name: 'source', spec: inst.source });
+    for (const [name, spec] of Object.entries(inst.sources ?? {})) {
+      linkSpecs.push({ name, spec });
+    }
+    for (const { name, spec } of linkSpecs) {
+      if (spec.kind !== 'link') continue;
+      const targetId = spec.equipment ?? '';
       const target = instById.get(targetId);
       if (target === undefined) {
-        err('PL-E001', `Link target ${targetId} của thiết bị ${inst.id} không tồn tại.`);
+        err('PL-E001', `Link target ${targetId} của ${name} thiết bị ${inst.id} không tồn tại.`);
       } else {
         const targetModel = models.get(target.model);
-        const obsKey = inst.source.observable ?? '';
+        const obsKey = spec.observable ?? '';
         if (targetModel !== undefined && !targetModel.observables.some((o) => o.key === obsKey)) {
           err(
             'PL-E001',
-            `Observable ${obsKey} không khai báo trong model ${target.model} của thiết bị ${targetId} (link từ ${inst.id}).`,
+            `Observable ${obsKey} không khai báo trong model ${target.model} của thiết bị ${targetId} (link từ ${name} của ${inst.id}).`,
           );
         }
       }
@@ -222,13 +247,7 @@ export function validatePlantConfig(
   }
   const { cycle } = topoSort(
     cfg.equipment.map((e) => e.id),
-    (id) => {
-      const inst = instById.get(id);
-      if (inst?.source?.kind === 'link' && inst.source.equipment !== undefined) {
-        return [inst.source.equipment];
-      }
-      return [];
-    },
+    (id) => linkDeps(instById.get(id)),
   );
   if (cycle !== undefined) {
     err('PL-E020', `Chu trình link: ${cycle.join(' → ')}.`);
@@ -248,6 +267,9 @@ export class PlantEngine implements SimComponent {
   #byId = new Map<string, RuntimeEquipment>();
   #ctxs = new Map<string, StepCtx>();
   #lastEmit = new Map<string, number | boolean>();
+  /** Hàm getObs đóng sẵn, tái dùng cho mọi evalSource mỗi bước (OQ-267: khỏi cấp phát closure mỗi lần gọi). */
+  #getObsBound = (equipmentId: string, key: string): number | boolean | string | undefined =>
+    this.#getObs(equipmentId, key);
 
   constructor(cfg: PlantConfig, tags: TagDB, models: ModelRegistry = defaultRegistry) {
     this.#cfg = cfg;
@@ -287,13 +309,7 @@ export class PlantEngine implements SimComponent {
     const instById = new Map(cfg.equipment.map((e) => [e.id, e]));
     const { order: sortedIds } = topoSort(
       cfg.equipment.map((e) => e.id),
-      (id) => {
-        const inst = instById.get(id);
-        if (inst?.source?.kind === 'link' && inst.source.equipment !== undefined) {
-          return [inst.source.equipment];
-        }
-        return [];
-      },
+      (id) => linkDeps(instById.get(id)),
     );
     this.#order = [];
     this.#byId = new Map();
@@ -335,6 +351,10 @@ export class PlantEngine implements SimComponent {
         const spec: SourceSpec = inst.source ?? { kind: 'const', value: 0 };
         source = { spec, setAtMs: 0, manualValue: 0 };
       }
+      const namedSources = new Map<string, SourceRuntime>();
+      for (const [name, spec] of Object.entries(inst.sources ?? {})) {
+        namedSources.set(name, { spec, setAtMs: 0, manualValue: 0 });
+      }
       const rt: RuntimeEquipment = {
         id,
         model,
@@ -344,9 +364,12 @@ export class PlantEngine implements SimComponent {
         obs: {},
         source,
         sourceValue: 0,
+        namedSources,
+        namedSourceValues: new Map(),
         handles,
         roles,
         ranges,
+        emitKeys: new Map(model.roles.map((r) => [r.role, `${id}:${r.role}`])),
         pendingObs: new Map(),
       };
       const ctx: StepCtx = {
@@ -358,7 +381,12 @@ export class PlantEngine implements SimComponent {
         has: (role) => rt.handles.has(role),
         emit: (role, v) => { this.#emit(rt, role, v); },
         fault: (fid) => this.#faults.equipmentFault(rt.id, fid),
-        source: () => rt.sourceValue,
+        source: (name?: string) =>
+          name === undefined ? rt.sourceValue : (rt.namedSourceValues.get(name) ?? 0),
+        // OQ-294: phân biệt named source đã cấu hình với chưa cấu hình
+        // (source() trả 0 cho cả hai trường hợp).
+        hasSource: (name?: string) =>
+          name === undefined ? rt.source !== undefined : rt.namedSources.has(name),
         rand: () => rngNext(rt.rng),
         setObs: (key, v) => {
           const prev = rt.obs[key];
@@ -371,7 +399,7 @@ export class PlantEngine implements SimComponent {
           }
           rt.obs[key] = v;
         },
-        getObs: (eqId, key) => this.#getObs(eqId, key),
+        getObs: this.#getObsBound,
         log: (level, msg, data) => {
           const e: PlantEvent = {
             t: this.#simTimeMs,
@@ -419,7 +447,7 @@ export class PlantEngine implements SimComponent {
     if (h === undefined) return;
     const roleDef = rt.roles.get(role) as RoleDef;
     const kind = roleDef.kind;
-    const key = `${rt.id}:${role}`;
+    const key = rt.emitKeys.get(role) ?? `${rt.id}:${role}`;
     const result = this.#faults.applyEmit(rt.id, role, kind, v, this.#simTimeMs, this.#cfg.stepMs, rt.rng);
     if ('rawOverride' in result) {
       if (roleDef.dataType === 'Real') {
@@ -467,7 +495,13 @@ export class PlantEngine implements SimComponent {
           T,
           rt.source.setAtMs,
           rt.source.manualValue,
-          (eq, key) => this.#getObs(eq, key),
+          this.#getObsBound,
+        );
+      }
+      for (const [name, ns] of rt.namedSources) {
+        rt.namedSourceValues.set(
+          name,
+          evalSource(ns.spec, T, ns.setAtMs, ns.manualValue, this.#getObsBound),
         );
       }
       const ctx = this.#ctxs.get(rt.id);
@@ -508,6 +542,13 @@ export class PlantEngine implements SimComponent {
           obs: { ...rt.obs },
           source: rt.source !== undefined ? { ...rt.source, spec: { ...rt.source.spec } } : null,
           sourceValue: rt.sourceValue,
+          namedSources: Object.fromEntries(
+            [...rt.namedSources.entries()].map(([name, ns]) => [
+              name,
+              { ...ns, spec: { ...ns.spec } },
+            ]),
+          ),
+          namedSourceValues: Object.fromEntries(rt.namedSourceValues.entries()),
         };
         return entry;
       }),
@@ -540,6 +581,13 @@ export class PlantEngine implements SimComponent {
       rt.pendingObs.clear();
       rt.source = es.source ?? undefined;
       rt.sourceValue = es.sourceValue;
+      rt.namedSources = new Map(
+        Object.entries(es.namedSources ?? {}).map(([name, ns]) => [
+          name,
+          { ...ns, spec: { ...ns.spec } },
+        ]),
+      );
+      rt.namedSourceValues = new Map(Object.entries(es.namedSourceValues ?? {}));
     }
     this.#faults.restore(snap.faults);
     this.#lastEmit = new Map(snap.lastEmit);
@@ -565,23 +613,36 @@ export class PlantEngine implements SimComponent {
     return rt.obs[key];
   }
 
-  setSource(equipmentId: string, spec: SourceSpec): void {
+  setSource(equipmentId: string, spec: SourceSpec, name?: string): void {
     const rt = this.#byId.get(equipmentId);
     if (rt === undefined) throw new Error(`PlantEngine: thiết bị ${equipmentId} không tồn tại.`);
     if (rt.model.hasSource !== true) {
       throw new Error(`PlantEngine: model ${rt.model.type} của ${equipmentId} không có source.`);
     }
     const parsed = sourceSpecSchema.parse(spec);
-    rt.source = { spec: parsed, setAtMs: this.#simTimeMs, manualValue: rt.source?.manualValue ?? 0 };
+    if (name === undefined) {
+      rt.source = { spec: parsed, setAtMs: this.#simTimeMs, manualValue: rt.source?.manualValue ?? 0 };
+      return;
+    }
+    const prev = rt.namedSources.get(name);
+    rt.namedSources.set(name, {
+      spec: parsed,
+      setAtMs: this.#simTimeMs,
+      manualValue: prev?.manualValue ?? 0,
+    });
   }
 
-  setManual(equipmentId: string, value: number | boolean): void {
+  setManual(equipmentId: string, value: number | boolean, name?: string): void {
     const rt = this.#byId.get(equipmentId);
     if (rt === undefined) throw new Error(`PlantEngine: thiết bị ${equipmentId} không tồn tại.`);
     if (rt.model.hasSource !== true) {
       throw new Error(`PlantEngine: model ${rt.model.type} của ${equipmentId} không có source.`);
     }
-    rt.source = { spec: { kind: 'manual' }, setAtMs: this.#simTimeMs, manualValue: value };
+    if (name === undefined) {
+      rt.source = { spec: { kind: 'manual' }, setAtMs: this.#simTimeMs, manualValue: value };
+      return;
+    }
+    rt.namedSources.set(name, { spec: { kind: 'manual' }, setAtMs: this.#simTimeMs, manualValue: value });
   }
 
   injectFault(req: FaultRequest): string {
