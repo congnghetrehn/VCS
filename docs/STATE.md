@@ -4281,7 +4281,6 @@ bằng chứng bench trước/sau OQ-267 fix.)*
 
 ### Lệch so với plan
 *(Implementer điền tier B — test/bảng tính tay chứng minh, không đổi spec.)*
-
 - **Commit 2 (OQ-302, tier B):** state van suy bằng eps 1e-9 thay vì `pos==0/100` exact — 0.1 cộng 1000 lần = 99.9999999999986, van không đạt đúng 100 với slowTravel factor 2, state kẹt OPENING dù bảng I.2 ghim OPEN tại T=10100 (mirror OQ-273 vfd; posPct giữ nguyên giá trị tích lũy). Bằng chứng: `node -e` tính tay + golden slow-travel xanh sau sửa.
 - **Commit 2 (tier B):** `faultNC` là param thứ 6 của valve_onoff (default false) — plan §26 mục Thiết kế.2 chỉ liệt kê 5 param của spec §7.3, nhưng OQ-275 yêu cầu polarity `faultNC` và plan phần tóm tắt đã nói "plan adds faultNC param (vfd default true, valve default false)".
 - **Commit 2 (tier B):** golden base-travel nhả `openCmd=false` cùng lúc đặt `closeCmd=true` tại t=6000 — bảng B chỉ ghi "closeCmd=1 sau step(6000)" nhưng số liệu đóng (pos 1 tại 10950, 0 tại 11000) yêu cầu dir −1, tức openCmd phải nhả (nếu không cả hai lệnh true → hold).
@@ -4332,3 +4331,915 @@ bằng chứng bench trước/sau OQ-267 fix.)*
 | `docs/equipment/<model>.md` × 8 | Sinh bằng `pnpm docs:equipment` (commit) |
 | `docs/semantics.md` | §22 mới (P2.3) |
 | `docs/STATE.md` (§26), `docs/open-questions.md` (OQ-268…300), `docs/OWNER-INBOX.md` (R-008) | Plan này |
+
+## 27. P2.4 — vòng kín + CLI `plant run` + làm lại vòng nóng (plan)
+
+**Prompt (PROMPTS M2, phase P2.4 — nguyên văn):**
+```
+Làm P2.4 theo AGENTS.md §9 (plan-first). Đọc: … → AMENDMENTS (A6, A7, D1) → M2 §5.1, 11.4.
+Nhiệm vụ: plantExtension (đăng ký PlantEngine pha 'plant', setOwner), vòng kín với SoftPlc: demo A–D (M2 §11.4) + CLI vcs plant run.
+Gate: 4 kịch bản qua CLI và UI cho cùng kết quả; hash tất định; bench vòng kín ≥ 1000 bước/giây.
+```
+**Nhánh:** `m2/p2.4-closed-loop` (từ `ed3cae2`, nội dung = develop sau PR #34).
+**Trạng thái:** ☑ plan → ☑ implement (commit 1–5) → ☐ gate → ☐ PR → ☐ merge — **DỪNG ở điểm tier C sau commit 6 (D-008)**, chờ owner quyết hướng hot-loop; commit 7–8 chưa làm.
+
+### Đọc
+- AGENTS.md (luật, gate, tier A/B/C); docs/agent/SOUL.md; docs/AUTONOMY.md;
+  PROMPTS M2 phase P2.4; M2 spec §5.1 (vòng lặp), §5.6 (hiệu năng), §11.4
+  (demo vòng kín A–D), §12 (bench), §14 (nghiệm thu M2), §15 (mặc định),
+  §4.2 (equipment.yaml); STATE §26 (P2.3 — điểm xuất phát + bench 1300);
+  docs/semantics.md §22 (bench plant + quyết định A); AMENDMENTS (A6, A7,
+  D1, A20); OWNER-INBOX (§6 R-008); PACKAGE-RULES.md §`@vcs/plant`;
+  docs/skills/SKILL-plc-simulation.md (§2, §8, §12),
+  SKILL-testing-and-verification.md (§2, §5, §9, §13),
+  SKILL-tools-and-protocols.md (§2, §12).
+- Đã kiểm code thật (không suy đoán): `packages/kernel/src/orchestrator.ts`
+  (pha plant/controllers/gateways, `register`, `post`/`applyInbox`,
+  `snapshotAll`/`restoreAll`, `stepOnce`); `packages/kernel/src/builder.ts`
+  (`createSimulation` 5 bước, `SimulationProject`, `BuildCtx`,
+  `CLI/SERVER_EXTENSIONS` một chỗ); `packages/plant/src/engine.ts`
+  (737 dòng: `validatePlantConfig`, `#initializeEquipment`,
+  `step`/`#cmd`/`#emit`, snapshot/restore, `setSource`/`setManual`,
+  `injectFault`/`applyPreset`); `packages/plant/src/faults.ts`
+  (`advance`, `equipmentFault` cache OQ-267, `applyEmit`/`applyCmd`,
+  `#activeSignalFaults` filter+sort); `packages/plant/src/registry.ts`
+  (`StepCtx`, `EquipmentModel`); `packages/runtime-iec/src/std/handlers.ts`
+  (`makeTon`: `elapsed = nowMs − _start`, `_start` đặt ở scan đầu IN=true,
+  `Q = elapsed ≥ PT`); `packages/plant/src/models/motor_dol.ts` (6 luật,
+  `startDelayMs 500`, `stopDelayMs 800`, `overloadResetMs 1000`,
+  `tripDelayMs 0`, `resetRequiresCmdOff true`, `overloadNC true`);
+  `examples/motor-interlock/plc/FB_Motor.scl` (seal + TON PT=3000ms +
+  reset); `apps/cli/src/commands/run.ts` + `index.ts` (commander, exit
+  0/2/3, `--steps/--until/--scans/--hash/--csv`); `apps/cli/src/extensions.ts`
+  + `apps/server/src/extensions.ts` (chỉ `[demoExtension]`);
+  `packages/project/src/load.ts` (chỉ nạp `vcs.project.yaml` + tags);
+  `packages/schemas/src/project.ts` (`files: {tags, comms, hmi}`, chưa có
+  `plant`); `bench/plant.bench.ts` (500 thiết bị, trung vị 5 runs),
+  `bench/softplc.bench.ts` (1 SoftPlc, OB1 gọi FB_Motor 200×, 1110–1746
+  scan/s), `bench/orchestrator.bench.ts` (mẫu project bench);
+  `scripts/check-bench-regression.mjs` (chỉ cảnh báo `::warning::`, không
+  fail); `.dependency-cruiser.cjs` (quy tắc `plant-deps`: plant được import
+  `{schemas, kernel, plant}` — runner scenario đặt trong `@vcs/plant`
+  được phép import runtime `@vcs/kernel`).
+- Điểm xuất phát P2.3 (đã merge PR #34 `aec87ef9`, 2026-11-26 10:26 +07):
+  9 model plant, test **2333/2333 (99 file)**, plant 359 test, coverage
+  plant **97,13%** lines, diagnostics **58 mã**, golden 77 case,
+  bench plant **1300 bước/s** (trung vị 5 runs, phạm vi 1207–1394; lần kiểm
+  độc lập 1768), heap −16,18 MB PASS; bench TagDB ~30–50M ops/s,
+  orchestrator ~300–518k bước/s, softplc 1110–1746 scan/s (dao động theo
+  tải VM). Ngưỡng M2 §12: engine-alone ≥ 5000 bước/s (thiếu ×3,85),
+  vòng kín ≥ 1000 bước/s (chưa đo). OQ-301/302/303 vẫn mở (tier B);
+  OQ-267 vẫn mở (theo dõi tới P2.4).
+
+### Tóm tắt hiểu biết (≤ 8 dòng)
+1. P2.4 = 3 việc trong 1 phase: (a) nối plant vào vòng kín (loader
+   `plant/equipment.yaml` + `plantExtension` đăng ký PlantEngine pha
+   'plant'); (b) demo A–D (§11.4) qua CLI `vcs plant run` mới + qua UI
+   (cùng kết quả, cùng hash); (c) làm lại vòng nóng plant (quyết định A
+   của owner) để bench engine-alone đạt ≥ 5000 bước/s.
+2. Vòng kín đã có sẵn khung: orchestrator có pha plant (trống) +
+   `createSimulation` 5 bước + extension một chỗ (CLI/server); chỉ thiếu
+   plantExtension + loader; `setOwner` engine đã tự làm trong constructor.
+3. Thứ tự bước (§5.1): externalInputs → faults.advance → plant → PLC
+   scan → flush → advance; PLC thấy plant cùng bước T, plant thấy output
+   PLC từ T+dt (trễ 1 bước) — bảng A–D tính tay theo đúng luật này.
+4. Bench vòng kín §12 (200 FB_Motor + 200 motor_dol, ≥ 1000 bước/s) rất
+   sát ngưỡng theo cấu tạo: 1 scan SoftPlc 200 FB đã 0,65–0,9 ms trong
+   ngân sách 1,0 ms/bước — plant chỉ còn ~0,1–0,3 ms.
+5. Vòng nóng hiện tại (1300 bước/s): chi phí rải đều, không còn điểm nóng
+   đơn lẻ (profile sau fix: step 19,8%, #emit 19,7%, tsx 7,4%, closure
+   6,1%, GC 4,5%) — phải đổi kiến trúc (kênh tính trước, dispatch đơn
+   hình), không phải vá 1 hàm.
+6. UI chưa có gì cho plant (không inspector, không fault panel, server
+   chưa có API plant) — chân UI của gate §11.4 phải làm tối thiểu trong
+   P2.4, inspector đầy đủ ở lại P2.8.
+7. Không cần I/O list thật (X-003 chỉ chặn P2.7); không chạm OQ-161
+   (không FB lồng); không mã diagnostic mới (OQ-319).
+8. Test target ~76 mới, tổng ~2409; coverage plant giữ ≥ 85; diagnostics
+   giữ 58 mã; bench plant ≥ 5000 + bench vòng kín ≥ 1000 là điều kiện
+   nghiệm thu cứng (không hạ ngưỡng, không sửa bench để qua).
+
+### Phạm vi
+**Làm:**
+- Loader `plant/equipment.yaml` (OQ-252, hoãn từ P2.1): `files.plant`
+  trong project schema + `loadProject` nạp + `SimulationProject.plant`.
+- `plantExtension` (`@vcs/plant`): dựng PlantEngine từ config project,
+  đăng ký pha 'plant'; thêm vào `CLI_EXTENSIONS` + `SERVER_EXTENSIONS`.
+- Scenario runner + CLI `vcs plant run` (OQ-305/306/307/315/316/319):
+  schema YAML kịch bản, runner lõi trong `@vcs/plant`, lệnh CLI mỏng,
+  exit 0/1/2/3.
+- Demo A–D (§11.4): `examples/motor-interlock/plant/equipment.yaml` +
+  `examples/motor-interlock/scenarios/{a,b,c,d}.yaml` (bảng tính tay A–D
+  dưới đây là kỳ vọng; file scenario khai `simulation: {stepMs: 10,
+  plcScanMs: 10}`).
+- Bench vòng kín `bench/closedloop.bench.ts` (200 FB_Motor + 200
+  motor_dol, ≥ 1000 bước/s) + nối vào `pnpm bench` + baseline +
+  regression script (OQ-314); đo-trước (commit 3) rồi mới tối ưu.
+- Làm lại vòng nóng (quyết định A): kênh emit/cmd tính trước (commit 4),
+  dispatch đơn hình theo model (commit 5), fault fast-path (commit 6 —
+  chỉ làm phần profile chứng minh cần; xem Thiết kế.7).
+- Server tối thiểu + UI parity (OQ-308/318): WS `plant.fault.*`,
+  `GET /api/plant`, `GET /api/sim/hash`, panel fault tối thiểu, e2e
+  A–D qua UI so hash với CLI.
+- `docs/semantics.md` §23 mới; STATE §27 + OQ-305…319 + R-009 (gồm
+  OQ-301/302/303 mang sang từ P2.3).
+- Thứ tự commit: (1) loader + plantExtension, (2) scenario + CLI
+  `plant run`, (3) bench vòng kín (đo-trước), (4) hot-loop 1 kênh tính
+  trước, (5) hot-loop 2 dispatch đơn hình, (6) hot-loop 3 fault
+  fast-path, (7) server + UI parity, (8) docs (§23 hoàn thiện + kết quả
+  + R-009).
+**Không làm (out of scope):** import CSV/XLSX (P2.5); address/validate/
+  diff (P2.6); auto-suggest (P2.7, X-003); UI plant đầy đủ — designer +
+  inspector đầy đủ + fault panel đầy đủ (P2.8); model P1 (crusher, mill…);
+  sửa SoftPlc/interpreter (trừ khi bench vòng kín chứng minh lỗi ở đó —
+  khi đó dừng, báo tier C, không tự sửa); sửa nền P2.1/P2.2/P2.3 trừ các
+  chỗ ghi trên + khi test chỉ ra lỗi — khi đó sửa nền + ghi vào §27
+  "Lệch so với plan".
+
+### Thiết kế
+**0. Nguyên tắc chung:** đo-trước-sửa-sau cho mọi tối ưu (bench trung vị
+5 runs, ghi số trước/sau vào §27); hành vi giống hệt (toàn bộ 2333 test +
+77 golden xanh sau mỗi commit hot-loop + determinism hash không đổi);
+không đổi interface `StepCtx` (OQ-309 — model không chạm); không
+rename/delete file trong các commit implement (bài học PR #34: web upload
+không đổi tên/xóa được — nếu bắt buộc thì ghi rõ "bước xóa/đổi tên riêng
+trên GitHub UI"); không sửa file ví dụ M1 hiện có (chỉ thêm file mới
+dưới `examples/motor-interlock/plant/` + `scenarios/`).
+**1. Loader `plant/equipment.yaml` (commit 1, OQ-252/312/313):**
+`packages/schemas/src/project.ts`: `files` thêm `plant:
+z.string().default('plant/equipment.yaml')` + `PROJECT_SHAPE.files.keys`
+thêm `'plant'`; `EMPTY_PROJECT_CONFIG.files` thêm plant default.
+`packages/schemas/src/equipment.ts`: thêm `equipmentFileSchema =
+z.array(equipmentInstanceSchema)` (file là danh sách thiết bị theo
+§4.2). `packages/project/src/load.ts`: sau khi nạp tags, nếu file
+`config.files.plant` tồn tại → đọc + `parseYamlWithSchema` với
+`equipmentFileSchema` → `model.plant: EquipmentInstance[]`, đưa file vào
+`model.files` (tính vào `model.hash`); file sai schema → diagnostics
+lỗi (load fail như tags); file không tồn tại → im lặng, `model.plant`
+undefined (plant là opt-in theo project; `vcs plant run` không thấy
+plant sẽ lỗi rõ ở đó — OQ-312). `ProjectModel` thêm `plant?:
+EquipmentInstance[]`. `packages/kernel/src/builder.ts`:
+`SimulationProject` thêm `plant?: readonly EquipmentInstance[]`
+(additive, optional; kiểu từ `@vcs/schemas`). Test loader: file hợp lệ
+→ nạp + hash đổi khi file đổi; YAML sai → diagnostic lỗi; thiếu file →
+valid true, plant undefined; `controller` lạ trong equipment (§4.2 có
+trường `controller: PLC1`) — schema `equipmentInstanceSchema` hiện
+không có trường này: thêm `controller?: string` (optional, additive)
+để file §4.2 parse được; không validate chéo controller ở loader
+(engine không dùng trường này ở P2.4 — ghi OQ-312).
+**2. `plantExtension` (commit 1):** `packages/plant/src/extension.ts`
+mới, export `plantExtension(): SimulationExtension` (id `'plant'`):
+đọc `ctx.project.plant`; vắng → no-op; có → `new PlantEngine({ stepMs:
+project.config.simulation.stepMs, seed: project.config.seed, equipment:
+plant, tags: new Map(project.tags.map(t => [t.name, t])),
+plcScanMs: project.config.simulation.plcScanMs }, ctx.tags)` →
+`ctx.register('plant', engine)`. PlantEngine constructor đã fail-fast
+khi config lỗi (PL-E001/E003/…) và đã `setOwner(h, 'plant')` cho role
+DI/AI trong `#initializeEquipment` — extension không làm thêm.
+Config lỗi → lỗi lan truyền khỏi `createSimulation` (không nuốt, không
+chạy sim thiếu plant — OQ-313); CLI map về exit 2 (xem Thiết kế.4).
+Export extension từ `packages/plant/src/index.ts`. Thêm 1 dòng vào
+`apps/cli/src/extensions.ts` + `apps/server/src/extensions.ts`
+(`[... , plantExtension()]` — thứ tự: plant trước plcExtension, vì
+extension chạy trước controller ở builder bước 3–4; thứ tự mảng không
+ảnh hưởng pha chạy — pha do orchestrator quyết). Test: extension đăng
+ký pha plant + setOwner (DI/AI owner 'plant', DO/AO giữ 'controller');
+không plant → no-op (0 component plant); equipment lỗi (model lạ,
+trùng tag, thiếu role bắt buộc) → throw kèm mã PL; project chỉ plant
+không PLC → chạy được (engine-alone, plant.step vẫn chạy).
+**3. Scenario runner (commit 2, OQ-305/315/317/319):**
+`packages/plant/src/scenario.ts` mới (đặt trong `@vcs/plant` được phép
+import runtime `@vcs/kernel` theo quy tắc `plant-deps`): zod
+`scenarioSchema` (mẫu plant golden schema ở `golden/schema.ts`):
+`{ name?: string, simulation?: { stepMs?: number, plcScanMs?: number },
+steps: Array<{ at: number, set?: Record<string, boolean | number>,
+fault?: FaultRequest, clear?: string, preset?: { equipment: string,
+preset: string } }>, expects: Array<{ at: number, tags?: Record<string,
+boolean | number>, observables?: Record<string, Record<string, number |
+boolean | string>> }> }`. `FaultRequest` tái dùng `faultRequestSchema`
+của schemas; `when` của fault lấy từ `at` (runner truyền
+`when: { time: at }` — chính xác tuyệt đối, không dùng 'now' để tránh
+lệch 1 bước do `#simTimeMs` còn ở bước trước). Runner
+`runScenario(sim, engine, scenario, opts?: { untilMs?: number })`:
+vòng lặp bước T = 0, stepMs, …: (1) áp dụng action đúng `at == T`:
+tag-set qua `sim.post({ label, run: ctx => ctx.tags.set(handle, v,
+'system') })` (drain ở đầu bước, trước pha plant — đúng §11.4 "tác động
+đặt ở đầu bước T, trước plant.step"); fault/clear/preset gọi trực tiếp
+`engine.injectFault/clearFault/applyPreset` với `when: { time: T }`;
+(2) `sim.stepOnce()`; (3) kiểm expects đúng `at == T` **sau bước T
+đầy đủ** (sau flush — OQ-315): tag qua `sim.tags.read(name).value`,
+observable qua `engine.getObservable(id, key)`; số so
+`|a−b| ≤ 0.01` (mirror OQ-257), bool/string so exact; ghi failures
+`[{ at, key, expected, actual }]`; (4) `TraceHasher` subscribe từ đầu
+(chủ CLI truyền vào hoặc runner tự tạo — runner nhận hasher optional,
+CLI tạo như `run.ts` đã làm) → trả `{ passed, failures, hash,
+stepCount }`. Determinism (§11.2/§14.3, OQ-317): test chạy scenario A
+2 lần + 1 lần restore ở T=1000 rồi chạy tiếp → hash giống hệt (dùng
+`snapshotAll`/`restoreAll` của orchestrator; inbox phải rỗng trước
+snapshot — runner post hết action của bước trước khi snapshot).
+Lỗi scenario (file sai schema, tag/equipment/observable không tồn tại,
+`at` không phải bội stepMs) → `ScenarioError` (mirror `GoldenError`
+OQ-201), **không mã Diagnostic mới** (OQ-319): CLI in message + exit 2.
+**4. CLI `vcs plant run` (commit 2, OQ-306/316):**
+`apps/cli/src/commands/plant.ts` mới + đăng ký group `plant` trong
+`apps/cli/src/commands/index.ts` (mẫu group `ir`/`golden`):
+`vcs plant run [dir] [--scenario <file> ...] [--until <dur> |
+--steps <n>] [--step-ms <n>] [--plc-scan-ms <n>] [--watch <tags>]
+[--csv <file>] [--hash] [--json]`. Hành vi: `loadProject` →
+`loadPlcProgram` (như `run.ts`; lỗi biên dịch → exit 2, OQ-217) →
+`createSimulation` với `CLI_EXTENSIONS` + `plcExtension` →
+`startPlcControllers` → nếu có `--scenario`: mỗi file chạy 1 lần qua
+runner (simulation override: cờ CLI `--step-ms/--plc-scan-ms` thắng
+`scenario.simulation`, thắng project config — OQ-307; `stepMs ≤
+plcScanMs` và `plcScanMs` là bội của `stepMs`, vi phạm → cảnh báo
+PL-W001 theo §5.1, vẫn chạy) → in từng checkpoint PASS/FAIL + hash →
+exit **0** tất cả pass, **1** có expect fail, **2** không chạy được
+(project/scenario lỗi — gồm lỗi plantExtension OQ-313), **3** sai tham
+số (mirror `run`/`golden run`). Không có `--scenario`: smoke mode
+(OQ-316): chạy tới `--until/--steps` như `vcs run`, in tags + hash,
+exit 0. `--json` in `{ name, simTimeMs, stepCount, hash, scenarios:
+[{ file, passed, failures }] }`. `--csv` ghi chuỗi thay đổi như
+`run.ts`. Test CLI (mẫu `run.test.ts`): exit codes, `--hash` khớp
+`TraceHasher` tính tay, scenario fail → 1 + in đúng checkpoint, file
+scenario thiếu → 2, cờ sai → 3, smoke mode không scenario → 0.
+**5. Demo A–D (commit 2):** `examples/motor-interlock/plant/
+equipment.yaml` (1 thiết bị M01 motor_dol, params mặc định, signals
+`runCmd: RUN_CMD, runFb: RUN_FB, overloadOk: OVL_OK`; `ready`/`remote`/
+`currentFb` không gán → cảnh báo PL-W001 ở validate, chấp nhận — đúng
+§11.4) + `examples/motor-interlock/scenarios/{a-normal-overload,
+b-no-feedback, c-local-mode, d-contactor-stuck}.yaml` (mỗi file khai
+`simulation: {stepMs: 10, plcScanMs: 10}` + steps/expects theo bảng
+A–D dưới đây). KHÔNG sửa file ví dụ M1 hiện có (tags/plc/golden/
+vcs.project.yaml giữ nguyên stepMs 100 — demo M1 không hồi quy).
+Test tham số hóa: 1 test/1 file scenario qua CLI thật (spawn `vcs
+plant run`, assert exit 0 + hash ổn định 2 lần chạy).
+**6. Bench vòng kín (commit 3, OQ-314 — đo-trước):**
+`bench/closedloop.bench.ts` mới (mẫu `softplc.bench.ts` +
+`plant.bench.ts`, dựng in-code, không file YAML): 1 SoftPlc với OB1 gọi
+FB_Motor 200× (200 DB, mirror `softplc.bench.ts` nhưng mỗi FB nhận
+input riêng: `iRunFb := %I<k>` của motor thứ k, `iStart/iStopOk/
+iOverloadOk/iPermissive/iReset` chung từ virtual input) + 200 thiết bị
+`motor_dol` (params mặc định) gán `runCmd=RUN_CMD_k` (`%Q`),
+`runFb=RUN_FB_k`, `overloadOk=OVL_OK_k`; `stepMs = plcScanMs = 10`;
+warm-up 200 bước; trung vị 5 mẫu × 2000 bước qua
+`orchestrator.runSteps`; ngưỡng **≥ 1000 bước/s** (M2 §12, không hạ);
+heap chỉ in (không ngưỡng — §12 không cho heap vòng kín), tách in 3
+phần (plant.step / controllers.step / flush) để biết phần nào chiếm
+ngân sách (bằng chứng cho điểm quyết định tier C nếu < 1000).
+`package.json` script `bench`: thêm bước thứ 5
+(`bench/closedloop.bench.ts`); `bench/baseline.json`: thêm key
+`closedloopStepsPerSec` + range (trung vị 5 runs trên VM);
+`scripts/check-bench-regression.mjs`: thêm `closedloopStepsPerSec`
+(higherIsBetter, chỉ `::warning::` khi hồi quy > 20% — như các key
+khác, không fail). 0 test mới (số đo là bằng chứng). Ngân sách ước
+tính trước khi đo (KHÔNG phải cam kết — commit 3 đo thật): 1 ms/bước =
+plant 200 motor ~0,08 ms (từ 5000 bước/s ÷ 500 thiết bị) + 1 scan
+SoftPlc 200 FB 0,65–0,9 ms (đo ở bench softplc 1110–1746 scan/s) +
+flush ~0,06–0,10 ms + orchestrator ~0,003 ms → ~0,8–1,1 ms, tức
+~900–1250 bước/s — **sát ngưỡng theo cấu tạo** (xem Rủi ro 1).
+**7. Làm lại vòng nóng (commit 4–6, quyết định A):** mục tiêu
+engine-alone **≥ 5000 bước/s** (từ 1300, ×3,85; 1,54 µs → 0,40 µs
+mỗi thiết bị-bước), heap < 1 MB sau 100 000 bước (giữ PASS). Mỗi commit
+đo bench plant + bench vòng kín trước/sau (trung vị 5 runs), ghi vào
+§27; hành vi giống hệt = toàn bộ gate xanh + determinism hash không
+đổi (thêm test hồi quy: chạy config bench plant 500 thiết bị 2 lần +
+restore giữa chừng → cùng hash — OQ-317 mở rộng sang engine-alone).
+- **Commit 4 — kênh emit/cmd tính trước:** thay 4 Map mỗi thiết bị
+  (`handles`, `roles`, `ranges`, `emitKeys`) bằng `channels: Channel[]`
+  (1 record/role, theo thứ tự `model.roles`: `{ role, handle, kind,
+  dataType, range, emitKey }`) + `roleSlot: Map<string, number>` (1
+  lookup/string mỗi lần gọi ctx thay vì 3–4). `#cmd`/`#emit`/
+  `#initialValue` đọc `channels[slot]`; interface `StepCtx` KHÔNG đổi
+  (OQ-309 — 9 model không chạm); `obs` (object phẳng) + `pendingObs`
+  (chỉ chạm khi đổi) giữ nguyên; `#getObsBound` giữ nguyên. Test mới
+  ~6 (precompute đúng cho role không gán/kind Real/Int, restore giữ
+  channels, 2 thiết bị cùng model không chia sẻ state).
+- **Commit 5 — dispatch đơn hình theo model:** ở `#initializeEquipment`
+  (sau topoSort): dựng DAG mức model (cạnh A→B nếu có thiết bị model A
+  link tới thiết bị model B) + topo-sort model; nếu DAG model có chu
+  trình → fallback về thứ tự topo thiết bị (không nhóm) + công khai
+  `engine.groupedByModel: boolean` (để test/bench quan sát — không im
+  lặng, OQ-310). Vòng step: lặp theo nhóm model (thứ tự topo model),
+  trong nhóm lặp thiết bị theo thứ tự topo (giữ đúng thứ tự link cùng
+  model) → mỗi vòng lặp gọi cùng 1 hàm `model.step` (monomorphic call
+  site thay vì megamorphic 9 hàm ở `#order` trộn model). ctx mỗi thiết
+  bị giữ nguyên (cùng shape — đã đồng nhất). Test mới ~6 (thứ tự nhóm
+  với link chéo model; fallback khi chu trình mức model; bench mix
+  `groupedByModel === true`; link analog→silo cho kết quả đúng sau
+  nhóm). Đo cả 2 bench trước/sau.
+- **Commit 6 — fault fast-path (chỉ làm phần profile chứng minh cần):**
+  `#activeSignalFaults` hiện filter+sort toàn bộ `#records` mỗi
+  emit/cmd — khi có fault active sẽ cấp phát + sort mỗi lần gọi; cache
+  danh sách active theo `(equipment, role)`, invalidate ở
+  inject/clear/`advance` (record đổi trạng thái). Lưu ý: bench chuẩn có
+  0 record nên phần này **không** cải thiện bench plant — chỉ cải thiện
+  chạy có fault; nếu cpu-prof sau commit 5 không thấy nó trong top 5
+  thì **BỎ QUA commit 6** (ghi "bỏ qua vì profile không cần" vào §27
+  kết quả, không code cho có). **Event-object pool: KHÔNG làm** —
+  `entries()` giữ event để trả về, pool sẽ phá API (object bị tái dùng
+  sau khi trả); đã cân nhắc và loại, ghi nhận ở đây (đề xuất P2.3 chỉ
+  là gợi ý, không phải yêu cầu). **Spike tsx (OQ-311, làm trong commit
+  4):** đo bench plant dưới tsx vs JS biên dịch trước (`tsc` build →
+  `node`): ghi số; chỉ đổi cách chạy bench/CLI nếu nhanh hơn ≥ 20% và
+  đổi được bằng cách additive (không đổi hành vi đo) — mặc định giữ tsx
+  để so được với baseline 1300.
+- **Điểm quyết định (tier C) sau commit 6:** nếu engine-alone vẫn
+  < 5000 bước/s → **DỪNG**, báo cáo số đo + profile + 3 phương án (a)
+  kênh số cho StepCtx (breaking — viết lại 9 model dùng slot số thay
+  vì tên role); (b) chạy bench/CLI từ JS biên dịch trước (nếu spike
+  OQ-311 cho thấy tsx chiếm ≥ 20%); (c) owner chấp nhận số đạt được và
+  hạ ngưỡng §12 (ghi lý do). Chủ sản phẩm quyết — implementer KHÔNG tự
+  chọn, KHÔNG hạ ngưỡng, KHÔNG sửa bench để qua. Tương tự: nếu bench
+  vòng kín < 1000 và phần tách (commit 3) cho thấy SoftPlc chiếm phần
+  lớn → tier C (việc SoftPlc nằm ngoài phạm vi plant của P2.4).
+**8. Server tối thiểu + UI parity (commit 7, OQ-308/318):** server:
+WS thêm `plant.fault.inject` / `plant.fault.clear` (validate bằng
+`faultRequestSchema`, lỗi → WS error kèm mã PL — mẫu `tag.write`/
+`plc.*` ở `ws.ts`); `GET /api/plant` (danh sách equipment + faults
+`listFaults()` + observables snapshot qua `getObservable`); `GET
+/api/sim/hash` (hash trace hiện tại — `sim-service` subscribe 1
+`TraceHasher` vào tags khi dựng sim, như CLI `run.ts` làm; hash đổi
+theo từng bước, đọc tại thời điểm gọi). Web: component tối thiểu
+`PlantFaultPanel` (liệt kê fault của M01 + nút Inject/Clear qua WS,
+tái dùng pattern `ws-client.ts` + i18n vi/en; đặt trong tab PLC
+Workspace cạnh Watch — implementer chốt vị trí, ghi vào §27).
+Inspector đầy đủ + designer ở lại P2.8 — KHÔNG làm ở đây. e2e
+`apps/web/e2e/plant-closedloop.spec.ts` (1 file, 4 test A–D): serve
+`examples/motor-interlock`, lái bằng tay qua UI (ghi virtual input
+qua Watch, inject/clear fault qua panel, chờ mốc simTime qua polling
+`sim.state` — KHÔNG sleep wall-clock), đọc tag cuối + `GET
+/api/sim/hash`, assert hash == hash CLI (`vcs plant run` cùng scenario,
+spawn 1 lần/scenario trong test) + tag cuối khớp bảng A–D. Rủi ro
+flake họ E2 (timing VM) — chờ theo mốc simTime + luật thử lại 3 lần
+của AGENTS.md §9.5. Test server mới ~8 (WS inject/clear + REST
+`/api/plant` + `/api/sim/hash`).
+**9. Docs (commit 8):** `docs/semantics.md` §23 mới (viết khung ở commit
+2, hoàn thiện ở commit 8): vòng kín (plant trước PLC, trễ 1 bước;
+TON `elapsed = T − _start`; action đầu bước / expect cuối bước),
+scenario format, model-grouping giữ thứ tự topo (link), bench (số
+trước/sau hot-loop + vòng kín), UI parity. STATE §27 "Kết quả triển
+khai" + "Lệch so với plan"; OQ-305…319 đóng/mở theo bằng chứng;
+OQ-267 đóng khi bench plant ≥ 5000 (bằng chứng: số đo commit 6);
+OWNER-INBOX R-009 (OQ-301/302/303 mang sang + OQ-305…319).
+
+### Bảng tính tay A–D (kịch bản vòng kín — kỳ vọng cho demo + golden CLI)
+Quy ước chung (M2 §5.1 + AGENTS §4): tác động đặt ở **đầu bước T,
+trước plant.step** (qua `post()`/inject `when: {time: T}`); kỳ vọng
+kiểm **sau bước T đầy đủ** (sau scan PLC + flush). `stepMs =
+plcScanMs = 10`; PLC scan mọi bước, kể cả T=0. Tag: `START_PB %I0.0`,
+`STOP_OK %I0.1`, `OVL_OK %I0.2`, `PERM %I0.3`, `RUN_FB %I0.4`,
+`RESET_PB %I0.5`, `RUN_CMD %Q0.0`, `FAULT_LAMP %Q0.1`; M01 =
+`motor_dol` (`runCmd=RUN_CMD`, `runFb=RUN_FB`, `overloadOk=OVL_OK`).
+Trạng thái đầu: `STOP_OK=1, PERM=1`. Luật dùng: FB_Motor (seal; TON
+PT=3000ms; `qFault` khi `sSeal ∧ ¬OVL_OK` hoặc timer Q; reset cần
+`iReset ∧ iOverloadOk`); motor_dol 6 luật (transitions ở
+`motor_dol.ts` docs); TON thật: `elapsed = T − _start`, `_start` đặt
+ở scan đầu IN=true → scan đầu ET=0 (đã kiểm code `handlers.ts`
+`makeTon` — KHÔNG phải ET += dt mỗi scan).
+
+**Bảng A — chạy bình thường rồi overload, reset, chạy lại** (đã tính
+tay lại toàn bộ theo luật + code thật — **khớp bảng §11.4 ở cả 17 mốc**;
+implementer dùng làm kỳ vọng, không sao chép mù):
+| T | Tác động | Kỳ vọng sau bước T |
+|---|---|---|
+| 0 | — | `RUN_CMD=0, OVL_OK=1, RUN_FB=0` (plant STOPPED; PLC scan T=0: seal false) |
+| 100 | `START_PB=1` | `RUN_CMD=1` (scan T=100 thấy cạnh lên R_TRIG, seal=true; plant ở T=100 vẫn thấy runCmd=0 vì plant chạy trước PLC) |
+| 110 | — | plant `STARTING` (t0=110 — plant thấy runCmd=1 từ scan T=100); PLC: timer FB bắt đầu đếm (IN = sSeal ∧ ¬RUN_FB, `_start`=110, ET=0) |
+| 200 | `START_PB=0` | `RUN_CMD=1` (seal giữ; R_TRIG Q=false không ảnh hưởng) |
+| 600 | — | `RUN_FB=0` (600−110 = 490 < 500 = startDelayMs) |
+| 610 | — | plant `RUNNING`, `RUN_FB=1` (610−110 = 500 ≥ 500); PLC cùng bước thấy `RUN_FB=1` → timer IN=false, ET=0; `RUN_CMD=1` |
+| 1000 | inject `overload` | `OVL_OK=0`, `RUN_FB=0` (plant TRIPPED: `T − sinceMs = 0 ≥ tripDelayMs 0`); PLC cùng bước: `FAULT_LAMP=1`, `RUN_CMD=0` (seal ∧ ¬OVL_OK → qFault=1 → seal=false) |
+| 1010 | — | plant thấy `runCmd=0`, vẫn `TRIPPED` |
+| 2000 | clear `overload` | plant bắt đầu đếm `overloadResetMs` (clearedAt=2000; vẫn TRIPPED, `OVL_OK=0`) |
+| 2990 | — | `OVL_OK=0` (2990−2000 = 990 < 1000) |
+| 3000 | — | `OVL_OK=1`, plant `STOPPED` (1000 ms trôi qua, `runCmd=0` thỏa `resetRequiresCmdOff`) |
+| 3100 | `RESET_PB=1` | `FAULT_LAMP=0` (reset: `iReset ∧ iOverloadOk`) |
+| 3200 | `RESET_PB=0`, `START_PB=1` | `RUN_CMD=1` (cạnh lên tại scan T=3200; plant ở T=3200 vẫn thấy runCmd=0) |
+| 3210 | — | plant thấy `runCmd=1` → `STARTING` (t0=3210) |
+| 3300 | `START_PB=0` | `RUN_CMD=1` |
+| 3700 | — | `RUN_FB=0` (3700−3210 = 490 < 500) |
+| 3710 | — | plant `RUNNING`, `RUN_FB=1`; PLC cùng bước thấy `RUN_FB=1` |
+
+**Bảng B — mất feedback (preset `noRunFeedback` bật từ T=0, `runFb`
+stuck false):** timer FB: IN=true từ scan T=110 (`_start`=110) →
+ET = T−110 → Q khi ET ≥ 3000, tức T=3110 (đã kiểm code TON — khớp
+bảng §11.4; nếu tính ET += dt/scan sẽ lệch 1 bước về 3100 — SAI).
+| T | Tác động | Kỳ vọng |
+|---|---|---|
+| 0 | preset `noRunFeedback` | `RUN_FB=0` (stuck false; plant STOPPED) |
+| 100 | `START_PB=1` | `RUN_CMD=1` |
+| 110 | — | timer FB bắt đầu (`_start`=110, ET=0); plant `STARTING` (t0=110) |
+| 610 | — | plant `RUNNING` nhưng `RUN_FB=0` (stuck); timer vẫn đếm (IN=true) |
+| 3100 | — | `RUN_CMD=1` (ET=2990 < 3000) |
+| 3110 | — | `FAULT_LAMP=1`, `RUN_CMD=0` (ET=3000 ≥ PT → Q → qFault=1 → seal=false) |
+| 3120 | — | plant thấy `runCmd=0` → `STOPPING` (t1=3120); `RUN_FB=0` |
+| 3920 | — | plant `STOPPED` (3920−3120 = 800 = stopDelayMs); `RUN_FB=0` |
+
+**Bảng C — `localMode` (tính tay mới — spec chỉ nêu bằng lời, chưa có
+bảng số):** fault `localMode` bật từ T=0 → `canRun` false
+(`remoteOk=false`); timer như bảng B.
+| T | Tác động | Kỳ vọng |
+|---|---|---|
+| 0 | inject `localMode` | plant `STOPPED`, `RUN_FB=0` |
+| 100 | `START_PB=1` | `RUN_CMD=1` (PLC không biết localMode — seal=true) |
+| 110 | — | plant vẫn `STOPPED` (localMode chặn STARTING); timer bắt đầu (`_start`=110, ET=0) |
+| 3100 | — | `RUN_CMD=1` (ET=2990); plant `STOPPED`, `RUN_FB=0` |
+| 3110 | — | `FAULT_LAMP=1`, `RUN_CMD=0` (ET=3000 → Q) |
+| 3120 | — | plant `STOPPED`, `RUN_FB=0`, `RUN_CMD=0`, `FAULT_LAMP=1` |
+
+**Bảng D — `contactorStuck` (tính tay mới — spec chỉ nêu bằng lời):**
+chạy bình thường như bảng A tới RUNNING, rồi mất lệnh nhưng contactor
+dính.
+| T | Tác động | Kỳ vọng |
+|---|---|---|
+| 100 | `START_PB=1` | `RUN_CMD=1` |
+| 110 | — | plant `STARTING` (t0=110) |
+| 610 | — | plant `RUNNING`, `RUN_FB=1` |
+| 1000 | inject `contactorStuck` | plant `RUNNING`, `RUN_FB=1` (runCmd còn 1 nên chưa thấy khác biệt) |
+| 1100 | `STOP_OK=0` | `RUN_CMD=0` (scan T=1100: seal=false; plant ở T=1100 vẫn thấy runCmd=1) |
+| 1110 | — | plant vẫn `RUNNING`, `RUN_FB=1` (luật 4: `!runCmd && !stuck` mới → STOPPING; stuck active nên ở lại RUNNING) |
+| 2000 | — | `RUN_CMD=0`, `RUN_FB=1`, `FAULT_LAMP=0`, state `RUNNING` (PLC không giả định feedback tắt: timer IN = seal ∧ ¬RUN_FB = false → không lỗi) |
+| 3000 | clear `contactorStuck` | plant → `STOPPING` (t1=3000; runCmd=0, stuck hết) |
+| 3790 | — | `STOPPING`, `RUN_FB=1` (790 < 800) |
+| 3800 | — | plant `STOPPED`, `RUN_FB=0` (800 ≥ 800) |
+
+### Mơ hồ (phân loại)
+- **Chặn:** không có (không tier C trong plan — các điểm quyết định đã
+  có: quyết định A của owner cho hot-loop; các OQ dưới đều tier B).
+- **Có mặc định (tier B — OQ-305…319, xem `docs/open-questions.md`):**
+  OQ-305 format scenario YAML; OQ-306 hình dạng `vcs plant run`;
+  OQ-307 override stepMs/plcScanMs; OQ-308 phạm vi chân UI (tối thiểu,
+  inspector đầy đủ ở P2.8); OQ-309 giữ nguyên interface `StepCtx`;
+  OQ-310 nhóm theo model + fallback khi DAG model có chu trình; OQ-311
+  spike tsx vs JS biên dịch; OQ-312 `files.plant` + file thiếu im lặng;
+  OQ-313 config plant lỗi → fail-fast + exit 2; OQ-314 hình dạng bench
+  vòng kín (1 SoftPlc × 200 FB, dựng in-code); OQ-315 expects kiểm sau
+  bước T đầy đủ; OQ-316 smoke mode không `--scenario`; OQ-317
+  determinism (2 lần + restore → cùng hash); OQ-318 hình dạng API
+  server plant; OQ-319 lỗi scenario không mã Diagnostic mới.
+- **Không ảnh hưởng:** OQ-301/302/303 (mở từ P2.3 — đã áp dụng trong
+  code, mang sang R-009 để owner veto; P2.4 không chạm); D-007 (HTTPS
+  LAN, không chặn); X-003 (chỉ chặn P2.7).
+
+### Test target + gate
+- Test mới ~76, tổng ~2409 (2333 + 76): commit 1 ~20 (loader ~12 +
+  extension ~8); commit 2 ~30 (scenario schema ~8 + runner ~12 + CLI
+  ~10); commit 3: 0 (bench là bằng chứng); commit 4 ~6; commit 5 ~6;
+  commit 6 ~4 (hoặc 0 nếu bỏ qua); commit 7 ~10 (server ~8 + e2e 1
+  file 4 test); commit 8: 0. Coverage plant giữ ≥ 85 lines (hiện
+  97,13%); diagnostics giữ 58 mã (không mã mới — OQ-319).
+- Gate mỗi commit (bản sao sạch, install thật — mẫu P2.3): `lint` 0,
+  `typecheck` 0, `depcheck` 0, `test` xanh, `docs:diagnostics --check`
+  khớp 58, `docs:equipment --check` khớp 9 model, `review:cheats`
+  SẠCH, `build` 3/3, `test:e2e` xanh (kể cả spec mới commit 7),
+  `bench` (TagDB/orchestrator/softplc PASS; plant ≥ 5000 + vòng kín
+  ≥ 1000 — **chỉ commit 6 trở đi mới bắt buộc đạt 2 ngưỡng này**;
+  commit 1–3 đo và ghi số, ngưỡng plant/vòng kín được phép FAIL có ghi
+  nhận vì hot-loop chưa làm; commit 3 ghi baseline vòng kín).
+- Gate phase (P2.4 xong): demo A–D xanh qua CLI (`vcs plant run`,
+  exit 0 + hash ổn định 2 lần) **và** qua UI (e2e, hash == CLI);
+  determinism: scenario A 2 lần + restore ở T=1000 → cùng hash;
+  bench plant ≥ 5000 bước/s (trung vị 5 runs, heap < 1 MB) + bench vòng
+  kín ≥ 1000 bước/s (trung vị 5 runs); M1 không hồi quy (golden M1 +
+  e2e cũ xanh — ví dụ motor-interlock không sửa file cũ).
+
+### Rủi ro top-3
+1. **Bench vòng kín sát ngưỡng theo cấu tạo** (SoftPlc 200 FB đã
+   0,65–0,9 ms trong ngân sách 1,0 ms/bước; plant chỉ còn ~0,1–0,3 ms)
+   — giảm: commit 3 đo phần tách (plant/PLC/flush) trước khi tối ưu;
+   nếu PLC chiếm phần lớn và tổng < 1000 → tier C (việc SoftPlc, ngoài
+   phạm vi P2.4), không thu nhỏ mix bench để qua.
+2. **Hot-loop không đạt ×3,85 bằng đổi nội bộ giữ nguyên interface**
+   — giảm: đo từng commit (4→5→6), điểm quyết định tier C sau commit
+   6 với 3 phương án (kênh số breaking / JS biên dịch / chấp nhận +
+   hạ ngưỡng); không hạ ngưỡng im lặng.
+3. **e2e UI parity flake** (họ E2 timing dưới tải VM; lái tay qua UI
+   phụ thuộc mốc simTime) — giảm: chờ theo mốc simTime (poll
+   `sim.state`), luật thử lại 3 lần, chân UI làm cuối (commit 7) để
+   không chặn các commit lõi; nếu e2e UI không ổn định sau 3 lần sửa
+   → báo tier C (hoãn chân UI sang P2.8, giữ CLI + hash làm bằng chứng
+   vòng kín — cần owner quyết vì đổi gate §11.4).
+
+### Kết quả triển khai
+- **Commit 1 — loader + plantExtension (`1104ee1`, 19 file +446/−13):**
+  `files.plant` + `equipmentFileSchema` + `controller?` (schemas);
+  `loadProject` nạp `plant/equipment.yaml` (thiếu → im lặng, sai → error,
+  tính vào hash); `SimulationProject.plant?`; `plantExtension()` đăng ký
+  pha 'plant', no-op khi vắng, fail-fast kèm mã PL khi config lỗi;
+  `CLI/SERVER_EXTENSIONS` + dep `@vcs/plant` (lockfile cập nhật).
+  Test mới 26 (loader 9 + extension 9 + schemas 8), tổng **2359/2359
+  (100 file)**. Gate bản sao sạch `~/.cache/vcs-p24c1` (install thật
+  `--frozen-lockfile`, 3s): lint 0, typecheck 0, depcheck 0, test
+  2359/2359, diagnostics khớp 58, equipment khớp 9 model, cheats SẠCH,
+  build 3/3, e2e 11/11 + 1 skipped. OQ-312/313 đóng (bằng chứng: test
+  loader + extension). Lưu ý môi trường: `pnpm install` (không frozen)
+  kẹt ở prompt tương tác "xóa node_modules cài lại từ đầu?" khi lockfile
+  lệch — phải pipe `y` (hoặc `--lockfile-only` trước, nhưng offline
+  thiếu metadata nên vẫn cần online); test `run.test.ts` + build cần
+  binary `pnpm` trên PATH — đã tạo shim `~/.local/bin/pnpm` (node
+  pnpm.cjs từ npx cache). 2 lỗi gate ban đầu đều do thiếu shim, không
+  phải code.
+- **Commit 2 — scenario + CLI `plant run` + demo A–D (chưa commit):**
+  `packages/plant/src/scenario.ts` (schema strict + `parseScenarioYaml` +
+  `runScenario` + `ScenarioError`, không mã Diagnostic mới);
+  `packages/kernel/src/orchestrator.ts` thêm getter `stepMs` (additive —
+  runner cần lặp đúng lưới); `PlantEngine.clearFault(id, atMs?)`
+  additive (xem "Lệch so với plan"); `apps/cli/src/commands/plant.ts`
+  (`vcs plant run`, exit 0/1/2/3) + group `plant` trong
+  `commands/index.ts`; `examples/motor-interlock/plant/equipment.yaml`
+  (M01 motor_dol) + `scenarios/{a-normal-overload,b-no-feedback,
+  c-local-mode,d-contactor-stuck}.yaml` (bảng A–D, 17+8+6+10 checkpoint);
+  `docs/semantics.md` §23 khung. Test mới 35 (scenario 20 — schema 8 +
+  runner 12 incl. determinism restore T=1000 OQ-317; CLI 14 — demo A–D
+  4 + cả 4 + --json + hash 2 lần + lỗi 4 + smoke 2 + spawn pnpm 1;
+  engine 1 — clearFault atMs), tổng **2394/2394** (từ 2359, 100 file).
+  Demo A–D xanh ngay lần đầu qua CLI thật (không sửa bảng tính tay).
+  OQ-305/306/307/315/316/317/319 đóng (bằng chứng: scenario.test.ts +
+  plant.test.ts). Gate commit 2 XANH trên bản sao sạch `~/.cache/vcs-p24c2b`
+  (commit `c8b586a`, install --frozen-lockfile): lint 0, typecheck 0,
+  depcheck 0, test **2394/2394** (102 file), diagnostics 0, equipment 0,
+  cheats 0, build 0, e2e 11 passed; bench TagDB 51,1M ops/s PASS,
+  orchestrator 496.807 bước/s PASS, softplc 1.680 scan/s PASS,
+  **plant 1.910 bước/s FAIL** vs M2 §12 ≥ 5.000 (heap −16,22 MB PASS) —
+  đúng kỳ vọng commit 2 (hot-loop chưa làm; 1.910 > baseline 1.300 là
+  dao động VM, 1 lần chạy, chưa phải trung vị 5).
+
+- **Commit 3 — bench vòng kín (chưa commit):** `bench/closedloop.bench.ts`
+  mới (in-code, mirror softplc + plant bench): 1 SoftPlc × OB1 gọi
+  FB_Motor 200× (mỗi FB iRunFb riêng %I của motor thứ k, 5 input chung
+  %I0.0/0.1/0.2/0.3/0.5, qRun → RUN_CMD_k %Q, qFault → %M) + 200
+  motor_dol (params mặc định); `stepMs = plcScanMs = 10`, warm-up 200,
+  trung vị 5×2000 bước; in thêm phần tách plant/PLC/còn lại (ms/bước)
+  + heap chỉ in; **assertion sau warm-up: M001_RUN_CMD=true và M001
+  state=RUNNING** (chống đo nhầm trạng thái STOPPED). Nối vào
+  `pnpm bench` qua runner mới `bench/run-all-benches.mjs` (xem "Lệch")
+  + `baseline.json` (key `closedLoopStepsPerSec`) +
+  `check-bench-regression.mjs` (METRICS) + CI bench job: regression step
+  thêm `if: always()` (vì `pnpm bench` exit 1 khi plant FAIL nên step
+  sau mặc định bị skip).
+  **Đo-trước: 1.250 bước/s PASS** (trung vị 5 lần chạy trực tiếp:
+  1274/1205/1273/1127/1250, phạm vi [1127, 1274]) vs M2 §12 ≥ 1.000 —
+  **KHÔNG chạm điểm dừng tier C** (điều kiện dừng: < 1000 + PLC chiếm
+  phần lớn; ở đây qua ngưỡng). Tách (trung vị): plant ~0,160 /
+  **PLC ~0,614 (~77%)** / còn lại (flush + orchestrator) ~0,013
+  ms/bước — đúng dự đoán plan (SoftPlc chiếm phần lớn) nhưng vẫn qua
+  ngưỡng; heap −0,22 MB. OQ-314 đóng. 0 test mới (tổng giữ 2394).
+  Số đo lần đầu **1.319 bước/s đã HỦY** (bẫy 3 dưới đây) — baseline ghi
+  số đúng 1250.
+  Ba bẫy khi làm bench (ghi lại): (1) PLC ở STOP sau `init` — phải
+  `start()` như CLI/server (`startPlcControllers`); lần chạy đầu quên
+  start đo nhầm 6.355 bước/s (chỉ plant + overhead). (2) Vòng tách gọi
+  `step()` trực tiếp đẩy đồng hồ nội bộ PLC/engine vượt đồng hồ sim —
+  phải đo heap trước, vòng tách chạy cuối cùng, T tách bắt đầu đúng tại
+  `sim.simTimeMs` (bước kế của orchestrator). (3) **`post` sai shape**
+  — `ExternalCommand` là `{ label, run }`, shape `{ name, value,
+  source }` không tồn tại: tsx chạy không typecheck nên lệnh sai được
+  đẩy vào inbox, `drainInbox` bắt lỗi thành diagnostic SIM-E001 im
+  lặng, 5 input chung không bao giờ được set, motor không bao giờ
+  RUNNING — số 1.319 đo sai trạng thái. Sửa: post `{ label, run }` với
+  handle resolve trước + assertion RUNNING sau warm-up. Bài học: bench
+  phải assert trạng thái đạt được, không chỉ đo thời gian.
+  Gate commit 3 XANH trên bản sao sạch `~/.cache/vcs-p24c3b` (commit
+  `c79007b`, install --frozen-lockfile): lint 0, typecheck 0, depcheck 0,
+  test **2394/2394** (102 file), diagnostics 0, equipment 0, cheats 0,
+  build 0; bench TagDB PASS, orchestrator 401.954 bước/s PASS, softplc
+  1.625 scan/s PASS, **plant 1.835 bước/s FAIL** vs ≥ 5.000 (đúng kỳ
+  vọng, hot-loop chưa làm), **closedloop 1.242 bước/s PASS** vs ≥ 1.000
+  (tách plant 0,149 / PLC 0,541 / còn lại 0,115 ms/bước). Test flaky
+  OQ-055 (sim-service 8ms slice) đỏ 1 lần ở gate trước, qua 12/12 khi
+  chạy riêng — không phải lỗi thật.
+
+- **Commit 4 — kênh emit/cmd tính trước (chưa commit):**
+  `packages/plant/src/engine.ts`: 4 Map mỗi thiết bị (`handles`, `roles`,
+  `ranges`, `emitKeys`) → `channels: Channel[]` (1 record/role, theo thứ
+  tự `model.roles`: `{ role, handle, kind, dataType, range, emitKey }`)
+  + `roleSlot: Map<string, number>`; `#cmd`/`#emit`/`#initialValue`/
+  `injectFault`/`has` đọc `channels[slot]` (1 lookup + 1 index mảng).
+  `StepCtx` KHÔNG đổi (OQ-309); `obs`/`pendingObs`/`#getObsBound` giữ
+  nguyên. Role không khai báo gọi qua ctx → throw Error rõ (trước đây
+  TypeError từ `as RoleDef`); role chưa gán → `has` false, `cmd`
+  undefined, `emit` no-op (như cũ). Test mới 6 (probe model +
+  `engine.test.ts`): role không gán; Real (cmd fround / emit eng);
+  Int có scaling (cmd rawToEng / emit engToRaw); restore giữ channels;
+  2 thiết bị cùng model không chia sẻ channels; determinism
+  engine-alone (OQ-317 mở rộng: config hỗn hợp fake_motor + fake_sensor
+  + probe, 2 lần + restore → cùng hash đoạn 50→100). Tổng **2400/2400**
+  (2394 + 6). **Đo bench (trung vị 5, cây live): plant 1.886 bước/s**
+  (1804/1772/1922/1886/2132; trước commit 4: 1.835 ở gate commit 3 —
+  **+2,8%, trong dao động VM, KHÔNG cải thiện đáng kể**; heap −16,06 MB
+  PASS) — kênh tính trước không phải điểm nghẽn; chi phí còn lại nằm ở
+  `model.step` closures / `FaultManager.applyEmit/applyCmd` / `tags.set`
+  / EventLog (đúng profile P2.3: chi phí rải đều). **Vòng kín 1.224
+  bước/s** (1224/1133/1278/1241/1138; trước: 1.242 — −2%, nhiễu) PASS,
+  tách plant ~0,147 / PLC ~0,611 / còn lại ~0,078 ms/bước. Ghi chú đo:
+  1 lần closedloop cho dư âm −0,171 (PLC-alone 0,816 spike) — nhiễu VM,
+  trung vị 5 lần mới đáng tin; phần tách chỉ là ước lượng.
+  **Spike OQ-311 (tsx vs JS biên dịch):** `node --expose-gc
+  bench/plant.bench.ts` chạy trực tiếp **LỖI** `ERR_MODULE_NOT_FOUND
+  .../packages/kernel/src/clock.js` — source import kiểu ESM `.js`,
+  chỉ tsx mới map `.js`→`.ts`; node type-stripping không làm việc này.
+  Build `tsc` thật cần biên dịch cả workspace packages sang dist +
+  đổi exports (không additive, vượt phạm vi spike). Profile P2.3: tsx
+  `runCallSync` chỉ 7,4% < ngưỡng 20% của OQ-311 → **giữ tsx, không
+  đổi cách chạy**. OQ-311 đóng.
+  Gate commit 4 XANH trên bản sao sạch `~/.cache/vcs-p24c4` (commit
+  `623ecd3`, install --frozen-lockfile): lint 0, typecheck 0, depcheck 0,
+  test **2400/2400** (102 file), diagnostics 0, equipment 0, cheats 0,
+  build 0; bench TagDB PASS, orchestrator 521.666 bước/s PASS, softplc
+  1.675 scan/s PASS, **plant 2.038 bước/s FAIL** vs ≥ 5.000 (đúng kỳ
+  vọng; số lần chạy này cao hơn trung vị 1.886 ở cây live — dao động
+  VM), **closedloop 1.270 bước/s PASS** vs ≥ 1.000 (tách plant 0,154 /
+  PLC 0,584 / còn lại 0,049 ms/bước).
+
+- **Commit 5 — dispatch đơn hình theo model (chưa commit):**
+  `packages/plant/src/engine.ts`: `#initializeEquipment` dựng DAG mức
+  model (cạnh A→B nếu thiết bị model A link tới thiết bị model B —
+  **link cùng model không tính**: thứ tự link cùng model giữ bằng thứ
+  tự topo thiết bị trong nhóm, đúng ý plan) + topo-sort model; DAG có
+  chu trình chéo model → fallback về `#order` (không nhóm) + công khai
+  `engine.groupedByModel: boolean` (OQ-310). `step()`: đường nhóm lặp
+  theo nhóm model, trong nhóm lặp thiết bị theo thứ tự topo, `model`
+  hoist ngoài vòng trong → cùng 1 hàm `model.step` ở 1 call site
+  (monomorphic); đường fallback giữ `rt.model.step` như cũ. Thân bước
+  tách thành `#prepareOne` (source + ctx) / `#drainPendingObs`
+  (event state). `StepCtx` KHÔNG đổi. Test mới 4 (`engine.test.ts`):
+  link chéo model analog→silo đọc cùng bước (khai báo ngược thứ tự);
+  chu trình mức model → fallback + kết quả vẫn đúng; link cùng model
+  giữ thứ tự trong nhóm; mix 9 model thật (không link, dựng tag theo
+  generator) → `groupedByModel === true` + tất định 2 lần. Tổng
+  **2404/2404** (2400 + 4). **Đo bench (trung vị 5, cây live): plant
+  1.896 bước/s** (1824/1859/1937/1912/1896; trước commit 5: 1.886 —
+  **+0,5%, không cải thiện**) — dispatch cũng không phải điểm nghẽn;
+  **vòng kín 1.282 bước/s** (1300/1106/1320/1282/1257; trước: 1.224)
+  PASS, tách plant ~0,142 / PLC ~0,572 / còn lại ~0,056 ms/bước.
+  **Profile CPU sau commit 5** (`node --cpu-prof` trên bench plant,
+  52.388 mẫu, self-time): `#emit` **25,0%**, `#prepareOne` 10,4%,
+  `#applyWrite` (TagDB) 10,1%, engine `step` 8,6%,
+  `#drainPendingObs` 5,8%, `#channelOf` 5,6%, các `model.step` ~16%
+  tổng, GC 2,0%, **`#activeSignalFaults` chỉ 0,2%** (không vào top 20).
+- **Commit 6 — fault fast-path: BỎ QUA (theo plan).** Plan Thiết kế.7:
+  chỉ làm phần profile chứng minh cần; cpu-prof sau commit 5 không
+  thấy `#activeSignalFaults` trong top 5 (chỉ 0,2% — bench chuẩn có 0
+  record) → **không code commit 6**. Event-object pool đã loại từ plan
+  (không làm).
+- **ĐIỂM DỪNG tier C (sau commit 6) — ĐÃ CHẠM.** Engine-alone vẫn
+  **1.896 bước/s << M2 §12 ≥ 5.000** (thiếu ×2,64) sau cả 2 lần làm
+  lại vòng nóng (commit 4: +2,8%; commit 5: +0,5% — đều trong dao
+  động VM). Profile chứng minh chi phí nằm ở bản thân máy móc
+  step/emit/tag (65%), không còn điểm nóng đơn lẻ để vá. **DỪNG ở
+  đây, không tự chọn, không hạ ngưỡng, không sửa bench.** Quyết định
+  ghi OWNER-INBOX **D-008** (3 phương án + đề xuất của AI). Nhánh
+  dừng ở commit 5; commit 7 (server/UI) + commit 8 (docs) CHƯA làm —
+  chờ owner quyết D-008 (phương án chọn có thể đổi phạm vi việc còn
+  lại). Bench vòng kín **1.282 ≥ 1.000 PASS** (yêu cầu vòng kín dùng
+  thật đã đạt; chỉ bench engine-alone tổng hợp 500 thiết bị là chưa).
+  Gate commit 5 XANH trên bản sao sạch `~/.cache/vcs-p24c5` (commit
+  `ac3ed77`, install --frozen-lockfile): lint 0, typecheck 0, depcheck 0,
+  test **2404/2404** (102 file), diagnostics 0, equipment 0, cheats 0,
+  build 0, e2e 11 passed; bench TagDB PASS, orchestrator 522.205 bước/s
+  PASS, softplc 1.705 scan/s PASS, **plant 2.105 bước/s FAIL** vs ≥ 5.000
+  (đúng kỳ vọng; số lần chạy này cao hơn trung vị 1.896 ở cây live —
+  dao động VM), **closedloop 1.294 bước/s PASS** vs ≥ 1.000 (tách plant
+  0,142 / PLC 0,557 / còn lại 0,073 ms/bước).
+
+### Lệch so với plan
+- **Commit 2 — `PlantEngine.clearFault(id, atMs?)` (additive, engine.ts):**
+  plan (Thiết kế 3) ghi "fault/clear/preset gọi trực tiếp … với `when:
+  {time: T}`" — nhưng `clearFault` cũ không nhận thời điểm, nó lấy
+  `clearedAtMs` từ `#simTimeMs` của engine (trước bước T còn là T−dt).
+  Bằng chứng: bảng A cần `clearedAtMs=2000` đúng (T=2990 OVL_OK=0,
+  T=3000 STOPPED) — clear trước bước không atMs cho 1990 → STOPPED ở
+  2990 (sai); bảng D cần lỗi hết hiệu lực TRONG bước 3000 (STOPPING
+  t1=3000, STOPPED 3800) — clear sau bước cho clearedAtMs đúng nhưng
+  trễ 1 bước (RUNNING ở 3000, STOPPING ở 3800 — sai). Chỉ `atMs` tường
+  minh thỏa cả hai bảng. Thay đổi additive (tham số optional, mặc định
+  `#simTimeMs` — mọi caller cũ không đổi hành vi); test mới
+  `engine.test.ts` (clearedAtMs đúng 500 / mặc định 0) + runner test
+  overload 2990/3000 ghim hành vi. Không đổi spec/model.
+- **Commit 2 — CLI ghi đè `config.scanPeriodMs` của controller def khi
+  override plcScanMs:** plan (OQ-307) chỉ nói "runner dùng
+  `scenario.simulation` (thắng project config)" — nhưng builder lấy
+  `def.config['scanPeriodMs'] ?? project plcScanMs`, nên chỉ đổi project
+  plcScanMs thì SoftPlc vẫn scan theo def (100 ms) và demo A–D sai mốc.
+  CLI `plant run` ghi đè def khi (và chỉ khi) cờ CLI/scenario khai
+  plcScanMs; khôi phục def về gốc trước mỗi scenario. Không sửa file ví
+  dụ M1. Ghi chú trong `buildSim` (plant.ts).
+- **Commit 2 — `scenarioFaultSchema` = `faultRequestSchema.omit({when})
+  .strict()`; schema scenario strict toàn bộ:** plan ghi "fault?:
+  FaultRequest" + "`when` lấy từ `at`" — file không được khai `when`
+  (runner đặt `{at:'time', timeMs: at}` — shape thật của `FaultTiming`,
+  không phải `{time: at}` như shorthand trong plan). Strict để bắt typo
+  key trong file scenario (test ghim).
+- **Commit 2 — runner: tag expects so RAW; expects vượt `untilMs` →
+  `ScenarioError`:** tag không có scaling trong runner (không có TagDef)
+  — muốn so eng dùng observable (ghi trong doc scenario.ts). Expects
+  vượt untilMs là lỗi (không bỏ qua im lặng); test determinism dùng
+  scenario rút gọn cho leg đầu vì vậy.
+- **Commit 2 — `--json` scenario mode:** shape plan `{name, simTimeMs,
+  stepCount, hash, scenarios}` — nhiều scenario thì 3 trường đầu là của
+  scenario cuối (ghi trong code); 1 scenario (trường hợp thường) đúng
+  như plan.
+- **Commit 11 — thêm message `plant.fault.preset` (tier B):** plan §27 mục
+  8 chỉ liệt kê inject/clear — nhưng kịch bản B chỉ lái được bằng tay qua
+  preset `noRunFeedback` (không có fault thiết bị tương đương). Thêm
+  `plant.fault.preset` (`{equipment, preset, when?}`) vào protocol +
+  server + ws-client + panel (ghi chú trong protocol.ts).
+- **Commit 11 — e2e assert parity NGỮ NGHĨA, không so hash UI == CLI (tier
+  B, phát hiện bằng đo):** hash UI ≠ hash CLI cho cùng scenario dù multiset
+  (ts, handle, value) giống hệt cả 4 scenario (probe tạm
+  `apps/cli/src/probe-parity.mts`, đã xóa sau khi đo; A: cùng 19 event,
+  runner hash `ce95b887…` vs UI `541d4d92…`; B/C: `f3c6a4ee…` vs
+  `b9a5b33c…`; D: `7d337ac0…` vs `47ab4def…`). Nguyên nhân: `TagDB.flush()`
+  gộp mọi thay đổi trong bước theo handle tăng dần — runner post set trước
+  bước nên flush cuối bước T=0 ra `[STOP_OK(h1), OVL_OK(h2), PERM(h3)]`;
+  UI tag.write khi paused flush ngay từng write nên ra `[STOP_OK, PERM,
+  OVL_OK]`; hasher băm theo thứ tự nhận. Không thể xen kẽ qua UI (sau bước,
+  clock đã sang T+10; set muộn đóng dấu T+10). Đây là khác biệt nhóm flush,
+  không phải khác ngữ nghĩa. E2e thay bằng: mọi expects của scenario tại
+  mọi mốc (tags qua TagTable + observables qua `GET /api/plant`),
+  stepCount cuối, CLI hash == golden commit 2 (beforeAll, `--json`), và UI
+  hash tất định khi reset + lái lại (test A). Sửa hash-parity cần đổi
+  hasher/flush (tier C) — ghi lại làm đề xuất, không làm ở commit 11.
+- **Commit 11 — `plantFaultClear` truyền atMs tường minh = simTime
+  orchestrator (tier B, lỗi thật do e2e bắt được):** clear qua WS không
+  atMs lấy `#simTimeMs` của engine (= T−dt trước bước T) → clearedAtMs
+  lệch 1 bước so với runner — e2e A fail `OVL_OK=FALSE at T=2990` (clear
+  T=2000 thành 1990 → OVL_OK hồi ở 2990 thay vì 3000). Sửa 1 dòng ở
+  `sim-service.ts` + test hồi quy (`clearedAtMs: 100` sau 1 bước stepMs
+  100). Inject/preset không lệch (panel gửi `when {at:'time', timeMs:
+  simTimeMs}` tường minh).
+- **Commit 11 — `applyPreset` báo preset lạ kèm `(PL-E001)` (tier B, 1
+  dòng engine.ts):** lỗi cùng hàm cho thiết bị lạ đã có `(PL-E001)`, lỗi
+  preset lạ thì không → WS trả SIM-E001 thay vì mã PL như plan yêu cầu.
+  Sửa message cho nhất quán; không đổi hành vi khác.
+- **Commit 11 — e2e lái qua bản sao tạm + chi tiết driver (đã nêu trong
+  plan §27, ghi lại cách làm):** bản sao `examples/motor-interlock` với
+  `stepMs/plcScanMs/scanPeriodMs` 100 → 10 (file gốc giữ 100 — mặc định
+  demo M1); CLI chạy trên thư mục gốc (`--json` in full hash — `--hash`
+  chỉ tác dụng ở smoke mode, không in hash ở scenario mode); driver bước
+  tới đúng simTime T trước khi làm actions (panel/clear dùng simTime hiện
+  tại); một step xử lý từng field độc lập (set + preset/fault cùng step);
+  reset đầu mỗi test (server dùng chung cho 4 test); hello WS dùng
+  `protocolVersion` (không phải `protocol`).
+
+
+### File (mới/sửa)
+| File | Nội dung |
+|---|---|
+| `packages/schemas/src/project.ts` + `project.test.ts` | `files.plant` + `PROJECT_SHAPE` |
+| `packages/schemas/src/equipment.ts` + `equipment.test.ts` | `equipmentFileSchema` + `controller?` optional |
+| `packages/project/src/load.ts` + `load.test.ts` | Nạp `plant/equipment.yaml` |
+| `packages/kernel/src/builder.ts` | `SimulationProject.plant?` |
+| `packages/plant/src/extension.ts` + `.test.ts` | `plantExtension` |
+| `packages/plant/src/index.ts` | Export extension |
+| `apps/cli/src/extensions.ts` + `apps/server/src/extensions.ts` | Thêm `plantExtension()` |
+| `packages/plant/src/scenario.ts` + `.test.ts` | Schema + runner kịch bản |
+| `apps/cli/src/commands/plant.ts` + `.test.ts` | `vcs plant run` |
+| `apps/cli/src/commands/index.ts` | Đăng ký group `plant` |
+| `examples/motor-interlock/plant/equipment.yaml` | M01 motor_dol (mới) |
+| `examples/motor-interlock/scenarios/{a,b,c,d}.yaml` | Demo A–D (mới) |
+| `bench/closedloop.bench.ts` | Bench vòng kín (mới) |
+| `package.json` (script `bench`) + `bench/baseline.json` + `scripts/check-bench-regression.mjs` | Nối bench vòng kín |
+| `packages/plant/src/engine.ts` (+ `.test.ts` mới cho kênh/nhóm) | Hot-loop commit 4–6 |
+| `packages/plant/src/faults.ts` | Fast-path commit 6 (nếu làm) |
+| `apps/server/src/ws.ts` + `sim-service.ts` + `routes.ts` | WS `plant.fault.*`, `GET /api/plant`, `GET /api/sim/hash` |
+| `apps/web/src/components/PlantFaultPanel.tsx` (+ test) | Panel fault tối thiểu |
+| `apps/web/e2e/plant-closedloop.spec.ts` | e2e parity A–D qua UI |
+| `docs/semantics.md` | §23 mới (vòng kín + scenario + bench) |
+| `docs/STATE.md` (§27), `docs/open-questions.md` (OQ-305…319), `docs/OWNER-INBOX.md` (R-009) | Plan này |
+
+## 28. P2.4 (tiếp) — D-008: làm A+B, hạ ngưỡng theo số đạt được (plan, 2026-11-26)
+
+**Quyết định của chủ sản phẩm (2026-11-26 13:38 +07 — thay thế các lựa chọn A/B/C cũ trong OWNER-INBOX D-008):** làm cả A (kênh số cho StepCtx) và B (bench từ JS biên dịch trước) để tăng tốc vòng lặp lên tối đa, rồi **hạ ngưỡng M2 §12 theo số đạt được** (band khả năng tối đa anh nêu: 2000–2500 bước/s). Phương án viết lại engine riêng để giữ 5000 đã được phân tích cùng ngày (13:30 +07) và KHÔNG chọn: cỡ P2.1+P2.2+P2.3 cộng lại, đổi vĩnh viễn hợp đồng viết model, chứng minh lại toàn bộ golden, mà vòng kín chỉ hưởng +11% (PLC chiếm ~79% bước).
+**Nhánh:** `m2/p2.4-closed-loop` (nối tiếp commit 1–5), HEAD `24baaec`, cây sạch (chỉ 2 untracked có sẵn từ trước: `docs/acceptance/state-notes-draft.md`, `user-chat/` — không commit). Không nhánh mới, không PR mới cho A+B — cùng PR P2.4 vào develop.
+**Trạng thái:** ☑ plan (§28) → ☑ implement (commit 6–12) → ☐ gate → ☐ PR → ☐ merge.
+
+### Đọc
+- AGENTS.md (luật, gate, tier A/B/C; luật cứng `.git`); SOUL.md (10 nguyên tắc, báo cáo ĐÃ CHẠY/CHƯA CHẠY/SUY ĐOÁN); STATE §27 (plan P2.4 + commit 1–5 + D-008); open-questions OQ-309 (giữ StepCtx — quyết định này ĐẢO NGƯỢC nó), OQ-310/311/314; AMENDMENTS A20; OWNER-INBOX D-008; M2 spec §12 + §5.6; `bench/plant.bench.ts`, `bench/run-all-benches.mjs`, `bench/baseline.json`, `bench/closedloop.bench.ts`.
+- Đã kiểm code thật (không suy đoán): `packages/plant/src/registry.ts` (`StepCtx`, `EquipmentModel.step(ctx)`); `packages/plant/src/engine.ts` (ctx tạo ở init dòng 413, `#prepareOne`, `#channelOf`, `#emit`, `#cmd`, `#drainPendingObs`; `roleSlot` đã gán chỉ số kênh từ commit 4); `packages/plant/src/models/*.ts` — **cả 8 file định nghĩa model đều khai `observables` + `faults`** (motor_dol observables khớp đúng 5 key `setObs` dùng); `damper` kế thừa qua `deriveModel`; `conveyor_simple.ts:140` có `proxyCtx` spread `...ctx` + override `cmd` (A phải forward slots qua proxy, so sánh với slot `runCmd`, không còn chuỗi `'runCmd'`); `packages/plant/src/registry.test.ts:65` dựng StepCtx giả bằng tay (test-helper phải sửa theo); golden runner (`packages/plant/src/golden/runner.ts`) KHÔNG chạm StepCtx (chạy model qua engine); `packages/plant/src/faults.ts` (`equipmentFault`, `applyEmit`, `#activeSignalFaults`); `apps/cli/tsup.config.ts` + `apps/server/tsup.config.ts` (pattern bundle: `noExternal: /^@vcs\//`, `external: ['yaml', ...]` — yaml bundle cùng nổ `Dynamic require of "process"`); `node_modules/.bin/esbuild` có sẵn; `.gitignore` có `bench/results.json` nhưng CHƯA có `bench/dist/`.
+- Số liệu đã đo (không bịa): bench plant tsx phiên 2026-11-26 13:22 **2054 bước/s** (trung vị 5 mẫu nội bộ); node + esbuild bundle cùng phiên **2331 (+13,5%)**; quy hoạch B +8–14%. A sàn +6% (chỉ xóa `#channelOf` 5,6% CPU), lạc quan +20%. Profile sau commit 5: `#emit` 25%, `#prepareOne` 10,4%, `#applyWrite` 10,1%, step 8,6%, `#drainPendingObs` 5,8%, `#channelOf` 5,6%, model step ~16%, GC 2%.
+
+### Tóm tắt hiểu biết (≤ 8 dòng)
+1. A đổi interface StepCtx sang slot số (breaking, đảo OQ-309 — đã ghi AMENDMENTS A21 trước khi code); bảng slot dựng một lần ở init từ định nghĩa model (roles/observables/faults đã khai sẵn), không đổi schema định nghĩa.
+2. B chỉ đổi cách ĐO bench (bundle esbuild theo pattern server, yaml external), không đổi exports packages (giữ JIT src), không làm vòng lặp production nhanh hơn — production (server/CLI dist) đã chạy JS biên dịch từ M0.
+3. Đo sau mỗi bước (A rồi B), cùng protocol: trung vị 5 lần chạy bench, mỗi lần đã là trung vị 5 mẫu nội bộ, máy rảnh; ghi cả phạm vi.
+4. Ngưỡng mới = min quan sát sau A+B trừ ~15% (dự kiến ~2000 nếu trung tâm ~2400–2500); chỉ hạ SAU khi đo, ở commit riêng.
+5. Vòng kín chỉ +4–6% từ A+B (PLC ~79% bước) — không hứa hơn; ngưỡng vòng kín 1000 giữ nguyên.
+6. 77 golden case + determinism + hash demo A–D phải giống hệt bit sau A — lệch là đổi hành vi, DỪNG, không sửa golden.
+
+### Bảng tính tay (thời gian/bước; 1 bước = 500 thiết bị)
+| Trường hợp | Hệ số | Bước/s | µs/bước | Ghi chú |
+|---|---|---|---|---|
+| Gốc tsx (đo 13:22) | 1,00 | 2054 | 487 | Gốc so sánh cho A |
+| B đo được (node bundle) | ×1,135 | 2331 | 429 | Một cặp chạy cùng phiên; quy hoạch +8–14% |
+| A sàn (chỉ xóa `#channelOf`) | ×1,059 | 2175 | 460 | 1/0,944 — trần của riêng `#channelOf` 5,6% |
+| A lạc quan (+dispatch) | ×1,20 | 2465 | 406 | Đầu cao ước tính D-008 |
+| **A+B sàn** | ×1,059 × ×1,08 | **2349** | 426 | |
+| **A+B trung tâm** | ×1,13 × ×1,11 | **2576** | 388 | |
+| **A+B lạc quan** | ×1,20 × ×1,135 | **2798** | 357 | |
+| A+B từ gốc 1932 (hôm qua) | sàn / trung tâm / lạc quan | 2210 / 2423 / 2631 | 452 / 413 / 380 | Dao động VM giữa ngày |
+| Mục tiêu 2000 / 2500 / 5000 | — | 2000 / 2500 / 5000 | 500 / 400 / 200 | Band anh nêu: 2000–2500 |
+- Kiểm chéo: 487 µs/500 thiết bị = 0,97 µs/thiết bị/bước; motor_dol ~16 lần gọi ctx/bước (1 cmd + 5 fault + 5 setObs + 5 emit) → ~60 ns/lần gọi — đúng bậc Map.get + thân emit, khớp profile.
+- Ngưỡng dự kiến: trung tâm 2400–2500, min ~2300 → min −15% ≈ **2000** (làm tròn xuống trăm). Trường hợp sàn (trung vị ~2210–2350, min ~2100) → min −15% ≈ **1800** — ngưỡng theo công thức, không theo band; band mô tả số đạt được, không phải ngưỡng.
+- Vòng kín: 1285 bước/s (778 µs/bước; plant 160 µs, PLC 614 µs, còn lại 13 µs). A+B trung tâm (plant ×1,25) → plant 128 µs → tổng 746 µs → **1340**; lạc quan (×1,36) → 118 µs → 736 µs → **1359**. Tức +4–6%, ngưỡng 1000 vẫn dư ~35%.
+
+### Thiết kế A — kênh số cho StepCtx (commit 6)
+- Chữ ký mới: `EquipmentModel.step(ctx, slots)`; `slots: ModelSlots` là object đóng băng, model **destructure một lần ở đầu step** rồi dùng local số sau đó (không lookup trong vòng nóng). `slots = { role, obs, fault, source }`, mỗi namespace là `Record<string, Slot>` (OQ-321).
+- Slot là số có brand theo miền (OQ-322): `RoleSlot` / `ObsSlot` / `FaultSlot` / `SourceSlot` (kiểu `number & { readonly __x: unique symbol }`) — trộn miền là lỗi typecheck.
+- Bảng slot dựng một lần ở init (OQ-320): `role` từ `model.roles`, `obs` từ `model.observables`, `fault` từ `model.faults` (đã khai sẵn, thứ tự = thứ tự mảng trong định nghĩa); `source` per-equipment từ key config `sources` (thứ tự chèn) + slot mặc định cho source không tên. `RoleSlot` chính là giá trị `roleSlot` đã có từ commit 4 (chỉ số vào `channels[]`) — A chỉ dời lookup từ mỗi lần gọi về init + đưa chỉ số cho model.
+- `StepCtx` mới: `cmd(slot: RoleSlot)`, `emit(slot: RoleSlot, v)`, `has(slot: RoleSlot)`, `fault(slot: FaultSlot): FaultState` (trả object có `.active` như cũ), `setObs(slot: ObsSlot, v)`, `source(slot?: SourceSlot)`, `rand()`, `dtMs`/`simTimeMs`/`params`/`state` giữ nguyên. `hasSource(name)` BỎ — model kiểm `slots.source.<tên> !== undefined` (object đóng băng, kiểm ở đầu step).
+- Engine đổi nội bộ: `rt.obs` (object) → mảng theo `ObsSlot` + mảng `prevObs` (drain so sánh trực tiếp, bỏ Map `pendingObs`); `namedSourceValues` (Map) → mảng theo `SourceSlot`; fault state per-thiết bị theo `FaultSlot` (FaultManager thêm API theo chỉ số, giữ API theo tên cho đường lạnh/inject). `roleSlot` Map giữ lại cho init + đường lạnh.
+- Reverse map cho thông báo lỗi (đường lạnh, không tốn vòng nóng): per-model `slotToName: { role: string[]; obs: string[]; fault: string[] }` — mọi lỗi slot không hợp lệ nêu TÊN role/obs/fault như cũ (`role speedFb không khai báo…`), không nêu số slot trần.
+- Bất biến: (1) bảng slot tất định (thứ tự mảng định nghĩa + thứ tự key config); (2) hành vi giống hệt — golden/determinism/demo hash không đổi; (3) không đổi schema định nghĩa model (slot suy ra, không khai thêm); (4) snapshot/restore không đổi (bảng slot thuộc instance engine, dựng lại giống hệt ở init).
+- File chạm: `packages/plant/src/registry.ts` (StepCtx + `step(ctx, slots)`), `engine.ts` (bảng slot, ctx số, obs/source/fault theo mảng), `faults.ts` (API theo chỉ số), `models/*.ts` (9 model — 8 file định nghĩa + `damper` kế thừa), `models/conveyor_simple.ts` (proxyCtx forward slots, override `cmd` so với slot `runCmd`), `registry.test.ts:65` (StepCtx giả viết tay) + test mới (slot sai → lỗi nêu tên; bảng slot đủ key — mọi `setObs`/`fault` model dùng đều có trong định nghĩa). Golden runner KHÔNG đổi (không chạm StepCtx). Docgen KHÔNG đổi (không thêm field định nghĩa).
+
+### Đo sau A (commit 7) — điểm quyết định, không phải tier C
+- Đo lại gốc tsx TRƯỚC khi đo sau A (cùng phiên/VM, tránh trôi giữa ngày): bench plant ×5 lần chạy + bench vòng kín ×5; ghi trung vị + phạm vi vào §28 (append, không sửa `bench/baseline.json` — baseline chỉ đổi ở commit 10).
+- Điểm quyết định: nếu A < +5% (trung vị sau A / trung vị gốc tsx − 1) → **báo vào §28 + OWNER-INBOX, KHÔNG chặn B** (A sàn đã dự kiến +6% nên < +5% nghĩa là giả định sai, cần ghi lại để B đo trên nền đó). Nếu golden/determinism/demo hash lệch → DỪNG (xem tier C TC-2).
+
+**Kết quả đo (commit 7, 2026-11-26, cùng phiên tsx cả hai phía — baseline từ bản sao sạch `~/.cache/vcs-p24c5` @ `24baaec`, sau A từ cây live @ `f9ed204`):**
+- plant: baseline [1449, 1618, 1480, 1527, 1622] trung vị **1527** (1449–1622) → sau A [1816, 1797, 1700, 1922, 1665] trung vị **1797** (1665–1922) → **A = +17,7%** (1797/1527 − 1). Vượt xa điểm quyết định +5% → KHÔNG báo OWNER-INBOX, tiếp tục B. Vượt sàn +6% vì A không chỉ bỏ `#channelOf` (5,6% profile) mà còn bỏ các `Map.get` theo tên trong `#emit`/`#prepareOne`/`#drainPendingObs` (pendingObs + namedSources thành mảng).
+- vòng kín: baseline [922, 899, 933, 808, 811] trung vị **899** (808–933) → sau A [990, 942, 959, 873, 962] trung vị **959** (873–990) → **+6,7%**. Phần plant trong vòng kín 0,196 → 0,162 ms/bước (−17%, khớp plant +17,7%); PLC ~0,84 ms không đổi. Ngưỡng 1000 vẫn FAIL trong phiên này (xem lưu ý VM).
+- Lưu ý VM: số tuyệt đối phiên này thấp hơn hẳn lần kiểm parent 12:52 (plant 1932, vòng kín 1285, cùng code `24baaec`) — máy chậm toàn diện (phần PLC trong vòng kín 0,84 ms so với 0,614 ms lúc đó). Chỉ so sánh cùng phiên mới có ý nghĩa; ngưỡng mới ở commit 9 lấy min của phiên đo sau A+B và vẫn chịu biến động máy (xem phân tích C trong báo cáo D-008). Run 4 vòng kín sau A in "còn lại −0,031 ms/bước" — nhiễu đo của phép tách (tổng − plant − PLC), không phải hồi quy.
+- Độ lệch commit 6 so với "Thiết kế A" ở trên (tier B, ghi lại): (1) chữ ký ctx nhận `Slot | undefined` (không phải `Slot` thuần) — `noUncheckedIndexedAccess` bắt `slots.role.X` thành `... | undefined`; slot thiếu fail-fast ở engine với lỗi nêu tên model/thiết bị, brand type vẫn cấm trộn miền; (2) lỗi slot sai nêu model + thiết bị + số slot + tổng số miền — slot ngoài bảng không có tên để nêu (reverse map `slotNames` dùng cho snapshot/restore/drain, không đặt tên được cho slot không tồn tại); (3) `equipmentFaultBySlot` thêm tham số `modelType?` để lỗi fault nêu tên model (FaultManager chỉ biết equipmentId).
+
+### Thiết kế B — bench từ JS biên dịch (commit 8)
+- Script mới `scripts/build-bench-bundle.mjs`: esbuild bundle `bench/<tên>.bench.ts` → `bench/dist/<tên>.bench.mjs` (`format: esm`, `platform: node`, `bundle: true`, `external: ['yaml']`), dùng `node_modules/.bin/esbuild` (có sẵn; fallback PATH như cách `run-all-benches.mjs` tìm tsx). Thêm `bench/dist/` vào `.gitignore` (hiện chưa có).
+- yaml resolve được lúc chạy (OQ-323): mặc định **thêm `yaml@2.9.1` làm root devDependency** (đúng version `@vcs/schemas` + `apps/server` đang dùng) + chạy `pnpm install` để cập nhật lockfile trong cùng commit (CI `--frozen-lockfile` sẽ fail nếu thiếu). LOẠI: symlink `node_modules` (bẫy spike 13:22 — Windows-hostile, dễ gãy). Kiểm: depcheck của repo là dependency-cruiser (quy tắc kiến trúc), không phải unused-dep — xác nhận không trip rule nào, nếu trip thì ghi tier B.
+- Sửa tính `ROOT` (OQ-325): `run-all-benches.mjs` truyền `VCS_REPO_ROOT=<root>` qua env khi spawn; `bench/plant.bench.ts` + `bench/closedloop.bench.ts` ưu tiên env, fallback về `import.meta.url` (giữ chạy trực tiếp bằng tsx được). Lỗi spike đã thấy: bundle ở `bench/.spike/` tính `ROOT = bench/` → ghi nhầm `bench/bench/results.json` — commit 8 phải có test tay: chạy bundle 1 lần, xác nhận `bench/results.json` đúng chỗ (và `FB_Motor.scl` ở closedloop cũng resolve đúng).
+- Runner `run-all-benches.mjs`: **plant + closedloop** chạy bằng `node bench/dist/<tên>.bench.mjs` (build trước, fail-fast nếu bundle lỗi); tagdb/orchestrator/softplc GIỮ tsx (OQ-324 — chỉ bench §12 đổi cách đo, giữ baseline M0). Giữ `NODE_OPTIONS=--expose-gc`. KHÔNG đổi exports packages (giữ JIT `src/index.ts`), KHÔNG build `tsc` toàn workspace, KHÔNG đổi server/CLI/dev workflow.
+- CI bench job: không đổi `ci.yml` (job gọi `pnpm bench` như cũ, runner che đường bundle) — xác nhận esbuild có trong CI install (devDep bắc cầu qua tsup/vite; nếu thiếu thì thêm direct devDep, ghi tier B).
+- Bẫy đã biết (ghi để implementer khỏi đạp lại): yaml bundle cùng → `Error: Dynamic require of "process" is not supported` (đúng lý do config tsup server để yaml external); bundle xong phải chạy thử trước khi đo.
+
+**Kết quả commit 8 (2026-11-26):** bundle build xong lần đầu (plant 932 KB, closedloop 1,5 MB, ~0,3 s); chạy thử bundle: plant 1947 bước/s, closedloop 974 bước/s (đơn lẻ, phiên chậm), `bench/results.json` đúng chỗ (không có `bench/bench/`), closedloop tìm được `FB_Motor.scl`; fallback tsx (không env) vẫn chạy (chỉ chứng minh fallback, số nhiễu dưới tải lint song song). `pnpm bench` end-to-end: plant bundle 2081, closedloop bundle 1008 PASS, exit 1 chỉ vì plant FAIL ngưỡng cũ 5000 (trạng thái đã biết tới commit 10).
+- Độ lệch tier B so với plan: **esbuild thành root devDep trực tiếp (`esbuild@0.28.2`)** — kiểm tra install sạch cho thấy `.bin/esbuild` KHÔNG có sau `pnpm install --frozen-lockfile` (chỉ có bin của direct dep), nên script bundle không tìm được esbuild trên CI; thêm direct dep theo đúng fallback plan đã nêu ("nếu thiếu thì thêm"). Đã chứng minh bằng bản sao sạch `~/.cache/vcs-c8check` (frozen install): `.bin/esbuild` + `node_modules/yaml` đều có, bundle build + chạy được (plant 2006).
+- Quirk môi trường (không chặn, ghi lại): `pnpm install` trên VM này luôn kết bằng `EPERM chown .../.modules.yaml.<số>` (tái hiện cả ở bản sao c5 không đổi gì) nhưng vẫn áp dụng đủ thay đổi (lockfile/symlink); bản sao mới install sạch thì KHÔNG gặp — CI (runner mới) không bị ảnh hưởng.
+
+### Đo sau B (commit 9) — tính ngưỡng mới
+- Bench plant ×5 lần chạy + vòng kín ×5 (đường bundle), ghi trung vị + phạm vi + min vào §28.
+- Ngưỡng mới = **min quan sát (plant, sau A+B) −15%**, làm tròn XUỐNG trăm gần nhất (OQ-326). Ngưỡng vòng kín giữ 1000.
+- **Điểm tier C TC-1: nếu trung vị plant sau A+B < 2000 bước/s (dưới band chủ sản phẩm) → DỪNG**, báo cáo vào §28 + OWNER-INBOX, chờ chủ sản phẩm quyết — KHÔNG tự hạ ngưỡng dưới 2000, KHÔNG tự chọn hướng khác (viết lại engine / chấp nhận số thấp hơn).
+
+**Kết quả đo (commit 9, 2026-11-26, đường bundle — cây live @ `8d4a1fc`):**
+- plant: [1974, 1840, 2035, 1921, 1941] trung vị **1941** (min **1840**, max 2035). B = 1941/1797 − 1 = **+8,0%** so với tsx sau A (trong quy hoạch +8–14%); A+B cộng dồn so với baseline tsx 1527 = **+27,1%**.
+- vòng kín: [985, 984, 973, 1021, 997] trung vị **985** (973–1021); phần plant 0,140–0,164 ms/bước, PLC ~0,78 ms không đổi. Ngưỡng 1000 vẫn FAIL trung vị trong phiên này (xem lưu ý VM).
+- **⛔ TC-1 XẢY RA: trung vị plant sau A+B = 1941 < 2000 → DỪNG.** Không làm commit 10 (không hạ ngưỡng), không làm commit 11–12, chờ chủ sản phẩm quyết. Theo công thức OQ-326, ngưỡng sẽ là min 1840 −15% = 1564 → làm tròn xuống trăm = **1500** — con số này CHƯA áp dụng, chỉ ghi để anh quyết (nó dưới band 2000–2500 anh nêu).
+- Lưu ý VM (quan trọng khi quyết): số tuyệt đối dao động mạnh giữa phiên — cùng code `24baaec` đo tsx được plant 1932 (parent kiểm 12:52) nhưng chỉ 1527 trong phiên đo commit 7; vòng kín cùng code được 1285 lúc 12:52 nhưng chỉ 899–985 trong phiên này (phần PLC 0,78–0,84 ms so với 0,614 ms lúc đó). Trung vị 1941 chỉ thấp hơn 2000 có 59 bước/s (3%); đo lại vào phiên máy yên có thể qua 2000 — đó là một lựa chọn cho anh, không phải điều implementer tự làm.
+
+### Hạ ngưỡng (commit 10) — chỉ sau khi đo, commit riêng
+- `docs/specs/M2-plant-and-io-import-spec.md` §12: `≥ 5 000 bước/giây (≥ 50× realtime)` → `≥ <N> bước/giây (≥ <N×0,01>× realtime)` với N = ngưỡng mới; §14 mục 6 không có số, không đổi. `docs/semantics.md` §22: cập nhật ghi chú ngưỡng (kèm số đo + phạm vi + ngày).
+- AMENDMENTS A22: bỏ dấu DRAFT, điền số N + bằng chứng đo (trung vị/phạm vi/min, ngày đo).
+- `bench/plant.bench.ts`: `THRESHOLD_STEPS_PER_SEC` → N + sửa comment đầu file (hiện ghi "Ngưỡng (không hạ)"). `bench/baseline.json`: `plantStepsPerSec` + `ranges.plantStepsPerSec` theo 5 lần chạy sau A+B; cập nhật luôn `closedLoopStepsPerSec` + ranges nếu trung vị mới lệch (tránh `check-bench-regression` cảnh báo sai). `scripts/check-bench-regression.mjs`: không đổi (đọc baseline + results).
+- OWNER-INBOX D-008: ghi số ngưỡng cuối + số đo vào mục quyết định (ghi lại, không quyết mới).
+
+### Commit 11–12 (= commit 7–8 cũ của §27, đổi số để nối tiếp — tham chiếu, không plan lại)
+- Commit 11: server tối thiểu + `PlantFaultPanel` + e2e parity (OQ-308/318, §27 mục 8). **Tiêu chí gate thêm:** hash demo A–D sau A phải GIỐNG HỆT commit 2 — lệch là hồi quy hành vi, DỪNG.
+- Commit 12: docs §23 hoàn thiện (`docs/semantics.md`).
+
+### Điểm quyết định tier C (tóm tắt)
+- **TC-1 (sau đo commit 9):** trung vị plant sau A+B < 2000 → DỪNG, chờ owner. (Đã nêu ở "Đo sau B".)
+- **TC-2 (bất cứ lúc nào sau A):** golden case / determinism / hash demo A–D lệch → DỪNG, điều tra nguyên nhân gốc; **KHÔNG sửa golden cho xanh** (SOUL.md §9). Nếu lệch do A làm tròn khác (vd `Math.fround` ở ranh giới) thì báo cáo đúng bản chất, owner quyết.
+- **TC-3 (nếu B tắc):** bundle không chạy được sau 3 lần sửa (yaml/ROOT/esbuild) → fallback: giữ bench tsx, đo A-only, ngưỡng theo số A-only, báo owner quyết (B chỉ là đo, không phải tốc độ thật — không được để B chặn P2.4).
+
+### Gate + PR
+- Gate đầy đủ theo AGENTS.md §9: lint, typecheck, depcheck, test, `review:cheats`, diagnostics/equipment `--check`, build 3/3, e2e, bench plant ×5 + bench vòng kín ×5, demo A–D qua CLI. **Lưu ý:** giữa commit 6–9, `pnpm bench` vẫn exit 1 do ngưỡng cũ 5000 — trạng thái này đã có từ P2.3, KHÔNG phải hồi quy; gate các commit đó dùng số đo trung vị so với baseline, không dùng exit code. Chỉ sau commit 10 bench mới xanh trở lại.
+- Parent kiểm gate độc lập trên bản sao sạch (`~/.cache/vcs-*`, `pnpm install --frozen-lockfile`) trước khi báo xong; upload qua cloud browser, mở PR vào develop, chờ CI xanh, merge (merge commit, không squash, không xóa nhánh); xác minh merge qua GitHub MCP read.
+
+### File (mới/sửa)
+| File | Nội dung |
+|---|---|
+| `packages/plant/src/registry.ts` + `registry.test.ts` | StepCtx slot số, `step(ctx, slots)`, brand types, StepCtx giả |
+| `packages/plant/src/engine.ts` (+ `.test.ts`) | Bảng slot ở init, ctx số, obs/source/fault theo mảng, reverse map lỗi |
+| `packages/plant/src/faults.ts` | API fault theo chỉ số (giữ API theo tên cho đường lạnh) |
+| `packages/plant/src/models/*.ts` (9 model) | Viết lại dùng slot; `conveyor_simple.ts` proxyCtx forward slots |
+| `scripts/build-bench-bundle.mjs` (mới) | Bundle bench bằng esbuild (yaml external) |
+| `bench/run-all-benches.mjs` | Dual path: plant + closedloop qua node+bundle, còn lại tsx; truyền `VCS_REPO_ROOT` |
+| `bench/plant.bench.ts` + `bench/closedloop.bench.ts` | ROOT ưu tiên env `VCS_REPO_ROOT`; plant: ngưỡng mới ở commit 10 |
+| `package.json` + `pnpm-lock.yaml` | Root devDep `yaml@2.9.1` (cho bundle resolve) |
+| `.gitignore` | Thêm `bench/dist/` |
+| `bench/baseline.json` | Chỉ commit 10: số sau A+B + ranges |
+| `docs/specs/M2-plant-and-io-import-spec.md` §12 + `docs/semantics.md` §22 | Chỉ commit 10: ngưỡng mới + ghi chú đo |
+| `docs/STATE.md` (§28), `docs/open-questions.md` (OQ-309 đảo + OQ-320…326), `docs/OWNER-INBOX.md` (D-008 đã quyết), `docs/AMENDMENTS.md` (A21 + A22 DRAFT) | Plan này |
+| Commit 11–12: xem §27 mục 8 (server/UI + docs §23) | Tham chiếu, không plan lại |
+
+### OQ mới (OQ-320…326) + tier C còn mở
+- OQ-320…326: xem `docs/open-questions.md` (bảng slot ở init; chữ ký `step(ctx, slots)`; brand types; yaml root devDep; bench nào bundle; ROOT qua env; công thức ngưỡng).
+- Tier C còn mở: TC-1 (A+B < 2000), TC-2 (golden lệch sau A), TC-3 (B tắc) — cả ba đều DỪNG + báo owner, implementer không tự quyết.
+- OQ cũ còn mở liên quan: OQ-301/302/303 (tier B); OQ-308/318 ☑ đóng ở commit 11 (xem "Kết quả commit 11").
+
+### Kết quả commit 10 — hạ ngưỡng plant §12 xuống 1500 (2026-11-26)
+- **TC-1 KHÔNG tái hiện (parent đo lại độc lập, bản sao sạch `~/.cache/vcs-tc1pv`, HEAD `d64ebfc`, cài thật):** plant bundle ×5 [2061, 2032, 2131, 2036, 1825] trung vị **2036** (phạm vi 1825–2131) ≥ 2000; vòng kín bundle ×3 [975, 963, 931] trung vị **963** < 1000 (cùng hiện tượng máy chậm như phiên implementer — PLC không đổi từ lúc PASS 1285; đo lại ở parent gate).
+- **Quyết định owner 2026-11-26 15:09 +07: (a) chấp nhận ngưỡng 1500, làm tiếp commit 10–12.** Công thức OQ-326 cho 1500 ở cả hai bộ dữ liệu (implementer min 1840 −15% = 1564 → 1500; parent min 1825 −15% = 1551 → 1500).
+- Thay đổi: M2 §12 `≥ 5 000` → `≥ 1 500 bước/giây (≥ 15× realtime)`; AMENDMENTS A22 chốt ĐÃ QUYẾT với N=1500 + bằng chứng đo; `bench/plant.bench.ts` `THRESHOLD_STEPS_PER_SEC = 1500` + sửa comment đầu file; `bench/baseline.json` plant 1941 (phạm vi 1840–2035) + closedLoop 985 (phạm vi 973–1021) + ghi chú; `docs/semantics.md` §22 ghi chú ngưỡng; OQ-326 ☑ đóng. Ngưỡng vòng kín 1000 KHÔNG đổi.
+
+### Kết quả commit 11 — server tối thiểu + PlantFaultPanel + e2e parity (2026-11-26)
+- Server: `plant.fault.inject` / `.clear` / `.preset` (thêm preset — xem Lệch §27) qua WS, validate schema, lỗi → WS error kèm mã PL; `GET /api/plant` (equipment + faults + observables + faultDefs/presets); `GET /api/sim/hash` (`TraceHasher` subscribe khi dựng sim, `reset()` sau `resetAll()`). Web: `ws-client` thêm 3 method + 1 test; i18n `plant.*` (vi/en); `PlantFaultPanel` mới (poll `/api/plant` 1 s + refresh 300 ms sau thao tác; inject/preset gửi `when {at:'time', timeMs: simTimeMs}`) trong tab PLC Workspace sau Watch; `App` wiring. E2e mới `apps/web/e2e/plant-closedloop.spec.ts` (4 test A–D, xem Lệch §27 về parity ngữ nghĩa + temp-copy + driver).
+- Test mới 13 (sim-service 6 + ws 6 + ws-client 1), tổng **2440/2440 (103 file)**. Gate cây live: lint 0, typecheck 0, depcheck 0 (161 modules, 368 deps), test 2440/2440, cheats SẠCH (253 file), diagnostics khớp, equipment khớp (9 model), build 3/3, e2e toàn suite **15 passed + 1 skipped** (2.2m), bench tất cả PASS — plant **2706 bước/s** (≥ 1500), vòng kín **1373 bước/s** (≥ 1000, xanh trở lại sau 963–985 ở các phiên máy chậm), tagdb 4/4, orchestrator 497 479, softplc 1676 scans/s. Golden **78/78**; hash demo A–D giống hệt commit 2 (`ce95b887…` / `f3c6a4ee…` / `f3c6a4ee…` / `7d337ac0…`) — **TC-2 clear**.
+- OQ-308/318 ☑ đóng (bằng chứng: sim-service/ws/ws-client test + e2e A–D + hash CLI == golden). Lệch so với plan: xem §27 "Lệch so với plan" (preset thêm; parity ngữ nghĩa thay cho hash-parity; clear atMs tường minh; applyPreset kèm PL-E001; chi tiết driver e2e).
+
+### Kết quả commit 12 — docs §23 hoàn thiện (2026-11-26)
+- `docs/semantics.md` §23: bỏ "KHUNG", ghi VERIFIED với số cuối P2.4 (bench vòng kín 1373 ≥ 1000, plant 2706 vs ngưỡng 1500, A+B +27,1%, server/UI parity, phát hiện hash UI vs CLI) + quy tắc clear WS (atMs tường minh = simTime orchestrator). OQ-305…319 tất cả đã đóng (308/318 ở commit 11). Không đổi code; chỉ docs (STATE §28 + §27 "Lệch" đã ghi ở commit 11).
+
+### Kết quả commit 13 — ci.yml: rebase lên gói A của develop (2026-11-26, parent fix trước PR)
+- Nhánh P2.4 tách từ `ed3cae2` (tip P2.3) trước khi PR #33 (gói A, `e06cfaa`) merge vào develop — nên `ci.yml` trên nhánh vẫn là bản trước gói A. Đẩy nguyên lên PR sẽ ghi đè, mất gói A (push chỉ develop/main, cancel-in-progress, test Windows có điều kiện, nightly chỉ bench).
+- Sửa: lấy `ci.yml` của develop (SHA `f14a2b03`, kiểm qua GitHub MCP read với `ref: develop`) + giữ đúng 3 dòng P2.4 thêm ở commit 3 (`if: always()` + comment cho bước regression). Diff với develop chỉ còn đúng 3 dòng đó; YAML parse OK. Không đổi code; gate đã kiểm ở `fcec7fe` vẫn nguyên (code giống hệt).
