@@ -2429,3 +2429,23 @@ Lưu ý: tab Checks của GitHub hiển thị sai — báo "in progress" 45 phú
 ---
 Log tới thời điểm 2026-11-27 02:59 +07.
 ---
+
+## 2026-11-27 06:31 +07 — anh Tiến
+
+Giờ em đang làm gì? Việc nào còn chờ anh?
+
+## 2026-11-27 06:31 +07 — TraMuse
+
+TraMuse báo: hiện em không chạy task nào — P2.8 đã merge xong lúc 02:58 (PR #39), P2.1–P2.8 xong hết; chỉ còn các cron nền (backup 30 phút, dashboard sáng nay).
+
+Việc còn chờ anh:
+- R-010: duyệt P2.8 (duyệt sau).
+- OQ-161: layout IN_OUT multi-instance — cần chốt trước khi M2 đụng FB lồng nhau có IN_OUT.
+- X-003: file I/O thật — G2 (ký M2) đang chờ cái này (anh đã chọn hoãn; kèm D-003 chính sách dữ liệu).
+- D-007: HTTPS cho LAN (A mkcert / B reverse proxy / C localhost-only).
+- D-006 (§16.5): giữ mã lỗi riêng hay gộp về U001.
+- Các mục verify chỉ anh làm được (bench trên máy anh, PLCSIM, Windows thật, kiosk tablet thật, đo lại perf-scroll 20k) — không chặn việc gì.
+
+---
+Log tới thời điểm 2026-11-27 06:31 +07.
+---
