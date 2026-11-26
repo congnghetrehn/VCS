@@ -1,0 +1,2228 @@
+generated:
+  seed: 20261126
+  signalCount: 300
+  roleSignals: 177
+  extraSignals: 123
+  headerRow: 6
+  firstDataRow: 7
+headers:
+  - Station
+  - Tag Name
+  - Description
+  - Type
+  - Address
+  - PLC
+  - Range Lo
+  - Range Hi
+  - Unit
+  - Equipment
+signals:
+  - tag: CR01_M01_RUN_CMD
+    equipment: CR01_M01
+    model: motor_dol
+    role: runCmd
+    signalType: DO
+    address: "%Q0.0"
+    row: 7
+  - tag: CR01_M01_RUN_FBK
+    equipment: CR01_M01
+    model: motor_dol
+    role: runFb
+    signalType: DI
+    address: "%I0.0"
+    row: 8
+  - tag: CR01_M01_READY
+    equipment: CR01_M01
+    model: motor_dol
+    role: ready
+    signalType: DI
+    address: "%I0.1"
+    row: 9
+  - tag: CR01_M01_REMOTE
+    equipment: CR01_M01
+    model: motor_dol
+    role: remote
+    signalType: DI
+    address: "%I0.2"
+    row: 10
+  - tag: CR01_M01_OVL_OK
+    equipment: CR01_M01
+    model: motor_dol
+    role: overloadOk
+    signalType: DI
+    address: "%I0.3"
+    row: 11
+  - tag: CR01_M01_CUR
+    equipment: CR01_M01
+    model: motor_dol
+    role: currentFb
+    signalType: AI
+    address: "%IW64"
+    row: 12
+  - tag: CR01_M01_TEMP
+    equipment: CR01_M01
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW66"
+    row: 13
+  - tag: CR01_M01_VIB
+    equipment: CR01_M01
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW68"
+    row: 14
+  - tag: CR01_M01_PWR
+    equipment: CR01_M01
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW70"
+    row: 15
+  - tag: CR01_M01_ESTOP
+    equipment: CR01_M01
+    model: motor_dol
+    role: null
+    signalType: DI
+    address: "%I0.4"
+    row: 16
+  - tag: CR01_M02_RUN_CMD
+    equipment: CR01_M02
+    model: motor_dol
+    role: runCmd
+    signalType: DO
+    address: "%Q0.1"
+    row: 17
+  - tag: CR01_M02_RUNNING
+    equipment: CR01_M02
+    model: motor_dol
+    role: runFb
+    signalType: DI
+    address: "%I0.5"
+    row: 18
+  - tag: CR01_M02_READY
+    equipment: CR01_M02
+    model: motor_dol
+    role: ready
+    signalType: DI
+    address: "%I0.6"
+    row: 19
+  - tag: CR01_M02_REMOTE
+    equipment: CR01_M02
+    model: motor_dol
+    role: remote
+    signalType: DI
+    address: "%I0.7"
+    row: 20
+  - tag: CR01_M02_OVL_OK
+    equipment: CR01_M02
+    model: motor_dol
+    role: overloadOk
+    signalType: DI
+    address: "%I1.0"
+    row: 21
+  - tag: CR01_M02_CUR
+    equipment: CR01_M02
+    model: motor_dol
+    role: currentFb
+    signalType: AI
+    address: "%IW72"
+    row: 22
+  - tag: CR01_M02_TEMP
+    equipment: CR01_M02
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW74"
+    row: 23
+  - tag: CR01_M02_VIB
+    equipment: CR01_M02
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW76"
+    row: 24
+  - tag: CR01_M02_PWR
+    equipment: CR01_M02
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW78"
+    row: 25
+  - tag: CR01_M02_ESTOP
+    equipment: CR01_M02
+    model: motor_dol
+    role: null
+    signalType: DI
+    address: "%I1.1"
+    row: 26
+  - tag: CR01_M03_RUN_CMD
+    equipment: CR01_M03
+    model: motor_dol
+    role: runCmd
+    signalType: DO
+    address: "%Q0.2"
+    row: 27
+  - tag: CR01_M03_RUN_ST
+    equipment: CR01_M03
+    model: motor_dol
+    role: runFb
+    signalType: DI
+    address: "%I1.2"
+    row: 28
+  - tag: CR01_M03_READY
+    equipment: CR01_M03
+    model: motor_dol
+    role: ready
+    signalType: DI
+    address: "%I1.3"
+    row: 29
+  - tag: CR01_M03_REMOTE
+    equipment: CR01_M03
+    model: motor_dol
+    role: remote
+    signalType: DI
+    address: "%I1.4"
+    row: 30
+  - tag: CR01_M03_OVL_OK
+    equipment: CR01_M03
+    model: motor_dol
+    role: overloadOk
+    signalType: DI
+    address: "%I1.5"
+    row: 31
+  - tag: CR01_M03_CUR
+    equipment: CR01_M03
+    model: motor_dol
+    role: currentFb
+    signalType: AI
+    address: "%IW80"
+    row: 32
+  - tag: CR01_M03_TEMP
+    equipment: CR01_M03
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW82"
+    row: 33
+  - tag: CR01_M03_VIB
+    equipment: CR01_M03
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW84"
+    row: 34
+  - tag: CR01_M03_PWR
+    equipment: CR01_M03
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW86"
+    row: 35
+  - tag: CR01_M03_ESTOP
+    equipment: CR01_M03
+    model: motor_dol
+    role: null
+    signalType: DI
+    address: "%I1.6"
+    row: 36
+  - tag: CR01_M04_RUN_CMD
+    equipment: CR01_M04
+    model: motor_dol
+    role: runCmd
+    signalType: DO
+    address: "%Q0.3"
+    row: 37
+  - tag: CR01_M04_RUN_FBK
+    equipment: CR01_M04
+    model: motor_dol
+    role: runFb
+    signalType: DI
+    address: "%I1.7"
+    row: 38
+  - tag: CR01_M04_READY
+    equipment: CR01_M04
+    model: motor_dol
+    role: ready
+    signalType: DI
+    address: "%I2.0"
+    row: 39
+  - tag: CR01_M04_REMOTE
+    equipment: CR01_M04
+    model: motor_dol
+    role: remote
+    signalType: DI
+    address: "%I2.1"
+    row: 40
+  - tag: CR01_M04_OVL_OK
+    equipment: CR01_M04
+    model: motor_dol
+    role: overloadOk
+    signalType: DI
+    address: "%I2.2"
+    row: 41
+  - tag: CR01_M04_CUR
+    equipment: CR01_M04
+    model: motor_dol
+    role: currentFb
+    signalType: AI
+    address: "%IW88"
+    row: 42
+  - tag: CR01_M04_TEMP
+    equipment: CR01_M04
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW90"
+    row: 43
+  - tag: CR01_M04_VIB
+    equipment: CR01_M04
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW92"
+    row: 44
+  - tag: CR01_M04_PWR
+    equipment: CR01_M04
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW94"
+    row: 45
+  - tag: CR01_M04_ESTOP
+    equipment: CR01_M04
+    model: motor_dol
+    role: null
+    signalType: DI
+    address: "%I2.3"
+    row: 46
+  - tag: CR01_MV01_RUN_CMD
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: runCmd
+    signalType: DO
+    address: "%Q0.4"
+    row: 47
+  - tag: CR01_MV01_SPEED_REF
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: speedRef
+    signalType: AO
+    address: "%QW64"
+    row: 48
+  - tag: CR01_MV01_RUNNING
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: runFb
+    signalType: DI
+    address: "%I2.4"
+    row: 49
+  - tag: CR01_MV01_SPEED_FB
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: speedFb
+    signalType: AI
+    address: "%IW74"
+    row: 50
+  - tag: CR01_MV01_READY
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: ready
+    signalType: DI
+    address: "%I2.5"
+    row: 51
+  - tag: CR01_MV01_VFD_OK
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: vfdFaultOk
+    signalType: DI
+    address: "%I2.6"
+    row: 52
+  - tag: CR01_MV01_REMOTE
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: remote
+    signalType: DI
+    address: "%I2.7"
+    row: 53
+  - tag: CR01_MV01_CUR
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: currentFb
+    signalType: AI
+    address: "%IW98"
+    row: 54
+  - tag: CR01_MV01_TEMP
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW100"
+    row: 55
+  - tag: CR01_MV01_VIB
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW102"
+    row: 56
+  - tag: CR01_MV01_PWR
+    equipment: CR01_MV01
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW104"
+    row: 57
+  - tag: CR01_MV02_RUN_CMD
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: runCmd
+    signalType: DO
+    address: "%Q0.5"
+    row: 58
+  - tag: CR01_MV02_SPEED_REF
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: speedRef
+    signalType: AO
+    address: "%QW66"
+    row: 59
+  - tag: CR01_MV02_RUN_ST
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: runFb
+    signalType: DI
+    address: "%I3.0"
+    row: 60
+  - tag: CR01_MV02_SPEED_FB
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: speedFb
+    signalType: AI
+    address: "%IW106"
+    row: 61
+  - tag: CR01_MV02_READY
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: ready
+    signalType: DI
+    address: "%I3.1"
+    row: 62
+  - tag: CR01_MV02_VFD_OK
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: vfdFaultOk
+    signalType: DI
+    address: "%I3.2"
+    row: 63
+  - tag: CR01_MV02_REMOTE
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: remote
+    signalType: DI
+    address: "%I3.3"
+    row: 64
+  - tag: CR01_MV02_CUR
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: currentFb
+    signalType: AI
+    address: "%IW108"
+    row: 65
+  - tag: CR01_MV02_TEMP
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW110"
+    row: 66
+  - tag: CR01_MV02_VIB
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW112"
+    row: 67
+  - tag: CR01_MV02_PWR
+    equipment: CR01_MV02
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW114"
+    row: 68
+  - tag: CR01_XV01_OPEN_CMD
+    equipment: CR01_XV01
+    model: valve_onoff
+    role: openCmd
+    signalType: DO
+    address: "%Q0.6"
+    row: 69
+  - tag: CR01_XV01_CLOSE_CMD
+    equipment: CR01_XV01
+    model: valve_onoff
+    role: closeCmd
+    signalType: DO
+    address: "%Q0.7"
+    row: 70
+  - tag: CR01_XV01_OPEN_LS
+    equipment: CR01_XV01
+    model: valve_onoff
+    role: openLs
+    signalType: DI
+    address: "%I3.4"
+    row: 71
+  - tag: CR01_XV01_CLOSED_LS
+    equipment: CR01_XV01
+    model: valve_onoff
+    role: closedLs
+    signalType: DI
+    address: "%I3.5"
+    row: 72
+  - tag: CR01_XV01_FAULT
+    equipment: CR01_XV01
+    model: valve_onoff
+    role: fault
+    signalType: DI
+    address: "%I3.6"
+    row: 73
+  - tag: CR01_XV01_TORQ
+    equipment: CR01_XV01
+    model: valve_onoff
+    role: null
+    signalType: AI
+    address: "%IW116"
+    row: 74
+  - tag: CR01_MV02_TEMP
+    equipment: CR01_XV01
+    model: valve_onoff
+    role: null
+    signalType: DI
+    address: "%I3.7"
+    row: 75
+  - tag: CR01_XV02_OPEN_CMD
+    equipment: CR01_XV02
+    model: valve_onoff
+    role: openCmd
+    signalType: DO
+    address: "%Q1.0"
+    row: 76
+  - tag: CR01_XV02_CLOSE_CMD
+    equipment: CR01_XV02
+    model: valve_onoff
+    role: closeCmd
+    signalType: DO
+    address: "%Q1.1"
+    row: 77
+  - tag: CR01_XV02_OPEN_LS
+    equipment: CR01_XV02
+    model: valve_onoff
+    role: openLs
+    signalType: DI
+    address: "%I1.5"
+    row: 78
+  - tag: CR01_XV02_CLOSED_LS
+    equipment: CR01_XV02
+    model: valve_onoff
+    role: closedLs
+    signalType: DI
+    address: "%I4.1"
+    row: 79
+  - tag: CR01_XV02_FAULT
+    equipment: CR01_XV02
+    model: valve_onoff
+    role: fault
+    signalType: DI
+    address: "%I4.2"
+    row: 80
+  - tag: CR01_M01_REMOTE
+    equipment: CR01_XV02
+    model: valve_onoff
+    role: null
+    signalType: AI
+    address: "%IW118"
+    row: 81
+  - tag: CR01_XV02_LOCAL
+    equipment: CR01_XV02
+    model: valve_onoff
+    role: null
+    signalType: DI
+    address: "%I4.3"
+    row: 82
+  - tag: CR01_XV03_OPEN_CMD
+    equipment: CR01_XV03
+    model: valve_onoff
+    role: openCmd
+    signalType: DO
+    address: "%Q1.2"
+    row: 83
+  - tag: CR01_XV03_CLOSE_CMD
+    equipment: CR01_XV03
+    model: valve_onoff
+    role: closeCmd
+    signalType: DO
+    address: "%Q1.3"
+    row: 84
+  - tag: CR01_XV03_OPEN_LS
+    equipment: CR01_XV03
+    model: valve_onoff
+    role: openLs
+    signalType: DI
+    address: "%I4.4"
+    row: 85
+  - tag: CR01_XV03_CLOSED_LS
+    equipment: CR01_XV03
+    model: valve_onoff
+    role: closedLs
+    signalType: DI
+    address: "%I4.5"
+    row: 86
+  - tag: CR01_XV03_FAULT
+    equipment: CR01_XV03
+    model: valve_onoff
+    role: fault
+    signalType: DI
+    address: "%I4.6"
+    row: 87
+  - tag: CR01_XV03_TORQ
+    equipment: CR01_XV03
+    model: valve_onoff
+    role: null
+    signalType: AI
+    address: "%IW120"
+    row: 88
+  - tag: CR01_XV03_LOCAL
+    equipment: CR01_XV03
+    model: valve_onoff
+    role: null
+    signalType: DI
+    address: "%I4.7"
+    row: 89
+  - tag: CR01_FCV01_POS_REF
+    equipment: CR01_FCV01
+    model: valve_ctrl
+    role: posRef
+    signalType: AO
+    address: "%QW68"
+    row: 90
+  - tag: CR01_MV02_REMOTE
+    equipment: CR01_FCV01
+    model: valve_ctrl
+    role: posFb
+    signalType: AI
+    address: "%IW122"
+    row: 91
+  - tag: CR01_FCV01_FAULT
+    equipment: CR01_FCV01
+    model: valve_ctrl
+    role: fault
+    signalType: DI
+    address: "%I5.0"
+    row: 92
+  - tag: CR01_FCV01_CLOSED_LS
+    equipment: CR01_FCV01
+    model: valve_ctrl
+    role: closedLs
+    signalType: DI
+    address: "%I5.1"
+    row: 93
+  - tag: CR01_FCV01_OPEN_LS
+    equipment: CR01_FCV01
+    model: valve_ctrl
+    role: openLs
+    signalType: DI
+    address: "%I5.2"
+    row: 94
+  - tag: CR01_FCV01_TORQ
+    equipment: CR01_FCV01
+    model: valve_ctrl
+    role: null
+    signalType: AI
+    address: "%IW124"
+    row: 95
+  - tag: CR01_FCV01_LOCAL
+    equipment: CR01_FCV01
+    model: valve_ctrl
+    role: null
+    signalType: DI
+    address: "%I5.3"
+    row: 96
+  - tag: CR01_FCV02_POS_REF
+    equipment: CR01_FCV02
+    model: valve_ctrl
+    role: posRef
+    signalType: AO
+    address: "%QW70"
+    row: 97
+  - tag: CR01_FCV02_POS_FB
+    equipment: CR01_FCV02
+    model: valve_ctrl
+    role: posFb
+    signalType: AI
+    address: "%IW126"
+    row: 98
+  - tag: CR01_FCV02_FAULT
+    equipment: CR01_FCV02
+    model: valve_ctrl
+    role: fault
+    signalType: DI
+    address: "%I5.4"
+    row: 99
+  - tag: CR01_FCV02_CLOSED_LS
+    equipment: CR01_FCV02
+    model: valve_ctrl
+    role: closedLs
+    signalType: DI
+    address: "%I5.5"
+    row: 100
+  - tag: CR01_FCV02_OPEN_LS
+    equipment: CR01_FCV02
+    model: valve_ctrl
+    role: openLs
+    signalType: DI
+    address: "%I5.6"
+    row: 101
+  - tag: CR01_FCV02_TORQ
+    equipment: CR01_FCV02
+    model: valve_ctrl
+    role: null
+    signalType: AI
+    address: "%IW128"
+    row: 102
+  - tag: CR01_FCV02_LOCAL
+    equipment: CR01_FCV02
+    model: valve_ctrl
+    role: null
+    signalType: DI
+    address: "%I5.7"
+    row: 103
+  - tag: CR01_PT01_RAW
+    equipment: CR01_PT01
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW130"
+    row: 104
+  - tag: CR01_PT01_BYPASS
+    equipment: CR01_PT01
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I6.0"
+    row: 105
+  - tag: CR01_PT02_RAW
+    equipment: CR01_PT02
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW132"
+    row: 106
+  - tag: CR01_PT02_BYPASS
+    equipment: CR01_PT02
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I6.1"
+    row: 107
+  - tag: CR01_TT01_RAW
+    equipment: CR01_TT01
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW134"
+    row: 108
+  - tag: CR01_TT01_BYPASS
+    equipment: CR01_TT01
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I6.2"
+    row: 109
+  - tag: CR01_TT02_RAW
+    equipment: CR01_TT02
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW136"
+    row: 110
+  - tag: CR01_TT02_BYPASS
+    equipment: CR01_TT02
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I6.3"
+    row: 111
+  - tag: CR01_LT01_RAW
+    equipment: CR01_LT01
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW138"
+    row: 112
+  - tag: CR01_LT01_BYPASS
+    equipment: CR01_LT01
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I6.4"
+    row: 113
+  - tag: CR01_LT02_RAW
+    equipment: CR01_LT02
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW140"
+    row: 114
+  - tag: CR01_LT02_BYPASS
+    equipment: CR01_LT02
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I6.5"
+    row: 115
+  - tag: CR01_FT01_RAW
+    equipment: CR01_FT01
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW142"
+    row: 116
+  - tag: CR01_FT01_BYPASS
+    equipment: CR01_FT01
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I6.6"
+    row: 117
+  - tag: CR01_LSH01_DI
+    equipment: CR01_LSH01
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I6.7"
+    row: 118
+  - tag: CR01_LSH01_TEST
+    equipment: CR01_LSH01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I7.0"
+    row: 119
+  - tag: CR01_LSH01_BYPASS
+    equipment: CR01_LSH01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I7.1"
+    row: 120
+  - tag: CR01_LSL01_DI
+    equipment: CR01_LSL01
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I7.2"
+    row: 121
+  - tag: CR01_LSL01_TEST
+    equipment: CR01_LSL01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I7.3"
+    row: 122
+  - tag: CR01_LSL01_BYPASS
+    equipment: CR01_LSL01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I7.4"
+    row: 123
+  - tag: CR01_ZS01_DI
+    equipment: CR01_ZS01
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I7.5"
+    row: 124
+  - tag: CR01_ZS01_TEST
+    equipment: CR01_ZS01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I7.6"
+    row: 125
+  - tag: CR01_ZS01_BYPASS
+    equipment: CR01_ZS01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I7.7"
+    row: 126
+  - tag: CR01_ZS02_DI
+    equipment: CR01_ZS02
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I8.0"
+    row: 127
+  - tag: CR01_ZS02_TEST
+    equipment: CR01_ZS02
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I8.1"
+    row: 128
+  - tag: CR01_ZS02_BYPASS
+    equipment: CR01_ZS02
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I8.2"
+    row: 129
+  - tag: CR01_SS01_DI
+    equipment: CR01_SS01
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I8.3"
+    row: 130
+  - tag: CR01_SS01_TEST
+    equipment: CR01_SS01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I8.4"
+    row: 131
+  - tag: CR01_SS01_BYPASS
+    equipment: CR01_SS01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I8.5"
+    row: 132
+  - tag: CR01_BIN01_LEVEL_RAW
+    equipment: CR01_BIN01
+    model: silo_bin
+    role: levelRaw
+    signalType: AI
+    address: "%IW144"
+    row: 133
+  - tag: CR01_BIN01_LEVEL_HIGH
+    equipment: CR01_BIN01
+    model: silo_bin
+    role: levelHigh
+    signalType: DI
+    address: "%I8.6"
+    row: 134
+  - tag: CR01_BIN01_LEVEL_LOW
+    equipment: CR01_BIN01
+    model: silo_bin
+    role: levelLow
+    signalType: DI
+    address: "%I8.7"
+    row: 135
+  - tag: CR01_BIN01_LEVEL_HIGH_HIGH
+    equipment: CR01_BIN01
+    model: silo_bin
+    role: levelHighHigh
+    signalType: DI
+    address: "%I9.0"
+    row: 136
+  - tag: CR01_BIN01_WEIGHT
+    equipment: CR01_BIN01
+    model: silo_bin
+    role: null
+    signalType: AI
+    address: "%IW142"
+    row: 137
+  - tag: CR01_BIN01_TEMP
+    equipment: CR01_BIN01
+    model: silo_bin
+    role: null
+    signalType: AI
+    address: "%IW148"
+    row: 138
+  - tag: CR01_BIN01_DUST
+    equipment: CR01_BIN01
+    model: silo_bin
+    role: null
+    signalType: DI
+    address: "%I9.1"
+    row: 139
+  - tag: CR01_BIN02_LEVEL_RAW
+    equipment: CR01_BIN02
+    model: silo_bin
+    role: levelRaw
+    signalType: AI
+    address: "%IW150"
+    row: 140
+  - tag: CR01_BIN02_LEVEL_HIGH
+    equipment: CR01_BIN02
+    model: silo_bin
+    role: levelHigh
+    signalType: DI
+    address: "%I9.2"
+    row: 141
+  - tag: CR01_BIN02_LEVEL_LOW
+    equipment: CR01_BIN02
+    model: silo_bin
+    role: levelLow
+    signalType: DI
+    address: "%I9.3"
+    row: 142
+  - tag: CR01_BIN02_LEVEL_HIGH_HIGH
+    equipment: CR01_BIN02
+    model: silo_bin
+    role: levelHighHigh
+    signalType: DI
+    address: "%I9.4"
+    row: 143
+  - tag: CR01_M02_REMOTE
+    equipment: CR01_BIN02
+    model: silo_bin
+    role: null
+    signalType: AI
+    address: "%IW152"
+    row: 144
+  - tag: CR01_BIN02_TEMP
+    equipment: CR01_BIN02
+    model: silo_bin
+    role: null
+    signalType: AI
+    address: "%IW154"
+    row: 145
+  - tag: CR01_BIN02_DUST
+    equipment: CR01_BIN02
+    model: silo_bin
+    role: null
+    signalType: DI
+    address: "%I9.5"
+    row: 146
+  - tag: CR01_BC01_RUN_CMD
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: runCmd
+    signalType: DO
+    address: "%Q1.4"
+    row: 147
+  - tag: CR01_BC01_RUN_FBK
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: runFb
+    signalType: DI
+    address: "%I9.6"
+    row: 148
+  - tag: CR01_BC01_READY
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: ready
+    signalType: DI
+    address: "%I9.7"
+    row: 149
+  - tag: CR01_BC01_REMOTE
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: remote
+    signalType: DI
+    address: "%I10.0"
+    row: 150
+  - tag: CR01_BC01_OVL_OK
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: overloadOk
+    signalType: DI
+    address: "%I10.1"
+    row: 151
+  - tag: CR01_BC01_CUR
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: currentFb
+    signalType: AI
+    address: "%IW156"
+    row: 152
+  - tag: CR01_BC01_ZERO_SPEED
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: zeroSpeed
+    signalType: DI
+    address: "%I10.2"
+    row: 153
+  - tag: CR01_BC01_PULL_CORD
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: pullCord
+    signalType: DI
+    address: "%I10.3"
+    row: 154
+  - tag: CR01_BC01_TEMP
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW158"
+    row: 155
+  - tag: CR01_BC01_VIB
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW160"
+    row: 156
+  - tag: CR01_BC01_PWR
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW162"
+    row: 157
+  - tag: CR01_BC01_LOAD
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW214"
+    row: 158
+  - tag: CR01_BC01_SPEED
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW166"
+    row: 159
+  - tag: CR01_BC01_TRACK
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: null
+    signalType: DI
+    address: "%I10.4"
+    row: 160
+  - tag: CR01_BC01_RIP
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: null
+    signalType: DI
+    address: "%I10.5"
+    row: 161
+  - tag: CR01_BC01_BLOCK
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: null
+    signalType: DI
+    address: "%I10.6"
+    row: 162
+  - tag: CR01_BC01_SLIP
+    equipment: CR01_BC01
+    model: conveyor_simple
+    role: null
+    signalType: DI
+    address: "%I8.4"
+    row: 163
+  - tag: CR02_M01_RUN_CMD
+    equipment: CR02_M01
+    model: motor_dol
+    role: runCmd
+    signalType: DO
+    address: "%Q1.5"
+    row: 164
+  - tag: CR02_M01_RUNNING
+    equipment: CR02_M01
+    model: motor_dol
+    role: runFb
+    signalType: DI
+    address: "%I11.0"
+    row: 165
+  - tag: CR02_M01_READY
+    equipment: CR02_M01
+    model: motor_dol
+    role: ready
+    signalType: DI
+    address: "%I11.1"
+    row: 166
+  - tag: CR02_M01_REMOTE
+    equipment: CR02_M01
+    model: motor_dol
+    role: remote
+    signalType: DI
+    address: "%I11.2"
+    row: 167
+  - tag: CR02_M01_OVL_OK
+    equipment: CR02_M01
+    model: motor_dol
+    role: overloadOk
+    signalType: DI
+    address: "%I11.3"
+    row: 168
+  - tag: CR02_M01_CUR
+    equipment: CR02_M01
+    model: motor_dol
+    role: currentFb
+    signalType: AI
+    address: "%IW168"
+    row: 169
+  - tag: CR02_M01_TEMP
+    equipment: CR02_M01
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW170"
+    row: 170
+  - tag: CR02_M01_VIB
+    equipment: CR02_M01
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW172"
+    row: 171
+  - tag: CR02_M01_PWR
+    equipment: CR02_M01
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW174"
+    row: 172
+  - tag: CR02_M01_ESTOP
+    equipment: CR02_M01
+    model: motor_dol
+    role: null
+    signalType: DI
+    address: "%I11.4"
+    row: 173
+  - tag: CR02_M02_RUN_CMD
+    equipment: CR02_M02
+    model: motor_dol
+    role: runCmd
+    signalType: DO
+    address: "%Q1.6"
+    row: 174
+  - tag: CR02_M02_RUN_ST
+    equipment: CR02_M02
+    model: motor_dol
+    role: runFb
+    signalType: DI
+    address: "%I11.5"
+    row: 175
+  - tag: CR02_M02_READY
+    equipment: CR02_M02
+    model: motor_dol
+    role: ready
+    signalType: DI
+    address: "%I11.6"
+    row: 176
+  - tag: CR02_M02_REMOTE
+    equipment: CR02_M02
+    model: motor_dol
+    role: remote
+    signalType: DI
+    address: "%I11.7"
+    row: 177
+  - tag: CR02_M02_OVL_OK
+    equipment: CR02_M02
+    model: motor_dol
+    role: overloadOk
+    signalType: DI
+    address: "%I12.0"
+    row: 178
+  - tag: CR02_M02_CUR
+    equipment: CR02_M02
+    model: motor_dol
+    role: currentFb
+    signalType: AI
+    address: "%IW176"
+    row: 179
+  - tag: CR02_M02_TEMP
+    equipment: CR02_M02
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW178"
+    row: 180
+  - tag: CR02_M02_VIB
+    equipment: CR02_M02
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW180"
+    row: 181
+  - tag: CR02_M02_PWR
+    equipment: CR02_M02
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW182"
+    row: 182
+  - tag: CR02_M02_ESTOP
+    equipment: CR02_M02
+    model: motor_dol
+    role: null
+    signalType: DI
+    address: "%I12.1"
+    row: 183
+  - tag: CR02_M03_RUN_CMD
+    equipment: CR02_M03
+    model: motor_dol
+    role: runCmd
+    signalType: DO
+    address: "%Q1.7"
+    row: 184
+  - tag: CR02_M03_RUN_FB
+    equipment: CR02_M03
+    model: motor_dol
+    role: runFb
+    signalType: DI
+    address: "%I12.2"
+    row: 185
+  - tag: CR02_M03_READY
+    equipment: CR02_M03
+    model: motor_dol
+    role: ready
+    signalType: DI
+    address: "%I12.3"
+    row: 186
+  - tag: CR02_M03_REMOTE
+    equipment: CR02_M03
+    model: motor_dol
+    role: remote
+    signalType: DI
+    address: "%I12.4"
+    row: 187
+  - tag: CR02_M03_OVL_OK
+    equipment: CR02_M03
+    model: motor_dol
+    role: overloadOk
+    signalType: DI
+    address: "%I12.5"
+    row: 188
+  - tag: CR02_M03_CUR
+    equipment: CR02_M03
+    model: motor_dol
+    role: currentFb
+    signalType: AI
+    address: "%IW184"
+    row: 189
+  - tag: CR02_M03_TEMP
+    equipment: CR02_M03
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW186"
+    row: 190
+  - tag: CR02_M03_VIB
+    equipment: CR02_M03
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW188"
+    row: 191
+  - tag: CR02_M03_PWR
+    equipment: CR02_M03
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW190"
+    row: 192
+  - tag: CR02_M03_ESTOP
+    equipment: CR02_M03
+    model: motor_dol
+    role: null
+    signalType: DI
+    address: "%I12.6"
+    row: 193
+  - tag: CR02_M04_RUN_CMD
+    equipment: CR02_M04
+    model: motor_dol
+    role: runCmd
+    signalType: DO
+    address: "%Q2.0"
+    row: 194
+  - tag: CR02_M04_RUN_FB
+    equipment: CR02_M04
+    model: motor_dol
+    role: runFb
+    signalType: DI
+    address: "%I12.7"
+    row: 195
+  - tag: CR02_M04_READY
+    equipment: CR02_M04
+    model: motor_dol
+    role: ready
+    signalType: DI
+    address: "%I13.0"
+    row: 196
+  - tag: CR02_M04_REMOTE
+    equipment: CR02_M04
+    model: motor_dol
+    role: remote
+    signalType: DI
+    address: "%I13.1"
+    row: 197
+  - tag: CR02_M04_OVL_OK
+    equipment: CR02_M04
+    model: motor_dol
+    role: overloadOk
+    signalType: DI
+    address: "%I13.2"
+    row: 198
+  - tag: CR02_M04_CUR
+    equipment: CR02_M04
+    model: motor_dol
+    role: currentFb
+    signalType: AI
+    address: "%IW192"
+    row: 199
+  - tag: CR02_M04_TEMP
+    equipment: CR02_M04
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW194"
+    row: 200
+  - tag: CR02_M04_VIB
+    equipment: CR02_M04
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW196"
+    row: 201
+  - tag: CR02_M04_PWR
+    equipment: CR02_M04
+    model: motor_dol
+    role: null
+    signalType: AI
+    address: "%IW198"
+    row: 202
+  - tag: CR02_M04_ESTOP
+    equipment: CR02_M04
+    model: motor_dol
+    role: null
+    signalType: DI
+    address: "%I13.3"
+    row: 203
+  - tag: CR02_MV01_RUN_CMD
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: runCmd
+    signalType: DO
+    address: "%Q2.1"
+    row: 204
+  - tag: CR02_MV01_SPEED_REF
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: speedRef
+    signalType: AO
+    address: "%QW72"
+    row: 205
+  - tag: CR02_MV01_RUN_FB
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: runFb
+    signalType: DI
+    address: "%I13.4"
+    row: 206
+  - tag: CR02_MV01_SPEED_FB
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: speedFb
+    signalType: AI
+    address: "%IW200"
+    row: 207
+  - tag: CR02_MV01_READY
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: ready
+    signalType: DI
+    address: "%I13.5"
+    row: 208
+  - tag: CR02_MV01_VFD_OK
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: vfdFaultOk
+    signalType: DI
+    address: "%I13.6"
+    row: 209
+  - tag: CR02_MV01_REMOTE
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: remote
+    signalType: DI
+    address: "%I13.7"
+    row: 210
+  - tag: CR02_MV01_CUR
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: currentFb
+    signalType: AI
+    address: "%IW202"
+    row: 211
+  - tag: CR02_MV01_TEMP
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW204"
+    row: 212
+  - tag: CR02_MV01_VIB
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW206"
+    row: 213
+  - tag: CR02_MV01_PWR
+    equipment: CR02_MV01
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW208"
+    row: 214
+  - tag: CR02_MV02_RUN_CMD
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: runCmd
+    signalType: DO
+    address: "%Q2.2"
+    row: 215
+  - tag: CR02_MV02_SPEED_REF
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: speedRef
+    signalType: AO
+    address: "%QW74"
+    row: 216
+  - tag: CR02_MV02_RUN_FB
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: runFb
+    signalType: DI
+    address: "%I14.0"
+    row: 217
+  - tag: CR02_MV02_SPEED_FB
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: speedFb
+    signalType: AI
+    address: "%IW210"
+    row: 218
+  - tag: CR02_MV02_READY
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: ready
+    signalType: DI
+    address: "%I14.1"
+    row: 219
+  - tag: CR02_MV02_VFD_OK
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: vfdFaultOk
+    signalType: DI
+    address: "%I14.2"
+    row: 220
+  - tag: CR02_MV02_REMOTE
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: remote
+    signalType: DI
+    address: "%I14.3"
+    row: 221
+  - tag: CR02_MV02_CUR
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: currentFb
+    signalType: AI
+    address: "%IW212"
+    row: 222
+  - tag: CR02_MV02_TEMP
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW214"
+    row: 223
+  - tag: CR02_MV02_VIB
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW216"
+    row: 224
+  - tag: CR02_MV02_PWR
+    equipment: CR02_MV02
+    model: motor_vfd
+    role: null
+    signalType: AI
+    address: "%IW218"
+    row: 225
+  - tag: CR02_XV01_OPEN_CMD
+    equipment: CR02_XV01
+    model: valve_onoff
+    role: openCmd
+    signalType: DO
+    address: "%Q2.3"
+    row: 226
+  - tag: CR02_XV01_CLOSE_CMD
+    equipment: CR02_XV01
+    model: valve_onoff
+    role: closeCmd
+    signalType: DO
+    address: "%Q2.4"
+    row: 227
+  - tag: CR02_XV01_OPEN_LS
+    equipment: CR02_XV01
+    model: valve_onoff
+    role: openLs
+    signalType: DI
+    address: "%I14.4"
+    row: 228
+  - tag: CR02_XV01_CLOSED_LS
+    equipment: CR02_XV01
+    model: valve_onoff
+    role: closedLs
+    signalType: DI
+    address: "%I14.5"
+    row: 229
+  - tag: CR02_XV01_FAULT
+    equipment: CR02_XV01
+    model: valve_onoff
+    role: fault
+    signalType: DI
+    address: "%I14.6"
+    row: 230
+  - tag: CR02_XV01_TORQ
+    equipment: CR02_XV01
+    model: valve_onoff
+    role: null
+    signalType: AI
+    address: "%IW220"
+    row: 231
+  - tag: CR02_XV01_LOCAL
+    equipment: CR02_XV01
+    model: valve_onoff
+    role: null
+    signalType: DI
+    address: "%I14.7"
+    row: 232
+  - tag: CR02_XV02_OPEN_CMD
+    equipment: CR02_XV02
+    model: valve_onoff
+    role: openCmd
+    signalType: DO
+    address: "%Q2.5"
+    row: 233
+  - tag: CR02_XV02_CLOSE_CMD
+    equipment: CR02_XV02
+    model: valve_onoff
+    role: closeCmd
+    signalType: DO
+    address: "%Q2.6"
+    row: 234
+  - tag: CR02_XV02_OPEN_LS
+    equipment: CR02_XV02
+    model: valve_onoff
+    role: openLs
+    signalType: DI
+    address: "%I15.0"
+    row: 235
+  - tag: CR02_XV02_CLOSED_LS
+    equipment: CR02_XV02
+    model: valve_onoff
+    role: closedLs
+    signalType: DI
+    address: "%I15.1"
+    row: 236
+  - tag: CR02_XV02_FAULT
+    equipment: CR02_XV02
+    model: valve_onoff
+    role: fault
+    signalType: DI
+    address: "%I15.2"
+    row: 237
+  - tag: CR02_XV02_TORQ
+    equipment: CR02_XV02
+    model: valve_onoff
+    role: null
+    signalType: AI
+    address: "%IW222"
+    row: 238
+  - tag: CR02_XV02_LOCAL
+    equipment: CR02_XV02
+    model: valve_onoff
+    role: null
+    signalType: DI
+    address: "%I15.3"
+    row: 239
+  - tag: CR02_XV03_OPEN_CMD
+    equipment: CR02_XV03
+    model: valve_onoff
+    role: openCmd
+    signalType: DO
+    address: "%Q2.7"
+    row: 240
+  - tag: CR02_XV03_CLOSE_CMD
+    equipment: CR02_XV03
+    model: valve_onoff
+    role: closeCmd
+    signalType: DO
+    address: "%Q3.0"
+    row: 241
+  - tag: CR02_XV03_OPEN_LS
+    equipment: CR02_XV03
+    model: valve_onoff
+    role: openLs
+    signalType: DI
+    address: "%I15.4"
+    row: 242
+  - tag: CR02_XV03_CLOSED_LS
+    equipment: CR02_XV03
+    model: valve_onoff
+    role: closedLs
+    signalType: DI
+    address: "%I15.5"
+    row: 243
+  - tag: CR02_XV03_FAULT
+    equipment: CR02_XV03
+    model: valve_onoff
+    role: fault
+    signalType: DI
+    address: "%I15.6"
+    row: 244
+  - tag: CR02_XV03_TORQ
+    equipment: CR02_XV03
+    model: valve_onoff
+    role: null
+    signalType: AI
+    address: "%IW224"
+    row: 245
+  - tag: CR02_XV03_LOCAL
+    equipment: CR02_XV03
+    model: valve_onoff
+    role: null
+    signalType: DI
+    address: "%I15.7"
+    row: 246
+  - tag: CR02_FCV01_POS_REF
+    equipment: CR02_FCV01
+    model: valve_ctrl
+    role: posRef
+    signalType: AO
+    address: "%QW76"
+    row: 247
+  - tag: CR02_FCV01_POS_FB
+    equipment: CR02_FCV01
+    model: valve_ctrl
+    role: posFb
+    signalType: AI
+    address: "%IW226"
+    row: 248
+  - tag: CR02_FCV01_FAULT
+    equipment: CR02_FCV01
+    model: valve_ctrl
+    role: fault
+    signalType: DI
+    address: "%I16.0"
+    row: 249
+  - tag: CR02_FCV01_CLOSED_LS
+    equipment: CR02_FCV01
+    model: valve_ctrl
+    role: closedLs
+    signalType: DI
+    address: "%I16.1"
+    row: 250
+  - tag: CR02_FCV01_OPEN_LS
+    equipment: CR02_FCV01
+    model: valve_ctrl
+    role: openLs
+    signalType: DI
+    address: "%I16.2"
+    row: 251
+  - tag: CR02_FCV01_TORQ
+    equipment: CR02_FCV01
+    model: valve_ctrl
+    role: null
+    signalType: AI
+    address: "%IW228"
+    row: 252
+  - tag: CR02_FCV01_LOCAL
+    equipment: CR02_FCV01
+    model: valve_ctrl
+    role: null
+    signalType: DI
+    address: "%I16.3"
+    row: 253
+  - tag: CR02_PT03_RAW
+    equipment: CR02_PT03
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW230"
+    row: 254
+  - tag: CR02_PT03_BYPASS
+    equipment: CR02_PT03
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I19.5"
+    row: 255
+  - tag: CR02_TT03_RAW
+    equipment: CR02_TT03
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW232"
+    row: 256
+  - tag: CR02_TT03_BYPASS
+    equipment: CR02_TT03
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I16.5"
+    row: 257
+  - tag: CR02_LT03_RAW
+    equipment: CR02_LT03
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW234"
+    row: 258
+  - tag: CR02_LT03_BYPASS
+    equipment: CR02_LT03
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I16.6"
+    row: 259
+  - tag: CR02_FT02_RAW
+    equipment: CR02_FT02
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW236"
+    row: 260
+  - tag: CR02_FT02_BYPASS
+    equipment: CR02_FT02
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I16.7"
+    row: 261
+  - tag: CR02_WT01_RAW
+    equipment: CR02_WT01
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW238"
+    row: 262
+  - tag: CR02_WT01_BYPASS
+    equipment: CR02_WT01
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I17.0"
+    row: 263
+  - tag: CR02_ST01_RAW
+    equipment: CR02_ST01
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW240"
+    row: 264
+  - tag: CR02_ST01_BYPASS
+    equipment: CR02_ST01
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I17.1"
+    row: 265
+  - tag: CR02_FT03_RAW
+    equipment: CR02_FT03
+    model: analog_sensor
+    role: raw
+    signalType: AI
+    address: "%IW242"
+    row: 266
+  - tag: CR02_FT03_BYPASS
+    equipment: CR02_FT03
+    model: analog_sensor
+    role: null
+    signalType: DI
+    address: "%I17.2"
+    row: 267
+  - tag: CR02_SS02_DI
+    equipment: CR02_SS02
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I17.3"
+    row: 268
+  - tag: CR02_SS02_TEST
+    equipment: CR02_SS02
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I17.4"
+    row: 269
+  - tag: CR01_BC01_ZERO_SPEED
+    equipment: CR02_SS02
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I17.5"
+    row: 270
+  - tag: CR02_PC01_DI
+    equipment: CR02_PC01
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I17.6"
+    row: 271
+  - tag: CR02_PC01_TEST
+    equipment: CR02_PC01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I17.7"
+    row: 272
+  - tag: CR02_PC01_BYPASS
+    equipment: CR02_PC01
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I18.0"
+    row: 273
+  - tag: CR02_PC02_DI
+    equipment: CR02_PC02
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I18.1"
+    row: 274
+  - tag: CR02_PC02_TEST
+    equipment: CR02_PC02
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I18.2"
+    row: 275
+  - tag: CR02_PC02_BYPASS
+    equipment: CR02_PC02
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I18.3"
+    row: 276
+  - tag: CR02_LSH02_DI
+    equipment: CR02_LSH02
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I18.4"
+    row: 277
+  - tag: CR02_LSH02_TEST
+    equipment: CR02_LSH02
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I18.5"
+    row: 278
+  - tag: CR02_LSH02_BYPASS
+    equipment: CR02_LSH02
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I18.6"
+    row: 279
+  - tag: CR02_ZS03_DI
+    equipment: CR02_ZS03
+    model: switch_di
+    role: di
+    signalType: DI
+    address: "%I18.7"
+    row: 280
+  - tag: CR02_ZS03_TEST
+    equipment: CR02_ZS03
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I19.0"
+    row: 281
+  - tag: CR02_ZS03_BYPASS
+    equipment: CR02_ZS03
+    model: switch_di
+    role: null
+    signalType: DI
+    address: "%I19.1"
+    row: 282
+  - tag: CR02_SILO01_LEVEL_RAW
+    equipment: CR02_SILO01
+    model: silo_bin
+    role: levelRaw
+    signalType: AI
+    address: "%IW244"
+    row: 283
+  - tag: CR02_SILO01_LEVEL_HIGH
+    equipment: CR02_SILO01
+    model: silo_bin
+    role: levelHigh
+    signalType: DI
+    address: "%I19.2"
+    row: 284
+  - tag: CR02_SILO01_LEVEL_LOW
+    equipment: CR02_SILO01
+    model: silo_bin
+    role: levelLow
+    signalType: DI
+    address: "%I19.3"
+    row: 285
+  - tag: CR02_SILO01_LEVEL_HIGH_HIGH
+    equipment: CR02_SILO01
+    model: silo_bin
+    role: levelHighHigh
+    signalType: DI
+    address: "%I19.4"
+    row: 286
+  - tag: CR02_SILO01_WEIGHT
+    equipment: CR02_SILO01
+    model: silo_bin
+    role: null
+    signalType: AI
+    address: "%IW246"
+    row: 287
+  - tag: CR02_SILO01_TEMP
+    equipment: CR02_SILO01
+    model: silo_bin
+    role: null
+    signalType: AI
+    address: "%IW248"
+    row: 288
+  - tag: CR02_SILO01_DUST
+    equipment: CR02_SILO01
+    model: silo_bin
+    role: null
+    signalType: DI
+    address: "%I19.5"
+    row: 289
+  - tag: CR02_BC02_RUN_CMD
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: runCmd
+    signalType: DO
+    address: "%Q3.1"
+    row: 290
+  - tag: CR02_BC02_RUN_FB
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: runFb
+    signalType: DI
+    address: "%I19.6"
+    row: 291
+  - tag: CR02_BC02_READY
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: ready
+    signalType: DI
+    address: "%I19.7"
+    row: 292
+  - tag: CR02_BC02_REMOTE
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: remote
+    signalType: DI
+    address: "%I20.0"
+    row: 293
+  - tag: CR02_BC02_OVL_OK
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: overloadOk
+    signalType: DI
+    address: "%I20.1"
+    row: 294
+  - tag: CR02_BC02_CUR
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: currentFb
+    signalType: AI
+    address: "%IW250"
+    row: 295
+  - tag: CR01_SS01_TEST
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: zeroSpeed
+    signalType: DI
+    address: "%I20.2"
+    row: 296
+  - tag: CR02_BC02_PULL_CORD
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: pullCord
+    signalType: DI
+    address: "%I20.3"
+    row: 297
+  - tag: CR02_BC02_TEMP
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW252"
+    row: 298
+  - tag: CR02_BC02_VIB
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW254"
+    row: 299
+  - tag: CR02_BC02_PWR
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW256"
+    row: 300
+  - tag: CR02_BC02_LOAD
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW258"
+    row: 301
+  - tag: CR02_BC02_SPEED
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: null
+    signalType: AI
+    address: "%IW260"
+    row: 302
+  - tag: CR02_BC02_TRACK
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: null
+    signalType: DI
+    address: "%I20.4"
+    row: 303
+  - tag: CR02_BC02_RIP
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: null
+    signalType: DI
+    address: "%I20.5"
+    row: 304
+  - tag: CR02_BC02_BLOCK
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: null
+    signalType: DI
+    address: "%I20.6"
+    row: 305
+  - tag: CR02_BC02_SLIP
+    equipment: CR02_BC02
+    model: conveyor_simple
+    role: null
+    signalType: DI
+    address: "%I20.7"
+    row: 306
+dirty:
+  - row: 8
+    kind: suffix-variant
+    detail: suffix FB -> RUN_FBK; ground truth role runFb
+  - row: 18
+    kind: suffix-variant
+    detail: suffix FB -> RUNNING; ground truth role runFb
+  - row: 25
+    kind: missing-type
+    detail: Type cell empty in file; ground truth AI
+  - row: 28
+    kind: suffix-variant
+    detail: suffix FB -> RUN_ST; ground truth role runFb
+  - row: 36
+    kind: missing-type
+    detail: Type cell empty in file; ground truth DI
+  - row: 38
+    kind: suffix-variant
+    detail: suffix FB -> RUN_FBK; ground truth role runFb
+  - row: 45
+    kind: missing-type
+    detail: Type cell empty in file; ground truth AI
+  - row: 47
+    kind: missing-type
+    detail: Type cell empty in file; ground truth DO
+  - row: 49
+    kind: suffix-variant
+    detail: suffix FB -> RUNNING; ground truth role runFb
+  - row: 50
+    kind: duplicate-address
+    detail: address %IW96 -> %IW74 (dup of row 23)
+  - row: 60
+    kind: suffix-variant
+    detail: suffix FB -> RUN_ST; ground truth role runFb
+  - row: 75
+    kind: duplicate-tag
+    detail: tag CR01_XV01_LOCAL -> CR01_MV02_TEMP (dup of row 66)
+  - row: 78
+    kind: duplicate-address
+    detail: address %I4.0 -> %I1.5 (dup of row 31)
+  - row: 81
+    kind: duplicate-tag
+    detail: tag CR01_XV02_TORQ -> CR01_M01_REMOTE (dup of row 10)
+  - row: 86
+    kind: missing-type
+    detail: Type cell empty in file; ground truth DI
+  - row: 91
+    kind: duplicate-tag
+    detail: tag CR01_FCV01_POS_FB -> CR01_MV02_REMOTE (dup of row 64)
+  - row: 96
+    kind: missing-type
+    detail: Type cell empty in file; ground truth DI
+  - row: 106
+    kind: missing-type
+    detail: Type cell empty in file; ground truth AI
+  - row: 124
+    kind: missing-type
+    detail: Type cell empty in file; ground truth DI
+  - row: 137
+    kind: duplicate-address
+    detail: address %IW146 -> %IW142 (dup of row 116)
+  - row: 144
+    kind: duplicate-tag
+    detail: tag CR01_BIN02_WEIGHT -> CR01_M02_REMOTE (dup of row 20)
+  - row: 148
+    kind: suffix-variant
+    detail: suffix FB -> RUN_FBK; ground truth role runFb
+  - row: 158
+    kind: duplicate-address
+    detail: address %IW164 -> %IW214 (dup of row 223)
+  - row: 161
+    kind: missing-type
+    detail: Type cell empty in file; ground truth DI
+  - row: 163
+    kind: duplicate-address
+    detail: address %I10.7 -> %I8.4 (dup of row 131)
+  - row: 165
+    kind: suffix-variant
+    detail: suffix FB -> RUNNING; ground truth role runFb
+  - row: 171
+    kind: missing-type
+    detail: Type cell empty in file; ground truth AI
+  - row: 175
+    kind: suffix-variant
+    detail: suffix FB -> RUN_ST; ground truth role runFb
+  - row: 180
+    kind: missing-type
+    detail: Type cell empty in file; ground truth AI
+  - row: 194
+    kind: missing-type
+    detail: Type cell empty in file; ground truth DO
+  - row: 216
+    kind: missing-type
+    detail: Type cell empty in file; ground truth AO
+  - row: 239
+    kind: missing-type
+    detail: Type cell empty in file; ground truth DI
+  - row: 255
+    kind: duplicate-address
+    detail: address %I16.4 -> %I19.5 (dup of row 289)
+  - row: 270
+    kind: duplicate-tag
+    detail: tag CR02_SS02_BYPASS -> CR01_BC01_ZERO_SPEED (dup of row 153)
+  - row: 291
+    kind: missing-type
+    detail: Type cell empty in file; ground truth DI
+  - row: 296
+    kind: duplicate-tag
+    detail: tag CR02_BC02_ZERO_SPEED -> CR01_SS01_TEST (dup of row 131)
