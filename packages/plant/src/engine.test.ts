@@ -70,7 +70,7 @@ function mustHandle(tags: TagDB, name: string): TagHandle {
 }
 
 describe('PL_CATALOG', () => {
-  it('7 mã PL (51 → 58 mã tổng)', () => {
+  it('8 mã PL (58 → 74 mã tổng; PL-W010 đăng ký ở P2.6 commit 3, OQ-359)', () => {
     expect(PL_CATALOG.codes()).toEqual([
       'PL-E001',
       'PL-E002',
@@ -78,6 +78,7 @@ describe('PL_CATALOG', () => {
       'PL-E012',
       'PL-E020',
       'PL-W001',
+      'PL-W010',
       'PL-W020',
     ]);
   });
