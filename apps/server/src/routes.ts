@@ -25,6 +25,13 @@ export interface ProjectInfo {
   }>;
   tagCount: number;
   diagnostics: readonly Diagnostic[];
+  /** P2.8 (AMENDMENTS B9, OQ-398): equipment từ plant/equipment.yaml trên
+   * đĩa (static, không cần sim chạy); project không plant → []. */
+  equipment: Array<{
+    id: string;
+    model: string;
+    roles: Array<{ role: string; tag: string }>;
+  }>;
 }
 
 /** Ngữ cảnh PLC cho REST (P1.7): thư mục project + tag catalog (OQ-198). */
@@ -51,14 +58,16 @@ export function registerRestRoutes(
     controllers: project.controllers,
     tagCount: project.tagCount,
     diagnostics: project.diagnostics,
+    equipment: project.equipment,
   }));
   if (opts?.service !== undefined) {
     const service = opts.service;
     // P2.4 (OQ-318): snapshot plant (equipment + faults + observables +
     // fault/preset model khai báo); project không plant → {equipment: []}.
+    // P2.8 (OQ-389): thêm events ≤ 100 mới nhất.
     fastify.get('/api/plant', () => {
       const snap = service.plantSnapshot();
-      return { equipment: snap?.equipment ?? [] };
+      return { equipment: snap?.equipment ?? [], events: snap?.events ?? [] };
     });
     // P2.4 (OQ-318): hash trace hiện tại — e2e so với hash CLI `plant run`.
     fastify.get('/api/sim/hash', () => ({

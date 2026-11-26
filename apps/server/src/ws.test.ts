@@ -1,13 +1,14 @@
 // Test server + WS /ws — @vcs/server (M0 §8.2; golden S1 §12).
 // Client `ws` thật trên port: 0; đồng hồ giả cho Pacer (trừ test drift).
 
-import { appendFile, cp, mkdtemp } from 'node:fs/promises';
+import { appendFile, cp, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import WebSocket from 'ws';
 import { afterEach, describe, expect, it } from 'vitest';
-import { serverMessageSchema, type ServerMessage } from '@vcs/schemas';
+import { serializeTags } from '@vcs/importers';
+import { serverMessageSchema, type ServerMessage, type TagDef } from '@vcs/schemas';
 import { createServer, type RunningServer } from './server.js';
 
 const ROOT = fileURLToPath(new URL('../../..', import.meta.url));
@@ -648,7 +649,7 @@ describe('REST', () => {
     expect(await res.json()).toEqual({ ok: true, version: '0.1.0' });
   });
 
-  it('GET /api/project → shape OQ-042', async () => {
+  it('GET /api/project → shape OQ-042 (+ equipment B9, P2.8: không plant → [])', async () => {
     const { httpUrl } = await startServer();
     const res = await fetch(`${httpUrl}api/project`);
     expect(res.status).toBe(200);
@@ -659,7 +660,26 @@ describe('REST', () => {
       controllers: [{ id: 'PLC1', mode: 'builtin', vendor: 'demo', model: 'loopback' }],
       tagCount: 12,
       diagnostics: [],
+      equipment: [],
     });
+  });
+
+  it('GET /api/project motor-interlock → equipment B9 (M01, roles role→tag)', async () => {
+    const { httpUrl } = await startServer({ dir: MOTOR });
+    const res = await fetch(`${httpUrl}api/project`);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { equipment: unknown };
+    expect(body.equipment).toEqual([
+      {
+        id: 'M01',
+        model: 'motor_dol',
+        roles: [
+          { role: 'runCmd', tag: 'RUN_CMD' },
+          { role: 'runFb', tag: 'RUN_FB' },
+          { role: 'overloadOk', tag: 'OVL_OK' },
+        ],
+      },
+    ]);
   });
 
   it('GET / → 404 JSON khi chưa có web build (OQ-044)', async () => {
@@ -777,13 +797,23 @@ describe('WS plant.fault.* + REST /api/plant + /api/sim/hash (P2.4, OQ-318)', ()
         observables: Record<string, unknown>;
         faultDefs: Array<{ id: string }>;
         presets: Array<{ name: string }>;
+        signals: Record<string, string>;
+        roleValues: Record<string, { tag: string; raw: unknown; eng?: number }>;
       }>;
+      events: unknown[];
     };
     expect(body.equipment).toHaveLength(1);
     const m01 = body.equipment[0] as (typeof body.equipment)[number];
     expect(m01.id).toBe('M01');
     expect(m01.model).toBe('motor_dol');
     expect(m01.controller).toBe('PLC1');
+    // P2.8 (OQ-387/389): signals + roleValues raw (Bool → không eng) + events.
+    expect(m01.signals).toEqual({ runCmd: 'RUN_CMD', runFb: 'RUN_FB', overloadOk: 'OVL_OK' });
+    expect(m01.roleValues['runCmd']).toEqual({ tag: 'RUN_CMD', raw: false });
+    expect(m01.roleValues['runFb']).toEqual({ tag: 'RUN_FB', raw: false });
+    expect(m01.roleValues['overloadOk']).toEqual({ tag: 'OVL_OK', raw: false });
+    expect(Array.isArray(body.events)).toBe(true);
+    expect(body.events.length).toBeLessThanOrEqual(100);
     expect(m01.faultDefs.map((f) => f.id)).toEqual([
       'overload',
       'failToStart',
@@ -815,11 +845,12 @@ describe('WS plant.fault.* + REST /api/plant + /api/sim/hash (P2.4, OQ-318)', ()
     expect(body2.equipment[0]?.observables['state']).toBe('STOPPED');
   });
 
-  it('GET /api/plant hello-tags → {equipment: []}; GET /api/sim/hash → 64-hex, simTimeMs 0', async () => {
+  it('GET /api/plant hello-tags → {equipment: [], events: []}; GET /api/sim/hash → 64-hex, simTimeMs 0', async () => {
     const { httpUrl } = await startServer();
     const plantRes = await fetch(`${httpUrl}api/plant`);
     expect(plantRes.status).toBe(200);
-    expect(await plantRes.json()).toEqual({ equipment: [] });
+    // P2.8 (OQ-389): /api/plant luôn trả events (rỗng khi không plant).
+    expect(await plantRes.json()).toEqual({ equipment: [], events: [] });
     const hashRes = await fetch(`${httpUrl}api/sim/hash`);
     expect(hashRes.status).toBe(200);
     const hashBody = (await hashRes.json()) as {
@@ -929,5 +960,164 @@ describe('WS plant.fault.* + REST /api/plant + /api/sim/hash (P2.4, OQ-318)', ()
       (afterStep.equipment[0]?.faults[0] as { target: unknown }).target,
     ).toEqual({ equipment: 'M01', signal: 'runFb', type: 'stuck' });
     expect(c.messages.some((m) => m.type === 'error')).toBe(false);
+  });
+});
+
+describe('WS plant.manual.set / plant.source.set (P2.8, OQ-388)', () => {
+  /** Project tạm: M01 motor_dol + CR01_PT01 analog_sensor (source const 0). */
+  async function makeAnalogProject(): Promise<string> {
+    const dir = await mkdtemp(join(tmpdir(), 'vcs-p28-ws-'));
+    await cp(MOTOR, dir, { recursive: true });
+    const tags: TagDef[] = [
+      // Giữ đủ 8 tag motor gốc: plc/ của motor-interlock biên dịch theo
+      // các tag này (bỏ tag → loadPlcProgram lỗi, server không khởi động).
+      { name: 'START_PB', type: 'Bool', area: 'I', address: '%I0.2', controller: 'PLC1', signal: { kind: 'DI' } },
+      { name: 'STOP_OK', type: 'Bool', area: 'I', address: '%I0.3', controller: 'PLC1', signal: { kind: 'DI' } },
+      { name: 'PERM', type: 'Bool', area: 'I', address: '%I0.4', controller: 'PLC1', signal: { kind: 'DI' } },
+      { name: 'RESET_PB', type: 'Bool', area: 'I', address: '%I0.5', controller: 'PLC1', signal: { kind: 'DI' } },
+      { name: 'FAULT_LAMP', type: 'Bool', area: 'Q', address: '%Q0.1', controller: 'PLC1', signal: { kind: 'DO' } },
+      { name: 'RUN_CMD', type: 'Bool', area: 'Q', address: '%Q0.0', controller: 'PLC1', signal: { kind: 'DO' } },
+      { name: 'RUN_FB', type: 'Bool', area: 'I', address: '%I0.0', controller: 'PLC1', signal: { kind: 'DI' } },
+      { name: 'OVL_OK', type: 'Bool', area: 'I', address: '%I0.1', controller: 'PLC1', signal: { kind: 'DI' } },
+      {
+        name: 'CR01_PT01_PV',
+        type: 'Int',
+        area: 'I',
+        address: '%IW4',
+        controller: 'PLC1',
+        signal: {
+          kind: 'AI',
+          scaling: { rawMin: 0, rawMax: 27648, engMin: 0, engMax: 100, unit: '%' },
+        },
+      },
+    ];
+    await writeFile(join(dir, 'tags', 'tags.yaml'), serializeTags(tags), 'utf8');
+    await writeFile(
+      join(dir, 'plant', 'equipment.yaml'),
+      `- id: M01
+  model: motor_dol
+  controller: PLC1
+  params:
+    startDelayMs: 500
+    stopDelayMs: 800
+    accelTimeMs: 1500
+    coastTimeMs: 3000
+    tripDelayMs: 0
+    overloadResetMs: 1000
+    resetRequiresCmdOff: true
+    overloadNC: true
+    ratedCurrentA: 0
+    noLoadCurrentFrac: 0.35
+    loadFraction: 0.8
+    inrushMult: 6
+    inrushMs: 1000
+    defaultRemote: true
+    defaultReady: true
+  signals:
+    runCmd: RUN_CMD
+    runFb: RUN_FB
+    overloadOk: OVL_OK
+- id: CR01_PT01
+  model: analog_sensor
+  controller: PLC1
+  params:
+    engMin: 0
+    engMax: 100
+    unit: '%'
+    tauMs: 0
+    noiseStd: 0
+  signals:
+    raw: CR01_PT01_PV
+  source:
+    kind: const
+    value: 0
+`,
+      'utf8',
+    );
+    return dir;
+  }
+
+  type PlantBody = {
+    equipment: Array<{
+      id: string;
+      roleValues: Record<string, { tag: string; raw: unknown; eng?: number; unit?: string }>;
+    }>;
+  };
+
+  async function roleValues(httpUrl: string, id: string): Promise<PlantBody['equipment'][number]['roleValues']> {
+    const res = await fetch(`${httpUrl}api/plant`);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as PlantBody;
+    const eq = body.equipment.find((e) => e.id === id);
+    expect(eq).toBeDefined();
+    return (eq as PlantBody['equipment'][number]).roleValues;
+  }
+
+  it('manual.set 50 → step → raw 13824 / eng 50; source.set const 25 → eng 25', async () => {
+    const dir = await makeAnalogProject();
+    const { wsUrl, httpUrl } = await startServer({ dir });
+    const c = await helloClient(wsUrl);
+    await c.waitFor((m) => m.type === 'welcome', 5000, 'welcome');
+    c.send({ type: 'plant.manual.set', equipment: 'CR01_PT01', value: 50 });
+    c.send({ type: 'tags.subscribe', names: '*' });
+    await c.waitFor((m) => m.type === 'tags.snapshot', 5000, 'snapshot sau manual.set');
+    c.send({ type: 'sim.command', cmd: 'step', steps: 1 });
+    await waitForPlant(httpUrl, (b) => {
+      const eq = (b as unknown as PlantBody).equipment.find((e) => e.id === 'CR01_PT01');
+      return eq?.roleValues['raw']?.eng === 50;
+    });
+    const afterManual = await roleValues(httpUrl, 'CR01_PT01');
+    expect(afterManual['raw']).toMatchObject({ tag: 'CR01_PT01_PV', raw: 13824, eng: 50, unit: '%' });
+    expect(c.messages.some((m) => m.type === 'error')).toBe(false);
+    c.send({ type: 'plant.source.set', equipment: 'CR01_PT01', source: { kind: 'const', value: 25 } });
+    c.send({ type: 'tags.subscribe', names: '*' });
+    await c.waitFor((m) => m.type === 'tags.snapshot', 5000, 'snapshot sau source.set');
+    c.send({ type: 'sim.command', cmd: 'step', steps: 1 });
+    await waitForPlant(httpUrl, (b) => {
+      const eq = (b as unknown as PlantBody).equipment.find((e) => e.id === 'CR01_PT01');
+      return eq?.roleValues['raw']?.eng === 25;
+    });
+    const afterSource = await roleValues(httpUrl, 'CR01_PT01');
+    expect(afterSource['raw']).toMatchObject({ tag: 'CR01_PT01_PV', raw: 6912, eng: 25 });
+    expect(c.messages.some((m) => m.type === 'error')).toBe(false);
+  });
+
+  it('manual.set trên motor_dol (không source) → error PL-E001, kết nối còn mở; thiết bị lạ → PL-E001', async () => {
+    const dir = await makeAnalogProject();
+    const { wsUrl } = await startServer({ dir });
+    const c = await helloClient(wsUrl);
+    await c.waitFor((m) => m.type === 'welcome', 5000, 'welcome');
+    c.send({ type: 'plant.manual.set', equipment: 'M01', value: 1 });
+    const err1 = await c.waitFor(
+      (m) => m.type === 'error' && m.code === 'PL-E001',
+      5000,
+      'error PL-E001 motor_dol',
+    );
+    expect(err1).toMatchObject({ type: 'error', code: 'PL-E001' });
+    c.send({ type: 'plant.source.set', equipment: 'KHONG_CO', source: { kind: 'const', value: 0 } });
+    const err2 = await c.waitFor(
+      (m) => m.type === 'error' && m.code === 'PL-E001',
+      5000,
+      'error PL-E001 thiet bi la',
+    );
+    expect(err2).toMatchObject({ type: 'error', code: 'PL-E001' });
+    c.send({ type: 'tags.subscribe', names: '*' });
+    await c.waitFor((m) => m.type === 'tags.snapshot', 5000, 'snapshot sau lỗi');
+  });
+
+  it('source.set sai schema → WS-E003, kết nối còn mở', async () => {
+    const dir = await makeAnalogProject();
+    const { wsUrl } = await startServer({ dir });
+    const c = await helloClient(wsUrl);
+    await c.waitFor((m) => m.type === 'welcome', 5000, 'welcome');
+    c.send({ type: 'plant.source.set', equipment: 'CR01_PT01', source: { kind: 'bogus' } });
+    const err = await c.waitFor(
+      (m) => m.type === 'error' && m.code === 'WS-E003',
+      5000,
+      'error WS-E003',
+    );
+    expect(err).toMatchObject({ type: 'error', code: 'WS-E003' });
+    c.send({ type: 'tags.subscribe', names: '*' });
+    await c.waitFor((m) => m.type === 'tags.snapshot', 5000, 'snapshot sau lỗi schema');
   });
 });

@@ -292,6 +292,12 @@ export class WsHub {
       case 'plant.fault.preset':
         this.#onPlantFaultPreset(conn, msg);
         break;
+      case 'plant.manual.set':
+        this.#onPlantManualSet(conn, msg);
+        break;
+      case 'plant.source.set':
+        this.#onPlantSourceSet(conn, msg);
+        break;
     }
   }
 
@@ -481,6 +487,22 @@ export class WsHub {
     );
     if (!r.ok) {
       this.#sendError(conn, r.code ?? 'PL-E001', r.message ?? 'plant.fault.preset lỗi');
+    }
+  }
+
+  /** P2.8 (OQ-388): đặt giá trị manual cho source — lỗi engine → mã PL. */
+  #onPlantManualSet(conn: Connection, msg: Extract<ClientMessage, { type: 'plant.manual.set' }>): void {
+    const r = this.#service.plantManualSet(msg.equipment, msg.value, msg.name);
+    if (!r.ok) {
+      this.#sendError(conn, r.code ?? 'PL-E001', r.message ?? 'plant.manual.set lỗi');
+    }
+  }
+
+  /** P2.8 (OQ-388): đổi spec source — lỗi engine → mã PL. */
+  #onPlantSourceSet(conn: Connection, msg: Extract<ClientMessage, { type: 'plant.source.set' }>): void {
+    const r = this.#service.plantSourceSet(msg.equipment, msg.source, msg.name);
+    if (!r.ok) {
+      this.#sendError(conn, r.code ?? 'PL-E001', r.message ?? 'plant.source.set lỗi');
     }
   }
 }
