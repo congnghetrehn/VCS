@@ -151,6 +151,20 @@
   - [File mới/sửa](#file-mớisửa-6)
   - [OQ mới + tier C còn mở](#oq-mới-tier-c-còn-mở)
   - [Kết quả implement](#kết-quả-implement-1)
+- [§34 — G2 — Gói nghiệm thu M2 (§14 #8 follow-up + docs/acceptance/M2.md) (PLAN)](#34-g2-gói-nghiệm-thu-m2-14-8-follow-up-docsacceptancem2md-plan)
+  - [Đọc (kiểm chứng bằng code thật, không suy đoán)](#đọc-kiểm-chứng-bằng-code-thật-không-suy-đoán-4)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng-9)
+  - [Phạm vi](#phạm-vi-8)
+  - [Thiết kế](#thiết-kế-8)
+  - [Bảng tính tay](#bảng-tính-tay-4)
+  - [Mơ hồ (phân loại)](#mơ-hồ-phân-loại-7)
+  - [Test target + gate](#test-target-gate-7)
+  - [Rủi ro top-3](#rủi-ro-top-3-8)
+  - [Commit plan (6 commit, mỗi commit gate xanh)](#commit-plan-6-commit-mỗi-commit-gate-xanh)
+  - [File mới/sửa](#file-mớisửa-7)
+  - [OQ mới + tier C còn mở](#oq-mới-tier-c-còn-mở-1)
+  - [Kết quả đo (implementer điền ở commit 2 — số thật từ CLI, không ghi trước)](#kết-quả-đo-implementer-điền-ở-commit-2-số-thật-từ-cli-không-ghi-trước)
+  - [Kết quả implement](#kết-quả-implement-2)
 
 > **AI đọc file này đầu mỗi phiên và cập nhật cuối mỗi phiên.** Chủ sản phẩm kiểm tra và ký ở mục "Ký duyệt milestone". Giữ ngắn: tối đa ~150 dòng; lịch sử chi tiết nằm ở git và `docs/acceptance/`.
 
@@ -195,9 +209,9 @@
 | P2.4   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #35 `0c4308f` vào `develop` 2026-11-26 17:15 +07, CI 3 successful + 2 skipped) | PR #35, nhánh `m2/p2.4-closed-loop` (đã merge) | test 2440/2440, e2e 15+1, plant 2572 ≥ 1500, vòng kín 1351 ≥ 1000 | xem §27–28; OQ-305…319, 308/318, 326 đóng; OQ-301/302/303, OQ-320…325 mở tier B |
 | P2.5   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #36 `ef853b4` vào `develop` 2026-11-26 19:03 +07, CI xanh) | PR #36, nhánh `m2/p2.5-io-import` (đã merge) | test 2563/2563, importers 99,53%, smoke 20k 1093 ms | xem §29; OQ-327…340 đóng |
 | P2.6   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #37 `ef5da92` vào `develop` 2026-11-26 20:33 +07, CI xanh) | PR #37, nhánh `m2/p2.6-address-validate` (đã merge) | test 2761/2761, importers 92,69%, smoke 20k 455 ms | xem §30; OQ-341…360 đóng |
-| P2.7   | ☑ plan xong (commit plan, STATE §31; implement chưa — chờ triển khai) | nhánh `m2/p2.7-auto-suggest` (plan) | | xem §31; OQ-361…380 mở, OQ-380 tier C (X-003 chặn nghiệm thu thật) |
-| P2.8   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
-| G2     | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | gói nghiệm thu M2                                                 |
+| P2.7   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #38 `411fd05` vào `develop` 2026-11-26 22:37 +07, CI xanh) | PR #38, nhánh `m2/p2.7-auto-suggest` (đã merge) | test 2845/2845, importers 97,21%, precision (a) 175/177, (b) 50/50, (c) 300/300 | xem §31; OQ-361…379 đóng, OQ-380 mở tier C |
+| P2.8   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #39 `1508fc5` vào `develop` 2026-11-27 02:58 +07, CI xanh) | PR #39, nhánh `m2/p2.8-ui` (đã merge) | test 2910/2910, e2e 14/14 | xem §32; OQ-382…398 đóng, R-010 chờ duyệt sau |
+| G2     | ☑ xong, chờ ký (gói nghiệm thu docs/acceptance/M2.md — 8/9 ĐẠT + §14 #4 UNVERIFIED; chờ chủ sản phẩm ký ở §8)                                                                                                         |                                                   |                                                                                                                                                                           | gói nghiệm thu M2                                                 |
 | P3.1   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
 | P3.2   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           |                                                                   |
 | P3.3   | ☐ chưa                                                                                                                                                         |                                                   |                                                                                                                                                                           | ⚠ plan-first                                                      |
@@ -6695,3 +6709,235 @@ Tính từ `layout.ts` (Bool gói bit; kiểu ≥ 2 byte bắt đầu chẵn; t�
 - Commit 5 `docs: semantics §12/§14/§15 + đóng OQ-399` (commit này): 4 chỗ semantics theo §33 + OQ-399 → ☑ đóng.
 - Gate cuối (implementer, chạy thật): `pnpm lint` xanh; `pnpm typecheck` xanh; `pnpm depcheck` xanh (no dependency violations, 193 modules); `pnpm test` **2915/2915** (131 files; baseline 2910 + 5 mới, đúng plan); `pnpm review:cheats` SẠCH (314 file); `pnpm docs:diagnostics --check` khớp. KHÔNG e2e/bench (compiler-only, theo §33).
 - Lưu ý: 2 lần chạy `vitest` trực tiếp (không qua script `test`) báo 1–2 test đỏ — đều là test `tags.test.ts` cần `globalThis.gc` (`NODE_OPTIONS=--expose-gc` chỉ có ở script `test`); chạy đúng `pnpm test` thì 2915/2915 xanh. Không phải lỗi code.
+
+## §34 — G2 — Gói nghiệm thu M2 (§14 #8 follow-up + docs/acceptance/M2.md) (PLAN)
+
+> **Prompt (G2):** "Lập plan cho gói nghiệm thu G2 (M2) — chỉ lập plan, KHÔNG code, KHÔNG commit, KHÔNG mở PR. Phạm vi: (1) §14 #8 follow-up (luồng trọn 1 test duy nhất); (2) gói nghiệm thu `docs/acceptance/M2.md` cho cả 9 mục §14, #4 ghi UNVERIFIED chờ file X-003."
+>
+> **Bối cảnh:** M2 P2.1–P2.8 đã merge hết vào develop (PR #31–#39 + #41 D-009 + #42 bench `.cmd` fix, develop `5a9cc99`); test 2915/2915; bench trên máy Windows của chủ sản phẩm 5/5 PASS (2026-11-27 15:08 +07). G2 chưa ký (docs/STATE.md/§8 hàng M2 trống); `docs/acceptance/M2.md` chưa có. X-003 ĐÃ QUYẾT A 2026-11-27 15:15 (gửi file I/O thật để đo) — file chưa có (chủ sản phẩm báo 17:07 +07: chưa làm được ngay, chắc sang tuần). Plan này chỉ làm phần KHÔNG cần file thật.
+> **Branch:** `m2/g2-acceptance` (cắt từ `origin/develop` @ `5a9cc99` — implementer fetch + xác nhận `git rev-parse origin/develop` trước khi cắt; KHÔNG cắt từ nhánh local `m2/bench-windows-spawn` @ `f407bd1` vì nó chứa 3 commit local đã có nội dung tương đương trên develop; nhánh local cũ giữ nguyên, không xóa).
+> **Trạng thái:** ☑ plan → ☐ implement → ☐ gate → ☐ PR → ☐ merge → ☐ ký (ký là tier C, chỉ chủ sản phẩm).
+> **Phạm vi:** (1) §14 #8 follow-up — 1 e2e duy nhất đi trọn luồng trên 1 project; (2) `docs/acceptance/M2.md` — bằng chứng cho cả 9 mục M2 §14 (theo mẫu `docs/acceptance/M1.md`, G1/PR #27). §14 #4 GHI UNVERIFIED chờ file X-003 (không dùng số fixture để tuyên bố đạt trên dữ liệu thật).
+
+### Đọc (kiểm chứng bằng code thật, không suy đoán)
+
+- M2 spec §14 (9 tiêu chí, tất cả phải đạt), §11.1/§11.2 (golden model + engine), §11.3 (fixture 300 + ngưỡng (a)–(d)), §11.4 (demo A–D), §12 (ngưỡng: plant ≥ 1500 sau A22, closedloop ≥ 1000), §8.5 (chuẩn hóa địa chỉ), §16 mục 1 (việc của chủ sản phẩm).
+- AMENDMENTS: A21 (StepCtx slot số, D-008), A22 (ngưỡng plant 1500), A23 (IN_OUT tự nhiên, D-009), D9 (§16.5 chữ), E8 (dữ liệu thật ẩn danh), B9 (`GET /api/project` equipment).
+- docs/STATE.md/§32 (P2.8, commit 9: giới hạn §14 #8 + đề xuất follow-up), §33 (D-009 — mẫu plan phase nhỏ + commit plan), §2 (bảng tiến độ: hàng G2 "☐ chưa"; hàng P2.7/P2.8 lỗi thời — đã merge PR #38/#39 nhưng bảng chưa cập nhật), §8 (ký duyệt — hàng M2 trống).
+- docs/acceptance/M1.md (mẫu gói: mục lục, kết luận, CHƯA ĐẠT, CẦN KIỂM TAY, bằng chứng từng tiêu chí, bằng chứng bổ sung, sai khác, quyết định còn chờ, ký duyệt).
+- `apps/web/e2e/p28-import-suggest-run.spec.ts` (header comment + case (1b) 18 lỗi/commit bị từ chối + (1c) commit OK + case (2)(3)(5) Designer/run/fault).
+- `packages/importers/src/io-list/validate.ts` (IO-E001 dòng 290: báo dòng sau; IO-E011 dòng 305: báo CẢ HAI dòng mỗi cặp chồng lấn), `suggest.precision.test.ts` (harness: 177 role-known, assert errors 18/warnings 23/IO-E001 6/IO-E011 12/IO-W030 23/tổng 41), `scripts/gen-io-fixture.ts` (DIRTY_COUNTS dòng 249; `buildExpectedYaml` viết từ signals SAU khi áp dirt — expected.yaml của biến thể phải sinh mới, không dùng lại file gốc).
+- docs/OWNER-INBOX.md/X-003 (A 2026-11-27 15:15, đang chờ file; D-003 A ẩn danh) + R-010 (chờ chủ sản phẩm duyệt sau — AI không tick thay).
+- `apps/web/e2e/fixtures/suggest-project/` (`vcs.project.yaml`: controller PLC1 loopback, stepMs/plcScanMs 100, không có `plc/`; README: 294 tag, 50 thiết bị — 36 confident/14 review/0 unmatched, 176 tag gán).
+
+### Tóm tắt hiểu biết (≤ 8 dòng)
+
+1. G2 = 2 việc: (1) 1 e2e duy nhất §14 #8; (2) `M2.md` cho 9 mục §14 — #4 UNVERIFIED chờ X-003.
+2. Fixture 300 bẩn có 18 lỗi nội tại (E001×6 + E011×12) nên không commit được qua wizard — đó là lý do P2.8 phải tách luồng; sửa fixture gốc bị cấm (bằng chứng §11.3 (d) + harness ghim 18/23/41).
+3. Biến thể sạch = cùng seed, chỉ tắt dirt trùng (6 tag + 6 địa chỉ khôi phục) → 0 lỗi, commit được; expected.yaml phải sinh mới (file gốc viết từ signals sau dirt).
+4. Base cho 1 test phải là project tối thiểu (0 tag, loopback, không `plc/`) — lấy motor-interlock làm base thì commit xóa 8 tag baseline → PLC FB_Motor mất tag (commit áp đúng diff kể cả xóa — đã đo ở P2.8 commit 4).
+5. Số assert e2e phải đo bằng CLI trước (suggest/apply stats), không ghim từ plan.
+6. `M2.md` theo mẫu `M1.md`; kết luận ghi rõ 8/9 ĐẠT + #4 UNVERIFIED (tiền lệ G1: M1 ký với §16.5 + OQ-161 chưa quyết, ghi rõ trong gói).
+7. Ký M2 là tier C — plan này không ký, không tick R-010, không quyết X-003 path.
+8. Edit chưa commit (verify-guide §1, X-003 A) đi theo nhánh G2 ở commit 0 — không mất, không PR docs riêng (xem Thiết kế).
+
+### Phạm vi
+
+**Làm:**
+- Việc 1 (§14 #8): cờ sinh fixture sạch + fixture `io-list-300-clean` (3 file) + fixture base project tối thiểu + 1 e2e duy nhất `g2-full-flow.spec.ts` đi trọn luồng trên 1 project/1 server.
+- Việc 2 (gói M2): `docs/acceptance/M2.md` — bằng chứng cho cả 9 mục §14 (số liệu từ gate bản sao sạch ở commit 4) + mục CẦN KIỂM TAY + QUYẾT ĐỊNH CÒN CHỜ + bảng KÝ DUYỆT để trống.
+- Docs kèm: STATE §34 (plan này + điền kết quả), §2 (hàng G2 + sửa 2 hàng P2.7/P2.8 lỗi thời), commit 0 gom edit chưa commit (xem Thiết kế).
+
+**Không làm (ghi lại, không chạm):**
+- Đo §14 #4 trên dữ liệu thật (chờ file X-003 — follow-up riêng, xem Thiết kế); dùng số fixture để tuyên bố đạt trên dữ liệu thật.
+- Sửa fixture 300 gốc (`fixtures/io-list-300.xlsx`/`.csv`/`expected.yaml`) — bằng chứng §11.3 + precision harness; sửa nó phá 2 bằng chứng.
+- Sửa pipeline P2.5/P2.6 (`validate`/`diff`/`commit`/`suggest`/`apply`), server, web Designer (trừ khi e2e chứng minh cần — khi đó dừng, báo parent, không tự mở rộng).
+- Hạ ngưỡng §14 (plant 1500/closedloop 1000/90%/95%), sửa golden/ngưỡng để xanh, sửa expects để xanh.
+- Ký M2, tick R-010, quyết X-003 path (file vs ký với #4 UNVERIFIED), probe FB_Probe (D-010), VERIFY §14, T-002/T-003, S-001/2/3 — việc của chủ sản phẩm, ghi trong M2.md mục còn chờ.
+- `docs/acceptance/M1.md` (bản ghi đã ký), `docs/acceptance/state-notes-draft.md` (nháp, không commit), `user-chat/` (không commit).
+
+### Thiết kế
+
+**Quyết định §14 #8 — CHỌN phương án B (fixture 300 biến thể commit được).**
+
+| Phương án | Nội dung | Kết luận |
+|---|---|---|
+| **B — CHỌN** | Biến thể sạch của fixture 300 (cùng seed, chỉ tắt dirt trùng) + 1 e2e duy nhất trên project tối thiểu | Nhỏ nhất thỏa đúng chữ §14 #8, bằng chứng mạnh nhất |
+| A — LOẠI | Nút "áp dụng nhóm review đã chọn" ở Designer | Xem lý do loại dưới |
+| C — LOẠI | Sửa fixture 300 gốc cho sạch | Phá bằng chứng §11.3 (d) + harness ghim 18/23/41 |
+| D — LOẠI | Import fixture 300 vào motor-interlock rồi sửa 18 lỗi bằng tay qua wizard | Không có quickfix cho E001/E011 (chỉ IO-W002 có "sửa nhanh"); sửa tay 18 dòng = "sửa file bằng tay", trái §14 #8; commit xóa 8 tag baseline → PLC mất tag |
+| E — LOẠI | Bỏ chân import khỏi e2e #8, chỉ test Designer → run | Trái chữ §14 #8 ("import → …") |
+
+**Vì sao B nhỏ nhất + đúng nhất:**
+1. Không đổi code sản phẩm (chỉ script sinh fixture + dữ liệu fixture + e2e) — rủi ro hồi quy thấp nhất; A đổi UI Designer (checkbox chọn nhóm + nút + wiring apply) vì một nhu cầu của test.
+2. Luồng nhân quả liền mạch: chính 300 tag vừa import được gợi ý → áp dụng → chạy → tiêm lỗi → quan sát. A: chân import (2 tag CLEAN01/02, 0 confident) và chân apply (nhóm RUN của baseline motor-interlock) không liên quan nhau — thỏa chữ nhưng bằng chứng yếu, reviewer có thể chất vấn.
+3. Tái dùng machinery đã có: `gen-io-fixture.ts` (thêm cờ), pattern `gen-suggest-project.ts`, helper restart server của case (5), assert quan sát của case (5).
+4. A vướng ambiguity tie-model: nhóm RUN hòa điểm motor_dol/conveyor_simple 0.40 (đo thật ở P2.8 commit 1) — UI phải cho chọn model, thêm việc + thêm quyết định. B không vướng.
+5. Nút "áp dụng nhóm review đã chọn" vẫn là tính năng tốt cho người dùng thật — ghi lại làm follow-up riêng (không làm ở G2), không vứt ý.
+
+**Việc 1 — chi tiết:**
+- Generator: thêm cờ `--clean-duplicates` vào `scripts/gen-io-fixture.ts` (parse args ở `main`, ~dòng 695): khi bật, `DIRTY_COUNTS.duplicateTag = 0`, `duplicateAddress = 0`; giữ `missingType` 15 + `suffixVariant` 9 (không sinh lỗi — đã chứng minh ở Bảng 1) và seed mặc định 20261126. `writeIoFixture` ghi vào thư mục out mới — KHÔNG ghi đè `fixtures/`.
+- Fixture mới: `fixtures/io-list-300-clean/` — `io-list-300-clean.xlsx` + `io-list-300-clean.csv` + `expected.yaml` (sinh mới — khác gốc đúng 12 dòng: 6 tag + 6 địa chỉ khôi phục) + `README.md` ngắn (nguồn: cùng seed 20261126, chỉ tắt dirt trùng; dùng cho e2e §14 #8; KHÔNG dùng cho precision harness §11.3 — harness vẫn dùng fixture bẩn gốc).
+- Base project mới (viết tay, 3 file + README): `apps/web/e2e/fixtures/empty-project/` — `vcs.project.yaml` (sao khối simulation/controller của suggest-project: PLC1 loopback, stepMs/plcScanMs 100; KHÔNG có `plc/`), `tags/tags.yaml` rỗng (schema-valid — implementer xác nhận `tagsFileSchema` chấp nhận; nếu không thì dùng file rỗng tối thiểu mà schema chấp nhận, ghi rõ), `plant/equipment.yaml` rỗng (như suggest-project ban đầu).
+- E2e mới: `apps/web/e2e/g2-full-flow.spec.ts` — 1 test duy nhất, port 4173 (implementer grep xác nhận trống; pattern server riêng như p28, webServer của suite ở 4170):
+  1. Wizard: upload variant XLSX → sheet IO List → header dòng 6 → total 300 → mapping tag/address → validate: errors **0**, warnings = IO-W030 ×N (số đo commit 2, neo 23) → diff added **300** / removed **0** / unchanged **0** → commit OK → filesWritten (tags/tags.yaml + io/io-list.normalized.csv + io/import-profile.yaml + reports/import-*) → banner restart hiện.
+  2. Restart server (tái dùng đúng pattern `restartServer2` của case (5): chờ cổng tự do hẳn rồi mới spawn — race EADDRINUSE đã đỏ 1 lần).
+  3. Designer Suggestions: stats (số đo commit 2; neo suggest-project: 50 thiết bị, 36 confident, 14 review, 0 unmatched, 176 gán) → "Accept all confident" → THEO SỐ ĐO: nếu 400 vì CR02_SS02 thiếu kind thì bấm "áp dụng các nhóm còn lại" (như case (3)), nếu OK thì đi tiếp — KHÔNG sao chép case (3) mù → applied N (neo 35, đo lại) → `GET /api/plant/equipment` thấy N thiết bị → `vcs plant validate` OK.
+  4. Restart server lần 2 (OQ-384).
+  5. Simulation: sim IDLE → bấm Run → chờ `sim-state` RUNNING (chính là chân "chạy" của §14 #8 — bài học case (5) lần đỏ 1) → inspector chọn CR01_FCV02 (valve_ctrl; xác nhận có sau apply — theo số đo) → inject fault `stuck` → quan sát 3 chỗ như case (5): inspector fault hiện + role fault true; Event log có fault + CR01_FCV02; Tag Manager lọc `CR01_FCV02_FAULT` → `TRUE` (assert `toContainText('TRUE')` — chữ hoa + nút "Ghi thử" trong cùng cell, bài học case (5) lần đỏ 3).
+  6. Toàn bộ qua UI + restart server theo OQ-384 — không sửa file bằng tay (test chỉ lái UI; restart process không phải sửa file).
+- Assert parity NGỮ NGHĨA, không assert hash UI == CLI (bài học P2.4).
+- **Đo trước, viết assert sau (luật):** commit 2 đo CLI xong, ghi số thật vào §34 mục "Kết quả đo" rồi mới viết assert e2e ở commit 3. Số neo trong plan là ước/neo, không phải kỳ vọng ghim.
+
+**Việc 2 — `docs/acceptance/M2.md` (theo mẫu `M1.md`):**
+- Mục lục; bảng meta (ngày lập, nhánh `m2/g2-acceptance`, môi trường bản sao sạch + lệnh install thật, Node, PR chứa M2: #31–#39 + #41 + #42).
+- Kết luận tổng thể: **8/9 ĐẠT + §14 #4 UNVERIFIED** (ghi rõ ngay đầu, không giấu) — tiền lệ G1: M1 ký với §16.5 + OQ-161 chưa quyết, ghi rõ trong gói.
+- Tiêu chí CHƯA ĐẠT: chỉ #4 (UNVERIFIED — chờ file X-003; lý do + follow-up).
+- Tiêu chí CẦN KIỂM TAY (chủ sản phẩm): (1) rà M2.md + duyệt R-010; (2) VERIFY M2 §14 với PLCSIM + mã thật (đang mở — xem `docs/verify-owner-guide.md` §3); (3) probe FB_Probe (D-010 — không chặn G2, ghi rõ); (4) X-003: gửi file (khi tới — đo + ký sau) hoặc quyết ký với #4 UNVERIFIED; (5) ký M2 ở STATE §8 (tier C).
+- Bằng chứng theo từng tiêu chí §14 (mỗi mục "Trạng thái: ..." + lệnh đã chạy + kết quả dán nguyên văn/số):
+
+| Mục §14 | Trạng thái (dự kiến) | Bằng chứng (nguồn — đo lại ở gate G2, commit 4) |
+|---|---|---|
+| #1 gate xanh, M1 không hồi quy | ĐẠT | `lint && typecheck && depcheck && test && review:cheats && docs:diagnostics --check && docs:equipment --check && build && test:e2e && bench` trên bản sao sạch; test 2915/2915 + test mới của việc 1 (implementer báo số chính xác) |
+| #2 golden model (§11.1) + engine (§11.2) | ĐẠT | Đếm case golden thật (`golden/<model>.golden.yaml` + test count) theo số tối thiểu §11.1 (dol 14, vfd 10, onoff 10, ctrl 6, analog 8, switch 8, silo 6, conveyor 8; mỗi fault ≥ 1 test; adapter ≥ 12); engine: determinism/thứ tự/link/ownership/snapshot/restore/heap; neo: P2.3 golden 77 case, plant coverage 97,13% |
+| #3 demo A–D qua CLI + UI, hash tất định | ĐẠT | CLI `vcs plant run` A–D (§11.4) + e2e `plant-closedloop.spec.ts` 4/4; determinism 2 lần + restore giống hệt (OQ-317) |
+| #4 import fixture 300 đạt §11.3 | **UNVERIFIED** | Proxy fixture: (a) 175/177, (b) 50/50, (c) 300/300, (d) 18 lỗi/23 warnings — GHI RÕ là proxy, KHÔNG chứng minh trên dữ liệu thật; follow-up X-003 (dưới) |
+| #5 mã chẩn đoán IO-*/PL-* có test + thông báo hành động được | ĐẠT | 74 mã (P2.6), mỗi mã ≥ 1 test; message nêu dòng/tag/gợi ý; `docs/diagnostics.md` sinh tự động, CI `--check` khớp |
+| #6 hiệu năng §12 | ĐẠT (kèm giới hạn đã biết) | Bench Bảng 3 (VM đo lại ở gate G2 + Windows 15:08 đã đo); ngưỡng plant ≥ 1500 (A22/D-008), closedloop ≥ 1000, softplc ≥ 1000, TagDB ≥ 10M, orchestrator ≥ 100k. Giới hạn ghi rõ: perf-scroll 20k 30.7/24.3 FPS trên VM vs ngưỡng 50 — KHÔNG hạ, cần đo lại trên phần cứng thật (P2.8 commit 7) |
+| #7 `docs/equipment/*.md` sinh tự động, CI kiểm không lệch | ĐẠT | `pnpm docs:equipment --check` khớp trên bản sao sạch |
+| #8 UI luồng trọn, e2e xanh | ĐẠT (sau việc 1) | `g2-full-flow.spec.ts` 1 test xanh (import variant → duyệt gợi ý → chạy → tiêm lỗi → quan sát, không sửa file bằng tay) |
+| #9 không `any` ngoài ranh giới I/O; `plant` không import `runtime-iec`/UI; không thời gian/ngẫu nhiên thật | ĐẠT | lint (allow-list thời gian/ngẫu nhiên) + depcheck/dependency-cruiser xanh |
+- Bằng chứng bổ sung (gate + bench đầy đủ, bản sao sạch — như M1.md); Sai khác so với spec (đã được quyết — chỉ cái chạm M2: A22 ngưỡng 1500, A21 StepCtx slot số (D-008 A+B), A23 (D-009), D9 chữ §16.5); Quyết định còn chờ chủ sản phẩm (X-003, R-010, D-010 probe, T-002/T-003, S-001/2/3 — ghi rõ cái nào chặn ký, cái nào không); Ký duyệt (bảng trống như M1.md — "Chữ ký ghi vào STATE §8 sau khi duyệt — AI không tự ký").
+
+**Commit 0 — edit chưa commit đi theo nhánh này (quyết định của plan, KHÔNG được làm mất):**
+- `docs/verify-owner-guide.md` (§1 bench 15:08): ĐI THEO NHÁNH G2 (commit 0) — là bằng chứng §14 #6 mà M2.md tham chiếu; PR docs riêng tạo phụ thuộc thứ tự merge mà không thêm giá trị.
+- `docs/OWNER-INBOX.md` + `docs/open-questions.md` (X-003 B→A, OQ-380): ĐI THEO NHÁNH G2 (commit 0) — là bản ghi quyết định mà M2.md §14 #4 dựa vào; đã do chủ sản phẩm quyết, implementer chỉ commit lại, không quyết thêm.
+- `docs/acceptance/state-notes-draft.md` + `user-chat/`: KHÔNG commit (untracked, không bao giờ commit).
+- §2 hàng P2.7/P2.8 lỗi thời (đã merge PR #38/#39 nhưng bảng ghi "plan xong/chưa làm") → sửa kèm commit 0 (docs-only, 2 dòng).
+- Kiểm tra sau khi cắt nhánh: `git status --short` phải hiện đúng 4 file sửa (OWNER-INBOX, open-questions, verify-owner-guide, STATE) + 0 file lạ; nếu thiếu file nào → DỪNG, báo parent.
+
+**Follow-up khi file X-003 tới (KHÔNG làm ở phase này — ghi sẵn để không quên):**
+- Nhánh riêng `m2/g2-x003-measure` (từ develop sau khi G2 merge — hoặc trên nhánh G2 nếu file tới trước khi G2 merge/PR).
+- File ẩn danh theo D-003 A → `fixtures-real/` (đã `.gitignore`, không commit) hoặc kênh riêng; AI chỉ đọc trong VM, không commit.
+- Chạy `vcs suggest` trên file thật; ground truth = equipment+role do chủ sản phẩm xác nhận (duyệt bảng suggest hoặc file đối chiếu); mẫu số = tín hiệu có ground truth; pass khi ≥ 90% tín hiệu và ≥ 95% thiết bị (§11.3).
+- Nếu < 90% → hiệu chỉnh `naming.yaml`/synonym/descKeywords (đổi dữ liệu, không đổi thuật toán) rồi đo lại; ghi kết quả vào `M2.md` #4 + đóng OQ-380.
+- PR → merge → chủ sản phẩm ký M2 (STATE §8). Nếu chủ sản phẩm ký G2 TRƯỚC khi file tới (với #4 UNVERIFIED — tiền lệ G1), việc đo trở thành follow-up sau M2 (ghi rõ trong M2.md + STATE) — quyết định này là của chủ sản phẩm (tier C), implementer không tự chọn.
+
+### Bảng tính tay
+
+**Bảng 1 — 18 lỗi của fixture 300 (suy ra từ code thật, khớp số đo).** Nguồn: `scripts/gen-io-fixture.ts` dòng 249 (`DIRTY_COUNTS = { missingType: 15, suffixVariant: 9, duplicateTag: 6, duplicateAddress: 6 }`); `packages/importers/src/io-list/validate.ts` dòng 290 (IO-E001: báo dòng sau) + dòng 305 (IO-E011: báo CẢ HAI dòng mỗi cặp chồng lấn).
+
+| Dirt | Số hàng | Diagnostic | Cách tính | Số lỗi |
+|---|---|---|---|---|
+| duplicate-tag (6) | 6 | IO-E001 | Mỗi hàng dirt 1 lỗi (chỉ báo dòng sau; hàng donor trước đó không bị báo) | ×6 |
+| duplicate-address (6) | 6 | IO-E011 | Mỗi cặp chồng lấn báo cả 2 dòng (hàng dirt + hàng donor) → 6×2 | ×12 |
+| missing-type (15) | 15 | — (0) | signalType suy ra từ địa chỉ (sniff/normalize) → không diagnostic | 0 |
+| suffix-variant (9) | 9 | — (0) | Chỉ đổi hậu tố runFb (RUN_FBK/RUNNING/…) → không diagnostic, chỉ ảnh hưởng scoring | 0 |
+| Địa chỉ PEW/PIW (23) | 23 | IO-W030 | Cảnh báo bỏ tiền tố P (§8.5) — không chặn commit | warnings ×23 |
+| **Tổng** | | | **Lỗi 18 + warnings 23 = 41 diagnostics** | **18 lỗi** |
+
+Khớp số đo: precision harness assert `errors 18, warnings 23, IO-E001 6, IO-E011 12, IO-W030 23, total 41`; case (1b) đo thêm +3 PL-W010 (baseline motor-interlock M01 — không phải lỗi của fixture).
+
+**Bảng 2 — Biến thể sạch kỳ vọng (implementer đo lại bằng CLI ở commit 2, ghi số thật vào §34 trước khi viết assert e2e).**
+
+| Hạng mục | Kỳ vọng (suy ra) | Ghi chú |
+|---|---|---|
+| Validate variant (CLI, không baseline) | errors **0**; warnings = IO-W030 ×N | 0 lỗi vì không còn trùng tag/địa chỉ (Bảng 1: missingType/suffixVariant không sinh lỗi). N neo 23 — CÓ THỂ lệch ±vài vì 6 địa chỉ gốc được khôi phục có thể là PEW/PIW; KHÔNG ghim 23, đo lại |
+| PL-W010 trên base trống | ×0 | Không có tag baseline đã gán (khác case (1b) +3) |
+| Diff trên base trống | added **300** / removed **0** / unchanged **0** | Base không có tag nào — suy ra từ định nghĩa diff, implementer xác nhận bằng chạy thật |
+| Commit | OK (0 lỗi) → filesWritten: tags/tags.yaml + io/io-list.normalized.csv + io/import-profile.yaml + reports/import-*.json/.html + banner restart | Warnings không chặn commit (tiền lệ case (1c): 3 warnings vẫn commit OK) |
+| Suggest trên variant (CLI) | Đo lại — neo suggest-project (294 tag): 50 thiết bị (36 confident, 14 review, 0 unmatched), 176 tag gán | Variant 300 tag → dự kiến ~50 thiết bị, confident ~36–38, assigned ~182 — CHỈ LÀ ƯỚC, KHÔNG GHIM |
+| Apply | "Accept all confident" → theo số đo (400 vì CR02_SS02 thiếu kind như case (3), hoặc OK); "áp dụng các nhóm còn lại" → applied N (neo 35, đo lại) → `vcs plant validate` OK | KHÔNG sao chép case (3) mù — hành vi theo số đo variant |
+| Run/fault | Sau restart lần 2: sim RUNNING → inject `stuck` CR01_FCV02 → inspector fault + role fault true; Event log có fault + CR01_FCV02; Tag Manager `CR01_FCV02_FAULT` = TRUE | Như case (5) — CR01_FCV02 phải có trong N thiết bị đã apply (xác nhận theo số đo) |
+
+**Bảng 3 — Bench §14 #6 (đã đo — gate G2 đo lại số VM trên bản sao sạch; số Windows lấy từ verify-owner-guide §1, không đo lại).**
+
+| Bench | Ngưỡng | VM (parent gate PR #42, bản sao sạch) | Windows máy anh (15:08 +07, develop sau PR #42) |
+|---|---|---|---|
+| TagDB set/get | ≥ 10.000.000 ops/s | 47.838.792 | 100.303.468 |
+| Orchestrator | ≥ 100.000 bước/s | 507.879 | 1.034.340 |
+| SoftPlc | ≥ 1.000 scan/s | 1.683 | 3.833 |
+| Plant | ≥ 1.500 bước/s (A22) | 2.602 | 5.957 |
+| Closed-loop | ≥ 1.000 bước/s | 1.358 | 3.340 |
+
+### Mơ hồ (phân loại)
+
+**Tier A (tự quyết, ghi lại):** tên cờ (`--clean-duplicates` — gợi ý, implementer có thể đổi tên nếu lý do rõ), tên thư mục fixture (`fixtures/io-list-300-clean/`), tên file e2e (`g2-full-flow.spec.ts`), port e2e (4173 — kiểm tra trống bằng grep trước), thứ tự commit, wording `M2.md` (theo mẫu `M1.md`), tên test mới (nếu có).
+**Tier B (mặc định + ghi lại, không mở OQ mới trừ khi ghi rõ):**
+- B1: base project tối thiểu dùng loopback controller, không PLC thật — vì §14 #8 không đòi PLC (chân "PLC báo lỗi" quan sát qua tag fault ở Tag Manager, như case (5)); demo A–D qua PLC thật đã có ở §14 #3 (plant-closedloop e2e + CLI). Ghi trong §34 + `M2.md` #8.
+- B2: assert e2e theo số đo CLI (ghi số thật vào §34 trước khi viết assert); số neo trong plan không phải kỳ vọng ghim.
+- B3: mục "Cần kiểm tay" nằm trong `M2.md` (như `M1.md`); implementer kiểm tra `docs/REVIEW-CHECKLISTS.md` §2 đã có mục M2 chưa — nếu chưa có thì KHÔNG tạo file/checklist mới ở phase này.
+- B4: perf-scroll 20k ghi là giới hạn đã biết ở §14 #6 (không hạ ngưỡng, không đo lại ở G2 — đo lại trên phần cứng thật là việc riêng, như P2.8 đã ghi).
+- B5: OQ-380 giữ MỞ tới khi đo X-003 xong hoặc M2 ký (theo quyết định của chủ sản phẩm lúc ký).
+- B6: expected.yaml của variant khác gốc đúng 12 dòng (6 tag + 6 địa chỉ); precision harness gốc KHÔNG đổi (vẫn assert 18/23/41 trên fixture bẩn).
+**Tier C (chặn — xem "tier C còn mở" dưới):** TC-G1…TC-G4; ký M2; quyết X-003 path; hạ ngưỡng §14; sửa golden/ngưỡng.
+
+### Test target + gate
+
+- **Vitest mới: 0 bắt buộc** (phase này không thêm unit test — chỉ fixture + e2e; nếu implementer muốn ghim cờ generator thì +1 test nhỏ cho `--clean-duplicates`, tier A).
+- **e2e mới: `g2-full-flow.spec.ts`, 1 test** (luồng trọn §14 #8 — xem Thiết kế). Hồi quy trong gate G2: `p28-import-suggest-run.spec.ts` 8/8 + `plant-closedloop.spec.ts` 4/4 + `tag-manager.spec.ts` 2/2 (chạy trong gate G2, không chỉ spec mới).
+- **Gate (theo repo AGENTS.md §2 + mẫu M1.md — chạy thật, dán kết quả):** bản sao sạch trên home disk (`~/.cache/vcs-g2-gate`, KHÔNG `/tmp` — `/tmp` nhỏ; `TMPDIR=$HOME/.cache/tmp`; `git archive` + `pnpm install --frozen-lockfile` thật): `lint && typecheck && depcheck && test && review:cheats && docs:diagnostics --check && docs:equipment --check && build && test:e2e && bench`. Ghi log ra file + `echo $?` từng lệnh, KHÔNG pipe qua `tail` trong chuỗi `&&`; `pnpm` qua `npx -y pnpm@10.15.0` (exec VM không có pnpm trần). Bench VM đo lại (Bảng 3); bench Windows lấy số đã đo (không chạy lại trên VM). Target: toàn suite xanh (baseline 2915 test + 0 mới bắt buộc → implementer báo số chính xác); e2e mới 1/1 + hồi quy 14/14.
+
+### Rủi ro top-3
+
+1. **Số đo variant lệch neo mà không rõ nguyên nhân** (confident/review/assigned khác suggest-project nhiều) → giảm: đo CLI trước, ghi số vào §34, đối chiếu từng nhóm review (harness in danh sách review groups); TC-G3.
+2. **E2e 1 test dài, flake do timing/restart** (tiền lệ case (5) đỏ 3 lần: IDLE-chưa-Run, race cổng EADDRINUSE, `TRUE` chữ hoa) → giảm: tái dùng đúng pattern restart (chờ cổng tự do hẳn), bấm Run + chờ RUNNING, assert `toContainText('TRUE')`; TC-G1 sau 3 lần sửa.
+3. **Gói M2.md bị hiểu là "M2 đã đạt" trong khi #4 UNVERIFIED** → giảm: kết luận tổng thể ghi rõ "8/9 ĐẠT + #4 UNVERIFIED" ngay đầu; mục CHƯA ĐẠT chỉ có #4; bảng ký duyệt để trống "(chờ duyệt)"; STATE §8 không ký cho tới khi chủ sản phẩm quyết.
+
+### Commit plan (6 commit, mỗi commit gate xanh)
+
+0. `docs: ghi X-003 A + bench §1 Windows + sửa hàng §2 P2.7/P2.8` — gom edit chưa commit (OWNER-INBOX, open-questions OQ-380, verify-owner-guide §1) + sửa 2 hàng §2 lỗi thời. Chỉ docs. Gate: lint/typecheck nhanh (docs-only). Kiểm tra `git status --short` trước/sau — đủ 4 file, không mất edit (xem Thiết kế).
+1. `plan(m2): G2 — gói nghiệm thu M2 (STATE §34)` — plan này + hàng G2 ở §2 → "☑ plan xong (plan STATE §34; implement chưa — chờ triển khai)". KHÔNG code.
+2. `feat(test): fixture io-list-300-clean + đo CLI` — cờ `--clean-duplicates` + 3 file fixture + đo validate/suggest/apply bằng CLI, ghi số thật vào §34 mục "Kết quả đo". Gate: lint/typecheck/test (harness gốc không đổi — assert 18/23/41 còn nguyên).
+3. `test(e2e): 1 test luồng trọn §14 #8 (g2-full-flow)` — fixture empty-project + spec mới, assert theo số đo commit 2. Gate full + e2e (mới 1/1 + hồi quy p28 8/8 + plant-closedloop 4/4 + tag-manager 2/2).
+4. `docs(m2): gói nghiệm thu docs/acceptance/M2.md` — 9 mục §14 + cần-kiểm-tay + quyết-định-còn-chờ + ký-duyệt (trống). Số liệu từ gate bản sao sạch (commit này chạy gate đầy đủ, dán kết quả vào M2.md). Gate full trên bản sao sạch.
+5. `docs: G2 kết quả + STATE §34` — điền "Kết quả implement" §34; cập nhật §2 hàng G2 → "☑ xong, chờ ký"; KHÔNG đóng OQ-380 (vẫn mở), KHÔNG tick R-010 (chờ chủ sản phẩm). Gate full rồi mới PR.
+
+### File mới/sửa
+
+| File | Đổi gì |
+|---|---|
+| `docs/STATE.md` §34 | Plan này (commit 1); commit 2 điền "Kết quả đo"; commit 5 điền "Kết quả implement" |
+| `docs/STATE.md` §2 | Hàng G2 → plan xong (commit 1) → xong, chờ ký (commit 5); hàng P2.7/P2.8 sửa lỗi thời (commit 0) |
+| `docs/OWNER-INBOX.md` (X-003) + `docs/open-questions.md` (OQ-380) | Gom edit chưa commit (commit 0) — đã do chủ sản phẩm quyết, chỉ commit lại |
+| `docs/verify-owner-guide.md` §1 | Gom edit chưa commit (commit 0) — bằng chứng bench Windows §14 #6 |
+| `scripts/gen-io-fixture.ts` | Thêm cờ `--clean-duplicates` (commit 2) |
+| `fixtures/io-list-300-clean/` (MỚI) | `io-list-300-clean.xlsx` + `.csv` + `expected.yaml` + `README.md` (commit 2) |
+| `apps/web/e2e/fixtures/empty-project/` (MỚI) | `vcs.project.yaml` + `tags/tags.yaml` + `plant/equipment.yaml` + `README.md` (commit 3) |
+| `apps/web/e2e/g2-full-flow.spec.ts` (MỚI) | 1 test luồng trọn §14 #8 (commit 3) |
+| `docs/acceptance/M2.md` (MỚI) | Gói nghiệm thu 9 mục §14 (commit 4) |
+
+### OQ mới + tier C còn mở
+
+- Không OQ mới (gap §14 #8 đã ghi ở STATE §32, không phải OQ; B1–B6 ghi trong plan, không mở OQ).
+- **TC-G1 — e2e luồng trọn đỏ sau 3 lần sửa:** DỪNG, đề xuất thu hẹp (tiền lệ P2.8 TC-1: tách e2e wizard khỏi e2e run, hoặc ghi §14 #8 là "bao phủ bởi case cộng lại" như P2.8) — KHÔNG tự quyết thu hẹp (đổi bằng chứng nghiệm thu, cần chủ sản phẩm quyết), không hạ §14 #8 im lặng, không sửa expects để xanh.
+- **TC-G2 — variant không commit được (errors ≠ 0 sau khi tắt dirt trùng):** DỪNG, báo parent (tiền đề "chỉ trùng tag/địa chỉ gây lỗi" sai — có thể missingType hoặc rule khác gây lỗi; không sửa validate để xanh).
+- **TC-G3 — số suggest/apply trên variant lệch neo không lý do:** DỪNG, kiểm tra (variant sinh sai hoặc suggest đổi hành vi; không sửa expects để xanh).
+- **TC-G4 — gate bản sao sạch đỏ sau 3 lần sửa:** DỪNG (luật chung — tìm nguyên nhân gốc, đề xuất thu hẹp).
+- **Tier C còn mở (không chặn bắt đầu G2):** ký M2 (chỉ chủ sản phẩm); quyết X-003 path (gửi file rồi đo, hoặc ký với #4 UNVERIFIED); OQ-380 (mở tới khi đo xong hoặc M2 ký); R-010 (chờ chủ sản phẩm tick); D-010 probe FB_Probe; VERIFY §14; T-002/T-003; S-001/2/3 (không chặn G2).
+
+### Kết quả đo (implementer điền ở commit 2 — số thật từ CLI, không ghi trước)
+
+- Validate variant (không baseline): errors = **0**, warnings = **23** (IO-W030 ×23, toàn PEW/PQW strip). Diff **+300/−0/0/0**. Lệnh: `vcs import-io <variant>.xlsx --report` (exit 0) rồi `--commit` (exit 0; ghi tags/tags.yaml, io/io-list.normalized.csv, io/import-profile.yaml). Đo trên project nháp `~/.cache/vcs-g2-measure` (vcs.project.yaml sao từ suggest-project, tags rỗng, equipment rỗng).
+- Suggest trên variant: **50** thiết bị (**37** confident, **13** review, **0** unmatched), **177** tags gán, 123 chưa gán (toàn extra role null). Lệnh: `vcs suggest <dir>` (exit 0). Review (13): CR01_BC01 (0.79), CR01_LSH01/LSL01, CR01_M04 (0.78), CR01_SS01, CR01_ZS01/ZS02, CR02_LSH02, CR02_M04 (0.78), CR02_PC01/PC02, CR02_SS02, CR02_ZS03. Lệch neo có lý do (không phải TC-G3): BC02 → confident 0.80 nhờ tag CR02_BC02_ZERO_SPEED khôi phục (exact match thay SPEED extra); FCV01 → confident 1.00 nhờ posFb khôi phục; SS02 → review 0.75 vì BYPASS extra còn lại trừ −0.1 (OQ-366) — ở suggest-project BYPASS bị dedupe mất nên SS02 đủ điểm confident.
+- Apply (server endpoint, đo qua POST /api/suggest/apply như UI — script `~/.cache/vcs-g2-commit1/measure-apply.mjs`): "Accept all confident" → **200 OK, applied 37/37**, autoFilled 33, filesWritten tags/tags.yaml + plant/equipment.yaml — **KHÔNG 400** (khác case (3) p28: CR02_SS02 là review nên không vào tập confident; không cần bước "áp dụng các nhóm còn lại"). GET /api/plant/equipment = **37** thiết bị. `vcs plant validate` sau apply: **OK — 37 thiết bị, 300 tags** (trước apply: OK — 0 thiết bị, 300 tags).
+- CLI `vcs suggest --accept-confident` (không phải server): exit 1, bị từ chối PL-E001 ×14 analog_sensor (thiếu engMin/engMax/unit) — hành vi đã biết (P2.8 commit 8: CLI không auto-fill, chỉ server auto-fill). Số này KHÔNG dùng cho e2e (e2e đi qua UI/server).
+- (Lệnh đã chạy + log: `~/.cache/vcs-g2-commit1/measure-{report,commit,suggest,accept,validate,apply}.log`.)
+
+### Kết quả implement
+
+**Commit 0 — `59f1f29` `docs: ghi X-003 A + bench §1 Windows + plan G2 (§34) + sửa hàng §2 P2.7/P2.8`:** gom 4 file sửa chưa commit (STATE §34 plan + §2, OWNER-INBOX X-003 A, open-questions OQ-380, verify-owner-guide §1 bench Windows 15:08) + sửa 2 hàng §2 lỗi thời (P2.7 → PR #38 `411fd05` 2026-11-26 22:37, test 2845/2845; P2.8 → PR #39 `1508fc5` 2026-11-27 02:58, test 2910/2910, e2e 14/14 — sha/giờ xác nhận lại từ lịch sử `origin/develop`). Gate: lint 0, typecheck 0. **Lệch so với plan:** commit 0 và commit 1 của plan gộp thành 1 commit (plan §34 đã nằm trong cây làm việc khi planner viết xong — nội dung giống hệt, 1 commit thay vì 2).
+
+**Commit 1 (plan 2) — `08a99c1` `feat(test): fixture io-list-300-clean + đo CLI`:** cờ `--clean-duplicates` ở `scripts/gen-io-fixture.ts` + `fixtures/io-list-300-clean/` (xlsx + csv + expected.yaml + README.md) + §34 "Kết quả đo". Gate: lint 0, typecheck 0 (sau khi sửa lỗi `exactOptionalPropertyTypes` ở dòng 730 bằng spread `...(cleanDuplicates ? { fileBase: 'io-list-300-clean' } : {})`), test **2915/2915** (131 file), depcheck 0, cheats SẠCH. Hồi quy fixture bẩn: CSV + expected.yaml byte-identical với file commit (đường dữ liệu không đổi); XLSX sha khác — chỉ metadata zip (điểm kiểm chứng mở, xem dưới).
+
+**Commit 2 (plan 3) — `81b6c50` `test(e2e): 1 test luồng trọn §14 #8 (g2-full-flow)`:** `apps/web/e2e/fixtures/empty-project/` (vcs.project.yaml loopback PLC1, tags rỗng, equipment rỗng, README) + `apps/web/e2e/g2-full-flow.spec.ts` (1 test, timeout 120s). Gate full: lint 0, typecheck 0, depcheck 0, test 2915/2915, cheats 0, diagnostics 0, equipment 0, build 0, e2e **26 passed + 1 skipped** (g2 1/1 — 23,1s; p28 8/8; closedloop 4/4; tag-manager 2/2). E2e mới PASS ngay lần chạy đầu — TC-G1 không nổ. **Lệch so với plan:** `test(name, { timeout }, fn)` không được Playwright bản này chấp nhận (`timeout` không có trong `TestDetails`) → dùng `test.setTimeout(120_000)` trong test.
+
+**Commit 3 (plan 4) — `a313285` `docs(acceptance): gói nghiệm thu M2 — 8/9 ĐẠT + §14 #4 UNVERIFIED`:** `docs/acceptance/M2.md` (271 dòng, TOC 23 mục bằng script `gen-docs-toc.mjs`). Số liệu từ **gate bản sao sạch** `~/.cache/vcs-g2-gate` (`git archive HEAD` tại `81b6c50`, install thật, log `~/.cache/vcs-g2-commit3/`): install 0, lint 0, typecheck 0, depcheck 0 (194 modules, 465 deps, không vi phạm), test **2915/2915** (131 file), cheats SẠCH (315 file), diagnostics --check 0, equipment --check 0, build 0, e2e **26 passed + 1 skipped**, bench 0 — TagDB 44 166 432 ops/s, orchestrator 516 262 bước/s, softplc 1 735 scan/s, plant 2 634 bước/s, closedloop 1 303 bước/s, tất cả PASS. CLI A–D (`vcs plant run --hash`): A 372 bước `ce95b887b29f` (chạy 2 lần giống hệt), B 393 bước `f3c6a4ee470e`, C 313 bước `f3c6a4ee470e` (= B — đúng, xem M2.md #3), D 381 bước `7d337ac0880b`. Golden đếm thật 77 case; adapter 16 test; 23 fault + 8 preset đều có test; 23 mã IO/PL đều có test; importers coverage 97,28% dòng.
+
+**Commit 4 (plan 5) — (commit này):** điền mục này; §2 hàng G2 → "☑ xong, chờ ký". **KHÔNG đóng OQ-380** (vẫn mở, chờ file X-003). **KHÔNG tick R-010** (chờ chủ sản phẩm).
+
+**TC stops:** không TC nào nổ (TC-G1: e2e PASS lần đầu; TC-G2: variant commit được, errors 0; TC-G3: lệch neo có lý do xác định; TC-G4: gate bản sao sạch xanh lần đầu).
+
+**Điểm kiểm chứng mở / follow-up (ngoài phạm vi G2, không sửa):** (1) so sánh sheet-XML của XLSX sinh lại vs file commit chưa hoàn tất (CSV + expected.yaml đã byte-identical); (2) `vcs plant run --csv` bị bỏ qua im lặng ở scenario mode (chỉ smoke mode ghi CSV) — đề xuất follow-up: báo lỗi hoặc ghi CSV thật.
+
+**Việc còn lại cho parent:** parent gate độc lập trên bản sao sạch → mở PR `m2/g2-acceptance` → `develop` → chờ CI xanh → merge (merge commit, không squash, không xóa nhánh) → báo cáo chủ sản phẩm (rà M2.md + quyết X-003/ký).
