@@ -1,5 +1,16 @@
 # AUTONOMY — Chính sách tự chủ của AI agent
 
+## Mục lục
+
+- [1. Ba tầng quyết định](#1-ba-tầng-quyết-định)
+- [2. Tầng C — luôn dừng và hỏi](#2-tầng-c-luôn-dừng-và-hỏi)
+- [3. Không bao giờ chờ — chỉ ghi lại và đi tiếp](#3-không-bao-giờ-chờ-chỉ-ghi-lại-và-đi-tiếp)
+- [4. Vòng làm việc tự chủ (mỗi phiên)](#4-vòng-làm-việc-tự-chủ-mỗi-phiên)
+- [5. Quy tắc nhánh và PR](#5-quy-tắc-nhánh-và-pr)
+- [6. Giữ cho chủ sản phẩm ít việc nhất](#6-giữ-cho-chủ-sản-phẩm-ít-việc-nhất)
+- [7. Tự kiểm soát chất lượng (thay cho việc chủ sản phẩm soi từng PR)](#7-tự-kiểm-soát-chất-lượng-thay-cho-việc-chủ-sản-phẩm-soi-từng-pr)
+- [8. Mức ưu tiên khi nhiều việc cùng khả dụng](#8-mức-ưu-tiên-khi-nhiều-việc-cùng-khả-dụng)
+
 > Mục tiêu: AI **tự làm gần như toàn bộ** (đọc spec, lập kế hoạch, viết code/test/tài liệu, tự rà soát, ghi chép, bàn giao phiên), chủ sản phẩm **chỉ can thiệp** khi cần: (1) quyết định, (2) thay đổi lớn, (3) test thật với PLCSIM/TIA/SCADA/phần cứng, (4) cung cấp dữ liệu thật.
 > File này **ưu tiên hơn** các chỗ trong `AGENTS.md`/`PROMPTS.md` nói "dừng chờ xác nhận" (⚠ plan-first): ở chế độ tự chủ, AI **không dừng chờ** trừ khi gặp mục Tầng C bên dưới — thay vào đó ghi kế hoạch/giả định và đi tiếp bằng mặc định của spec.
 

@@ -1,5 +1,15 @@
 # SPIKES — Thử nghiệm nhỏ để giảm rủi ro (làm sớm, giới hạn thời gian)
 
+## Mục lục
+
+- [S6 — Môi trường Windows (0.5 ngày)](#s6-môi-trường-windows-05-ngày)
+- [S1 — Khảo sát độ phủ ngôn ngữ trên mã thật (0.5–1 ngày)](#s1-khảo-sát-độ-phủ-ngôn-ngữ-trên-mã-thật-051-ngày)
+- [S4 — Bench node-opcua (0.5 ngày)](#s4-bench-node-opcua-05-ngày)
+- [S5 — SCADA smoke test (0.5 ngày, cần SCADA)](#s5-scada-smoke-test-05-ngày-cần-scada)
+- [S2 — PLCSIM Advanced "hello" (1 ngày, cần PLCSIM)](#s2-plcsim-advanced-hello-1-ngày-cần-plcsim)
+- [S3 — Openness export (1 ngày, cần TIA)](#s3-openness-export-1-ngày-cần-tia)
+- [Mẫu `docs/spikes/Sx-<tên>.md`](#mẫu-docsspikessx-md)
+
 > Spike = thí nghiệm **0.5–1 ngày** nhằm trả lời một câu hỏi có thể làm đổ kế hoạch. Kết quả ghi vào `docs/spikes/Sx-*.md` (mẫu cuối file) và cập nhật `OWNER-INBOX.md`/`STATE.md`. Spike **không** là mã sản phẩm: có thể bỏ.
 > Spike cần phần cứng/phần mềm/ dữ liệu của anh sẽ được AI ghi thành mục 🔑 trong `OWNER-INBOX.md` kèm hướng dẫn từng bước; AI tiếp tục làm việc khác trong lúc chờ.
 

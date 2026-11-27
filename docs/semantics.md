@@ -1,5 +1,31 @@
 # Ngữ nghĩa mô phỏng — phần M0
 
+## Mục lục
+
+- [1. Thời gian — số nguyên ms](#1-thời-gian-số-nguyên-ms)
+- [2. Thứ tự một bước](#2-thứ-tự-một-bước)
+- [3. Plant trước controller; trễ 1 bước](#3-plant-trước-controller-trễ-1-bước)
+- [4. Thông báo thay đổi theo lô tại `flush()`](#4-thông-báo-thay-đổi-theo-lô-tại-flush)
+- [5. Quyền sở hữu tag](#5-quyền-sở-hữu-tag)
+- [6. Pacer và tốc độ (không ảnh hưởng logic)](#6-pacer-và-tốc-độ-không-ảnh-hưởng-logic)
+- [7. Lỗi component: `throw` / `isolate`](#7-lỗi-component-throw-isolate)
+- [8. Controller demo `loopback` (không phải PLC thật)](#8-controller-demo-loopback-không-phải-plc-thật)
+- [9. Giao thức và delta](#9-giao-thức-và-delta)
+- [10. Builder và extension](#10-builder-và-extension)
+- [11. Vá giao diện P0.8 (M4/M5 áp trước)](#11-vá-giao-diện-p08-m4m5-áp-trước)
+- [12. Bộ nhớ Siemens (M1 §3.1–§3.4, P1.1)](#12-bộ-nhớ-siemens-m1-3134-p11)
+- [13. Lexer + parser SCL (M1 §4.2–4.4, P1.2)](#13-lexer-parser-scl-m1-4244-p12)
+- [14. Typecheck + lower AST→IR (M1 §4.4, §6, §7.1–7.3, P1.3)](#14-typecheck-lower-astir-m1-44-6-7173-p13)
+- [15. Interpreter + SoftPlc (M1 §7.2–7.3, §8, §10, P1.4)](#15-interpreter-softplc-m1-7273-8-10-p14)
+- [16. System block IEC — R_TRIG/F_TRIG, SR/RS, TON/TOF/TP/TONR, CTU/CTD/CTUD (M1 §9, P1.5)](#16-system-block-iec-r_trigf_trig-srrs-tontoftptonr-ctuctdctud-m1-9-p15)
+- [17. LAD — schema JSON, validate, lower → IR chung SCL (M1 §5, P1.6)](#17-lad-schema-json-validate-lower-ir-chung-scl-m1-5-p16)
+- [18. Golden runner + demo + Watch + bench (M1 §11–§14, P1.7)](#18-golden-runner-demo-watch-bench-m1-1114-p17)
+- [19. PWA shell + kiosk (M0 §8.2–8.3, P0.9)](#19-pwa-shell-kiosk-m0-8283-p09)
+- [20. Plant — model, adapter, nguồn, lỗi tín hiệu (M2 §3–§6, P2.1)](#20-plant-model-adapter-nguồn-lỗi-tín-hiệu-m2-36-p21)
+- [21. Plant — model `motor_dol` (M2 §7.1, P2.2)](#21-plant-model-motor_dol-m2-71-p22)
+- [22. Plant — 8 model còn lại (M2 §7.2–§7.8, P2.3)](#22-plant-8-model-còn-lại-m2-7278-p23)
+- [23. Vòng kín plant + SoftPlc + scenario (M2 §5.1, §11.4, P2.4) — VERIFIED (P2.4, commit 12)](#23-vòng-kín-plant-softplc-scenario-m2-51-114-p24-verified-p24-commit-12)
+
 Tài liệu này ghi lại ngữ nghĩa **đã triển khai** ở M0 (P0.1–P0.6): mỗi điểm có
 nhãn **VERIFIED** (có test trực tiếp) hoặc **UNVERIFIED** (chưa có test trực
 tiếp — suy từ code/spec, không viết như đã chắc). Khi một điểm UNVERIFIED được

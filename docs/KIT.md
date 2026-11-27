@@ -1,5 +1,14 @@
 # VCS Kit — Bộ khởi động vibe coding tự chủ
 
+## Mục lục
+
+- [1. Kit gồm gì](#1-kit-gồm-gì)
+- [2. Vị trí đích trong repo](#2-vị-trí-đích-trong-repo)
+- [3. Cách vận hành (khuyến nghị: tự chủ)](#3-cách-vận-hành-khuyến-nghị-tự-chủ)
+- [4. Anh cần làm gì (và chỉ những việc này)](#4-anh-cần-làm-gì-và-chỉ-những-việc-này)
+- [5. Nên làm ngay (tuần đầu)](#5-nên-làm-ngay-tuần-đầu)
+- [6. Giới hạn cần biết (trung thực)](#6-giới-hạn-cần-biết-trung-thực)
+
 > Đặt file này ở `docs/KIT.md` trong repo. Đây là hướng dẫn cho **chủ sản phẩm**; AI đọc `AGENTS.md` và `docs/AUTONOMY.md`.
 
 ## 1. Kit gồm gì

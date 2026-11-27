@@ -1,5 +1,13 @@
 # AMENDMENTS — Sổ đối chiếu chéo giữa các spec
 
+## Mục lục
+
+- [A. Điều chỉnh từ M0 §2 (áp dụng khi làm M1, M2, M3)](#a-điều-chỉnh-từ-m0-2-áp-dụng-khi-làm-m1-m2-m3)
+- [B. Điều chỉnh từ M4 §2 (áp dụng khi làm M4; một phần có thể làm trước ở **P0.8**)](#b-điều-chỉnh-từ-m4-2-áp-dụng-khi-làm-m4-một-phần-có-thể-làm-trước-ở-p08)
+- [C. Điều chỉnh từ M5 §2 (áp dụng khi làm M5; một phần có thể làm trước ở **P0.8**)](#c-điều-chỉnh-từ-m5-2-áp-dụng-khi-làm-m5-một-phần-có-thể-làm-trước-ở-p08)
+- [D. Làm rõ bổ sung (không đổi hành vi, tránh AI hiểu sai)](#d-làm-rõ-bổ-sung-không-đổi-hành-vi-tránh-ai-hiểu-sai)
+- [E. Điểm hở đã phát hiện — cần quyết định (kèm đề xuất mặc định)](#e-điểm-hở-đã-phát-hiện-cần-quyết-định-kèm-đề-xuất-mặc-định)
+
 > **Quy tắc:** các spec được viết lần lượt (PRD → M1 → M2 → M3 → M0 → M4 → M5), nên spec sau điều chỉnh spec trước. Ở mỗi điểm dưới đây, **sổ này thắng** nội dung cũ. Khi bắt đầu một milestone, AI đọc mục của milestone đó.
 > Cột "Khi nào" = prompt/milestone **áp dụng**. Mục **D** là làm rõ bổ sung và **E** là điểm hở cần quyết định (có đề xuất mặc định).
 
@@ -77,6 +85,7 @@
 | D6 | **Diagnostic codes:** mọi mã mới (PRJ/SIM/TAG/WS/SCL/IO/PL/TS/CE/COM/HMI/BRG/PSA/S7/TIA/SML) đăng ký ở `DiagnosticCatalog`; `docs/diagnostics.md` sinh tự động. |
 | D7 | **Đánh số milestone:** PRD §13 gọi M0–M7; các spec chi tiết hiện có **M0–M5** trùng số với PRD. **PRD M6 (clinker cooler lite) và M7+ (Rockwell/ABB, 3D…) chưa có spec** — không làm trước. |
 | D8 | **File sinh tự động / không sửa tay:** `tests/generated/**`, `plc/generated/**`, `docs/diagnostics.md`, `docs/equipment/*.md`, JSON màn hình HMI (chỉ designer/API), `bench/results.json`, `reports/**`. |
+| D9 | **M1 §16.5 — mã lỗi cho cấu trúc chưa hỗ trợ (chỉ đổi chữ, không đổi hành vi):** chữ cũ viết `SCL-U001` cho mọi lệnh/từ khóa chưa hỗ trợ; thực tế đã kiểm chứng bằng probe (M1.md §16.5): `SCL-U001` chỉ cho cấu trúc biết tên nhưng chưa hỗ trợ (String), `SCL-T001` cho kiểu chưa biết (POINTER/ANY), `SCL-P002` cho cú pháp ngoài EBNF (mảng nhiều chiều, GOTO) — cả 5 probe đều lỗi ồn ào, có vị trí, exit 2. Quyết D-006 (chủ sản phẩm, 2026-11-27): giữ nguyên 3 mã (A), chỉ sửa câu chữ §16.5 cho đúng thực tế. |
 
 ## E. Điểm hở đã phát hiện — cần quyết định (kèm đề xuất mặc định)
 

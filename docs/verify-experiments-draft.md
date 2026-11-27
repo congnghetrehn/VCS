@@ -1,5 +1,11 @@
 # Danh sách thí nghiệm VERIFY — bản nháp (P1.7)
 
+## Mục lục
+
+- [M1 §14 (14 mục, theo thứ tự spec)](#m1-14-14-mục-theo-thứ-tự-spec)
+- [Ngoài M1 §14 (UNVERIFIED trong semantics §§12–18)](#ngoài-m1-14-unverified-trong-semantics-1218)
+- [Cách chạy (khi chủ sản phẩm sẵn sàng)](#cách-chạy-khi-chủ-sản-phẩm-sẵn-sàng)
+
 > **Trạng thái: BẢN NHÁP — chưa chạy thí nghiệm nào trong P1.7.**
 > Mọi mục dưới đây chờ chủ sản phẩm chạy trên PLCSIM Advanced (hoặc PLCSIM /
 > TIA) với mã thật (spike S1, OWNER-INBOX X-002) hoặc project TIA nhỏ.

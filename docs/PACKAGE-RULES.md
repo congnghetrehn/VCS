@@ -1,5 +1,24 @@
 # PACKAGE-RULES — Quy tắc riêng theo package
 
+## Mục lục
+
+- [`@vcs/schemas` (M0 §4)](#vcsschemas-m0-4)
+- [`@vcs/kernel` (M0 §6, M4 §4)](#vcskernel-m0-6-m4-4)
+- [`@vcs/project` (M0 §5)](#vcsproject-m0-5)
+- [`@vcs/test-utils` (M0 §7)](#vcstest-utils-m0-7)
+- [`@vcs/expr` (M3 §5, M4 §11.3)](#vcsexpr-m3-5-m4-113)
+- [`@vcs/runtime-iec` + `@vcs/vendor-siemens` (M1, M5 §9)](#vcsruntime-iec-vcsvendor-siemens-m1-m5-9)
+- [`@vcs/plant` (M2 §3–7)](#vcsplant-m2-37)
+- [`@vcs/importers` (M2 §8–9)](#vcsimporters-m2-89)
+- [`@vcs/testing` (M3)](#vcstesting-m3)
+- [`@vcs/comms` (M4, M5 §6–7)](#vcscomms-m4-m5-67)
+- [`@vcs/hmi` + `apps/web` (M4 §11)](#vcshmi-appsweb-m4-11)
+- [`apps/server` (M0 §8.2, M4 §10)](#appsserver-m0-82-m4-10)
+- [`apps/cli` (M0 §8.1)](#appscli-m0-81)
+- [`apps/web` (M0 §8.3, M4 §11.7)](#appsweb-m0-83-m4-117)
+- [`tools/bridge-agent` (M5 §5) — .NET Framework 4.8 x64](#toolsbridge-agent-m5-5-net-framework-48-x64)
+- [`tools/tia-export` (M5 §8) — .NET Framework 4.8 x64](#toolstia-export-m5-8-net-framework-48-x64)
+
 > Khi một package được tạo, **copy mục tương ứng thành `packages/<tên>/AGENTS.md`** (công cụ AI thường đọc file gần nhất với thư mục đang sửa). Quy tắc chung nằm ở `AGENTS.md` gốc; ở đây chỉ có **bất biến riêng** và **lỗi hay gặp**. Nguồn chi tiết: spec trong ngoặc.
 
 ---

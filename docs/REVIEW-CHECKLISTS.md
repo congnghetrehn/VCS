@@ -1,5 +1,27 @@
 # REVIEW-CHECKLISTS — Checklist rà soát (chủ sản phẩm làm sau mỗi prompt và mỗi milestone)
 
+## Mục lục
+
+- [1. Checklist chung (mỗi prompt/PR)](#1-checklist-chung-mỗi-promptpr)
+  - [1.1 Chạy lại gate (máy anh, môi trường sạch)](#11-chạy-lại-gate-máy-anh-môi-trường-sạch)
+  - [1.2 Đọc diff — những file phải xem kỹ](#12-đọc-diff-những-file-phải-xem-kỹ)
+  - [1.3 Mùi gian lận / yếu (tìm trong diff)](#13-mùi-gian-lận-yếu-tìm-trong-diff)
+  - [1.4 Bất biến lõi (AGENTS.md §4) — kiểm nhanh bằng grep](#14-bất-biến-lõi-agentsmd-4-kiểm-nhanh-bằng-grep)
+  - [1.5 Báo cáo của AI có trung thực không?](#15-báo-cáo-của-ai-có-trung-thực-không)
+  - [1.6 Quyết định](#16-quyết-định)
+- [2. Checklist theo milestone](#2-checklist-theo-milestone)
+  - [M0 — Skeleton](#m0-skeleton)
+  - [M1 — Soft-PLC](#m1-soft-plc)
+  - [M2 — Plant + I/O import](#m2-plant-io-import)
+  - [M3 — Test automation](#m3-test-automation)
+  - [M4 — Comms + HMI](#m4-comms-hmi)
+  - [M5 — PLCSIM / S7 / SimaticML](#m5-plcsim-s7-simaticml)
+- [3. Việc kiểm bằng tay cần kiến thức điều khiển của anh (AI không tự làm được)](#3-việc-kiểm-bằng-tay-cần-kiến-thức-điều-khiển-của-anh-ai-không-tự-làm-được)
+  - [3.1 Ngữ nghĩa PLC (M1/M2)](#31-ngữ-nghĩa-plc-m1m2)
+  - [3.2 Chất lượng bộ test (M3)](#32-chất-lượng-bộ-test-m3)
+  - [3.3 Hiện trường (M4/M5)](#33-hiện-trường-m4m5)
+- [4. Mẫu ghi nhận kết quả rà soát (dán vào PR/`docs/acceptance/Mx.md`)](#4-mẫu-ghi-nhận-kết-quả-rà-soát-dán-vào-prdocsacceptancemxmd)
+
 > Nguyên tắc: **"xanh" trong báo cáo của AI chưa phải bằng chứng**. Anh (hoặc một AI reviewer độc lập, prompt H4) tự chạy lệnh và đọc diff. Mục 1 dùng cho **mọi** prompt; mục 2 theo milestone; mục 3 là việc kiểm bằng tay cần kiến thức điều khiển của anh.
 
 ---

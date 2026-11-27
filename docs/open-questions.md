@@ -1,5 +1,10 @@
 # Câu hỏi mở và giả định (open-questions)
 
+## Mục lục
+
+- [Mẫu một mục tốt](#mẫu-một-mục-tốt)
+- [Phân loại ưu tiên khi anh rà soát](#phân-loại-ưu-tiên-khi-anh-rà-soát)
+
 > AI **ghi vào đây** mọi mơ hồ/giả định/sai khác so với spec thay vì tự quyết im lặng. Chủ sản phẩm quyết định và cập nhật cột "Quyết định". Mục đã quyết giữ lại (không xóa) để truy vết; nếu ảnh hưởng kiến trúc → thêm ADR.
 > Tham chiếu trong mã: `TODO(OQ-019)`.
 
