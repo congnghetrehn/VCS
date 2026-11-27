@@ -1,5 +1,13 @@
 # ADR-0007: Tách `main()` ra `main.ts`, `index.ts` export-only (main-guard + tsup)
 
+## Mục lục
+
+- [Bối cảnh](#bối-cảnh)
+- [Các lựa chọn đã xem xét](#các-lựa-chọn-đã-xem-xét)
+- [Quyết định](#quyết-định)
+- [Hệ quả](#hệ-quả)
+- [Ghi chú xác minh](#ghi-chú-xác-minh)
+
 - **Trạng thái:** đã chấp nhận
 - **Ngày:** 2026-11-24
 - **Người quyết định:** chủ sản phẩm · **Người đề xuất:** AI (P0.5)
