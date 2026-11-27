@@ -14,7 +14,6 @@
 // `import.meta.url`.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,10 +22,10 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const BENCHES_TSX = ['tagdb', 'orchestrator', 'softplc'];
 const BENCHES_BUNDLED = ['plant', 'closedloop'];
 
-// tsx ở node_modules/.bin khi chạy qua pnpm (PATH đã có .bin); chạy trực
-// tiếp thì dùng tsx trên PATH.
-const localTsx = join(ROOT, 'node_modules', '.bin', process.platform === 'win32' ? 'tsx.cmd' : 'tsx');
-const tsx = existsSync(localTsx) ? localTsx : 'tsx';
+// Spawn node + CLI của tsx thay vì shim node_modules/.bin/tsx[.cmd]: cùng lỗi
+// EINVAL khi Node spawnSync file .cmd trên Windows (xem scripts/build-bench-
+// bundle.mjs). `dist/cli.mjs` là bin chính thức của tsx.
+const tsxCli = join(ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs');
 
 // Bundle plant + closedloop trước (D-008 B): đo bằng node thuần như
 // production; build lỗi → fail-fast, không chạy bench cũ.
@@ -41,7 +40,7 @@ if (build.status !== 0) {
 
 const failed = [];
 for (const name of BENCHES_TSX) {
-  const r = spawnSync(tsx, [`bench/${name}.bench.ts`], {
+  const r = spawnSync(process.execPath, [tsxCli, `bench/${name}.bench.ts`], {
     cwd: ROOT,
     stdio: 'inherit',
     env: { ...process.env, NODE_OPTIONS: '--expose-gc' },
