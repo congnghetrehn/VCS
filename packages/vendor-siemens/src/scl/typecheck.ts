@@ -1179,10 +1179,9 @@ class Typechecker {
       }
       const iface = this.lookupInterface(block.fbName, false);
       if (iface === undefined) return undefined;
-      // Layout instance DB (§3.5, OQ-125): VAR_INPUT + VAR_OUTPUT +
-      // VAR_IN_OUT (tham chiếu — 4 byte nội bộ, không lộ) + VAR(static),
-      // theo thứ tự khai báo. IN_OUT chiếm chỗ bằng DInt rồi loại khỏi
-      // fields (không lộ ra ngoài: truy cập field IN_OUT → T005).
+      // Layout instance DB (§3.5, OQ-399/A23): VAR_INPUT + VAR_OUTPUT +
+      // VAR_IN_OUT (kích thước tự nhiên, hiện field) + VAR(static),
+      // theo thứ tự khai báo.
       const toDecl = (v: IrVar): LayoutFieldDecl => ({
         name: v.name,
         type: v.type,
@@ -1191,7 +1190,7 @@ class Typechecker {
       const decls: LayoutFieldDecl[] = [
         ...iface.input.map(toDecl),
         ...iface.output.map(toDecl),
-        ...iface.inout.map((v): LayoutFieldDecl => ({ name: v.name, type: 'DInt' })),
+        ...iface.inout.map(toDecl),
         ...iface.static.map(toDecl),
       ];
       let laid: { fields: IrField[]; size: number };
@@ -1205,10 +1204,13 @@ class Typechecker {
         );
         return undefined;
       }
-      const inoutNames = new Set(iface.inout.map((v) => v.name.toLowerCase()));
-      const fields = laid.fields.filter((f) => !inoutNames.has(f.name.toLowerCase()));
+      const fields = laid.fields;
       const db: IrDb = { id: block.name, name: block.name, fbName: fb.name, fields, size: laid.size };
       this.dbs.set(key, db);
+      // Init DB (vd "DB_Sub".io := 5) áp dụng cho cả DB instance FB:
+      // trước A23 checkDbInit chỉ chạy ở nhánh DB STRUCT nên init ở
+      // đây từng bị bỏ qua im lặng — A23 ghim init vào field IN_OUT được.
+      this.checkDbInit(block, db);
       return db;
     }
     const fields = block.fields ?? [];

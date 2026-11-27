@@ -320,12 +320,13 @@ describe('lowerFile — OB số + DB/UDT trực tiếp', () => {
     expect(program.blocks.map((b) => b.name)).toEqual(['FB_X']);
     expect(program.dbs).toHaveLength(1);
     expect(program.dbs[0]?.fbName).toBe('FB_X');
-    // IN: Bool byte 0 bit 0; Q: Bool byte 0 bit 1; IO: slot DInt byte 2..5 (không lộ) → size 6.
+    // IN: Bool byte 0 bit 0; Q: Bool byte 0 bit 1; IO: Int byte 2 (2B) → size 4 (A23).
     expect(program.dbs[0]?.fields.map((f) => [f.name, f.byteOffset, f.size])).toEqual([
       ['IN', 0, 1],
       ['Q', 0, 1],
+      ['IO', 2, 2],
     ]);
-    expect(program.dbs[0]?.size).toBe(6);
+    expect(program.dbs[0]?.size).toBe(4);
   });
 });
 
