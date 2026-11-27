@@ -9,12 +9,12 @@
   - [3. VERIFY §14 với PLCSIM + mã thật](#3-verify-14-với-plcsim-mã-thật)
   - [4. Gate trên máy Windows thật](#4-gate-trên-máy-windows-thật)
   - [5. Quyết OQ-161 — layout IN_OUT của multi-instance lồng](#5-quyết-oq-161-layout-in_out-của-multi-instance-lồng)
-  - [6. Phán §16.5 — giữ mã lỗi tách riêng hay gom về U001?](#6-phán-165-giữ-mã-lỗi-tách-riêng-hay-gom-về-u001)
+  - [6. Phán §16.5 — giữ mã lỗi tách riêng hay gom về U001? — ✅ ĐÃ QUYẾT A 2026-11-27](#6-phán-165-giữ-mã-lỗi-tách-riêng-hay-gom-về-u001-đã-quyết-a-2026-11-27)
   - [7. Ký M1](#7-ký-m1)
   - [Quan sát (không phải lỗi)](#quan-sát-không-phải-lỗi)
 - [P0.9 — Kiosk trên tablet thật + HTTPS cho LAN (D-007)](#p09-kiosk-trên-tablet-thật-https-cho-lan-d-007)
   - [1. Kiosk trên tablet thật](#1-kiosk-trên-tablet-thật)
-  - [2. Quyết D-007 — HTTPS cho truy cập LAN](#2-quyết-d-007-https-cho-truy-cập-lan)
+  - [2. Quyết D-007 — HTTPS cho truy cập LAN — ✅ ĐÃ QUYẾT A 2026-11-27 (mkcert)](#2-quyết-d-007-https-cho-truy-cập-lan-đã-quyết-a-2026-11-27-mkcert)
 - [Các mục verify sau này](#các-mục-verify-sau-này)
   - [Probe layout — FB đa kiểu (D-010 A, OQ-400)](#probe-layout-fb-đa-kiểu-d-010-a-oq-400)
 
@@ -30,7 +30,7 @@
 | Milestone | Gói nghiệm thu | Ngày ký | Ghi chú |
 | --------- | -------------- | ------- | ------- |
 | M0 | `docs/acceptance/M0.md` | 2026-11-24 | 12/12 §15 ĐẠT; probe 3/3 PASS; Windows 439/439 |
-| M1 | `docs/acceptance/M1.md` | 2026-11-25 | 9/9 §16 ĐẠT; probe 4/4 PASS; §16.5 đã quyết A 2026-11-27; OQ-161 đã đóng 2026-11-27 bằng bằng chứng TIA (xem mục 5) |
+| M1 | `docs/acceptance/M1.md` | 2026-11-25 | 9/9 §16 ĐẠT; probe 4/4 PASS; §16.5 đã quyết A 2026-11-27 (mục 6); OQ-161 đã đóng 2026-11-27 bằng bằng chứng TIA (mục 5); D-009/D-010 đã quyết A 2026-11-27 (D-009 đang sửa, D-010 chờ probe FB_Probe) |
 
 ---
 
@@ -87,7 +87,6 @@ dòng 681 (11 std block). Phần VERIFIED đã có test ghim — anh chỉ cần
   cần SCR thêm ENO vào IR.
 - Intrinsics ở biên: `NORM_X`/`SCALE_X` với x ngoài [0..1] **không kẹp**;
   tập `X_TO_Y`/`BOOL_TO_*` chỉ nhận Int/DInt/Byte/Word/DWord.
-- OQ-161 (mục 5).
 
 **§16 — System block IEC:**
 
@@ -181,25 +180,24 @@ máy anh bắt được lỗi path có dấu cách mà CI không bắt — OQ-07
 ```text
 pnpm lint        # kỳ vọng: 0 lỗi
 pnpm typecheck   # kỳ vọng: sạch
-pnpm test        # kỳ vọng: 1927/1927 (76 file)
-pnpm test:e2e    # kỳ vọng: 6/6
+pnpm test        # kỳ vọng: toàn bộ xanh (develop 2026-11-27: 2910/2910; sau PR D-009: 2915/2915)
+pnpm test:e2e    # kỳ vọng: 14/14
 pnpm bench       # như mục 1
 ```
 
-Tiền lệ M0: máy anh chạy 439/439 sau fix OQ-074. Nếu test Windows đỏ, chụp log
-gửi AI — đừng sửa test để cho xanh.
+Tiền lệ M0: máy anh chạy 439/439 sau fix OQ-074 (T-001 ✅ ĐÃ XONG 2026-11-24). Còn lại ở mục này: e2e trên máy Windows thật chưa chạy + trạng thái .NET SDK/Playwright chưa báo cáo. Nếu test Windows đỏ, chụp log gửi AI — đừng sửa test để cho xanh.
 
 ### 5. Quyết OQ-161 — layout IN_OUT của multi-instance lồng
 
 **✅ ĐÃ ĐÓNG 2026-11-27 — bằng chứng TIA của anh (CPU 1511-1 PN).** Kiểm tra 1 (layout) đã đủ để kết luận — **IN_OUT lồng = kích thước tự nhiên**, không phải slot 4 byte: `DB_Motor.sub.io: Int` @30.0 (2 byte), `s` @32.0. Code hiện tại (`fbInterfaceStruct`) đã đúng, không đổi code; test bảng P giữ 38 byte. Kiểm tra 2 (PLCSIM, hành vi) **không còn cần cho OQ-161** — IN_OUT truyền bằng tham chiếu đã là ngữ nghĩa của TIA và của interpreter nhà mình (semantics §15, OQ-148).
 
-**Phát hiện thêm từ cùng bằng chứng (cần anh quyết — D-009/D-010, xem `docs/OWNER-INBOX.md`):**
-- OQ-125 bị bác bỏ: IN_OUT top-level cũng kích thước tự nhiên (`DB_Sub.io: Int` @4.0, 2 byte, `s` @6.0) — nhà mình đang slot DInt 4 byte, ẩn, đọc → T005 (DB_Sub 10 byte vs TIA 7 byte). → SCR OQ-399.
-- Lệch layout rộng hơn: Bool interface (nhà mình gói bit, TIA mỗi Bool 1 byte + căn chẵn — qRun @2.0 không phải @0.1); TON 18 vs 16 byte; CTU 10 vs 6 byte (TIA có CD/LD/QD, nhà mình không có); DB_Motor 33 vs 38 byte. → SCR OQ-400.
+**Phát hiện thêm từ cùng bằng chứng — cả hai đã quyết A 2026-11-27 (xem `docs/OWNER-INBOX.md`):**
+- OQ-125 bị bác bỏ: IN_OUT top-level cũng kích thước tự nhiên (`DB_Sub.io: Int` @4.0, 2 byte, `s` @6.0) — nhà mình đang slot DInt 4 byte, ẩn, đọc → T005 (DB_Sub 10 byte vs TIA 7 byte). → SCR OQ-399, **D-009 = A: sửa ngay phase nhỏ** — đang triển khai (branch `m1/d009-inout-natural`, PR đang mở; sau sửa DB_Sub 8 byte — lệch 1 byte đuôi so với TIA 7 thuộc OQ-400).
+- Lệch layout rộng hơn: Bool interface (nhà mình gói bit, TIA mỗi Bool 1 byte + căn chẵn — qRun @2.0 không phải @0.1); TON 18 vs 16 byte; CTU 10 vs 6 byte (TIA có CD/LD/QD, nhà mình không có); DB_Motor 33 vs 38 byte. → SCR OQ-400, **D-010 = A: probe thêm FB_Probe trước khi viết lại layout** — chờ anh làm probe (hướng dẫn ở cuối file, mục "Probe layout — FB đa kiểu").
 
 **Bảng đối chiếu TIA vs nhà mình (DB_Motor):** iStart @0.0 / qRun @2.0 / tOn @4.0 (TON_TIME 16 byte) / cCount @20.0 (CTU_INT 6 byte) / sub @26.0 (a @26.0, q @28.0, io @30.0, s @32.0) — tổng 33 byte. Nhà mình: iStart+qRun byte 0 / tOn @2 (18 byte) / cCount @20 (10 byte) / sub @30 (8 byte) — tổng 38 byte.
 
-### 6. Phán §16.5 — giữ mã lỗi tách riêng hay gom về U001?
+### 6. Phán §16.5 — giữ mã lỗi tách riêng hay gom về U001? — ✅ ĐÃ QUYẾT A 2026-11-27
 
 **Hiện trạng đã kiểm chứng bằng probe** (đều lỗi ồn ào, có vị trí, exit 2 —
 không cấu trúc nào chạy sai im lặng; xem `docs/acceptance/M1.md` §16.5):
@@ -216,11 +214,9 @@ Chữ spec §16.5 viết "`SCL-U001`" cho mọi lệnh/từ khóa chưa hỗ tr�
 EBNF §4.2 (`POINTER`, `ANY`) đi qua nhánh named-type rồi bị T001 tại đúng token
 kiểu; cấu trúc ngoài ngữ pháp (mảng nhiều chiều, `GOTO`) bị P002 tại đúng vị trí.
 
-- **A (đề xuất): giữ nguyên**, chỉ ghi anh chấp nhận phạm vi mã này, không sửa code.
-- **B: SCR gom mọi cấu trúc ngoài EBNF về một mã U001** — đổi spec + sửa parser,
-  làm ở phase sau.
+- **A: giữ nguyên** — đã chọn. Chỉ ghi anh chấp nhận phạm vi mã này, không sửa code.
 
-**Báo lại:** "§16.5: A hay B".
+**✅ ĐÃ QUYẾT 2026-11-27: chọn A.** Đã làm xong: M1 spec §16.5 câu 5 viết lại thành "báo lỗi ồn ào kèm vị trí — mã `SCL-U001` cho cấu trúc biết tên nhưng chưa hỗ trợ, `SCL-T001` cho kiểu chưa biết, `SCL-P002` cho cú pháp ngoài EBNF"; ghi AMENDMENTS **D9** (SCR chỉ đổi tài liệu). Không đổi parser, không đổi test/golden. Lựa chọn B (gom về U001) đã bị loại — xem phân tích ở `docs/OWNER-INBOX.md/D-006`.
 
 ### 7. Ký M1
 
@@ -230,7 +226,7 @@ ghi chữ ký vào `docs/STATE.md` §8 (ngày ký, người ký, ghi chú), mở
 chờ CI xanh rồi merge, sau đó đẩy main theo D-001 (PR develop → main, CI xanh,
 merge). Anh không cần tự sửa file.
 
-**Đã ký 2026-11-25.** §16.5 đã quyết A 2026-11-27; OQ-161 đã đóng 2026-11-27 bằng bằng chứng TIA (mục 5).
+**Đã ký 2026-11-25.** §16.5 đã quyết A 2026-11-27 (mục 6); OQ-161 đã đóng 2026-11-27 bằng bằng chứng TIA (mục 5); D-009/D-010 đã quyết A 2026-11-27 (sau ký — D-009 là phase sửa riêng theo SCR OQ-399, không đổi chữ ký M1; `docs/acceptance/M1.md` không chạm).
 
 ### Quan sát (không phải lỗi)
 
@@ -257,7 +253,7 @@ pull-to-refresh/zoom.
    (hoặc demo motor-interlock), mở trên tablet cùng mạng LAN… **nhưng** lưu ý:
    PWA qua HTTP trên LAN **không** đăng ký được service worker (mục 2 dưới)
    — để kiểm kiosk đầy đủ (offline + cài đặt), mở trên chính máy server
-   (`http://127.0.0.1:4170/?kiosk=1`) hoặc chờ D-007 (HTTPS) xong.
+   (`http://127.0.0.1:4170/?kiosk=1`) hoặc chờ triển khai mkcert xong (D-007 đã quyết A, chưa triển khai TLS).
 2. Mở `http://127.0.0.1:4170/?kiosk=1` trên tablet (hoặc trình duyệt máy anh
    giả lập): header (chọn ngôn ngữ, đổi theme, tab Tags/PLC) phải **ẩn**;
    chỉ còn thanh kiosk với nút Fullscreen/Thoát.
@@ -277,21 +273,20 @@ từ nút bấm nên phải vào được).
 
 **Báo lại:** "Kiosk tablet: đạt / lỗi ở bước X (máy + trình duyệt)".
 
-### 2. Quyết D-007 — HTTPS cho truy cập LAN
+### 2. Quyết D-007 — HTTPS cho truy cập LAN — ✅ ĐÃ QUYẾT A 2026-11-27 (mkcert)
 
 **Mục đích:** chọn cách đưa PWA lên LAN để tablet ở hiện trường dùng được
 offline + cài đặt (service worker chỉ chạy trên HTTPS/localhost).
 
-**Lựa chọn (ADR-0009):**
-- **A (AI đề xuất): mkcert** — chứng chỉ local tin cậy được, trình duyệt
-  không cảnh báo; server chỉ thêm cert/key qua env, mặc định vẫn HTTP
-  localhost. Mỗi máy client cài root CA của mkcert một lần.
-- **B: Reverse proxy (Caddy/nginx + TLS)** — không sửa server VCS, nhưng
-  thêm một thành phần vận hành riêng cho mỗi site.
-- **C: Chỉ localhost** — không làm gì thêm; tablet LAN không dùng được PWA.
+**✅ ĐÃ QUYẾT 2026-11-27: chọn A (mkcert).** ADR-0009 đã cập nhật trạng thái đã quyết. Lựa chọn B (reverse proxy) giữ làm phương án dự phòng — nếu triển khai mkcert xong mà tablet vẫn không đăng ký được SW dù đã cài CA thì xem lại B.
 
-**Báo lại:** "D-007: A / B / C". Không chặn P0.9 — PWA đã đầy đủ trên
-localhost; quyết xong mới triển khai ở phase sau.
+**Việc tiếp theo (chưa làm — việc riêng sau P0.9, không trong P0.9):**
+1. `mkcert -install` 1 lần trên máy chủ.
+2. `mkcert <tên-máy/IP-LAN>` tạo cert cho tên-máy/IP-LAN.
+3. Server đọc cert/key qua env (`VCS_TLS_CERT`/`VCS_TLS_KEY` hoặc tương đương) khi được cấu hình — mặc định vẫn HTTP + bind `127.0.0.1`.
+4. Cài CA root mkcert lên từng tablet 1 lần.
+5. Gia hạn cert theo chu kỳ mkcert.
+WS đã tự chọn `wss:` khi `https:` nên không sửa code web.
 
 ---
 

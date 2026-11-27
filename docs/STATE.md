@@ -138,6 +138,19 @@
   - [File mới/sửa](#file-mớisửa-5)
   - [OQ mới (OQ-382…398) + tier C còn mở](#oq-mới-oq-382398-tier-c-còn-mở)
   - [Kết quả implement](#kết-quả-implement)
+- [§33 — D-009 — resolveDb: IN_OUT top-level theo kích thước tự nhiên (PLAN)](#33-d-009-resolvedb-in_out-top-level-theo-kích-thước-tự-nhiên-plan)
+  - [Đọc (kiểm chứng bằng code thật, không suy đoán)](#đọc-kiểm-chứng-bằng-code-thật-không-suy-đoán-3)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng-8)
+  - [Phạm vi](#phạm-vi-7)
+  - [Thiết kế](#thiết-kế-7)
+  - [Bảng tính tay](#bảng-tính-tay-3)
+  - [Mơ hồ (phân loại)](#mơ-hồ-phân-loại-6)
+  - [Test target + gate](#test-target-gate-6)
+  - [Rủi ro top-3](#rủi-ro-top-3-7)
+  - [Commit plan (5 commit, mỗi commit gate xanh)](#commit-plan-5-commit-mỗi-commit-gate-xanh)
+  - [File mới/sửa](#file-mớisửa-6)
+  - [OQ mới + tier C còn mở](#oq-mới-tier-c-còn-mở)
+  - [Kết quả implement](#kết-quả-implement-1)
 
 > **AI đọc file này đầu mỗi phiên và cập nhật cuối mỗi phiên.** Chủ sản phẩm kiểm tra và ký ở mục "Ký duyệt milestone". Giữ ngắn: tối đa ~150 dòng; lịch sử chi tiết nằm ở git và `docs/acceptance/`.
 
