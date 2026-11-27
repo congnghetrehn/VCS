@@ -171,7 +171,7 @@ Thuật toán mặc định:
 Trả về `FieldInfo { name, type, byteOffset, bitOffset?, size }`. M1 chỉ cần layout đúng và truy cập đúng; export địa chỉ tuyệt đối cho Snap7 là việc sau, nhưng layout phải đúng ngay để khỏi sửa.
 
 ### 3.5 Instance DB và multi-instance
-- Mỗi FB được gọi với instance DB (`"FB_Motor_DB"`) có layout = `VAR_INPUT + VAR_OUTPUT + VAR_IN_OUT(tham chiếu, M1: 4 byte nội bộ không lộ) + VAR(static)` theo thứ tự khai báo.
+- Mỗi FB được gọi với instance DB (`"FB_Motor_DB"`) có layout = `VAR_INPUT + VAR_OUTPUT + VAR_IN_OUT (kích thước tự nhiên, hiện field) + VAR(static)` theo thứ tự khai báo.
 - Multi-instance: FB con khai báo trong `VAR` (static) của FB cha → layout lồng trong instance DB của cha.
 - System FB (`TON`, `CTU`, `R_TRIG`...) khai báo trong `VAR` như một kiểu: `sT : TON;` → vùng con có layout định nghĩa trong `std/*.ts` (gồm trường công khai + trường nội bộ ẩn như `_startTime`, `_state`).
 
