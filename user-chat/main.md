@@ -3322,3 +3322,19 @@ Dạ, parent gate **ĐẠT** rồi ạ — kiểm chứng độc lập trên b�
 ---
 Log tới thời điểm 2026-11-27 19:51 +07.
 ---
+
+## 2026-11-27 20:23 +07 — em My
+
+Dạ, PR #43 **MERGED** rồi ạ — em đã kiểm chứng độc lập qua GitHub: develop head đúng `6ae8775` ("Merge pull request #43 from congnghetrehn/m2/g2-acceptance"), PR #43 `merged: true`, và file `docs/acceptance/M2.md` trên develop trùng byte-identical với bản local (sha256 `7b355587…`). CI run #355 xanh 3m9s (test 2 915/2 915, e2e xanh; chỉ 3 cảnh báo Node 20 deprecation, không lỗi); merge bằng merge commit, nhánh `m2/g2-acceptance` giữ nguyên không xóa. Gói G2 đã vào develop ạ. Việc còn lại chờ anh: rà `docs/acceptance/M2.md` + tick R-010, gửi file I/O thật (sang tuần) để đo §14 #4, rồi ký M2 ở docs/STATE.md/§8. Em đang cập nhật VCS Tracker theo số mới ạ.
+
+---
+Log tới thời điểm 2026-11-27 20:23 +07.
+---
+
+## 2026-11-27 20:26 +07 — em My
+
+Dạ, VCS Tracker đã cập nhật xong theo snapshot 20:23 ạ: develop head `6ae8775` (PR #43), test 2 915/2 915, e2e 26 passed + 1 skipped, quyết định 10/10; mục "Vừa xong" là gói G2 PR #43, mục "Đang chờ anh" vẫn 7 mục như cũ.
+
+---
+Log tới thời điểm 2026-11-27 20:26 +07.
+---
