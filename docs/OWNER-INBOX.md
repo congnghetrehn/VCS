@@ -20,7 +20,7 @@
   - [T-003 · Spike S3 — TIA Openness export · Chặn: P5.7 · Ước tính: 1 ngày · Cần: TIA (Offline), nhóm `Siemens TIA Openness`](#t-003-spike-s3-tia-openness-export-chặn-p57-ước-tính-1-ngày-cần-tia-offline-nhóm-siemens-tia-openness)
   - [T-004 · Spike S5 — SCADA smoke test · Chặn: P4.4 · Ước tính: 0.5 ngày · Cần: SCADA đích](#t-004-spike-s5-scada-smoke-test-chặn-p44-ước-tính-05-ngày-cần-scada-đích)
 - [3. DỮ LIỆU CẦN CÓ (X)](#3-dữ-liệu-cần-có-x)
-  - [X-003 · P2.7: cần I/O list thật để đo acceptance suggest ≥ 90% (tier C — chặn nghiệm thu thật, KHÔNG chặn code/merge P2.7) · Hạn mong muốn: trước khi ký M2 (G2) — ✅ ĐÃ QUYẾT B 2026-11-26 21:55](#x-003-p27-cần-io-list-thật-để-đo-acceptance-suggest-90-tier-c-chặn-nghiệm-thu-thật-không-chặn-codemerge-p27-hạn-mong-muốn-trước-khi-ký-m2-g2-đã-quyết-b-2026-11-26-2155)
+  - [X-003 · P2.7: cần I/O list thật để đo acceptance suggest ≥ 90% (tier C — chặn nghiệm thu thật, KHÔNG chặn code/merge P2.7) · Hạn mong muốn: trước khi ký M2 (G2) — ✅ ĐÃ QUYẾT A 2026-11-27 15:15 (đổi từ B 2026-11-26 21:55)](#x-003-p27-cần-io-list-thật-để-đo-acceptance-suggest-90-tier-c-chặn-nghiệm-thu-thật-không-chặn-codemerge-p27-hạn-mong-muốn-trước-khi-ký-m2-g2-đã-quyết-a-2026-11-27-1515-đổi-từ-b-2026-11-26-2155)
 - [4. THAY ĐỔI SPEC / LỚN (S)](#4-thay-đổi-spec-lớn-s)
   - [S-001 · PRD §9 dùng M1–M8 cho lĩnh vực chức năng, trùng số milestone M0–M5 (Spec Change Request) · Nguồn: docs-audit §4 SCR-001, PRD §9 vs §13](#s-001-prd-9-dùng-m1m8-cho-lĩnh-vực-chức-năng-trùng-số-milestone-m0m5-spec-change-request-nguồn-docs-audit-4-scr-001-prd-9-vs-13)
   - [S-002 · Số golden test M1: PRD §13 nói ≥ 60, M1 §16 nói ≥ 80 · Nguồn: docs-audit §4 SCR-002](#s-002-số-golden-test-m1-prd-13-nói-60-m1-16-nói-80-nguồn-docs-audit-4-scr-002)
@@ -36,9 +36,9 @@
 Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần cứng) · **X** DỮ LIỆU CẦN CÓ · **S** THAY ĐỔI SPEC/LỚN · **K** KÝ DUYỆT milestone · **R** DUYỆT SAU (tầng B)
 
 ## 0. Tóm tắt (AI cập nhật mỗi lần ghi)
-- Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). X-003 chặn nghiệm thu thật P2.7 (đo acceptance suggest ≥ 90% trên I/O list thật) — không chặn code/merge P2.7; ĐÃ QUYẾT B 2026-11-26 21:55 (hoãn đo, acceptance UNVERIFIED tới khi có dữ liệu). D-001/D-002/D-003/D-004/D-005/D-006/D-007 ĐÃ XONG; M0 ĐÃ KÝ 2026-11-24; M1 ĐÃ KÝ 2026-11-25.
+- Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). X-003 chặn nghiệm thu thật P2.7 (đo acceptance suggest ≥ 90% trên I/O list thật) — không chặn code/merge P2.7; ĐÃ QUYẾT A 2026-11-27 15:15 (gửi file I/O thật để đo; đang chờ file, acceptance UNVERIFIED tới khi đo xong). D-001/D-002/D-003/D-004/D-005/D-006/D-007 ĐÃ XONG; M0 ĐÃ KÝ 2026-11-24; M1 ĐÃ KÝ 2026-11-25.
 - Việc cần anh trong tuần này: probe FB_Probe (D-010 A — xem `docs/verify-owner-guide.md`); chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA; VERIFY §14 với PLCSIM + mã thật (xem `docs/verify-owner-guide.md` mục 3)
-- Cập nhật lần cuối: 2026-11-27 (D-009 + D-010 ĐÃ QUYẾT A; OQ-161 ĐÃ ĐÓNG bằng bằng chứng TIA 2026-11-27 — IN_OUT lồng kích thước tự nhiên, code đúng không đổi; OQ-399/OQ-400 mới (SCR: OQ-125 bị bác bỏ + lệch layout rộng hơn); D-002 + D-006 ĐÃ QUYẾT A; D-003 ĐÃ QUYẾT A + D-007 ĐÃ QUYẾT A (mkcert); T-001 ĐÃ XONG 2026-11-24 23:02 +07; P2.8 MERGED PR #39 02:58 +07)
+- Cập nhật lần cuối: 2026-11-27 (D-009 + D-010 ĐÃ QUYẾT A; OQ-161 ĐÃ ĐÓNG bằng bằng chứng TIA 2026-11-27 — IN_OUT lồng kích thước tự nhiên, code đúng không đổi; OQ-399/OQ-400 mới (SCR: OQ-125 bị bác bỏ + lệch layout rộng hơn); D-002 + D-006 ĐÃ QUYẾT A; D-003 ĐÃ QUYẾT A + D-007 ĐÃ QUYẾT A (mkcert); T-001 ĐÃ XONG 2026-11-24 23:02 +07; P2.8 MERGED PR #39 02:58 +07; X-003 ĐÃ QUYẾT A 15:15 — đổi từ B, đang chờ file I/O thật)
 - Nhãn/milestone GitHub (II.7): CHƯA CHẠY — GitHub MCP không có tool tạo nhãn/milestone (46 tool đã kiểm, không có); cần làm qua giao diện GitHub hoặc chủ sản phẩm. Không tự đổi branch protection (D-001).
 
 ---
@@ -90,7 +90,7 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 **Lựa chọn:**
 - [x] A — KHÔNG đưa dữ liệu thật vào công cụ AI / repo; chỉ dữ liệu ẩn danh đặt ở `fixtures-real/` (đã .gitignore) hoặc kho riêng
 - [ ] B — Cho phép dùng dữ liệu thật có giới hạn: …
-**✅ ĐÃ QUYẾT 2026-11-27: chọn A.** Dữ liệu thật chỉ được dùng sau khi ẩn danh (xóa/đổi tên khách hàng, tên dự án, IP, ghi chú nội bộ; giữ nguyên cấu trúc cột + tên tag/thiết bị + mô tả), đặt ở `fixtures-real/` (đã .gitignore — không vào repo) hoặc kho riêng; AI chỉ đọc trong VM, không commit. Áp dụng cho X-003…X-008 (I/O list, C&E, SimaticML, SCADA). X-003 hiện đang chọn B (hoãn, 2026-11-26) — không đổi; khi nào có file thật thì phải ẩn danh theo A mới được đưa vào. Không đổi spec (AMENDMENTS E8 đã ghi nguyên tắc này). Nếu hợp đồng khách hàng yêu cầu khác thì quyết lại (mở B).
+**✅ ĐÃ QUYẾT 2026-11-27: chọn A.** Dữ liệu thật chỉ được dùng sau khi ẩn danh (xóa/đổi tên khách hàng, tên dự án, IP, ghi chú nội bộ; giữ nguyên cấu trúc cột + tên tag/thiết bị + mô tả), đặt ở `fixtures-real/` (đã .gitignore — không vào repo) hoặc kho riêng; AI chỉ đọc trong VM, không commit. Áp dụng cho X-003…X-008 (I/O list, C&E, SimaticML, SCADA). X-003 đã đổi sang A 2026-11-27 15:15 (gửi file I/O thật để đo); file thật phải ẩn danh theo A mới được đưa vào. Không đổi spec (AMENDMENTS E8 đã ghi nguyên tắc này). Nếu hợp đồng khách hàng yêu cầu khác thì quyết lại (mở B).
 **Đề xuất của AI:** A, vì đây là dữ liệu khách hàng + dự án TIA.
 **Hệ quả nếu chọn khác:** B thì cần quy tắc ẩn danh + kho lưu trữ cụ thể trước khi đưa.
 **Việc đang chờ:** X-003…X-008 · **Liên quan:** AGENTS §8, BOOTSTRAP bước 7
@@ -248,15 +248,16 @@ Không phải code sai — code làm đúng "lỗi ồn ào + vị trí". Mâu t
 - [ ] X-003 · I/O list thật + quy ước tên tag · cần trước P2.7
 - [ ] X-004 · C&E thật + biểu mẫu FAT + cách PLC nhận start/stop/reset · cần trước P3.4–P3.5
 
-### X-003 · P2.7: cần I/O list thật để đo acceptance suggest ≥ 90% (tier C — chặn nghiệm thu thật, KHÔNG chặn code/merge P2.7) · Hạn mong muốn: trước khi ký M2 (G2) — ✅ ĐÃ QUYẾT B 2026-11-26 21:55
+### X-003 · P2.7: cần I/O list thật để đo acceptance suggest ≥ 90% (tier C — chặn nghiệm thu thật, KHÔNG chặn code/merge P2.7) · Hạn mong muốn: trước khi ký M2 (G2) — ✅ ĐÃ QUYẾT A 2026-11-27 15:15 (đổi từ B 2026-11-26 21:55)
 **Bối cảnh:** P2.7 đã cài xong engine auto-suggest (§9) và đo được trên fixture tổng hợp 300 tín hiệu (177 có ground truth). Nhưng fixture chỉ là xấp xỉ quy ước tên thật (M2 §16 mục 1, AMENDMENTS E8): số ≥ 90% trên fixture KHÔNG chứng minh được 90% trên dữ liệu thật. Cần I/O list thật (đã ẩn danh theo D-003) để đo acceptance và hiệu chỉnh `naming.yaml`/synonym.
 **Cần anh cung cấp (chọn 1 trong 2 cách):**
-- [ ] A — File I/O list thật (1–2 dự án, đã ẩn danh: xóa/đổi tên khách hàng, tên dự án, IP, ghi chú nội bộ; giữ nguyên cấu trúc cột + tên tag/thiết bị + mô tả): định dạng XLSX hoặc CSV, ≥ 100 tín hiệu, có cột tag / mô tả / loại / địa chỉ (cột equipment nếu có càng tốt) + file `naming.yaml` hoặc mô tả quy ước đặt tên đang dùng (vd tiền tố thiết bị, hậu tố role). Đặt file vào `fixtures-real/` (đã .gitignore — không vào repo) hoặc gửi qua kênh riêng; AI chỉ đọc trong VM, không commit.
-- [x] B — Chưa có file lúc này: P2.7 merge với bằng chứng fixture, acceptance thật ghi UNVERIFIED tới khi có dữ liệu (M2 ký sau). **← ĐÃ CHỌN 2026-11-26 21:55.**
+- [x] A — File I/O list thật (1–2 dự án, đã ẩn danh: xóa/đổi tên khách hàng, tên dự án, IP, ghi chú nội bộ; giữ nguyên cấu trúc cột + tên tag/thiết bị + mô tả): định dạng XLSX hoặc CSV, ≥ 100 tín hiệu, có cột tag / mô tả / loại / địa chỉ (cột equipment nếu có càng tốt) + file `naming.yaml` hoặc mô tả quy ước đặt tên đang dùng (vd tiền tố thiết bị, hậu tố role). Đặt file vào `fixtures-real/` (đã .gitignore — không vào repo) hoặc gửi qua kênh riêng; AI chỉ đọc trong VM, không commit. **← ĐÃ CHỌN 2026-11-27 15:15 (đổi từ B).**
+- [ ] B — Chưa có file lúc này: P2.7 merge với bằng chứng fixture, acceptance thật ghi UNVERIFIED tới khi có dữ liệu (M2 ký sau). (Đã chọn 2026-11-26 21:55, đã đổi sang A 2026-11-27 15:15.)
 **Cách AI dùng:** chạy `vcs suggest` trên file thật, so equipment+role với ground truth do anh xác nhận (AI in bảng, anh duyệt/tick đúng-sai hoặc đưa file đối chiếu); pass khi ≥ 90% tín hiệu và ≥ 95% thiết bị đúng (§11.3); nếu < 90% thì AI chỉnh `naming.yaml`/synonym (đổi dữ liệu, không đổi thuật toán) rồi đo lại. Kết quả ghi vào `docs/acceptance/M2.md`.
 **Đề xuất của AI:** A, vì đây là dữ liệu quan trọng nhất để M2 sát thực tế (M2 §16 mục 1); B chỉ hoãn việc đo, không hoãn code.
-**Việc đang chờ:** P2.7 (plan §31, OQ-380) · **Liên quan:** D-003 (chính sách dữ liệu — chưa quyết), STATE §31, OQ-374/380
+**Việc đang chờ:** P2.7 (plan §31, OQ-380) — đang chờ file I/O thật của anh · **Liên quan:** D-003 (chính sách dữ liệu — ĐÃ QUYẾT A 2026-11-27), STATE §31, OQ-374/380
 **Quyết định 2026-11-26 21:55 (owner chọn B):** chưa có file lúc này — hoãn đo acceptance; P2.7 merge với bằng chứng fixture, acceptance thật UNVERIFIED tới khi có dữ liệu, M2 ký sau. OQ-380 giữ MỞ. P2.7 không đo/không hiệu chỉnh theo dữ liệu thật.
+**Quyết định 2026-11-27 15:15 (owner đổi sang A):** gửi file I/O thật để đo acceptance (§14 #4, ≥ 90% tín hiệu / ≥ 95% thiết bị); đang chờ file — chưa có `fixtures-real/`. OQ-380 vẫn MỞ tới khi đo xong.
 - [ ] X-005 · SCADA đích + ví dụ node id/tag + chính sách bảo mật · cần trước P4.4
 - [ ] X-006 · Windows có TIA + PLCSIM Advanced (+ giấy phép, nhóm quyền) · cần trước P5.4/P5.6 (spike S2, S3 nên sớm)
 - [ ] X-007 · ≥ 10 file SimaticML thật + XSD Openness · cần trước P5.7

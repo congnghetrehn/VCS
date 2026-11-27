@@ -1,0 +1,14 @@
+# Project rỗng tối thiểu cho e2e G2 (viết tay, G2 §34) — base cho 1 test duy nhất
+# đi trọn luồng §14 #8: import variant sạch → commit → duyệt gợi ý → chạy →
+# tiêm lỗi → quan sát. 0 tag, controller loopback, KHÔNG có `plc/` (lấy
+# motor-interlock làm base thì commit xóa 8 tag baseline → PLC mất tag).
+schemaVersion: 1
+name: G2 Empty Project
+language: vi
+seed: 1
+simulation: { stepMs: 100, plcScanMs: 100 }
+controllers:
+  - id: PLC1
+    mode: builtin
+    vendor: demo
+    model: loopback

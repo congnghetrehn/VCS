@@ -110,9 +110,17 @@ NGUYÊN NHÂN ĐÃ RÕ (2026-11-27 14:23): Node `spawnSync` file `.cmd` lỗi
 …esbuild.cmd EINVAL`); esbuild chạy tay OK (bundle plant 923.9kb/416ms),
 `esbuild.exe` nguyên vẹn 11 694 592 byte. Cách sửa: script gọi thẳng `node` +
 entry JS (`node_modules/esbuild/bin/esbuild`,
-`node_modules/tsx/dist/cli.mjs`) thay vì spawn file `.cmd` — đang sửa trên
-nhánh `m2/bench-windows-spawn` (PR → develop → anh chạy lại `pnpm bench`).
+`node_modules/tsx/dist/cli.mjs`) thay vì spawn file `.cmd` — đã sửa trên
+nhánh `m2/bench-windows-spawn`, PR #42 MERGED vào develop 2026-11-27 14:55 +07
+(merge commit 5a9cc99, CI #347 xanh 2m24s, test 2915/2915) — anh
+`git checkout develop`, `git pull`, rồi chạy lại `pnpm bench`.
 Node trên máy anh: v26.13.0.
+**Kết quả chạy lại — 2026-11-27 15:08 +07, `develop` sau PR #42: 5/5 PASS** —
+build bundle xong (plant + closedloop); TagDB 100 303 468 ops/s; orchestrator
+1 034 340 bước/s; softplc 3 833 scan/s (±0.23 MB); plant 5 957 bước/s
+(≥ 1 500); closedloop 3 340 bước/s (≥ 1 000; tách plant 0.048 ms / PLC
+0.234 ms / còn lại 0.017 ms, tổng 0.299 ms/bước). Máy anh nhanh hơn VM
+~2–2.5× ở mọi bench. **Mục §1 ĐÃ XONG.**
 
 **Báo lại:** con số softplc scan/s anh đo được. Nếu dưới 1000 → tier C: dừng
 lại bàn, không hạ ngưỡng, không sửa kỳ vọng để cho qua.
