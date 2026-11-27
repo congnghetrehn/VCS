@@ -2461,3 +2461,170 @@ Dạ, em đổi tên thành ChaMuse_02 rồi ạ. Từ giờ em sẽ xưng em My
 ---
 Log tới thời điểm 2026-11-27 07:54 +07.
 ---
+
+## 2026-11-27 09:04 +07 — anh Tiến
+
+anh đang xem và duyệt Owner-inbox.md, em update cho anh các quyết định sau:
+- D-003: chọn A
+- D-007: chọn A
+
+các quyết định cần phần tích rõ ý nghĩa và ảnh hưởng của từng lựa chọn:
+- D-002: nếu chọn giấy phép nguồn mở thì sao? unlicensed (A) thì có được dùng trong công việc của tôi ko?
+- D-006: phân tích lại các lựa chọn và tài liệu/mục liên quan để a đọc kỹ
+
+các quyết định khác đã chọn thì đánh dấu ✅ ĐÃ QUYẾT như ở D-008
+
+## 2026-11-27 09:04 +07 — ChaMuse
+
+ChaMuse cập nhật xong rồi ạ, anh Tiến ơi. D-003 chọn A và D-007 chọn A (mkcert) đã tick và ghi ✅ ĐÃ QUYẾT 2026-11-27 trong OWNER-INBOX.md; các quyết định đã chọn khác (D-001, D-004, D-005, X-003) cũng đã gắn ✅ như D-008. ADR-0009 và STATE.md đã cập nhật theo.
+
+Hai phân tích anh nhờ, em viết đầy đủ trong OWNER-INBOX.md để anh đọc kỹ ạ:
+- D-002: A (UNLICENSED) anh dùng thoải mái trong công việc của mình vì anh là chủ bản quyền — hạn chế chỉ ở người khác (họ không được dùng/sao chép khi chưa có phép riêng của anh). Chọn B (MIT/Apache-2.0) thì ai cũng dùng được, kể cả đối thủ; GPL thì không nên vì copyleft. Trước khi mở mã cần rà soát phần tích hợp Siemens.
+- D-006: chữ spec §16.5 nói rộng hơn thực tế — parser phân loại theo tầng nên String → U001, kiểu lạ → T001, sai cú pháp → P002, cả 5 probe đều lỗi ồn ào có vị trí, exit 2. Em vẫn đề xuất A, kèm sửa 1 câu chữ spec cho đúng 3 mã (SCR chỉ đổi tài liệu, không sửa code); chọn B thì mất độ chi tiết chẩn đoán và phải sửa parser + churn test.
+
+Các thay đổi đang ở cây làm việc (3 file: OWNER-INBOX.md, STATE.md, ADR-0009). Anh muốn em đẩy lên GitHub luôn bằng PR docs riêng, hay để vào PR sau ạ?
+
+---
+Log tới thời điểm 2026-11-27 09:04 +07.
+---
+
+## 2026-11-27 09:12 +07 — anh Tiến
+
+D-002: chọn A
+D-006: chọn A
+
+## 2026-11-27 09:12 +07 — em My
+
+Dạ, em ghi xong rồi ạ. D-002 và D-006 đều đã chọn A, tick ✅ ĐÃ QUYẾT 2026-11-27 trong OWNER-INBOX.md. Với D-006, em đã làm luôn phần sửa 1 câu chữ M1 §16.5 cho đúng 3 mã (U001/T001/P002) và ghi AMENDMENTS D9 — chỉ đổi tài liệu, không sửa code, parser hay test ạ.
+
+Một điểm nhỏ em xin nói thêm ạ: AGENTS.md §4 còn viết tắt "lệnh/cú pháp chưa hỗ trợ → lỗi SCL-U001" — theo thứ tự ưu tiên thì AMENDMENTS D9 thắng dòng đó, nên không sai quy trình, nhưng nếu anh muốn em sửa luôn dòng đó cho khớp thì em sửa ạ.
+
+Giờ tất cả các quyết định D-001…D-007 đều đã xong, anh Tiến ơi. Còn chờ anh là OQ-161, T-001/T-002/T-003, VERIFY §14, R-010 và X-003 (đang hoãn).
+
+Các thay đổi đang ở cây làm việc (5 file: OWNER-INBOX.md, STATE.md, ADR-0009, M1 spec, AMENDMENTS.md), để vào PR sau cùng với lựa chọn đẩy PR docs anh chưa chọn ở trên ạ.
+
+---
+Log tới thời điểm 2026-11-27 09:12 +07.
+---
+
+## 2026-11-27 09:22 +07 — anh Tiến
+
+thảo luận OQ-161: 
+- P1.4 đọc ở đâu?
+- giải thích dễ hiểu về layout instance DB vs multi-instance lồng
+- em recommend chọn gì?
+- có cần test trên PLCSIM để kết luận ko? (hướng dẫn chi tiết nếu cần test PLCSIM)
+
+## 2026-11-27 09:22 +07 — ChaMuse
+
+Dạ, ChaMuse trình bày từng câu ạ, anh Tiến ơi.
+
+**1. P1.4 đọc ở đâu?**
+- `docs/STATE.md` §19 — plan + kết quả P1.4 (OQ-161 sinh ra ở mục "Lệch plan" số 11).
+- `docs/open-questions.md`: OQ-161 (dòng 169), OQ-125 (dòng 133, quy tắc slot 4 byte), OQ-173 (dòng 183).
+- M1 spec §3.5 (dòng 122–124) — quy tắc layout instance DB.
+- Code: `packages/vendor-siemens/src/scl/typecheck.ts` — `resolveDb` (~dòng 1183: DB top-level, IN_OUT chiếm slot DInt 4 byte rồi giấu) và `fbInterfaceStruct` (~dòng 611: FB con lồng, IN_OUT theo kích thước tự nhiên).
+- Test ghim hành vi hiện tại: `packages/vendor-siemens/src/scl/softplc-std.test.ts:214` (bảng P, DB 38 byte).
+- Hướng dẫn quyết: `docs/verify-owner-guide.md` mục 5 (lựa chọn A/B) và `docs/acceptance/M1.md` mục OQ-161.
+
+**2. Giải thích dễ hiểu**
+Anh cứ hình dung instance DB là một ngăn kéo chia ô theo đúng thứ tự khai báo. Mỗi biến chiếm một ô to bằng kích thước kiểu của nó. IN_OUT thì đặc biệt: nó không phải dữ liệu riêng của FB, mà là một "tờ giấy ghi chú" bảo FB "ghi kết quả trả lại vào biến của nơi gọi". Câu hỏi OQ-161 là: tờ giấy ghi chú này to bao nhiêu?
+- **DB top-level (đã quyết, OQ-125):** tờ giấy luôn 4 byte (slot DInt), giấu đi — đọc field IN_OUT trong DB sẽ báo lỗi T005.
+- **FB con lồng trong static của FB cha (chưa quyết, OQ-161):** tờ giấy to bằng kích thước tự nhiên của kiểu — vd `io: Int` thì 2 byte.
+
+Ví dụ cụ thể trong test bảng P (`FB_Motor` chứa `sub: FB_Sub`, `FB_Sub` có `io: Int` ở VAR_IN_OUT). DB_Motor hiện tại 38 byte:
+| Ô | Byte | Giải thích |
+|---|---|---|
+| `iStart` + `qRun` | 0 | 2 bit trong 1 byte |
+| `tOn` (TON) | 2–19 | 18 byte |
+| `cCount` (CTU) | 20–29 | 10 byte |
+| `sub` (FB_Sub lồng) | 30–37 | 8 byte, trong đó `io: Int` chiếm 2 byte tự nhiên |
+
+Nếu lật sang "IN_OUT lồng cũng là tham chiếu 4 byte" thì `io` từ 2 → 4 byte, `sub` thành 10 byte, DB thành **40 byte** + phải sửa `fbInterfaceStruct`, sửa test bảng P, mở SCR. Về hành vi chạy thì không đổi gì — interpreter nhà mình đã truyền IN_OUT bằng tham chiếu rồi (`semantics.md` §15: "IN_OUT = alias trực tiếp, không copy-back"). Chỉ layout bộ nhớ là khác — mà layout sai thì mọi thứ đọc DB theo địa chỉ tuyệt đối (HMI, SCADA, S7 comms, bảng xem DB của TIA) sẽ đọc lệch byte.
+
+**3. ChaMuse recommend gì?**
+Em recommend **A — hoãn tới khi có bằng chứng PLCSIM/S1, đừng lật vội**, vì 3 lý do ạ:
+- M1 đã ký với mặc định 38 byte; lật khi chưa có bằng chứng là đổi một hành vi đã ký chỉ bằng suy đoán. Mà suy đoán theo hướng "nhất quán thì phải 4 byte" nghe hợp lý nhưng chưa chắc TIA làm vậy — TIA có thể nhúng nguyên struct interface của FB con vào DB cha.
+- Cái giá khi đoán sai là layout lệch với PLC thật (sai cả kích thước DB lẫn offset các field sau `sub`) — đúng kiểu lỗi im lặng mà dự án này sợ nhất.
+- Không gấp: M2 không chạm FB lồng có IN_OUT, nên cứ để mở tới khi có dữ liệu S1/PLCSIM cũng không chặn việc gì.
+- Chỉ chọn **B** (quyết ngay là tham chiếu 4 byte) khi anh chắc từ kinh nghiệm hiện trường — vd anh đã từng mở bảng xem DB của TIA và thấy `sub.io` chiếm 4 byte. Khi đó em sửa ngay trong phase sau.
+
+**4. Có cần test trên PLCSIM để kết luận không?**
+Dạ cần — nhưng chỉ một nửa cần PLCSIM, một nửa chỉ cần TIA Portal biên dịch là đủ. Nửa layout (38 hay 40) quyết bằng TIA, nửa hành vi (ghi trả qua tham chiếu có thật không) mới cần PLCSIM.
+
+*Kiểm tra 1 — layout, chỉ cần TIA (~10 phút, quyết định được kích thước):*
+1. Trong TIA Portal, tạo project CPU S7-1500 bất kỳ.
+2. Tạo FB `FB_Sub` đúng như test: VAR_INPUT `a: Int`; VAR_OUTPUT `q: Bool`; VAR_IN_OUT `io: Int`; VAR `s: Bool`.
+3. Tạo FB `FB_Motor`: VAR_INPUT `iStart: Bool`; VAR_OUTPUT `qRun: Bool`; VAR `tOn: TON`, `cCount: CTU`, `sub: FB_Sub`.
+4. Tạo instance DB `DB_Motor` (FB_Motor) và `DB_Sub` (FB_Sub). Compile all.
+5. Mở `DB_Motor` xem cột Address và độ dài DB, ghi lại: tổng bao nhiêu byte (38 hay 40?), `sub` bắt đầu ở byte mấy, `sub.io` chiếm mấy byte.
+6. Mở `DB_Sub` xem `io` ở top-level chiếm mấy byte (theo OQ-125 thì 4).
+7. Gửi lại em hai con số + bảng offset (chụp màn hình hoặc copy cột Address là đủ).
+
+*Kiểm tra 2 — hành vi, cần PLCSIM Advanced (~30 phút, chứng minh ghi trả qua tham chiếu):*
+1. Vẫn project trên, trong `FB_Sub` thêm một dòng `#io := #io + 1;`, OB1 gọi `DB_Motor` với `iStart := %I0.0`.
+2. Download xuống PLCSIM Advanced (tạo instance S7-1500, cần quyền nhóm `PlcSimUsers` — như mục T-002).
+3. Chạy, mở watch table theo dõi `DB_Motor.cCount.CV`: vì `io` được nối vào `#cCount.CV`, nếu mỗi scan CV tăng lên thì IN_OUT đúng là tham chiếu sống (ghi trả về được); nếu CV không đổi thì nó là bản copy.
+4. Cách quan sát: watch table của TIA là đủ; muốn đọc bằng code thì dùng console C# ở T-002 (đã đọc/ghi được vùng DB).
+5. Gửi lại em: CV có tăng không + ảnh watch table.
+
+Anh gửi kết quả về (chỉ cần hai con số kích thước DB và CV có tăng không), em sẽ cập nhật OQ-161: nếu 40 byte thì mở SCR + sửa `fbInterfaceStruct` + sửa test bảng P; nếu 38 byte thì giữ nguyên và ghi vào `semantics.md` ạ.
+
+---
+Log tới thời điểm 2026-11-27 09:22 +07.
+---
+
+## 2026-11-27 09:25 +07 — anh Tiến
+
+T-001 hôm trước anh test xong rồi (đã báo kết quả cho em) phải update là ✅ ĐÃ XONG chứ nhỉ
+
+## 2026-11-27 09:25 +07 — em My
+
+Dạ đúng rồi ạ, anh Tiến ơi — em xin lỗi để sót. Em đã đối chiếu lại log chat: tối 2026-11-24 anh báo kết quả trong chat lúc 22:45 (demo OK, hash trùng Linux, `pnpm test` 437/439 do lỗi đường dẫn có dấu cách OQ-074), sau fix PR #16 thì anh chạy lại 439/439 lúc 23:02 rồi ký M0. Em đã cập nhật T-001 thành ✅ ĐÃ XONG 2026-11-24 23:02 +07 trong OWNER-INBOX.md, ghi kết quả vào `docs/spikes/S6-env.md` và STATE.md rồi ạ.
+
+Em cũng ghi rõ hai mục còn thiếu (không chặn): e2e mẫu trên máy Windows thật chưa chạy, và .NET SDK + Playwright trên máy anh chưa được báo cáo — hai mục này em gộp vào mục gate Windows cho M1 ở `docs/verify-owner-guide.md` §4, khi nào anh chạy thì báo em nhé.
+
+---
+Log tới thời điểm 2026-11-27 09:25 +07.
+---
+
+## 2026-11-27 09:30 +07 — anh Tiến
+
+bây giờ các file .md đều khá dài, khó tìm theo mục. Em tạo đề mục index cho các mục (ở đầu file, có link tới phần nội dung) để a tìm cho dễ nhé. Khi em đề cập đến mục nào, ví dụ P1.4, M1 §16.5, spec §16.5, T-002 thì em ghi dạng đầy đủ <tên file .md>/T-002 để anh tìm đọc cho dễ nhé. Áp dụng tất cả các file trong docs/
+
+## 2026-11-27 09:30 +07 — ChaMuse
+
+Xong rồi ạ, anh Tiến ơi. Em đã thêm mục lục vào 42 file trong docs/ — ngay sau tiêu đề mỗi file, dạng `## Mục lục`, mỗi mục là link bấm tới đúng phần đó. Ví dụ trong docs/STATE.md/P1.4 anh bấm là nhảy tới phần kế hoạch P1.4 luôn ạ.
+
+Có 12 file em không thêm: docs/diagnostics.md + 8 file docs/equipment/*.md là file sinh tự động (không được sửa tay), còn docs/acceptance/state-notes-draft.md và docs/skills/README.md thì không có mục nào để lập chỉ mục.
+
+Từ nay khi em nhắc tới mục nào, em ghi dạng đầy đủ như anh dặn: docs/OWNER-INBOX.md/T-002, docs/specs/M1-soft-plc-spec.md/§16.5, docs/STATE.md/P1.4.
+
+Em phải báo thật một sự cố ạ: bản script đầu tiên của em có lỗi — khi chạy lần 2 để kiểm tra, nó xóa mất phần nội dung nằm giữa tiêu đề và mục đầu tiên của mỗi file. Nặng nhất là docs/open-questions.md mất cả bảng 400 dòng OQ, và nhiều file mất đoạn giới thiệu đầu file. Em đã khôi phục toàn bộ từ git, đối chiếu từng dòng bị xóa, sửa script rồi chạy lại đúng 1 lần và kiểm chứng: 42 file chỉ thêm dòng (không mất dòng nào nữa), bảng OQ còn đủ 398 dòng, các quyết định D-002/D-003/D-006/D-007 và T-001 đã ghi lại đầy đủ. Em xin lỗi vì sơ suất này ạ.
+
+Các file đang nằm trong cây làm việc, chưa đẩy PR. Anh muốn đẩy PR docs ngay hay để vào PR sau ạ?
+
+---
+Log tới thời điểm 2026-11-27 09:30 +07.
+---
+
+## 2026-11-27 09:54 +07 — anh Tiến
+
+Đẩy PR docs ngay
+
+## 2026-11-27 09:55 +07 — anh Tiến
+
+Làm tracker VCS
+
+## 2026-11-27 09:56 +07 — em My
+
+Dạ, cả hai việc em đang làm rồi ạ, anh Tiến ơi.
+
+- PR docs: em đã commit 42 file lên nhánh `docs/toc-index` (commit `a77ebd1`, +1112/−39) và giao cho trình duyệt cloud đẩy lên GitHub, mở PR vào `develop`, chờ CI xanh rồi merge. Xong em báo anh kết quả.
+- Tracker VCS: em đang làm, xong em gửi anh xem ngay.
+
+Anh cứ làm việc khác đi ạ, hai việc này em lo.
+
+---
+Log tới thời điểm 2026-11-27 09:56 +07.
+---
