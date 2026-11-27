@@ -2698,3 +2698,37 @@ Snapshot mới lúc 11:57. OQ-161 đã ghi là đóng bằng bằng chứng TIA;
 ---
 Log tới thời điểm 2026-11-27 12:07 +07.
 ---
+
+## 2026-11-27 12:39 +07 — anh Tiến
+
+Cả hai đều A
+
+## 2026-11-27 12:41 +07 — ChaMuse
+
+Dạ, em ghi cả hai là A rồi ạ, anh Tiến ơi.
+
+**D-009 (A) — sửa OQ-125 ngay:** em đã cho chạy phase nhỏ theo đúng quy trình plan-first: plan đang được viết (branch `m1/d009-inout-natural`), rồi implement → tự kiểm gate → PR → merge, em báo anh từng mốc. Phạm vi: `resolveDb` layout IN_OUT theo kích thước tự nhiên + hiện field, sửa M1 §3.5 + AMENDMENTS, cập nhật test ghim slot/T005; bảng P không đổi.
+
+**D-010 (A) — probe FB_Probe trước:** em đã viết hướng dẫn chi tiết vào `docs/verify-owner-guide.md` (mục mới trong "Các mục verify sau này"). Tóm tắt cho anh:
+- UDT `UDT_Probe`: `x: Int; y: Bool; z: DInt;`
+- FB `FB_SubD`: `a: Int` in, `q: Bool` out, `ioD: DInt` in-out, `s: Bool`.
+- FB `FB_Probe` (giữ đúng thứ tự): in `di: DInt; r: Real; lr: LReal; bIn: Bool;` — out `qo: Bool; ro: Real;` — in-out `ioD: DInt; ioR: Real;` — var `b1: Bool; b2: Bool; i1: Int; arr: Array[0..3] of Int; u: UDT_Probe; subD: FB_SubD; t1: TON; c1: CTU;`
+- Tạo DB `DB_Probe`, compile, chụp Details view như lần trước + cho em biết "Optimized block access" có tick không + độ dài DB.
+
+Anh cứ làm probe khi rảnh, không gấp ạ — phần D-009 chạy độc lập, không chờ probe.
+
+---
+Log tới thời điểm 2026-11-27 12:41 +07.
+---
+
+## 2026-11-27 12:46 +07 — em My
+
+Plan D-009 xong rồi ạ, anh Tiến ơi — em đã kiểm lại rồi cho chạy tiếp implement.
+
+Plan ở `docs/STATE.md/§33` (branch `m1/d009-inout-natural`, 2 commit: `5c4a0c2` docs + `fad6f6f` plan; AMENDMENTS mới A23). Có một hiệu đính quan trọng: DB_Sub sau sửa là **8 byte, không phải 7** — nội dung kết thúc byte 7, quy tắc (6) làm tròn chẵn → 8; offsets khớp TIA từng byte, chỉ đuôi 1 byte lệch (thuộc OQ-400). Plan tính tay đầy đủ: DB_Sub 10→8, FB_T 8→6, FB_X 6→4, FB_Inc_DB 4→2, FB_Latch_DB 8→6, DB_Motor giữ 38 (bảng P không đổi). 3 test cập nhật + 5 test mới, 0 golden đổi, gate lint/typecheck/depcheck/test/cheats + diagnostics (không e2e/bench).
+
+Implement đang chạy (commit 3 spec → commit 4 code+test → commit 5 semantics + đóng OQ-399), xong em tự kiểm gate độc lập rồi mới PR → merge, em báo anh ạ.
+
+---
+Log tới thời điểm 2026-11-27 12:46 +07.
+---
