@@ -2668,3 +2668,33 @@ Snapshot mới lúc 10:49, theo commit `be41113` trên `develop`. Thẻ "Vừa x
 ---
 Log tới thời điểm 2026-11-27 10:50 +07.
 ---
+
+## 2026-11-27 11:57 +07 — anh Tiến
+
+[Kết quả test cho OQ-161: Kiểm tra 1 — layout: kết quả DB_Motor và DB_Sub như ảnh]
+
+## 2026-11-27 12:03 +07 — em My
+
+Dạ, em đọc xong hai ảnh rồi ạ, anh Tiến ơi — và em đã đối chiếu với code nhà mình (biên dịch thử bằng `compileSclProgram`, không đoán số).
+
+**1. OQ-161: ĐÓNG — IN_OUT lồng = kích thước tự nhiên ạ.** `DB_Motor.sub.io: Int` @30.0 (2 byte), `s` @32.0 — code nhà mình (`fbInterfaceStruct`) đã đúng, không đổi gì, bảng P giữ 38 byte. Kiểm tra 2 (PLCSIM) không còn cần cho OQ-161 nữa ạ, anh khỏi mất 30 phút.
+
+**2. Cùng bằng chứng lại bác bỏ OQ-125:** IN_OUT top-level cũng kích thước tự nhiên — `DB_Sub.io: Int` @4.0 (2 byte), `s` @6.0. Nhà mình đang slot DInt 4 byte, ẩn, đọc → T005 (DB_Sub 10 byte vs TIA 7 byte). → SCR `docs/open-questions.md/OQ-399`, chờ anh quyết `docs/OWNER-INBOX.md/D-009`. Em đề xuất **A: sửa ngay phase nhỏ** (resolveDb theo kích thước tự nhiên + hiện field; bảng P không đổi).
+
+**3. Lệch layout rộng hơn:** Bool interface (nhà mình gói bit, TIA mỗi Bool 1 byte + căn chẵn — qRun @2.0); TON 18 vs 16 byte; CTU 10 vs 6 byte (TIA có CD/LD/QD, nhà mình không có); DB_Motor 33 vs 38 byte. → SCR `docs/open-questions.md/OQ-400`, chờ anh quyết `docs/OWNER-INBOX.md/D-010`. Em đề xuất **A: probe thêm 1 FB đa kiểu trên TIA** (DInt/Real/LReal/Array/UDT) để chốt quy tắc rồi mới viết lại layout — sửa khi chưa biết quy tắc tổng quát có thể ra model sai lần hai.
+
+Em đã ghi hết vào docs (`docs/open-questions.md/OQ-161+OQ-399+OQ-400`, `docs/OWNER-INBOX.md/D-009+D-010`, `docs/STATE.md/§5`, `docs/semantics.md/§12`, `docs/verify-owner-guide.md/§5`) — chưa commit, để đi cùng PR sau. Tracker em cũng đang làm mới (OQ-161 đã quyết, 8 việc chờ anh, 8/10 quyết định), xong em gửi ạ.
+
+---
+Log tới thời điểm 2026-11-27 12:03 +07.
+---
+
+## 2026-11-27 12:07 +07 — ChaMuse
+
+Tracker làm mới xong rồi ạ, anh Tiến ơi.
+
+Snapshot mới lúc 11:57. OQ-161 đã ghi là đóng bằng bằng chứng TIA; danh sách chờ anh giờ có 8 việc — OQ-161 được thay bằng D-009 và D-010 (mỗi mục ghi đề xuất A kèm link tới `docs/OWNER-INBOX.md/D-009`, `D-010`); KPI quyết định thành 8/10 đã chốt. Các số khác không đổi: M0/M1 đã ký, M2 chờ ký G2, test 2.910/2.910.
+
+---
+Log tới thời điểm 2026-11-27 12:07 +07.
+---
