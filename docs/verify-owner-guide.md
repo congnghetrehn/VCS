@@ -44,6 +44,8 @@ VM chia sẻ CPU nên số dao động vài % giữa các lần chạy.
 
 **Làm:**
 
+Máy đã có repo (nhánh `develop`):
+
 ```text
 cd <thư mục repo VCS trên máy anh>
 git checkout develop
@@ -52,8 +54,33 @@ pnpm install --frozen-lockfile
 pnpm bench
 ```
 
-Chạy lúc máy rảnh (không chạy thêm gì nặng). Lệnh `pnpm bench` chạy cả 3 bench
-(TagDB, orchestrator, softplc); con số quyết định là **softplc scan/s**.
+Máy mới (thư mục trống, chưa clone — `git checkout` sẽ báo `fatal: not a git
+repository`): kiểm tra công cụ trước (`node --version`, `pnpm --version`,
+`git --version`; Node cần ≥ 20). Chưa có Node thì cài Node 22 LTS
+(nodejs.org, bản Windows Installer, để mặc định + tick "Add to PATH") rồi đóng
+mở lại PowerShell. Có Node mà thiếu pnpm thì `npm install -g pnpm@10.15.0`
+(trên Windows dùng npm, không dùng `corepack enable` — corepack hay không có
+trên PATH). Rồi clone vào chính thư mục trống đang đứng:
+
+```text
+git clone https://github.com/congnghetrehn/VCS.git .
+git checkout develop
+pnpm install --frozen-lockfile
+pnpm bench
+```
+
+Lưu ý: đặt repo ở đường dẫn ngắn, KHÔNG có dấu cách, ngoài thư mục OneDrive
+đồng bộ (vd `C:\Coding\VCS`) — OneDrive có thể khóa file lúc `pnpm install`/
+chạy bench, và đường dẫn có dấu cách từng làm rớt test (OQ-074). Nếu gặp lỗi
+lạ về file bị khóa thì tạm dừng đồng bộ OneDrive trong lúc chạy, hoặc chuyển
+repo ra ngoài OneDrive.
+
+Chạy lúc máy rảnh (không chạy thêm gì nặng). Lệnh `pnpm bench` trên `develop`
+chạy cả 5 bench qua `bench/run-all-benches.mjs` (TagDB, orchestrator, softplc
+qua tsx + plant, closedloop qua bundle esbuild); con số quyết định là
+**softplc scan/s**. (Chuỗi 3 bench cũ chỉ còn ở các nhánh/commit trước P2.4 —
+nếu `pnpm bench` in ra chuỗi `tsx bench/tagdb… && …` thì anh đang ở commit cũ,
+kiểm tra nhánh bằng `git branch --show-current` + `git rev-parse --short HEAD`.)
 
 **Kỳ vọng:**
 
@@ -63,6 +90,29 @@ Chạy lúc máy rảnh (không chạy thêm gì nặng). Lệnh `pnpm bench` ch
 | softplc heap | < 1 MB / 2000 scan | +0.22 MB |
 | TagDB set/get | ≥ 10M ops/s | ~50M ops/s |
 | orchestrator | ≥ 100 000 steps/s | ~455 000 steps/s |
+| plant (M2 §12) | ≥ 1500 steps/s | 2572 (gate P2.4) |
+| closed-loop (M2 §12) | ≥ 1000 steps/s | 1351 (gate P2.4) |
+
+**Kết quả trên máy anh — 2026-11-27, `F:\Coding\vcs`: nhánh `main` — 3 bench M1 PASS — softplc 4 181 scan/s,
+heap ±0.25 MB/2000 scan; TagDB set/get 97 417 036 ops/s, flush 0.1 µs / 0.027 ms,
+heap −0.07 MB; orchestrator 1 121 699 steps/s. Máy anh nhanh hơn hẳn VM
+(softplc gấp ~2.4× số VM). Nhánh `develop`: `pnpm bench` FAIL ở bước build
+bundle (`bundle plant FAIL (exit null)`) — đang chẩn đoán. Đã loại trừ:
+OneDrive (repo mới ở `F:\Coding\vcs` vẫn lỗi); `node_modules\@esbuild` vắng
+mặt là BÌNH THƯỜNG với pnpm (gói platform nằm ở
+`node_modules\.pnpm\@esbuild+win32-x64@0.28.2`) — không phải nguyên nhân.
+Chẩn đoán 2026-11-27 14:21: gói platform `@esbuild+win32-x64@0.28.2` CÓ;
+`esbuild.cmd --version` → 0.28.2; `node …\bin\esbuild --version` → 0.28.2;
+`cmd /c echo hi` → hi — esbuild chạy tốt khi gọi trực tiếp, chỉ FAIL im lặng
+khi script Node spawn nó với tham số bundle.
+NGUYÊN NHÂN ĐÃ RÕ (2026-11-27 14:23): Node `spawnSync` file `.cmd` lỗi
+`EINVAL` (repro tối thiểu ra `status=null signal=null error=Error: spawnSync
+…esbuild.cmd EINVAL`); esbuild chạy tay OK (bundle plant 923.9kb/416ms),
+`esbuild.exe` nguyên vẹn 11 694 592 byte. Cách sửa: script gọi thẳng `node` +
+entry JS (`node_modules/esbuild/bin/esbuild`,
+`node_modules/tsx/dist/cli.mjs`) thay vì spawn file `.cmd` — đang sửa trên
+nhánh `m2/bench-windows-spawn` (PR → develop → anh chạy lại `pnpm bench`).
+Node trên máy anh: v26.13.0.
 
 **Báo lại:** con số softplc scan/s anh đo được. Nếu dưới 1000 → tier C: dừng
 lại bàn, không hạ ngưỡng, không sửa kỳ vọng để cho qua.

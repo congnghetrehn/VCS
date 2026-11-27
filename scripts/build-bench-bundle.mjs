@@ -6,22 +6,18 @@
 // Fail-fast khi bundle lỗi (exit 1) — runner không đo bằng bundle hỏng.
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'bench', 'dist');
 
-// esbuild ở node_modules/.bin khi chạy qua pnpm (PATH đã có .bin); chạy trực
-// tiếp thì dùng esbuild trên PATH (tiền lệ: cách run-all-benches.mjs tìm tsx).
-const localEsbuild = join(
-  ROOT,
-  'node_modules',
-  '.bin',
-  process.platform === 'win32' ? 'esbuild.cmd' : 'esbuild',
-);
-const esbuild = existsSync(localEsbuild) ? localEsbuild : 'esbuild';
+// Spawn node + entry JS của esbuild thay vì shim node_modules/.bin/esbuild[.cmd]:
+// Node spawnSync file .cmd trên Windows lỗi EINVAL (repro 2026-11-27: status
+// null, signal null, error EINVAL) trong khi chạy trực tiếp ở PowerShell vẫn
+// OK — esbuild bản thân không hỏng. Entry JS là bin chính thức của esbuild.
+const esbuildBin = join(ROOT, 'node_modules', 'esbuild', 'bin', 'esbuild');
 
 const BUNDLED = ['plant', 'closedloop'];
 const targets = process.argv.slice(2);
@@ -36,8 +32,9 @@ for (const name of names) {
 mkdirSync(DIST, { recursive: true });
 for (const name of names) {
   const r = spawnSync(
-    esbuild,
+    process.execPath,
     [
+      esbuildBin,
       join(ROOT, 'bench', `${name}.bench.ts`),
       '--bundle',
       '--format=esm',
@@ -53,7 +50,9 @@ for (const name of names) {
     { cwd: ROOT, stdio: 'inherit' },
   );
   if (r.status !== 0) {
-    console.error(`build-bench-bundle: bundle ${name} FAIL (exit ${r.status}).`);
+    console.error(
+      `build-bench-bundle: bundle ${name} FAIL (exit ${r.status}${r.error ? `, error: ${r.error.message}` : ''}).`,
+    );
     process.exit(1);
   }
 }
