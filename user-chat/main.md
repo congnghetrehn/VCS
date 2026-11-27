@@ -3258,3 +3258,23 @@ Dạ, cả hai đều có thật, nhưng chiều chuẩn là **từ ngoài vào 
 ---
 Log tới thời điểm 2026-11-27 15:19 +07.
 ---
+
+## 2026-11-27 17:07 +07 — anh Tiến
+
+đoạn IO list này a chưa làm được ngay. Chắc phải sang tuần. Em xem còn bước nào em tự làm được mà ko cần a quyết định thì em tự làm đi nhé. Làm liên tục và báo cáo kết quả. Ko cần dừng lại chờ anh (trừ khi bắt buộc cần input/quyết định của anh)
+
+## 2026-11-27 17:07 +07 — em My
+
+Dạ rõ ạ. File X-003 để sang tuần, em không nhắc lại. Phần em tự làm được là gói G2 — em đã bắt đầu rồi ạ: đang lập plan (STATE §34) cho 2 việc, (1) lấp khoảng docs/specs/M2-plant-and-io-import-spec.md/§14 #8 — 1 e2e duy nhất đi trọn luồng import → duyệt gợi ý → chạy → tiêm lỗi → quan sát (hiện mới bao phủ bằng case (1)+(2)+(3)+(5) cộng lại, vì fixture 300 không commit được qua wizard do 18 lỗi trùng tag/địa chỉ), và (2) gói nghiệm thu docs/acceptance/M2.md cho cả 9 mục §14, với #4 ghi rõ UNVERIFIED chờ file của anh (theo tiền lệ M1 ký với §16.5 + OQ-161 chưa quyết). Xong plan em triển khai implement → gate → PR → merge rồi báo anh. Việc còn chờ anh: file X-003 (sang tuần), VERIFY §14, probe FB_Probe, tick R-010, và ký G2 — em sẽ gom lại báo một lần khi gói xong ạ.
+
+---
+Log tới thời điểm 2026-11-27 17:07 +07.
+---
+
+## 2026-11-27 17:16 +07 — ChaMuse
+
+Dạ, plan G2 xong rồi ạ — em đã kiểm trên đĩa: docs/STATE.md/§34 (dòng 6713–6928), hàng G2 ở bảng §2 đã đổi thành "plan xong". Phương án §14 #8 đã chọn là **B — fixture 300 biến thể commit được**: thêm cờ `--clean-duplicates` vào script sinh fixture (tắt dirt trùng, giữ seed + dirt khác) → 1 e2e duy nhất `g2-full-flow.spec.ts` đi trọn luồng trên 1 project. Chọn B vì nhỏ nhất, không đổi code sản phẩm, luồng nhân quả liền mạch (chính 300 tag vừa import được gợi ý → áp dụng → chạy); các phương án khác đã loại có lý do trong plan (nút Designer đổi UI vì nhu cầu test; sửa fixture gốc phá bằng chứng §11.3; sửa tay qua wizard không có quickfix). Gói docs/acceptance/M2.md sẽ kết luận **8/9 ĐẠT + §14 #4 UNVERIFIED** chờ file của anh. Không có quyết định nào cần anh trước khi implement — em đã cho chạy implement trên nhánh `m2/g2-acceptance` (6 commit theo plan, mỗi commit gate xanh; TC stops TC-G1…G4 đã ghi). Xong implement em tự kiểm gate lại trên bản sao sạch rồi mở PR → merge và báo anh ạ.
+
+---
+Log tới thời điểm 2026-11-27 17:16 +07.
+---
