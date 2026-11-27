@@ -12,6 +12,8 @@
   - [D-006 · §16.5 — giữ mã lỗi tách riêng hay gom về U001? · Chặn: không chặn ký M1 · Hạn mong muốn: trước M2 — ✅ ĐÃ QUYẾT 2026-11-27: chọn A](#d-006-165-giữ-mã-lỗi-tách-riêng-hay-gom-về-u001-chặn-không-chặn-ký-m1-hạn-mong-muốn-trước-m2-đã-quyết-2026-11-27-chọn-a)
   - [D-007 · HTTPS cho LAN (PWA trên tablet) — chọn mkcert, reverse proxy, hay chỉ localhost? · Chặn: không chặn P0.9 (PWA chạy đủ trên localhost) · Hạn mong muốn: trước khi dùng tablet witness qua LAN — ✅ ĐÃ QUYẾT 2026-11-27: chọn A (mkcert)](#d-007-https-cho-lan-pwa-trên-tablet-chọn-mkcert-reverse-proxy-hay-chỉ-localhost-chặn-không-chặn-p09-pwa-chạy-đủ-trên-localhost-hạn-mong-muốn-trước-khi-dùng-tablet-witness-qua-lan-đã-quyết-2026-11-27-chọn-a-mkcert)
   - [D-008 · Hot-loop plant không đạt M2 §12 ≥ 5000 bước/s — ✅ ĐÃ QUYẾT 2026-11-26 13:38 +07: làm A+B, hạ ngưỡng theo số đạt được · Chặn: P2.4 (commit 6–12) + nghiệm thu M2](#d-008-hot-loop-plant-không-đạt-m2-12-5000-bướcs-đã-quyết-2026-11-26-1338-07-làm-ab-hạ-ngưỡng-theo-số-đạt-được-chặn-p24-commit-612-nghiệm-thu-m2)
+  - [D-009 · Sửa OQ-125 theo bằng chứng TIA — ✅ ĐÃ QUYẾT 2026-11-27: chọn A](#d-009-sửa-oq-125-theo-bằng-chứng-tia-đã-quyết-2026-11-27-chọn-a)
+  - [D-010 · Lệch layout so với TIA — hướng xử lý — ✅ ĐÃ QUYẾT 2026-11-27: chọn A](#d-010-lệch-layout-so-với-tia-hướng-xử-lý-đã-quyết-2026-11-27-chọn-a)
 - [2. KIỂM THẬT (T) — cần anh chạy trên môi trường thật](#2-kiểm-thật-t-cần-anh-chạy-trên-môi-trường-thật)
   - [T-001 · Spike S6 — kiểm môi trường Windows · Chặn: P0.1 · Ước tính: 30 phút · Cần: máy Windows của anh — ✅ ĐÃ XONG 2026-11-24 23:02 +07](#t-001-spike-s6-kiểm-môi-trường-windows-chặn-p01-ước-tính-30-phút-cần-máy-windows-của-anh-đã-xong-2026-11-24-2302-07)
   - [T-002 · Spike S2 — PLCSIM Advanced "hello" · Chặn: M5 (P5.4/P5.6) · Ước tính: 1 ngày · Cần: PLCSIM Advanced + giấy phép, nhóm `PlcSimUsers`](#t-002-spike-s2-plcsim-advanced-hello-chặn-m5-p54p56-ước-tính-1-ngày-cần-plcsim-advanced-giấy-phép-nhóm-plcsimusers)
@@ -35,8 +37,8 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 
 ## 0. Tóm tắt (AI cập nhật mỗi lần ghi)
 - Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). X-003 chặn nghiệm thu thật P2.7 (đo acceptance suggest ≥ 90% trên I/O list thật) — không chặn code/merge P2.7; ĐÃ QUYẾT B 2026-11-26 21:55 (hoãn đo, acceptance UNVERIFIED tới khi có dữ liệu). D-001/D-002/D-003/D-004/D-005/D-006/D-007 ĐÃ XONG; M0 ĐÃ KÝ 2026-11-24; M1 ĐÃ KÝ 2026-11-25.
-- Việc cần anh trong tuần này: quyết OQ-161; chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA; VERIFY §14 với PLCSIM + mã thật (xem `docs/verify-owner-guide.md` mục 3)
-- Cập nhật lần cuối: 2026-11-27 (D-002 + D-006 ĐÃ QUYẾT A; D-003 ĐÃ QUYẾT A + D-007 ĐÃ QUYẾT A (mkcert); T-001 ĐÃ XONG 2026-11-24 23:02 +07; P2.8 MERGED PR #39 02:58 +07)
+- Việc cần anh trong tuần này: probe FB_Probe (D-010 A — xem `docs/verify-owner-guide.md`); chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA; VERIFY §14 với PLCSIM + mã thật (xem `docs/verify-owner-guide.md` mục 3)
+- Cập nhật lần cuối: 2026-11-27 (D-009 + D-010 ĐÃ QUYẾT A; OQ-161 ĐÃ ĐÓNG bằng bằng chứng TIA 2026-11-27 — IN_OUT lồng kích thước tự nhiên, code đúng không đổi; OQ-399/OQ-400 mới (SCR: OQ-125 bị bác bỏ + lệch layout rộng hơn); D-002 + D-006 ĐÃ QUYẾT A; D-003 ĐÃ QUYẾT A + D-007 ĐÃ QUYẾT A (mkcert); T-001 ĐÃ XONG 2026-11-24 23:02 +07; P2.8 MERGED PR #39 02:58 +07)
 - Nhãn/milestone GitHub (II.7): CHƯA CHẠY — GitHub MCP không có tool tạo nhãn/milestone (46 tool đã kiểm, không có); cần làm qua giao diện GitHub hoặc chủ sản phẩm. Không tự đổi branch protection (D-001).
 
 ---
@@ -172,6 +174,26 @@ Không phải code sai — code làm đúng "lỗi ồn ào + vị trí". Mâu t
 **Cần anh quyết (chọn một):** (a) chấp nhận ngưỡng 1500 theo công thức (dưới band 2000–2500); (b) đo lại vào phiên máy yên rồi quyết theo số mới (trung vị 1941 chỉ thiếu 3% — cùng code từng đo 1932 tsx lúc 12:52, máy yên có thể qua 2000); (c) hướng khác do anh chỉ định (vd viết lại engine riêng đã phân tích 13:30 — cỡ P2.1+P2.2+P2.3). **Liên quan:** STATE §28 (kết quả commit 9).
 **✅ ĐÃ QUYẾT 2026-11-26 15:09 +07 — anh chọn (a): chấp nhận ngưỡng 1500, làm tiếp commit 10–12.** Parent đo lại độc lập trước khi trình (bản sao sạch `~/.cache/vcs-tc1pv`, HEAD `d64ebfc`, cài thật): plant bundle ×5 [2061, 2032, 2131, 2036, 1825] trung vị **2036** ≥ 2000 → **TC-1 KHÔNG tái hiện**; vòng kín [975, 963, 931] trung vị 963 < 1000 (máy chậm, PLC không đổi từ lúc PASS 1285 — đo lại ở parent gate, KHÔNG hạ ngưỡng vòng kín). Công thức OQ-326 cho 1500 ở cả hai bộ (min 1840/1825 −15% → 1564/1551 → 1500). Commit 10 áp dụng: M2 §12 ≥ 1500, A22 chốt, `THRESHOLD_STEPS_PER_SEC = 1500`, baseline plant 1941 / closedLoop 985, OQ-326 đóng.
 **Việc đang chờ:** ✅ Đã quyết (a) 15:09 +07 — commit 10 xong (ngưỡng 1500); commit 11–12 đang làm · **Liên quan:** STATE §27 (commit 4/5/6 + profile) + §28 (plan A+B), OQ-309 (đảo ngược) / OQ-310/311 / OQ-320…326, AMENDMENTS A21 + A22 (ĐÃ QUYẾT)
+
+### D-009 · Sửa OQ-125 theo bằng chứng TIA — ✅ ĐÃ QUYẾT 2026-11-27: chọn A
+**Bối cảnh:** OQ-125 (đã đóng 2026-11-25) quyết IN_OUT top-level là slot DInt 4 byte, ẩn, đọc → T005 (M1 §3.5 + `resolveDb`). Bằng chứng TIA 2026-11-27 của anh (DB_Sub, CPU 1511-1 PN): `io: Int` @4.0, 2 byte, hiện trong DB, `s` @6.0 — IN_OUT top-level cũng kích thước tự nhiên. Nhà mình sai: DB_Sub 10 byte vs TIA 7 byte, đọc `DB_Sub.io` báo T005 sai.
+**Lựa chọn:**
+- [x] A — Sửa ngay phase nhỏ: `resolveDb` layout IN_OUT theo kích thước tự nhiên + hiện field; sửa M1 §3.5 + AMENDMENTS (SCR OQ-399); cập nhật test ghim slot/T005. Bảng P không đổi.
+- [ ] B — Hoãn sang M2/sau, ghi UNVERIFIED, giữ hành vi sai đã biết.
+**Đã quyết 2026-11-27: chọn A — triển khai phase nhỏ (plan → implement → gate → PR → merge).**
+**Đề xuất của AI:** A, vì nhỏ, rõ phạm vi, và để lại layout sai đã biết trong M1 đã ký là đúng kiểu lỗi im lặng.
+**Hệ quả nếu chọn khác:** B thì mọi DB của FB có IN_OUT top-level vẫn sai 3 byte + đọc field IN_OUT vẫn T005 sai tới khi sửa.
+**Việc đang chờ:** ✅ Đã quyết A 2026-11-27 — phase nhỏ đang triển khai · **Liên quan:** OQ-399, OQ-125, M1 §3.5, `typecheck.ts: resolveDb`
+
+### D-010 · Lệch layout so với TIA — hướng xử lý — ✅ ĐÃ QUYẾT 2026-11-27: chọn A
+**Bối cảnh:** Bằng chứng TIA 2026-11-27 (DB_Motor/DB_Sub): layout nhà mình lệch TIA ở 4 điểm — Bool interface gói bit vs mỗi Bool 1 byte + căn chẵn; TON 18 vs 16 byte; CTU 10 vs 6 byte (thiếu CD/LD/QD); tổng DB_Motor 38 vs 33, DB_Sub 10 vs 7. Quy tắc tổng quát chưa chốt được từ 2 DB này (section-based hay căn chẵn tối thiểu đều khớp).
+**Lựa chọn:**
+- [x] A — Probe thêm: anh tạo 1 FB đa kiểu trên TIA (DInt/Real/LReal/Array/UDT/nhiều Bool) rồi gửi offset; AI chốt quy tắc + lập phase viết lại §3.4/defs + golden theo bằng chứng.
+- [ ] B — Hoãn, ghi UNVERIFIED ở semantics §12, tiếp tục M2; layout lệch vẫn tồn tại.
+**Đã quyết 2026-11-27: chọn A — anh làm probe FB_Probe theo hướng dẫn ở `docs/verify-owner-guide.md` (mục mới trong "Các mục verify sau này"), gửi offset về; AI chốt quy tắc + lập phase viết lại layout.**
+**Đề xuất của AI:** A, vì sửa khi chưa biết quy tắc tổng quát có thể ra model sai lần hai; probe chỉ tốn ~10 phút của anh.
+**Hệ quả nếu chọn khác:** B thì mọi thứ đọc DB theo địa chỉ tuyệt đối tiếp tục lệch tới 5 byte/DB.
+**Việc đang chờ:** ✅ Đã quyết A 2026-11-27 — chờ anh probe FB_Probe (xem `docs/verify-owner-guide.md`) · **Liên quan:** OQ-400, M1 §3.4/§3.5/§9, `runtime-iec/src/std/defs.ts`, `runtime-iec/src/layout.ts`
 
 ## 2. KIỂM THẬT (T) — cần anh chạy trên môi trường thật
 

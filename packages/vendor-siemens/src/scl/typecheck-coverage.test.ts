@@ -56,6 +56,24 @@ BEGIN
   #Q := #IN;
 END_FUNCTION_BLOCK`;
 
+const FB_SUB = `FUNCTION_BLOCK "FB_Sub"
+VAR_INPUT
+  a : Int;
+END_VAR
+VAR_OUTPUT
+  q : Bool;
+END_VAR
+VAR_IN_OUT
+  io : Int;
+END_VAR
+VAR
+  s : Bool;
+END_VAR
+BEGIN
+  #q := #a >= 1;
+  #s := #q;
+END_FUNCTION_BLOCK`;
+
 const FC_A = `FUNCTION "FC_A" : Int
 VAR_INPUT
   i : Int;
@@ -225,7 +243,7 @@ describe('checkCallStmt — các dạng callee', () => {
 });
 
 describe('DB — resolveDb + checkDbInit', () => {
-  it('DB dạng "fbname" → layout INPUT+OUTPUT+IN_OUT(4B, không lộ)+STATIC (§3.5)', () => {
+  it('DB dạng "fbname" → layout INPUT+OUTPUT+IN_OUT+STATIC (§3.5)', () => {
     const src = `FUNCTION_BLOCK "FB_S"\nVAR_INPUT\n  i : Bool;\nEND_VAR\nVAR\n  st : Int;\n  b : Bool;\nEND_VAR\nBEGIN\nEND_FUNCTION_BLOCK\nDATA_BLOCK "DB_S" "FB_S"\nBEGIN\nEND_DATA_BLOCK`;
     const { result } = checkSrc(src);
     expectNoErrors(result);
@@ -243,25 +261,59 @@ describe('DB — resolveDb + checkDbInit', () => {
     expect(db?.size).toBe(6);
   });
 
-  it('DB dạng "fbname" có IN_OUT → slot 4 byte, field không lộ (truy cập → T005)', () => {
+  it('DB dạng "fbname" có IN_OUT → kích thước tự nhiên, field hiện (đọc được)', () => {
     const src = `FUNCTION_BLOCK "FB_T"\nVAR_INPUT\n  a : Bool;\nEND_VAR\nVAR_OUTPUT\n  q : Bool;\nEND_VAR\nVAR_IN_OUT\n  io : Int;\nEND_VAR\nVAR\n  st : Int;\nEND_VAR\nBEGIN\nEND_FUNCTION_BLOCK\nDATA_BLOCK "DB_T" "FB_T"\nBEGIN\nEND_DATA_BLOCK`;
     const { result } = checkSrc(src);
     expectNoErrors(result);
     const db = result.dbs.get('db_t');
     expect(db).toBeDefined();
-    // a byte 0 bit 0; q byte 0 bit 1; io chiếm slot DInt byte 2..5 (không lộ);
-    // st: Int byte 6, size 2 → tổng 8.
+    // a byte 0 bit 0; q byte 0 bit 1; io: Int byte 2 (căn chẵn, 2B);
+    // st: Int byte 4, size 2 → tổng 6 (A23 — trước đây slot DInt 4 byte ẩn, size 8).
     expect(db?.fields.map((f) => [f.name, f.byteOffset, f.size])).toEqual([
       ['a', 0, 1],
       ['q', 0, 1],
-      ['st', 6, 2],
+      ['io', 2, 2],
+      ['st', 4, 2],
     ]);
-    expect(db?.fields.some((f) => f.name.toLowerCase() === 'io')).toBe(false);
-    expect(db?.size).toBe(8);
-    const bad = checkSrc(
+    expect(db?.fields.find((f) => f.name === 'io')?.type).toBe('Int');
+    expect(db?.size).toBe(6);
+    const ok = checkSrc(
       `${src}\nORGANIZATION_BLOCK "Main"\nVAR_TEMP\n  n : Int;\nEND_VAR\nBEGIN\n  #n := "DB_T".io;\nEND_ORGANIZATION_BLOCK`,
     );
-    expectDiag(bad.result, 'SCL-T005', "không có field 'io'");
+    expectNoErrors(ok.result);
+  });
+
+  it('DB_Sub layout: IN_OUT Int @4, size 8 (A23)', () => {
+    const src = `${FB_SUB}\nDATA_BLOCK "DB_Sub" "FB_Sub"\nBEGIN\nEND_DATA_BLOCK`;
+    const { result } = checkSrc(src);
+    expectNoErrors(result);
+    const db = result.dbs.get('db_sub');
+    expect(db).toBeDefined();
+    // a: Int byte 0 (2B); q: Bool byte 2 bit 0; io: Int byte 4 (căn chẵn, 2B);
+    // s: Bool byte 6 bit 0 → nội dung hết byte 6, quy tắc §3.4(6) làm tròn
+    // chẵn → size 8. TIA đo 7 byte nội dung, cùng offsets — lệch 1 byte
+    // đuôi thuộc OQ-400, không phải lỗi phase này.
+    expect(db?.fields.map((f) => [f.name, f.byteOffset, f.size])).toEqual([
+      ['a', 0, 2],
+      ['q', 2, 1],
+      ['io', 4, 2],
+      ['s', 6, 1],
+    ]);
+    expect(db?.size).toBe(8);
+  });
+
+  it('"DB_Sub".io đọc + ghi được như field thường (A23)', () => {
+    const src = `${FB_SUB}\nDATA_BLOCK "DB_Sub" "FB_Sub"\nBEGIN\nEND_DATA_BLOCK\n${obWith('  n : Int;', '  #n := "DB_Sub".io;\n  "DB_Sub".io := 5;')}`;
+    const { result } = checkSrc(src);
+    expectNoErrors(result);
+  });
+
+  it('DB init ghi vào field IN_OUT → init == 5 (A23, tier B)', () => {
+    const src = `${FB_SUB}\nDATA_BLOCK "DB_Sub" "FB_Sub"\nBEGIN\n  "DB_Sub".io := 5;\nEND_DATA_BLOCK`;
+    const { result } = checkSrc(src);
+    expectNoErrors(result);
+    const db = result.dbs.get('db_sub');
+    expect(db?.fields.find((f) => f.name === 'io')?.init).toBe(5);
   });
 
   it('DB dạng "fbname" với FB không biết → SCL-T001', () => {

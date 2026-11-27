@@ -303,8 +303,8 @@ export function prog(
   return { blocks, dbs, udts: [], organization };
 }
 
-/** DB instance cho một FB (layout §3.5: input + output + IN_OUT slot 4 byte
- * (không lộ) + static; chỉ kiểu scalar). */
+/** DB instance cho một FB (layout §3.5, A23: input + output + IN_OUT kích
+ * thước tự nhiên, hiện field + static; chỉ kiểu scalar). */
 function elemFieldType(t: IrType): FieldType {
   if (typeof t !== 'string') {
     throw new Error('ir-testkit: dbForFb chỉ hỗ trợ field scalar');
@@ -314,29 +314,23 @@ function elemFieldType(t: IrType): FieldType {
 
 export function dbForFb(fbName: string, dbName: string, intf: IrInterface): IrDb {
   const vars = [...intf.input, ...intf.output, ...intf.inout, ...intf.static];
-  const inoutNames = new Set(intf.inout.map((v) => v.name.toLowerCase()));
   const decls: FieldDecl[] = vars.map((varDecl) => ({
     name: varDecl.name,
-    // IN_OUT: tham chiếu 4 byte nội bộ (§3.5), chiếm chỗ bằng DInt.
-    type: inoutNames.has(varDecl.name.toLowerCase())
-      ? { kind: 'elem', type: 'DInt' }
-      : elemFieldType(varDecl.type),
+    type: elemFieldType(varDecl.type),
   }));
   const layout = layoutStruct(decls);
-  const fields: IrField[] = layout.fields
-    .filter((f) => !inoutNames.has(f.name.toLowerCase()))
-    .map((f) => {
-      if (f.type.kind !== 'elem') {
-        throw new Error('ir-testkit: dbForFb chỉ hỗ trợ field scalar');
-      }
-      return {
-        name: f.name,
-        type: f.type.type as IrType,
-        byteOffset: f.byteOffset,
-        ...(f.bitOffset !== undefined ? { bitOffset: f.bitOffset } : {}),
-        size: f.size,
-      };
-    });
+  const fields: IrField[] = layout.fields.map((f) => {
+    if (f.type.kind !== 'elem') {
+      throw new Error('ir-testkit: dbForFb chỉ hỗ trợ field scalar');
+    }
+    return {
+      name: f.name,
+      type: f.type.type as IrType,
+      byteOffset: f.byteOffset,
+      ...(f.bitOffset !== undefined ? { bitOffset: f.bitOffset } : {}),
+      size: f.size,
+    };
+  });
   return { id: dbName.toLowerCase(), name: dbName, fbName, fields, size: layout.size };
 }
 

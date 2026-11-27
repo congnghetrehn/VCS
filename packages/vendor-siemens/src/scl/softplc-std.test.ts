@@ -282,6 +282,52 @@ END_ORGANIZATION_BLOCK`;
     }
   });
 
+  it('DB_Sub.io IN_OUT tự nhiên: init + ghi qua alias → đọc lại từ DB (A23)', () => {
+    const src = `FUNCTION_BLOCK "FB_Sub"
+VAR_INPUT
+  a : Int;
+END_VAR
+VAR_OUTPUT
+  q : Bool;
+END_VAR
+VAR_IN_OUT
+  io : Int;
+END_VAR
+VAR
+  s : Bool;
+END_VAR
+BEGIN
+  #q := #a >= 1;
+  #io := #a + 1;
+  #s := #q;
+END_FUNCTION_BLOCK
+
+DATA_BLOCK "DB_Sub" "FB_Sub"
+BEGIN
+  "DB_Sub".io := 5;
+END_DATA_BLOCK
+
+ORGANIZATION_BLOCK "Main"
+BEGIN
+  "DB_Sub"(a := 7, io := "DB_Sub".io);
+  %Q0.0 := "DB_Sub".q;
+END_ORGANIZATION_BLOCK`;
+    const { program, diagnostics } = compileSclProgram(src, 'Sub.scl');
+    expect(diagnostics.filter((d) => d.severity === 'error')).toEqual([]);
+    // DB_Sub: a @0 (2B), q @2.0, io @4 (2B), s @6.0 → size 8 (§3.4(6)).
+    const db = program.dbs.find((d) => d.name === 'DB_Sub');
+    expect(db?.size).toBe(8);
+    expect(db?.fields.find((f) => f.name === 'io')?.init).toBe(5);
+    const plc = new SoftPlc(program, new Map(), { id: 'PLC1', scanPeriodMs: 100 });
+    plc.start();
+    // Trước scan: io = init 5 trong bộ nhớ DB.
+    expect(plc.read('"DB_Sub".io')).toBe(5);
+    scan(plc, 100, () => {});
+    // Sau scan: FB ghi #io := #a + 1 = 8 qua alias trỏ chính field DB → đọc lại 8.
+    expect(plc.read('"DB_Sub".io')).toBe(8);
+    expect(plc.read('%Q0.0')).toBe(true);
+  });
+
   it('P-S8 out-arg => : Q và ET ra cả DB lẫn Ref (OQ-175) — expectedFrom: spec', () => {
     const plc = compileOk(
       `DATA_BLOCK "T1" "TON"
