@@ -97,6 +97,11 @@ export interface GenerateIoFixtureOptions {
   /** Sinh đúng N tín hiệu role (không bẩn, không tín hiệu thêm) — dùng cho
    *  smoke test perf 20k dòng (OQ-340). Không cho → layout §11.3 (300). */
   signalCount?: number;
+  /** G2 §34: chỉ tắt dirt trùng (duplicateTag + duplicateAddress) để fixture
+   *  commit được qua wizard; giữ missingType + suffixVariant (không sinh lỗi). */
+  cleanDuplicates?: boolean;
+  /** Tên file cơ sở cho xlsx/csv (mặc định 'io-list-300'). */
+  fileBase?: string;
 }
 
 /** Bố cục 50 thiết bị §11.3, nhóm theo station để cột station merge được
@@ -518,18 +523,24 @@ export function generateIoFixture(options: GenerateIoFixtureOptions = {}): Fixtu
   }
 
   // Chọn dòng bẩn (tập rời nhau, tất định theo seed).
+  // --clean-duplicates (G2 §34): tắt dirt trùng để fixture commit được qua
+  // wizard; pickIndices với k=0 vẫn rút RNG như thường nên thứ tự rút của
+  // các dirt còn lại không đổi — variant khác gốc đúng 12 dòng (6 tag + 6 địa chỉ).
+  const dirty = options.cleanDuplicates
+    ? { ...DIRTY_COUNTS, duplicateTag: 0, duplicateAddress: 0 }
+    : DIRTY_COUNTS;
   const used = new Set<number>();
   const dirtyRows: FixtureDirtyRow[] = [];
   const signals: FixtureSignal[] = pending.map((s, i) => ({ ...s, row: FIRST_DATA_ROW + i }));
 
-  for (const idx of pickIndices(signals.length, DIRTY_COUNTS.missingType, rng, used)) {
+  for (const idx of pickIndices(signals.length, dirty.missingType, rng, used)) {
     used.add(idx);
     const s = signals[idx] as FixtureSignal;
     dirtyRows.push({ row: s.row, kind: 'missing-type', detail: `Type cell empty in file; ground truth ${s.signalType}` });
   }
   const runFbIndices = signals.map((s, i) => (s.role === 'runFb' ? i : -1)).filter((i) => i >= 0);
   const variantPool = runFbIndices.filter((i) => !used.has(i));
-  for (let k = 0; k < DIRTY_COUNTS.suffixVariant && k < variantPool.length; k += 1) {
+  for (let k = 0; k < dirty.suffixVariant && k < variantPool.length; k += 1) {
     const idx = variantPool[k] as number;
     used.add(idx);
     const s = signals[idx] as FixtureSignal;
@@ -538,7 +549,7 @@ export function generateIoFixture(options: GenerateIoFixtureOptions = {}): Fixtu
     s.tag = `${s.equipment}_${variant}`;
     dirtyRows.push({ row: s.row, kind: 'suffix-variant', detail: `suffix ${oldSuffix} -> ${variant}; ground truth role runFb` });
   }
-  for (const idx of pickIndices(signals.length, DIRTY_COUNTS.duplicateTag, rng, used)) {
+  for (const idx of pickIndices(signals.length, dirty.duplicateTag, rng, used)) {
     used.add(idx);
     const s = signals[idx] as FixtureSignal;
     const donorIdx = Math.floor(rngNext(rng) * idx);
@@ -551,7 +562,7 @@ export function generateIoFixture(options: GenerateIoFixtureOptions = {}): Fixtu
     const kind = (signals[idx] as FixtureSignal).signalType;
     return signals.map((s, i) => (s.signalType === kind && i !== idx && !used.has(i) ? i : -1)).filter((i) => i >= 0);
   };
-  for (const idx of pickIndices(signals.length, DIRTY_COUNTS.duplicateAddress, rng, used)) {
+  for (const idx of pickIndices(signals.length, dirty.duplicateAddress, rng, used)) {
     used.add(idx);
     const s = signals[idx] as FixtureSignal;
     const donors = sameKind(idx);
@@ -679,8 +690,9 @@ export interface WrittenFixture {
 export async function writeIoFixture(outDir: string, options: GenerateIoFixtureOptions = {}): Promise<WrittenFixture> {
   const data = generateIoFixture(options);
   await mkdir(outDir, { recursive: true });
-  const xlsxPath = join(outDir, 'io-list-300.xlsx');
-  const csvPath = join(outDir, 'io-list-300.csv');
+  const base = options.fileBase ?? 'io-list-300';
+  const xlsxPath = join(outDir, `${base}.xlsx`);
+  const csvPath = join(outDir, `${base}.csv`);
   const yamlPath = join(outDir, 'expected.yaml');
   const wb = buildWorkbook(data);
   await wb.xlsx.writeFile(xlsxPath);
@@ -693,6 +705,7 @@ async function main(): Promise<number> {
   const args = process.argv.slice(2);
   let outDir = 'fixtures';
   let seed = FIXTURE_SEED;
+  let cleanDuplicates = false;
   for (let i = 0; i < args.length; i += 1) {
     const a = args[i] as string;
     if (a === '--out') {
@@ -706,13 +719,20 @@ async function main(): Promise<number> {
       seed = Number(v);
       if (!Number.isInteger(seed)) throw new Error('gen-io-fixture: --seed phải là số nguyên');
       i += 1;
+    } else if (a === '--clean-duplicates') {
+      cleanDuplicates = true;
     } else {
       throw new Error(`gen-io-fixture: tham số không nhận dạng được: ${a}`);
     }
   }
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-  const written = await writeIoFixture(join(root, outDir), { seed });
-  const data = generateIoFixture({ seed });
+  // exactOptionalPropertyTypes: chỉ truyền fileBase khi có giá trị.
+  const written = await writeIoFixture(join(root, outDir), {
+    seed,
+    cleanDuplicates,
+    ...(cleanDuplicates ? { fileBase: 'io-list-300-clean' } : {}),
+  });
+  const data = generateIoFixture({ seed, cleanDuplicates });
   process.stdout.write(
     `Đã sinh fixture (${String(data.signals.length)} tín hiệu, ${String(data.devices.length)} thiết bị, ${String(data.dirtyRows.length)} dòng bẩn):\n` +
       `  ${written.xlsx}\n  ${written.csv}\n  ${written.yaml}\n`,
