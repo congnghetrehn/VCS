@@ -2654,3 +2654,17 @@ Còn chờ anh: OQ-161, T-002/T-003, VERIFY §14, R-010, X-003.
 ---
 Log tới thời điểm 2026-11-27 10:17 +07.
 ---
+
+## 2026-11-27 10:49 +07 — em My
+
+Em đang làm mới tracker cho anh, xong em gửi ạ.
+
+## 2026-11-27 10:50 +07 — ChaMuse
+
+Tracker làm mới xong rồi ạ, anh Tiến ơi.
+
+Snapshot mới lúc 10:49, theo commit `be41113` trên `develop`. Thẻ "Vừa xong" giờ ghi PR #40 đã merge: 42 file docs có mục lục, D-002/D-003/D-006/D-007 và T-001 đã ghi vào docs, CI xanh. Các số còn lại không đổi: M0/M1 đã ký, M2 chờ ký G2, 8/8 quyết định, test 2.910/2.910, 7 việc đang chờ anh.
+
+---
+Log tới thời điểm 2026-11-27 10:50 +07.
+---
