@@ -358,6 +358,8 @@ wrap/chuẩn hóa là việc của interpreter trước khi ghi (§7.2).
 `DataType`: cùng `%IW64` có thể là Int, Word hoặc Real tùy khai báo ở lúc
 đọc. Không có dạng 64-bit tuyệt đối (`%ML` không tồn tại trong §3.3).
 
+**VERIFIED (TIA, 2026-11-27 — OQ-161 đóng; OQ-399/OQ-400 SCR).** Layout instance DB trên TIA Portal (CPU 1511-1 PN, optimized, đo từ DB_Motor/DB_Sub): **IN_OUT = kích thước tự nhiên ở cả hai mức** — lồng (`sub.io: Int` @30.0, 2 byte, `s` @32.0) và top-level (`DB_Sub.io: Int` @4.0, 2 byte, `s` @6.0). `fbInterfaceStruct` (lồng) đã đúng; `resolveDb` top-level **đã sửa ở D-009 (A23)**: IN_OUT kích thước tự nhiên, hiện field; DB_Sub 8 byte (7 nội dung + làm tròn chẵn §3.4(6)) vs TIA 7 byte — lệch 1 byte đuôi, xem OQ-400. **UNVERIFIED/lệch (OQ-400):** 6 quy tắc §3.4 không khớp layout optimized của TIA — Bool interface: TIA mỗi Bool 1 byte + căn chẵn (qRun @2.0, không gói bit); TON_TIME 16 byte (TIA) vs 18 (nhà mình); CTU_INT 6 byte (TIA, có CD/LD/QD) vs 10 (nhà mình); tổng DB_Motor 33 vs 38 byte, DB_Sub 7 vs 8 byte. Mọi thứ đọc DB theo địa chỉ tuyệt đối (HMI/SCADA/S7 comms) sẽ lệch offset tới khi sửa.
+
 **VERIFIED (OQ-085/090).** `parseAddress`: chấp nhận chữ thường + chuẩn hóa
 hoa, trim khoảng trắng, không `%` cũng parse được; `DB0` → throw;
 `sym:…` → throw; bit phải 0..7; không kiểm giới hạn vùng ở parse
@@ -559,7 +561,7 @@ named arg → T004.
 field không tồn tại → T005; giá trị không hằng → T008; gán trùng field →
 T009; giá trị vào `IrField.init` — do **typecheck** tính, lower chỉ copy).
 DB dạng `"fbname"` → `IrDb` với `fbName`, layout = `VAR_INPUT` +
-`VAR_OUTPUT` + `VAR_IN_OUT` (4 byte nội bộ, không lộ) + `VAR(static)` theo
+`VAR_OUTPUT` + `VAR_IN_OUT` (kích thước tự nhiên, hiện field) + `VAR(static)` theo
 thứ tự khai báo. Tham số OUT của FC (không phải `Q`) → **SCL-T004**
 (OQ-127 — `IrStmt.callFc` không có slot `outArgs`); tham số IN_OUT của FC
 → **SCL-T004** (OQ-128 — IR `callFc`/`callFcExpr` không có slot inout;
@@ -680,9 +682,9 @@ P1.1, cross-test ~20 địa chỉ ở vendor-siemens); `sym:` → throw chưa h�
 trợ (OQ-137). Địa chỉ tuyệt đối trần diễn giải theo width: bit → `Bool`,
 8 → `Byte`, 16 → `Int`, 32 → `DInt` (OQ-110); `LReal` 64-bit qua dạng
 `%ML10`/`DB1.DBL4` (chỉ có trong `parsePlcRef`, không có trong
-`parseAddress`). Layout instance DB (§3.5, OQ-125): `VAR_INPUT` +
-`VAR_OUTPUT` + `VAR_IN_OUT` (tham chiếu — slot 4 byte nội bộ, **không
-lộ**; truy cập field IN_OUT trong DB → T005) + `VAR(static)`, theo thứ
+`parseAddress`). Layout instance DB (§3.5, A23): `VAR_INPUT` +
+`VAR_OUTPUT` + `VAR_IN_OUT` (kích thước tự nhiên, hiện field; truy cập
+field IN_OUT trong DB như field thường (A23)) + `VAR(static)`, theo thứ
 tự khai báo — **sửa bug P1.3** ở `resolveDb` (bản cũ chỉ lấy `static` +
 prefix 4 byte, làm interpreter không tìm được field input). Số DB gán
 1..n theo `id` đã sort ở `load()`; ref ngoài → `load()` throw (OQ-136).
@@ -698,9 +700,7 @@ sai thì SCR đổi mô hình + sửa bảng A. OV/ENO không quan sát được
 (OQ-135) — nếu PLCSIM cho thấy ENO ảnh hưởng luồng thì cần SCR thêm ENO
 vào IR (P1.7). Ngữ nghĩa intrinsics ở biên (`NORM_X`/`SCALE_X` ngoài
 [0..1], tập `X_TO_Y`, `BOOL_TO_*`) theo spec §7.3, chưa đối chiếu code
-thật (X-002/S1). Layout IN_OUT của **multi-instance lồng** chưa nhất
-quán với DB top-level (`fbInterfaceStruct` dùng kích thước tự nhiên,
-không slot 4 byte — OQ-161, mở). Hiệu năng: smoke 200 FB_Motor đo
+thật (X-002/S1). Layout IN_OUT **nhất quán ở cả hai mức** (kích thước tự nhiên) — OQ-161 đóng 2026-11-27, OQ-399/A23 sửa top-level. Hiệu năng: smoke 200 FB_Motor đo
 **519 và 533 scan/s** (2 lần, 2000 scan) — dưới mục tiêu P1.7 ≥ 1000
 scan/s; bench chính thức + tối ưu là P1.7, không phải gate P1.4.
 

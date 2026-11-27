@@ -289,12 +289,14 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 | 2026-11-27 | D-007 — chủ sản phẩm quyết A (mkcert): HTTPS cho LAN bằng mkcert; việc tiếp theo (riêng sau P0.9): `mkcert -install` trên máy chủ, tạo cert cho tên-máy/IP-LAN, server đọc `VCS_TLS_CERT`/`VCS_TLS_KEY` khi cấu hình, cài CA root lên từng tablet; mặc định vẫn HTTP + bind `127.0.0.1`. | OWNER-INBOX D-007; ADR-0009 |
 | 2026-11-27 | D-002 — chủ sản phẩm quyết A: giữ repo private, proprietary/UNLICENSED, tên gói `@vcs/*`; `package.json` không đổi, không thêm file LICENSE. R-002 (P0.1 làm theo mặc định A) nay được chốt chính thức. | OWNER-INBOX D-002 |
 | 2026-11-27 | D-006 — chủ sản phẩm quyết A: giữ nguyên 3 mã lỗi (U001/T001/P002); chỉ sửa 1 câu chữ M1 §16.5 cho đúng thực tế (SCR chỉ đổi tài liệu, không sửa code/parser/test). Ghi AMENDMENTS **D9**. | OWNER-INBOX D-006; AMENDMENTS D9; M1 §16.5 |
+| 2026-11-27 | D-009 — chủ sản phẩm quyết A: sửa OQ-125 theo bằng chứng TIA — `resolveDb` layout IN_OUT top-level theo kích thước tự nhiên + hiện field (đọc được như field thường); sửa M1 §3.5 + AMENDMENTS (SCR OQ-399); cập nhật test ghim slot/T005. Bảng P không đổi. | OWNER-INBOX D-009; OQ-399; M1 §3.5 |
+| 2026-11-27 | D-010 — chủ sản phẩm quyết A: probe thêm 1 FB đa kiểu trên TIA (FB_Probe: DInt/Real/LReal/Array/UDT/nhiều Bool) để chốt quy tắc căn tổng quát rồi mới viết lại §3.4/defs + golden (SCR OQ-400); hướng dẫn probe ở `docs/verify-owner-guide.md`. | OWNER-INBOX D-010; OQ-400 |
 
 ## 5. Đang chờ chủ sản phẩm
 
 Chỉ liệt kê **ID** (chi tiết ở `docs/OWNER-INBOX.md`; câu hỏi/ giả định ở `docs/open-questions.md`):
 
-- Chặn tiến độ: T-002, T-003 (nên làm sớm, quyết định khả thi M5); D-001/D-004 đã xong (D-001 rule `main` đã tạo, not enforced — free plan, chấp nhận; D-004 server Node); D-003/D-007 đã quyết 2026-11-27 (D-003 A, D-007 A mkcert); D-002/D-006 đã quyết A 2026-11-27
+- Chặn tiến độ: T-002, T-003 (nên làm sớm, quyết định khả thi M5); D-001/D-004 đã xong (D-001 rule `main` đã tạo, not enforced — free plan, chấp nhận; D-004 server Node); D-003/D-007 đã quyết 2026-11-27 (D-003 A, D-007 A mkcert); D-002/D-006 đã quyết A 2026-11-27; D-009/D-010 đã quyết A 2026-11-27 (D-009 triển khai phase nhỏ; D-010 chờ anh probe FB_Probe); OQ-161 đã đóng 2026-11-27 (IN_OUT lồng kích thước tự nhiên, code đúng không đổi)
 - Không còn mục chặn P0.6 (OQ-062 đã quyết 2026-11-24, A19).
 - Không chặn (duyệt sau): D-005, S-001, S-002, S-003, R-001, R-002; OQ-006, OQ-007, OQ-009, OQ-010, OQ-011, OQ-012, OQ-013, OQ-014, OQ-015, OQ-016, OQ-017, OQ-018, OQ-019, OQ-020, OQ-021, OQ-022, OQ-023, OQ-024, OQ-025, OQ-026, OQ-027, OQ-028, OQ-029, OQ-030, OQ-031, OQ-033, OQ-034, OQ-035, OQ-036, OQ-037, OQ-038, OQ-039, OQ-040, OQ-041, OQ-042, OQ-043, OQ-044, OQ-045, OQ-046, OQ-047, OQ-048, OQ-049, OQ-050, OQ-051, OQ-052, OQ-053, OQ-054, OQ-057, OQ-058, OQ-059, OQ-060, OQ-061, OQ-063, OQ-064, OQ-065, OQ-066, OQ-067, OQ-068, OQ-069, OQ-070, OQ-071, OQ-072, OQ-073 (mở, xem `docs/open-questions.md`)
 
@@ -6533,3 +6535,150 @@ apps/web/e2e/p28-import-suggest-run.spec.ts  # e2e luồng trọn vẹn (§14 #8
 - **Giới hạn §14 #8 (ghi thật, không phóng đại):** luồng trọn được bao phủ bởi case (1)+(2)+(3)+(5) cộng lại, KHÔNG phải 1 test duy nhất — vì fixture 300 không commit được qua wizard (18 lỗi nội tại) còn motor-interlock có 0 confident để apply. Đề xuất follow-up (không làm ở P2.8): nút "áp dụng nhóm review đã chọn" ở Designer, hoặc fixture 300 biến thể commit được, để 1 test duy nhất đi hết luồng trên 1 project.
 - **Tổng kết P2.8 (đo thật, gate cuối trên cây live):** lint 0; typecheck 0; depcheck 0 (193 modules); test **2910/2910** (130 file — từ 2845 cuối P2.7, **+65 test mới**, vượt target ≥60); cheats SẠCH (313 file); `docs:diagnostics --check` khớp; build 3/3; e2e **p28 8/8** (1a, 1b, 1c, 2, 3, 4, 5, 6) + plant-closedloop 4/4 + tag-manager 2/2; perf-scroll KHÔNG chạy trong gate (chạy tay, VM-limited — xem commit 7). TC-1 không nổ; TC-2 không nổ (harness giữ 175/177, 50/50, 300/300); TC-3 không đốt lần tối ưu nào (trần VM, cần đo lại trên phần cứng thật — KHÔNG hạ ngưỡng 50 FPS).
 - **OQ đóng ở P2.8:** OQ-381 (qua OQ-391, commit 1) + OQ-382…398 (17 OQ, commit 2–9). Vẫn mở: OQ-380 (tier C, X-003 — acceptance thật UNVERIFIED, M2 ký sau), OQ-301/302/303, OQ-320…325 (tier B, không chạm P2.8).
+
+## §33 — D-009 — resolveDb: IN_OUT top-level theo kích thước tự nhiên (PLAN)
+
+> **Prompt (D-009, SCR OQ-399):** "Sửa `resolveDb` — IN_OUT top-level layout theo kích thước tự nhiên + hiện field (đọc được như field thường), thay slot DInt 4 byte ẩn + đọc → T005."
+>
+> **Bối cảnh:** Bằng chứng TIA 2026-11-27 của chủ sản phẩm (CPU 1511-1 PN): `DB_Sub.io: Int` @4.0 (2 byte, hiện trong DB), `s` @6.0 — IN_OUT top-level cũng kích thước tự nhiên, giống IN_OUT lồng (OQ-161 đã đóng). OQ-125 (quyết 2026-11-25) bị bác bỏ → SCR OQ-399. Chủ sản phẩm quyết D-009 = A 2026-11-27 (sửa ngay phase nhỏ).
+> **Branch:** `m1/d009-inout-natural` (tách từ `a77ebd1`, tip nhánh `docs/toc-index` = `develop` trên GitHub sau merge PR #40).
+> **Trạng thái:** ☑ plan → ☑ implement → ☑ gate → ☐ PR → ☐ merge.
+> **Phạm vi:** `resolveDb` + `dbForFb` (đồng bộ) + M1 §3.5 + AMENDMENTS A23 + semantics §12/§14/§15 + đóng OQ-399. Bảng P (38 byte) KHÔNG đổi. OQ-400 (lệch layout rộng hơn) KHÔNG chạm — D-010/probe FB_Probe là việc riêng.
+
+### Đọc (kiểm chứng bằng code thật, không suy đoán)
+
+- M1 spec §3.5 (dòng 173–174): layout instance DB = `VAR_INPUT + VAR_OUTPUT + VAR_IN_OUT (tham chiếu, M1: 4 byte nội bộ không lộ) + VAR(static)` — 1 dòng duy nhất nói về slot 4 byte trong spec (grep "4 byte": chỉ dòng 174; dòng 146 là vùng nhớ, không liên quan).
+- `packages/vendor-siemens/src/scl/typecheck.ts` — `resolveDb` (~dòng 1141): nhánh FB thường map IN_OUT → `type: 'DInt'` (dòng 1194) rồi lọc khỏi `fields` (dòng 1208–1209); nhánh system-FB/OQ-163 (dòng ~1147) layout từ def, không có IN_OUT — giữ nguyên. `fbInterfaceStruct` (dòng 611): input+output+inout(tự nhiên)+static — đã đúng, KHÔNG đổi. Tra cứu field DB → T005 ở dòng 1488/1506 (lookup chung, không special-case IN_OUT — sau sửa `io` tự resolve, không sửa lookup).
+- `packages/runtime-iec/src/layout.ts` (§3.4, 6 quy tắc): (1) Bool gói bit; (2) Byte 1 byte; (3) kiểu ≥ 2 byte bắt đầu chẵn; (4) LReal chẵn (không căn 8); (5) struct bắt đầu/kết thúc chẵn; (6) **tổng làm tròn chẵn** (`roundUpEven`, trừ struct rỗng). DInt chỉ căn chẵn (không căn 4) — khớp FB_T cũ (slot @2..5).
+- `packages/runtime-iec/src/ir-testkit.ts` — `dbForFb` (dòng 315): lặp lại quy tắc slot (map inout → DInt, dòng ~320; lọc fields) — PHẢI đồng bộ. Callers có IN_OUT: FB_Inc (`interpreter.test.ts:224`, `softplc-scan.test.ts:494`, inout `cnt: Int`) và FB_Latch (`softplc-scan.test.ts:312`, inout `ioCount: Int`); FB_Out/FB_X không có IN_OUT.
+- Bằng chứng TIA (2026-11-27, đã đo): DB_Motor iStart @0.0, qRun @2.0, tOn @4.0 TON_TIME 16 byte, cCount @20.0 CTU_INT 6 byte, sub @26.0 (a @26.0, q @28.0, io @30.0, s @32.0) = 33 byte; DB_Sub a @0.0, q @2.0, io @4.0, s @6.0 = 7 byte nội dung.
+- Đã đo thật bằng compile (parent, `compileSclProgram`): DB_Motor size 38 (iStart @0.0, qRun @0.1, tOn @2, cCount @20, sub @30); DB_Sub size 10 (a @0, q @2.0, s @8.0, io ẩn slot DInt @4–7).
+- Golden IR JSON: `fb-motor.json` (`inout: []`), `fc-scale.json` (`inout: []`), `db-motor.json` (DB STRUCT, không phải fbname) — **không golden nào chứa DB có IN_OUT → không đổi golden**.
+- OQ mở liên quan: OQ-399 (SCR này, tier B); OQ-400 (tier B, lệch layout rộng — không chạm); OQ-161 đã đóng 2026-11-27.
+
+### Tóm tắt hiểu biết (≤ 8 dòng)
+
+1. Chỉ 2 chỗ lặp quy tắc slot: `resolveDb` (production) + `dbForFb` (testkit) — sửa cả hai, cùng một thay đổi: IN_OUT dùng đúng kiểu khai báo, không lọc khỏi fields.
+2. Sau sửa, `"DB".io` resolve như field thường qua lookup chung (typecheck.ts:1488/1506) — không sửa lookup, interpreter, lower hay `DbStore` (size lấy từ `IrDb.size`).
+3. Bảng tính tay (dưới): DB_Sub 10 → 8 (không phải 7 — quy tắc (6) làm tròn chẵn; offsets khớp TIA từng byte); FB_T 8 → 6; FB_X (lower) 6 → 4; FB_Inc_DB 4 → 2; FB_Latch_DB 8 → 6; DB_Motor giữ 38.
+4. Spec đổi 1 dòng (§3.5) + AMENDMENTS **A23** mới (ghi TRƯỚC khi code, theo luật SCR); semantics 4 chỗ (§12 note + §14/~564 + §15/~686, ~705).
+5. Init DB ghi vào `io`: cho phép (field tồn tại — cùng luật OQ-125: chỉ field không tồn tại mới T005); ghim bằng test, ghi lựa chọn tier B vào plan.
+6. Test: 3 `it` cập nhật kỳ vọng (FB_T, FB_X, FB_S chỉ đổi tên) + 5 `it` mới (DB_Sub layout/read/init, `dbForFb` unit, runtime read); không golden nào đổi.
+7. Gate: lint + typecheck + depcheck + test + review:cheats + diagnostics --check; KHÔNG e2e/bench (compiler-only, không đổi server/UI/hiệu năng).
+8. Tier C: bảng P đổi; golden churn ngoài danh sách; slot 4 byte còn sót ở chỗ khác.
+
+### Phạm vi
+
+**Làm:**
+- Code: `resolveDb` nhánh FB thường (typecheck.ts ~1183–1209): IN_OUT dùng `toDecl` như input/output (giữ `init` nếu có — như các section khác), bỏ map DInt + bỏ lọc `inoutNames`; cập nhật comment §3.5/OQ-125. `dbForFb` (ir-testkit.ts ~306–348): cùng thay đổi (bỏ map DInt + bỏ lọc), cập nhật comment.
+- Spec/docs TRƯỚC code: M1 §3.5 dòng 174 → câu mới; AMENDMENTS **A23** (bảng A, xem Thiết kế); semantics §12 note + §14 + §15 (xem Thiết kế); OQ-399 đóng khi merge (không đóng ở plan).
+- Test (xem Test target): cập nhật 3 `it` cũ + thêm 5 `it` mới; testkit `dbForFb` có unit test trực tiếp mới.
+- Init-DB: cho phép ghi vào field IN_OUT (test ghim lựa chọn tier B).
+
+**Không làm (ghi lại, không chạm):**
+- `fbInterfaceStruct` (đã đúng — OQ-161 đóng), nhánh system-FB/OQ-163, lookup T005 (1488/1506), interpreter/lower/`DbStore`/SoftPlc, bảng P (38 byte), golden IR JSON, `docs/acceptance/M1.md` (bản ghi nghiệm thu đã ký — kết luận ở OQ table + STATE + semantics).
+- OQ-400 (Bool gói bit / TON 18 vs 16 / CTU 10 vs 6 / tổng 38 vs 33): D-010 + probe FB_Probe là việc riêng; phase này chỉ sửa đúng IN_OUT top-level.
+- Hạ ngưỡng/sửa golden để cho xanh; e2e/bench (không cần — xem Test target).
+
+### Thiết kế
+
+**Thay đổi code (2 chỗ, cùng một thay đổi ngữ nghĩa):**
+1. `typecheck.ts` `resolveDb` (~1183–1209): `decls` = input + output + inout (qua `toDecl`, giữ nguyên kiểu khai báo + `init`) + static; xóa dòng map `type: 'DInt'` (1194) và lọc `inoutNames` (1208–1209) — `fields = laid.fields` trực tiếp. Comment mới: "Layout instance DB (§3.5, OQ-399/A23): VAR_INPUT + VAR_OUTPUT + VAR_IN_OUT (kích thước tự nhiên, hiện field) + VAR(static), theo thứ tự khai báo."
+2. `ir-testkit.ts` `dbForFb` (~306–348): tương tự — `decls` dùng đúng kiểu khai báo cho mọi section (bỏ nhánh DInt), bỏ `.filter` loại inout; comment mới cùng nội dung. (Chỉ kiểu scalar — tiền lệ hiện có giữ nguyên; FB có IN_OUT kiểu struct/array vẫn throw như cũ.)
+
+**Thứ tự bắt buộc (luật SCR):** commit spec (M1 §3.5 + A23) TRƯỚC commit code. Không code theo §3.5 mới khi AMENDMENTS chưa ghi.
+
+**AMENDMENTS A23 (bảng A — implementer ghi nguyên văn, chỉ thay "Khi nào" nếu cần):**
+| A23 | M1 §3.5: instance DB layout `VAR_IN_OUT` (tham chiếu, 4 byte nội bộ không lộ) | **IN_OUT layout theo kích thước tự nhiên của kiểu khai báo, hiện field như field thường (đọc/ghi/init được).** Bằng chứng TIA 2026-11-27 (CPU 1511-1 PN): `DB_Sub.io: Int` @4.0 (2 byte), `s` @6.0. Quyết bởi chủ sản phẩm 2026-11-27 (D-009 chọn A). `resolveDb` + `dbForFb` đồng bộ; bảng P không đổi. | D-009 |
+
+**M1 §3.5 dòng 174 (mới):** "- Mỗi FB được gọi với instance DB (`\"FB_Motor_DB\"`) có layout = `VAR_INPUT + VAR_OUTPUT + VAR_IN_OUT (kích thước tự nhiên, hiện field) + VAR(static)` theo thứ tự khai báo."
+
+**Semantics (4 chỗ):**
+- §12 note TIA (dòng 361): "…`resolveDb` (top-level, slot DInt 4 byte ẩn + T005) **sai so với TIA** (SCR OQ-399)" → "…`resolveDb` top-level **đã sửa ở D-009 (A23)**: IN_OUT kích thước tự nhiên, hiện field; DB_Sub 8 byte (7 nội dung + làm tròn chẵn §3.4(6)) vs TIA 7 byte — lệch 1 byte đuôi, xem OQ-400".
+- §14 (~dòng 564): công thức layout "(4 byte nội bộ, không lộ)" → "(kích thước tự nhiên, hiện field)".
+- §15 (~dòng 686): cùng công thức + "truy cập field IN_OUT trong DB → T005" → "truy cập field IN_OUT trong DB như field thường (A23)".
+- §15 (~dòng 705): "Layout IN_OUT của **multi-instance lồng** chưa nhất quán với DB top-level (`fbInterfaceStruct` dùng kích thước tự nhiên, không slot 4 byte — OQ-161, mở)" → "Layout IN_OUT **nhất quán ở cả hai mức** (kích thước tự nhiên) — OQ-161 đóng 2026-11-27, OQ-399/A23 sửa top-level."
+
+### Bảng tính tay
+
+Tính từ `layout.ts` (Bool gói bit; kiểu ≥ 2 byte bắt đầu chẵn; tổng làm tròn chẵn — quy tắc (6)). Đối chiếu TIA 2026-11-27.
+
+> **Hiệu đính (quan trọng):** brief ban đầu kỳ vọng DB_Sub mới size **7**. Tính tay từ `layout.ts` cho **8**: nội dung kết thúc byte 7 (s @6.0, 1 bit) → quy tắc (6) làm tròn chẵn → 8. Offsets khớp TIA từng byte (a @0, q @2.0, io @4.0, s @6.0); chỉ đuôi 1 byte lệch (TIA 7 — TIA không làm tròn chẵn ở đây; xem OQ-400). Test assert **8**, kèm comment giải thích (quy tắc (6) + TIA 7). KHÔNG đổi quy tắc (6) trong phase này.
+
+| DB | Cũ (slot DInt, đã đo) | Mới (tự nhiên, tính tay) | TIA |
+|---|---|---|---|
+| DB_Sub (a Int, q Bool, io Int IN_OUT, s Bool) | size 10: a @0, q @2.0, io ẩn @4–7, s @8.0 | **size 8**: a @0 (2B), q @2.0, io @4 (2B), s @6.0; fields [['a',0,2],['q',2,1],['io',4,2],['s',6,1]] | 7 byte nội dung (cùng offsets) |
+| FB_T (a Bool, q Bool, io Int IN_OUT, st Int) | size 8: a @0.0, q @0.1, io ẩn @2–5, st @6; `"DB_T".io` → T005 | **size 6**: a @0.0, q @0.1, io @2 (2B), st @4 (2B); fields [['a',0,1],['q',0,1],['io',2,2],['st',4,2]]; `"DB_T".io` đọc được (Int) | — (FB_T chỉ dùng test) |
+| FB_X lower (IN Bool, Q Bool, IO Int IN_OUT) | size 6: IN @0.0, Q @0.1, IO ẩn @2–5 | **size 4**: IN @0.0, Q @0.1, IO @2 (2B); fields [['IN',0,1],['Q',0,1],['IO',2,2]] | — |
+| FB_Inc_DB (cnt Int IN_OUT) | size 4, fields [] | **size 2**, fields [['cnt',0,2]] | — |
+| FB_Latch_DB (iSet/iReset Bool, qOut Bool, ioCount Int IN_OUT, sLatched Bool) | size 8: iSet @0.0, iReset @0.1, qOut @0.2, ioCount ẩn @2–5, sLatched @6.0 | **size 6**: iSet @0.0, iReset @0.1, qOut @0.2, ioCount @2 (2B), sLatched @4.0 | — |
+| DB_Motor (bảng P, không IN_OUT top-level) | size 38 | **size 38 — KHÔNG ĐỔI** (guard tier C) | 33 (lệch OQ-400, không chạm) |
+
+### Mơ hồ (phân loại)
+
+**Tier A (tự quyết):** thứ tự commit (spec → code+test → semantics/OQ-đóng); tên test mới; vị trí file test mới (`ir-testkit.test.ts` mới cho unit `dbForFb`); comment giải thích size 8 vs TIA 7 trong test DB_Sub.
+**Tier B (mặc định + ghi OQ):** Init DB ghi vào field IN_OUT → **cho phép** (field tồn tại — cùng luật OQ-125: chỉ field không tồn tại mới T005); ghim bằng test; nếu bằng chứng TIA sau này cho thấy khác thì SCR mới. `init` trên khai báo IN_OUT (vd `io : Int := 5` trong VAR_IN_OUT) → giữ nguyên luật `toDecl` (init đi kèm field như mọi section) — test ghim cùng test init-DB.
+**Tier C (dừng, hỏi — xem "tier C còn mở"):** TC-1/TC-2/TC-3 dưới đây.
+
+### Test target + gate
+
+**Cập nhật (3 `it`, kỳ vọng cũ → mới, kèm lý do trong comment/test name):**
+1. `packages/vendor-siemens/src/scl/typecheck-coverage.test.ts` — `it('DB dạng "fbname" có IN_OUT → slot 4 byte, field không lộ (truy cập → T005)')` → đổi tên thành `... IN_OUT kích thước tự nhiên, field hiện (đọc được)` + kỳ vọng FB_T mới (fields + size 6) + thay assert T005 bằng assert đọc `"DB_T".io` OK (gán vào `#n : Int`, `expectNoErrors`).
+2. `packages/vendor-siemens/src/scl/lower-coverage.test.ts` — `it('DB dạng "fbname" qua lowerFile → IrDb có fbName + layout ...')` → fields + size 4 (FB_X mới).
+3. `packages/vendor-siemens/src/scl/typecheck-coverage.test.ts` — `it('DB dạng "fbname" → layout INPUT+OUTPUT+IN_OUT(4B, không lộ)+STATIC (§3.5)')` (FB_S, không có IN_OUT) → chỉ đổi tên (bỏ "(4B, không lộ)"), kỳ vọng giữ nguyên (size 6).
+
+**Mới (5 `it`):**
+4. `typecheck-coverage.test.ts` — DB_Sub layout: fields [['a',0,2],['q',2,1],['io',4,2],['s',6,1]], size 8 (comment: quy tắc (6) + TIA 7).
+5. `typecheck-coverage.test.ts` — `"DB_Sub".io` đọc được (gán vào temp Int, `expectNoErrors`) + ghi được (`"DB_Sub".io := 5` compile OK).
+6. `typecheck-coverage.test.ts` — init DB ghi vào `io`: `DATA_BLOCK "DB_Sub" "FB_Sub" BEGIN "DB_Sub".io := 5; END_DATA_BLOCK` → `expectNoErrors` + `init == 5` (ghim lựa chọn tier B).
+7. `packages/runtime-iec/src/ir-testkit.test.ts` (MỚI) — unit `dbForFb` với interface có IN_OUT (FB_T-like): fields + size 6, `io` hiện.
+8. `packages/vendor-siemens/src/scl/softplc-std.test.ts` (nhóm P-S7, cạnh bảng P) — runtime: compile FB_Sub + DB_Sub + Main gọi DB_Sub, chạy scan, `plc.read('"DB_Sub".io')` trả đúng giá trị đã ghi/alias (chứng minh field sống trong bộ nhớ, không chỉ ở typecheck).
+
+**Không đổi:** golden IR JSON (không file nào chứa DB có IN_OUT — đã rà: `fb-motor.json`/`fc-scale.json` `inout: []`, `db-motor.json` là DB STRUCT); bảng P (38 byte, test P-S7 giữ nguyên); FB_Inc/FB_Latch/FB_Out/FB_X behavior tests (không assert layout — chạy lại để xác nhận, không sửa kỳ vọng).
+
+**Gate (theo repo AGENTS.md §2 — chạy thật, dán kết quả):** `pnpm lint && pnpm typecheck && pnpm depcheck && pnpm test && pnpm review:cheats` + `pnpm docs:diagnostics --check` (catalog không đổi — T005 vẫn dùng ở lookup chung; `--check` chỉ xác nhận file sinh không lệch). **KHÔNG e2e** (không đổi server/UI — compiler-only), **KHÔNG bench** (không đổi đường nóng). Target test: toàn suite xanh (baseline 2910 test, +5 mới −0 xóa → ~2915; implementer báo số chính xác).
+
+### Rủi ro top-3
+
+1. **Size 8 vs TIA 7 gây hiểu lầm "chưa khớp TIA"** — giảm thiểu: comment trong test + plan + semantics ghi rõ quy tắc (6) làm tròn chẵn; lệch 1 byte đuôi thuộc OQ-400, không phải lỗi của phase này.
+2. **`dbForFb` sót ở test khác (FB_Inc/FB_Latch đổi size 4→2 / 8→6)** — giảm thiểu: đã rà — không test nào assert size/fields/snapshot-bytes của 2 DB này (chỉ assert hành vi alias qua %M); gate full suite bắt nếu sót.
+3. **Init-DB vào IN_OUT (tier B) sai so với TIA** — giảm thiểu: test ghim lựa chọn + ghi rõ trong plan; bằng chứng TIA ngược lại → SCR mới, không sửa lén.
+
+### Commit plan (5 commit, mỗi commit gate xanh)
+
+1. ☑ `docs: OQ-161 đóng (bằng chứng TIA) + SCR OQ-399/400 + D-009/D-010` (`5c4a0c2`) — gom docs chờ commit sẵn (OQ-161/OQ-399/OQ-400, D-009/D-010, STATE §4/§5, semantics §12, verify-guide §5). KHÔNG code.
+2. ☑ `plan(m1): D-009 — resolveDb IN_OUT tự nhiên (STATE §33)` — plan này + OQ-399 ghi "plan: STATE §33" (vẫn mở tới khi merge). KHÔNG code.
+3. ☐ `docs(m1): §3.5 + AMENDMENTS A23` — spec TRƯỚC code (1 dòng §3.5 + 1 hàng A23 nguyên văn trong Thiết kế). Gate: lint/typecheck (docs-only, test không cần chạy lại nhưng chạy nhanh để chắc).
+4. ☐ `fix(vendor-siemens): resolveDb + dbForFb IN_OUT tự nhiên` — code 2 chỗ + cập nhật 3 `it` cũ + thêm 5 `it` mới (mục Test target). Gate full (lint/typecheck/depcheck/test/cheats + diagnostics --check).
+5. ☐ `docs: semantics §12/§14/§15 + đóng OQ-399` — 4 chỗ semantics + OQ-399 → "☑ đóng (D-009, merge phase m1/d009-inout-natural)" + STATE §33 điền "Kết quả implement". Gate full rồi mới PR.
+
+### File mới/sửa
+
+| File | Đổi gì |
+|---|---|
+| `docs/STATE.md` §33 | Plan này (commit 2); commit 5 điền "Kết quả implement" |
+| `docs/open-questions.md` OQ-399 | Commit 2: ghi "plan: STATE §33"; commit 5: đóng |
+| `docs/specs/M1-soft-plc-spec.md` §3.5 (dòng 174) | 1 dòng → câu mới (commit 3) |
+| `docs/AMENDMENTS.md` | Thêm hàng **A23** (commit 3) |
+| `packages/vendor-siemens/src/scl/typecheck.ts` | `resolveDb` ~1183–1209 (commit 4) |
+| `packages/runtime-iec/src/ir-testkit.ts` | `dbForFb` ~306–348 (commit 4) |
+| `packages/vendor-siemens/src/scl/typecheck-coverage.test.ts` | Cập nhật 2 `it` (FB_T, FB_S tên) + thêm 3 `it` (DB_Sub layout/read/init) (commit 4) |
+| `packages/vendor-siemens/src/scl/lower-coverage.test.ts` | Cập nhật 1 `it` (FB_X) (commit 4) |
+| `packages/runtime-iec/src/ir-testkit.test.ts` | MỚI — unit `dbForFb` (commit 4) |
+| `packages/vendor-siemens/src/scl/softplc-std.test.ts` | Thêm 1 `it` runtime DB_Sub.io (commit 4) |
+| `docs/semantics.md` §12 + §14 + §15 | 4 chỗ (commit 5) |
+
+### OQ mới + tier C còn mở
+
+- Không OQ mới (OQ-399 đã có từ 2026-11-27; không phát sinh OQ trong plan — init-DB tier B ghi trong plan, không mở OQ).
+- **TC-1 — bảng P đổi:** test P-S7 DB_Motor ≠ 38 byte → **DỪNG**, không sửa kỳ vọng bảng P; báo parent (tiền đề "FB_Motor không có IN_OUT top-level" sai hoặc `resolveDb` chạm static).
+- **TC-2 — golden IR churn ngoài danh sách:** `git diff` chạm golden JSON khác (`fb-motor.json`/`fc-scale.json`/`db-motor.json` phải KHÔNG đổi) → **DỪNG**, báo parent (không tự đổi golden).
+- **TC-3 — slot 4 byte còn sót:** grep `slot 4 byte|4 byte nội bộ|type: 'DInt'` sau commit 4 còn hit ngoài comment lịch sử (STATE/OQ/AMENDMENTS) → **DỪNG**, mở rộng phạm vi có phê duyệt (không tự sửa ngoài danh sách File mới/sửa).
+
+### Kết quả implement
+
+- Commit 3 `fe645e5` docs(m1): §3.5 dòng 174 + AMENDMENTS A23 (nguyên văn §33). Gate: lint + typecheck xanh.
+- Commit 4 `4f0efce` fix(vendor-siemens): `resolveDb` (IN_OUT qua `toDecl`, bỏ map DInt + bỏ lọc `inoutNames`, `fields = laid.fields`) + `dbForFb` đồng bộ + `checkDbInit` cho nhánh DB instance FB (trước đây chỉ chạy ở nhánh STRUCT nên init ở DB `"fbname"` từng bị bỏ qua im lặng — cần cho test init `io == 5`; xem "Sai khác" dưới). 3 `it` cũ cập nhật (FB_T size 6, FB_X size 4, FB_S chỉ đổi tên) + 5 `it` mới (DB_Sub layout size 8, đọc/ghi `"DB_Sub".io`, init `io == 5`, unit `dbForFb`, runtime alias ghi 8 vào DB). Bảng P giữ 38 byte (test P-S7 xanh). Golden JSON không đổi (TC-2). Không còn slot 4 byte IN_OUT (TC-3 — 5 hit `type: 'DInt'` còn lại ở `std/defs.ts` là field ẩn `_start`/`_accum` của TON/CTU, có từ trước phase, không phải slot IN_OUT).
+- Commit 5 `docs: semantics §12/§14/§15 + đóng OQ-399` (commit này): 4 chỗ semantics theo §33 + OQ-399 → ☑ đóng.
+- Gate cuối (implementer, chạy thật): `pnpm lint` xanh; `pnpm typecheck` xanh; `pnpm depcheck` xanh (no dependency violations, 193 modules); `pnpm test` **2915/2915** (131 files; baseline 2910 + 5 mới, đúng plan); `pnpm review:cheats` SẠCH (314 file); `pnpm docs:diagnostics --check` khớp. KHÔNG e2e/bench (compiler-only, theo §33).
+- Lưu ý: 2 lần chạy `vitest` trực tiếp (không qua script `test`) báo 1–2 test đỏ — đều là test `tags.test.ts` cần `globalThis.gc` (`NODE_OPTIONS=--expose-gc` chỉ có ở script `test`); chạy đúng `pnpm test` thì 2915/2915 xanh. Không phải lỗi code.

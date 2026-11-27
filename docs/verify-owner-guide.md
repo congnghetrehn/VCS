@@ -16,6 +16,7 @@
   - [1. Kiosk trên tablet thật](#1-kiosk-trên-tablet-thật)
   - [2. Quyết D-007 — HTTPS cho truy cập LAN](#2-quyết-d-007-https-cho-truy-cập-lan)
 - [Các mục verify sau này](#các-mục-verify-sau-này)
+  - [Probe layout — FB đa kiểu (D-010 A, OQ-400)](#probe-layout-fb-đa-kiểu-d-010-a-oq-400)
 
 > File sống: AI ghi vào đây hướng dẫn chi tiết cho mọi việc chỉ chủ sản phẩm làm
 > được (kiến thức điều khiển, máy thật, PLCSIM/TIA, quyết định). Mỗi mục tự đủ
@@ -29,7 +30,7 @@
 | Milestone | Gói nghiệm thu | Ngày ký | Ghi chú |
 | --------- | -------------- | ------- | ------- |
 | M0 | `docs/acceptance/M0.md` | 2026-11-24 | 12/12 §15 ĐẠT; probe 3/3 PASS; Windows 439/439 |
-| M1 | `docs/acceptance/M1.md` | 2026-11-25 | 9/9 §16 ĐẠT; probe 4/4 PASS; §16.5 và OQ-161 chưa quyết (giữ mặc định, xem mục 5–6) |
+| M1 | `docs/acceptance/M1.md` | 2026-11-25 | 9/9 §16 ĐẠT; probe 4/4 PASS; §16.5 đã quyết A 2026-11-27; OQ-161 đã đóng 2026-11-27 bằng bằng chứng TIA (xem mục 5) |
 
 ---
 
@@ -190,19 +191,13 @@ gửi AI — đừng sửa test để cho xanh.
 
 ### 5. Quyết OQ-161 — layout IN_OUT của multi-instance lồng
 
-**Vấn đề:** DB top-level dùng slot DInt 4 byte **không lộ** cho IN_OUT (đọc field
-IN_OUT trong DB → T005), nhưng `fbInterfaceStruct` — layout cho FB con lồng
-trong static của FB cha — lại layout IN_OUT theo kích thước tự nhiên. Hai chỗ
-không nhất quán. Hiện tại P1.4/P1.5 giữ nguyên cả hai; test bảng P ghim FB_Motor
-DB **38 byte**. Nếu lật sang "IN_OUT lồng cũng là tham chiếu 4 byte" thì DB thành
-40 byte + SCR + sửa `fbInterfaceStruct` + sửa test bảng P.
+**✅ ĐÃ ĐÓNG 2026-11-27 — bằng chứng TIA của anh (CPU 1511-1 PN).** Kiểm tra 1 (layout) đã đủ để kết luận — **IN_OUT lồng = kích thước tự nhiên**, không phải slot 4 byte: `DB_Motor.sub.io: Int` @30.0 (2 byte), `s` @32.0. Code hiện tại (`fbInterfaceStruct`) đã đúng, không đổi code; test bảng P giữ 38 byte. Kiểm tra 2 (PLCSIM, hành vi) **không còn cần cho OQ-161** — IN_OUT truyền bằng tham chiếu đã là ngữ nghĩa của TIA và của interpreter nhà mình (semantics §15, OQ-148).
 
-- **A (đề xuất): hoãn tới khi có bằng chứng PLCSIM/S1**, không chặn ký M1, nhưng
-  phải quyết trước M2 nếu chạm FB lồng có IN_OUT.
-- **B: quyết ngay theo kinh nghiệm hiện trường của anh** — IN_OUT lồng là tham
-  chiếu 4 byte → AI sửa ngay trong phase sau.
+**Phát hiện thêm từ cùng bằng chứng (cần anh quyết — D-009/D-010, xem `docs/OWNER-INBOX.md`):**
+- OQ-125 bị bác bỏ: IN_OUT top-level cũng kích thước tự nhiên (`DB_Sub.io: Int` @4.0, 2 byte, `s` @6.0) — nhà mình đang slot DInt 4 byte, ẩn, đọc → T005 (DB_Sub 10 byte vs TIA 7 byte). → SCR OQ-399.
+- Lệch layout rộng hơn: Bool interface (nhà mình gói bit, TIA mỗi Bool 1 byte + căn chẵn — qRun @2.0 không phải @0.1); TON 18 vs 16 byte; CTU 10 vs 6 byte (TIA có CD/LD/QD, nhà mình không có); DB_Motor 33 vs 38 byte. → SCR OQ-400.
 
-**Báo lại:** "OQ-161: A hay B".
+**Bảng đối chiếu TIA vs nhà mình (DB_Motor):** iStart @0.0 / qRun @2.0 / tOn @4.0 (TON_TIME 16 byte) / cCount @20.0 (CTU_INT 6 byte) / sub @26.0 (a @26.0, q @28.0, io @30.0, s @32.0) — tổng 33 byte. Nhà mình: iStart+qRun byte 0 / tOn @2 (18 byte) / cCount @20 (10 byte) / sub @30 (8 byte) — tổng 38 byte.
 
 ### 6. Phán §16.5 — giữ mã lỗi tách riêng hay gom về U001?
 
@@ -235,7 +230,7 @@ ghi chữ ký vào `docs/STATE.md` §8 (ngày ký, người ký, ghi chú), mở
 chờ CI xanh rồi merge, sau đó đẩy main theo D-001 (PR develop → main, CI xanh,
 merge). Anh không cần tự sửa file.
 
-**Đã ký 2026-11-25.** §16.5 và OQ-161 chưa quyết — giữ mặc định hiện tại (mục 5–6).
+**Đã ký 2026-11-25.** §16.5 đã quyết A 2026-11-27; OQ-161 đã đóng 2026-11-27 bằng bằng chứng TIA (mục 5).
 
 ### Quan sát (không phải lỗi)
 
@@ -306,3 +301,23 @@ Mỗi khi có việc mới chỉ chủ sản phẩm làm được (M2: I/O list 
 M4: SCADA/Modbus thật; M5: PLCSIM/S7/SimaticML…), AI sẽ viết hướng dẫn chi tiết
 vào file này theo cùng mẫu: mục đích → làm gì (lệnh/file) → kỳ vọng số → báo
 lại bằng cách nào. Mục đã xong chuyển xuống cuối file, không xóa.
+
+### Probe layout — FB đa kiểu (D-010 A, OQ-400)
+
+**Mục đích:** chốt quy tắc căn tổng quát của layout instance DB trên TIA (optimized). Từ 2 DB đã đo (DB_Motor/DB_Sub), hai quy tắc ứng viên đều khớp: (a) layout theo section (Input → Output → InOut → Static, mỗi section căn theo phần tử đầu), (b) mọi biến interface bắt đầu ở địa chỉ chẵn (căn tối thiểu 2 byte). Probe này đo thêm các kiểu lớn/mảng/UDT để AI khớp model với toàn bộ offset và chốt quy tắc.
+
+**Làm gì:**
+1. Trong cùng project TIA (CPU 1511-1 PN), tạo UDT `UDT_Probe`: `x: Int; y: Bool; z: DInt;`
+2. Tạo FB `FB_SubD`: VAR_INPUT `a: Int`; VAR_OUTPUT `q: Bool`; VAR_IN_OUT `ioD: DInt`; VAR `s: Bool`. Thân: `#q := #a >= 1; #s := #q;`
+3. Tạo FB `FB_Probe` đúng thứ tự khai báo sau (thứ tự là thứ probe kiểm — đừng sắp lại):
+   - VAR_INPUT: `di: DInt; r: Real; lr: LReal; bIn: Bool;`
+   - VAR_OUTPUT: `qo: Bool; ro: Real;`
+   - VAR_IN_OUT: `ioD: DInt; ioR: Real;`
+   - VAR: `b1: Bool; b2: Bool; i1: Int; arr: Array[0..3] of Int; u: UDT_Probe; subD: FB_SubD; t1: TON; c1: CTU;`
+4. Tạo instance DB `DB_Probe` (FB_Probe). Compile all.
+5. Mở `DB_Probe`, chụp Details view (cột Name/Offset/Data type) như lần trước — thấy hết các field + field con của `u`, `subD`, `t1`, `c1`.
+6. Kiểm thêm: mở Properties của FB_Probe → General → "Optimized block access" có tick không (ghi lại có/không).
+
+**Kỳ vọng:** `lr: LReal` (8 byte) cho biết căn 8 hay căn 4; `arr` (4×Int) cho biết mảng căn/kích thước; `u` cho biết UDT lồng căn thế nào; `ioD`/`ioR` xác nhận IN_OUT DInt/Real cũng kích thước tự nhiên (dự kiến 4 byte mỗi cái); `subD.ioD` xác nhận IN_OUT lồng kiểu DInt cũng tự nhiên.
+
+**Báo lại:** ảnh Details view của DB_Probe + "Optimized block access: có/không" + độ dài DB (xem ở Properties của DB nếu có).
