@@ -3156,3 +3156,105 @@ Chạy lúc máy rảnh rồi báo lại 5 số cho em ạ (TagDB, orchestrator,
 ---
 Log tới thời điểm 2026-11-27 14:55 +07.
 ---
+
+## 2026-11-27 15:08 +07 — anh Tiến
+
+build-bench-bundle: xong — bench/dist/plant.bench.mjs, bench/dist/closedloop.bench.mjs
+bench TagDB (M0 §12.4) — trung vị, có warm-up:
+  set/get:            100,303,468 ops/s (ngưỡng ≥ 10,000,000) PASS
+  flush 5000 tag/0 đổi: 0.1 µs (ngưỡng ≤ 50) PASS
+  flush 1000 đổi + 1 sub: 0.028 ms (ngưỡng ≤ 1) PASS
+  heap +10M thao tác: -0.07 MB (ngưỡng < 1) PASS
+  kết quả: F:\Coding\VCS\bench\results.json
+bench orchestrator (M0 §12.4) — trung vị, có warm-up:
+  steps: 1,034,340 bước/s (ngưỡng ≥ 100,000) PASS
+  simTime sau bench: 1020000 ms, stepCount 102000
+  kết quả: F:\Coding\VCS\bench\results.json
+bench softplc (M1 §12.4) — FB_Motor §13 × 200, trung vị, có warm-up:
+  scans: 3,833 scan/s (ngưỡng ≥ 1,000) PASS
+  heap: +-0.23 MB / 2000 scan (ngưỡng < 1 MB) PASS
+  scanCount: 12200
+bench plant (M2 §12) — 500 thiết bị hỗn hợp (mix ×10 fixture §11.3), bước 10 ms, trung vị:
+  steps: 5,957 bước/s (ngưỡng ≥ 1,500) PASS
+  heap: +-11.72 MB / 100,000 bước (ngưỡng < 1 MB) PASS
+bench closedloop (M2 §12) — 1 SoftPlc × FB_Motor §13 200× + 200 motor_dol, bước 10 ms, trung vị:
+  steps: 3,340 bước/s (ngưỡng ≥ 1,000) PASS
+  tách: plant 0.048 ms/bước, PLC 0.234 ms/bước, còn lại (flush + orchestrator) 0.017 ms/bước, tổng 0.299 ms/bước
+  heap: +-0.16 MB / 2,000 bước (chỉ in, không ngưỡng)
+bench: tất cả PASS.
+
+## 2026-11-27 15:08 +07 — ChaMuse
+
+Dạ, cả 5 bench PASS hết ạ — bản sửa chạy ngon trên máy thật rồi: bundle build xong (plant + closedloop), TagDB 100 303 468 ops/s, orchestrator 1 034 340 bước/s, softplc 3 833 scan/s, **plant 5 957 bước/s (gấp ~4× ngưỡng 1 500)**, **closed-loop 3 340 bước/s (gấp ~3,3× ngưỡng 1 000)**. Máy anh nhanh hơn VM khoảng 2–2,5× ở mọi bench. Mục bench trên máy anh (§1) coi như xong — em đã ghi đủ 5 số vào `docs/verify-owner-guide.md` mục 1 và đang cập nhật VCS Tracker theo số mới ạ.
+
+---
+Log tới thời điểm 2026-11-27 15:08 +07.
+---
+
+## 2026-11-27 15:09 +07 — em My
+
+Dạ, VCS Tracker đã cập nhật xong theo số mới ạ — snapshot 15:08, develop @ 5a9cc99 (PR #42), test giữ 2 915/2 915, mục "Vừa xong" là fix bench Windows PR #42 + bench trên máy anh 5/5 PASS, 7 mục "Đang chờ anh" giữ nguyên.
+
+---
+Log tới thời điểm 2026-11-27 15:09 +07.
+---
+
+## 2026-11-27 15:10 +07 — anh Tiến
+
+tiếp theo cần làm những gì để tiếp tục và duyệt G2?
+
+## 2026-11-27 15:10 +07 — ChaMuse
+
+Dạ, trạng thái hiện tại: P2.1–P2.8 đã merge hết vào develop, test 2 915/2 915, bench trên máy anh 5/5 PASS; G2 chưa ký (docs/STATE.md/§8 hàng M2 còn trống, docs/acceptance/M2.md chưa có). Đường tới G2 còn 2 nhóm việc ạ:
+
+**Em làm — gói nghiệm thu M2:** lấp khoảng docs/specs/M2-plant-and-io-import-spec.md/§14 #8 (chưa có e2e nào chạy trọn luồng import → commit → run → fault; fixture 300 không commit được qua wizard vì 18 lỗi nội tại) + viết docs/acceptance/M2.md + gate + PR vào develop. Các mục §14 còn lại đã xanh (test, bench plant 5 957 / closed-loop 3 340 trên máy anh, diagnostics 74 mã, equipment docs tự sinh).
+
+**Anh quyết/làm — X-003 là chặn chính:** docs/specs/M2-plant-and-io-import-spec.md/§14 #4 đòi đo acceptance suggest ≥ 90% trên dữ liệu thật; hiện chỉ có số fixture (175/177), acceptance thật UNVERIFIED theo quyết định B anh chọn 2026-11-26 (docs/OWNER-INBOX.md/X-003, OQ-380 mở). Ngoài ra: VERIFY §14 (PLCSIM + mã thật), probe FB_Probe (D-010/OQ-400), tick R-010. S-001→3 không chặn G2, quyết khi rảnh.
+
+Thứ tự: (1) em làm gói G2 → (2) anh quyết X-003 → (3) anh rà gói + tick R-010 → (4) anh ký M2 ở docs/STATE.md/§8 → (5) em mở PR develop → main khi CI xanh (D-001). Lưu ý: M1 anh đã ký với §16.5 + OQ-161 chưa quyết (giữ mặc định) — ký G2 với #4 ghi UNVERIFIED cũng có tiền lệ rồi ạ. Anh chọn hướng X-003 giúp em:
+
+[[hatch_widget:widget-d8e99f37-1dce-4934-877f-a53453dfb5c0]]
+
+---
+Log tới thời điểm 2026-11-27 15:10 +07.
+---
+
+## 2026-11-27 15:15 +07 — anh Tiến
+
+Gửi file I/O thật để đo (A)
+
+## 2026-11-27 15:16 +07 — anh Tiến
+
+file IO cần format/column thế nào?
+
+## 2026-11-27 15:16 +07 — em My
+
+Dạ, đơn giản thôi ạ — **XLSX hoặc CSV**, ≥ 100 tín hiệu (docs/OWNER-INBOX.md/X-003); CSV tự nhận encoding + dấu phân tách, XLSX thì chọn sheet, ô công thức lấy giá trị cache. Anh **không cần đổi tên cột** — importer tự dò header trong 30 dòng đầu bằng từ điển synonym vi/en/de (docs/specs/M2-plant-and-io-import-spec.md/§8.3), giữ nguyên file gốc là tốt nhất. Cần có đủ các cột này:
+
+- **Bắt buộc:** `tag` (tên tín hiệu, vd KKS), `description` (mô tả), `signalType` (DI/DO/AI/AO…), `address` (E0.0/A0.0 hay I/Q đều được, tự chuẩn hóa về %I/%Q).
+- **Rất cần:** `equipment` (tên thiết bị) — để đo ≥ 95% thiết bị; thiếu cột này thì chỉ đo được role.
+- **Có càng tốt:** `controller`/PLC, `engMin`/`engMax` (range), `unit`, `polarity` (NO/NC), `rack`/`slot`/`channel`/`module`.
+
+Kèm theo: file `naming.yaml` hoặc mô tả ngắn quy ước đặt tên (tiền tố thiết bị, hậu tố role) — quan trọng nhất để chỉnh suggest (M2 §16 mục 1). **Ẩn danh trước khi gửi (D-003 A):** xóa/đổi tên khách hàng, tên dự án, IP, ghi chú nội bộ; giữ nguyên cấu trúc cột + tên tag/thiết bị + mô tả. Anh gửi file đính kèm ở đây là được, hoặc bỏ vào `fixtures-real/` (đã .gitignore, không commit) — em chỉ đọc trong VM thôi ạ. Nhận xong em chạy `vcs suggest`, in bảng equipment + role để anh duyệt đúng/sai (hoặc anh gửi kèm file đối chiếu); pass khi ≥ 90% tín hiệu và ≥ 95% thiết bị đúng (§11.3).
+
+---
+Log tới thời điểm 2026-11-27 15:16 +07.
+---
+
+## 2026-11-27 15:19 +07 — anh Tiến
+
+IO list với những thông tin như thế a có thể xuất trực tiếp từ dự án ở TIA portal ko? Hay nó là dữ liệu được chuẩn bị bên ngoài (ví dụ Comos) và đưa cho PLC?
+
+## 2026-11-27 15:19 +07 — ChaMuse
+
+Dạ, cả hai đều có thật, nhưng chiều chuẩn là **từ ngoài vào TIA** ạ:
+
+**Xuất từ TIA Portal thì được, nhưng thiếu cột:** bảng PLC tag chuột phải → Export ra Excel có Name, Data type, Address, Comment — gần nhất với I/O list trong TIA. Nhưng nó thiếu cột `equipment` (tag table là danh sách phẳng, chỉ nhóm bằng folder), thiếu `signalType` chi tiết (chỉ có kiểu Bool/Int/Real — DI hay AI phải suy từ địa chỉ), thiếu range/unit (nằm trong cấu hình kênh module AI ở HW config, không ra cùng bảng). HW config thì UI không có nút export Excel; muốn đủ thì phải qua TIA Openness API — đúng spike S3/T-003 đã lên kế hoạch (docs/SPIKES.md/S3: exporter tối thiểu xuất block/UDT/bảng tag + manifest), ghép tag table + HW config lại mới đủ cột.
+
+**Chiều chuẩn trong dự án thật:** COMOS (hoặc SPI/Intools, Excel do bên instrument lập) giữ I/O list gốc — tag, mô tả, loại tín hiệu, range, unit, thiết bị, loop… — rồi đưa cho PLC engineer để cấu hình HW + lập tag table trong TIA. Tức TIA là nơi tiêu thụ, không phải nơi sinh ra I/O list; xuất ngược ra chỉ được bản "as-built" đã mất thông tin gốc.
+
+**Cho X-003:** ưu tiên file I/O list gốc (COMOS/Excel) vì giữ đủ equipment + mô tả + range — đúng các cột cần đo. Nếu chỉ có TIA project thì xuất tag table ra Excel gửi em, kèm HW config (screenshot hoặc đợi S3 lấy qua Openness); thiếu equipment thì vẫn đo được role/tag, riêng mục equipment ≥ 95% sẽ không đo đầy đủ ạ.
+
+---
+Log tới thời điểm 2026-11-27 15:19 +07.
+---
