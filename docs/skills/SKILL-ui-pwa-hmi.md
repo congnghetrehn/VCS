@@ -1,5 +1,19 @@
 # SKILL — Giao diện web, HMI/SVG designer và PWA
 
+## Mục lục
+
+- [1. Bản chất UI này](#1-bản-chất-ui-này)
+- [2. Kiến trúc và luồng dữ liệu](#2-kiến-trúc-và-luồng-dữ-liệu)
+- [3. Hiệu năng](#3-hiệu-năng)
+- [4. Form, validation, i18n](#4-form-validation-i18n)
+- [5. Trợ năng (a11y) và UX công nghiệp](#5-trợ-năng-a11y-và-ux-công-nghiệp)
+- [6. HMI/SVG — runtime](#6-hmisvg-runtime)
+- [7. HMI/SVG — designer](#7-hmisvg-designer)
+- [8. Bảng thời gian thực và các trang dữ liệu](#8-bảng-thời-gian-thực-và-các-trang-dữ-liệu)
+- [9. PWA (tùy chọn — prompt P0.9; ngoài M0–M5)](#9-pwa-tùy-chọn-prompt-p09-ngoài-m0m5)
+- [10. Lỗi hay gặp](#10-lỗi-hay-gặp)
+- [11. Checklist tự kiểm](#11-checklist-tự-kiểm)
+
 > Dùng khi: `apps/web` (bảng Tags, Sim bar, Import wizard, Test Center, Communications), HMI designer/runtime (M4), và **PWA** (tùy chọn, prompt P0.9).
 > Spec thắng skill. Mẫu mã chỉ minh họa.
 

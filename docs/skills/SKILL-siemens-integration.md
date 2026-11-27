@@ -1,5 +1,16 @@
 # SKILL — Tích hợp Siemens: quy trình "sự thật trước" (PLCSIM Advanced, Openness/SimaticML, S7comm, OPC UA node id)
 
+## Mục lục
+
+- [1. Quy trình bắt buộc (5 bước)](#1-quy-trình-bắt-buộc-5-bước)
+- [2. PLCSIM Advanced (Bridge Agent)](#2-plcsim-advanced-bridge-agent)
+- [3. TIA Openness và SimaticML](#3-tia-openness-và-simaticml)
+- [4. S7comm cổ điển / Snap7](#4-s7comm-cổ-điển-snap7)
+- [5. OPC UA node id kiểu S7-1500](#5-opc-ua-node-id-kiểu-s7-1500)
+- [6. Mẫu sổ sự thật `docs/facts/<chủ-đề>.md`](#6-mẫu-sổ-sự-thật-docsfactsmd)
+- [7. Lỗi hay gặp](#7-lỗi-hay-gặp)
+- [8. Checklist tự kiểm](#8-checklist-tự-kiểm)
+
 > Dùng khi: P4.4 (node id kiểu S7-1500), toàn bộ M5. Đây là vùng **AI dễ bịa nhất**: API tên đúng 90% nhưng sai 10% là đủ làm hỏng cả công cụ.
 > Quy tắc vàng: **không viết code giao diện hãng từ trí nhớ.** Mọi mã chạm API/định dạng/giao thức hãng phải truy được về một **nguồn sự thật** đã ghi lại.
 
