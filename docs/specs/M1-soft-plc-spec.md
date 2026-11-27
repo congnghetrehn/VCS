@@ -1,5 +1,56 @@
 # M1 — Soft-PLC lõi: Đặc tả chi tiết
 
+## Mục lục
+
+- [1. Mục tiêu và phạm vi M1](#1-mục-tiêu-và-phạm-vi-m1)
+  - [1.1 Mục tiêu](#11-mục-tiêu)
+  - [1.2 Trong phạm vi (P0)](#12-trong-phạm-vi-p0)
+  - [1.3 Ngoài phạm vi M1 (không làm, không "làm tạm")](#13-ngoài-phạm-vi-m1-không-làm-không-làm-tạm)
+- [2. Cấu trúc package](#2-cấu-trúc-package)
+- [3. Kiểu dữ liệu và bộ nhớ](#3-kiểu-dữ-liệu-và-bộ-nhớ)
+  - [3.1 Kiểu dữ liệu M1](#31-kiểu-dữ-liệu-m1)
+  - [3.2 Bộ nhớ](#32-bộ-nhớ)
+  - [3.3 Địa chỉ tuyệt đối (parser trong `vendor-siemens/address.ts`)](#33-địa-chỉ-tuyệt-đối-parser-trong-vendor-siemensaddressts)
+  - [3.4 Layout DB / Struct (standard access) — `layout.ts` `VERIFY`](#34-layout-db-struct-standard-access-layoutts-verify)
+  - [3.5 Instance DB và multi-instance](#35-instance-db-và-multi-instance)
+- [4. Front-end SCL](#4-front-end-scl)
+  - [4.1 Lexer](#41-lexer)
+  - [4.2 Ngữ pháp (EBNF rút gọn, bắt buộc bám sát)](#42-ngữ-pháp-ebnf-rút-gọn-bắt-buộc-bám-sát)
+  - [4.3 Ưu tiên toán tử (cao → thấp)](#43-ưu-tiên-toán-tử-cao-thấp)
+  - [4.4 Type check (`typecheck.ts`)](#44-type-check-typecheckts)
+- [5. Front-end LAD](#5-front-end-lad)
+  - [5.1 Schema JSON (`lad/schema.ts`, validate bằng zod)](#51-schema-json-ladschemats-validate-bằng-zod)
+  - [5.2 Ngữ nghĩa LAD](#52-ngữ-nghĩa-lad)
+- [6. IR (cấu trúc, không phải bytecode)](#6-ir-cấu-trúc-không-phải-bytecode)
+- [7. Interpreter và mô hình thực thi](#7-interpreter-và-mô-hình-thực-thi)
+  - [7.1 Frame](#71-frame)
+  - [7.2 Quy tắc số học (phải giống nhau mọi nơi; ghi vào `docs/semantics.md`)](#72-quy-tắc-số-học-phải-giống-nhau-mọi-nơi-ghi-vào-docssemanticsmd)
+  - [7.3 Hàm intrinsic M1 (đăng ký qua `IntrinsicRegistry`)](#73-hàm-intrinsic-m1-đăng-ký-qua-intrinsicregistry)
+- [8. Scan và lập lịch (scheduler)](#8-scan-và-lập-lịch-scheduler)
+  - [8.1 Trạng thái CPU](#81-trạng-thái-cpu)
+  - [8.2 Chu kỳ](#82-chu-kỳ)
+  - [8.3 Cyclic OB](#83-cyclic-ob)
+  - [8.4 Process image — quy tắc đọc/ghi trong scan](#84-process-image-quy-tắc-đọcghi-trong-scan)
+  - [8.5 Thời gian](#85-thời-gian)
+- [9. Ngữ nghĩa các system block (`runtime-iec/std`)](#9-ngữ-nghĩa-các-system-block-runtime-iecstd)
+  - [9.1 Edge](#91-edge)
+  - [9.2 Bistable](#92-bistable)
+  - [9.3 Timer IEC (theo thời gian mô phỏng, độ phân giải = chu kỳ scan)](#93-timer-iec-theo-thời-gian-mô-phỏng-độ-phân-giải-chu-kỳ-scan)
+  - [9.4 Counter IEC (`PV, CV` kiểu Int mặc định; biến thể DInt theo tham số kiểu)](#94-counter-iec-pv-cv-kiểu-int-mặc-định-biến-thể-dint-theo-tham-số-kiểu)
+- [10. API công khai](#10-api-công-khai)
+- [11. UI tối thiểu của M1 (`apps/web`)](#11-ui-tối-thiểu-của-m1-appsweb)
+- [12. Chiến lược test](#12-chiến-lược-test)
+  - [12.1 Golden test format (`runtime-iec/golden/*.golden.yaml`)](#121-golden-test-format-runtime-iecgoldengoldenyaml)
+  - [12.2 Số lượng tối thiểu (≥ 80 golden + unit test riêng)](#122-số-lượng-tối-thiểu-80-golden-unit-test-riêng)
+  - [12.3 Property-based (fast-check)](#123-property-based-fast-check)
+  - [12.4 Benchmark (`pnpm bench`)](#124-benchmark-pnpm-bench)
+- [13. Demo chấp nhận: `examples/motor-interlock`](#13-demo-chấp-nhận-examplesmotor-interlock)
+- [14. Danh sách VERIFY với PLCSIM (việc của chủ sản phẩm)](#14-danh-sách-verify-với-plcsim-việc-của-chủ-sản-phẩm)
+- [15. Kế hoạch triển khai và prompt cho AI](#15-kế-hoạch-triển-khai-và-prompt-cho-ai)
+  - [Prompt mẫu](#prompt-mẫu)
+- [16. Tiêu chí nghiệm thu M1 (tất cả phải đạt)](#16-tiêu-chí-nghiệm-thu-m1-tất-cả-phải-đạt)
+- [17. Quyết định mặc định (để AI không dừng hỏi)](#17-quyết-định-mặc-định-để-ai-không-dừng-hỏi)
+
 > Thuộc dự án VCS (xem `PRD.md`, milestone M1, FR-201 … FR-206, FR-301, FR-302, FR-305).
 > Phiên bản: 0.1 (2026-11-21). Thời lượng dự kiến: 2–3 tuần công (10–15 ngày làm việc).
 > Dành cho: AI coding assistant. Khi spec này mâu thuẫn với "kiến thức sẵn có" của AI về Siemens, **spec thắng**. Chỗ nào không chắc về ngữ nghĩa Siemens, spec gắn thẻ `VERIFY` và đặt **giá trị mặc định** để AI không bị kẹt; chủ sản phẩm sẽ kiểm tra bằng PLCSIM (mục 14) rồi cập nhật `docs/semantics.md` + golden test.
@@ -718,7 +769,7 @@ Mỗi prompt kết thúc bằng: *"Chạy toàn bộ test/lint/typecheck, báo c
 2. ≥ 80 golden test + unit test theo bảng 12.2 đạt; mỗi test có `expectedFrom`.
 3. Demo `motor-interlock` chạy đúng cả 4 kịch bản qua CLI **và** qua UI (Watch table + force).
 4. Lỗi biên dịch có vị trí chính xác (±0 ký tự) cho ≥ 12 lỗi mẫu; compile báo nhiều lỗi trong một lần.
-5. Không có "bỏ qua im lặng": lệnh/từ khóa chưa hỗ trợ cho lỗi `SCL-U001 unsupported: <tên>` kèm vị trí.
+5. Không có "bỏ qua im lặng": lệnh/từ khóa chưa hỗ trợ báo lỗi ồn ào kèm vị trí — mã `SCL-U001` cho cấu trúc biết tên nhưng chưa hỗ trợ, `SCL-T001` cho kiểu chưa biết, `SCL-P002` cho cú pháp ngoài EBNF (đã kiểm chứng bằng probe, xem `docs/acceptance/M1.md` §16.5).
 6. Benchmark 12.4 ≥ 1 000 scan/s với 200 FB_Motor.
 7. `docs/semantics.md` liệt kê mọi quy tắc ở mục 7.2, 8, 9 với trạng thái `VERIFIED` / `UNVERIFIED`.
 8. `snapshot()/restore()` tái lập: chạy N scan, snapshot, chạy thêm M scan (ghi kết quả), restore, chạy lại M scan → kết quả **giống hệt**.
