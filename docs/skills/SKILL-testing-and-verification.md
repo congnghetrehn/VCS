@@ -1,5 +1,21 @@
 # SKILL — Kiểm thử và kiểm chứng
 
+## Mục lục
+
+- [1. Các loại test và khi nào dùng](#1-các-loại-test-và-khi-nào-dùng)
+- [2. Golden timeline tính tay — quy trình bắt buộc](#2-golden-timeline-tính-tay-quy-trình-bắt-buộc)
+- [3. Table-driven và đặt tên](#3-table-driven-và-đặt-tên)
+- [4. Property-based](#4-property-based)
+- [5. Tất định](#5-tất-định)
+- [6. Thời gian, bất đồng bộ, mạng](#6-thời-gian-bất-đồng-bộ-mạng)
+- [7. Mutation và phân loại mutant sống](#7-mutation-và-phân-loại-mutant-sống)
+- [8. Chất lượng assertion — tự hỏi](#8-chất-lượng-assertion-tự-hỏi)
+- [9. Benchmark có kỷ luật](#9-benchmark-có-kỷ-luật)
+- [10. Đa nền tảng](#10-đa-nền-tảng)
+- [11. Bằng chứng khi báo cáo](#11-bằng-chứng-khi-báo-cáo)
+- [12. Lỗi hay gặp](#12-lỗi-hay-gặp)
+- [13. Checklist tự kiểm](#13-checklist-tự-kiểm)
+
 > Dùng khi: viết/ sửa **bất kỳ** test; nhất là golden timeline (M1, M2, M3), property test (codec, bộ nhớ, TagDB), tất định, mutation, conformance, benchmark.
 > Triết lý: **test là bằng chứng**, không phải thủ tục. Một test không thể đỏ khi code sai là test vô dụng.
 

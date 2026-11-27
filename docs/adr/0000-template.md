@@ -1,5 +1,13 @@
 # ADR-NNNN: <Tiêu đề quyết định, dạng mệnh đề>
 
+## Mục lục
+
+- [Bối cảnh](#bối-cảnh)
+- [Các lựa chọn đã xem xét](#các-lựa-chọn-đã-xem-xét)
+- [Quyết định](#quyết-định)
+- [Hệ quả](#hệ-quả)
+- [Ghi chú xác minh](#ghi-chú-xác-minh)
+
 - **Trạng thái:** đề xuất | đã chấp nhận | thay thế bởi ADR-xxxx | từ bỏ
 - **Ngày:** YYYY-MM-DD
 - **Người quyết định:** <chủ sản phẩm>  · **Người đề xuất:** <AI/phiên/prompt>

@@ -1,5 +1,20 @@
 # SKILL — Mô phỏng PLC và plant (thuật toán, thời gian, số học)
 
+## Mục lục
+
+- [1. Mô hình thực thi của PLC (cái bạn đang mô phỏng)](#1-mô-hình-thực-thi-của-plc-cái-bạn-đang-mô-phỏng)
+- [2. Thời gian trong VCS (rời rạc, nguyên ms)](#2-thời-gian-trong-vcs-rời-rạc-nguyên-ms)
+- [3. Số học và kiểu dữ liệu kiểu S7 (mẫu minh họa; mặc định theo M1 §7.2)](#3-số-học-và-kiểu-dữ-liệu-kiểu-s7-mẫu-minh-họa-mặc-định-theo-m1-72)
+- [4. Bộ nhớ Siemens](#4-bộ-nhớ-siemens)
+- [5. Thiết kế interpreter](#5-thiết-kế-interpreter)
+- [6. Timer, counter, edge](#6-timer-counter-edge)
+- [7. LAD/FBD (và SimaticML FlgNet)](#7-ladfbd-và-simaticml-flgnet)
+- [8. Mô hình plant (toán rời rạc, tất định)](#8-mô-hình-plant-toán-rời-rạc-tất-định)
+- [9. Mẫu điều khiển xi măng (để test có ý nghĩa)](#9-mẫu-điều-khiển-xi-măng-để-test-có-ý-nghĩa)
+- [10. Xác minh ngữ nghĩa](#10-xác-minh-ngữ-nghĩa)
+- [11. Lỗi hay gặp](#11-lỗi-hay-gặp)
+- [12. Checklist tự kiểm](#12-checklist-tự-kiểm)
+
 > Dùng khi: soft-PLC (M1), plant model (M2), vòng mô phỏng (M0), test timeline (M3), adapter lockstep (M5).
 > **Spec thắng skill.** Đoạn mã dưới đây là *mẫu minh họa* để hiểu ý, không phải API có thật; ngữ nghĩa chuẩn nằm ở M1 §7–9, M2 §5–7.
 

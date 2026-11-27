@@ -1,5 +1,12 @@
 # ADR-0008: Editor SCL dùng `monaco-editor` (P1.7)
 
+## Mục lục
+
+- [Bối cảnh](#bối-cảnh)
+- [Các lựa chọn đã xem xét](#các-lựa-chọn-đã-xem-xét)
+- [Quyết định](#quyết-định)
+- [Hệ quả](#hệ-quả)
+
 - **Trạng thái:** đã chấp nhận
 - **Ngày:** 2026-11-25
 - **Người quyết định:** AI (P1.7, plan STATE §22 — dep lớn cần ADR theo AGENTS.md §5) · **Người đề xuất:** AI (P1.7)

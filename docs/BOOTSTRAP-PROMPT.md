@@ -1,5 +1,12 @@
 # BOOTSTRAP-PROMPT — Prompt khởi động và prompt "tiếp tục"
 
+## Mục lục
+
+- [A. Prompt khởi động (dán vào phiên đầu tiên)](#a-prompt-khởi-động-dán-vào-phiên-đầu-tiên)
+- [B. Prompt "tiếp tục" (dán vào mọi phiên sau)](#b-prompt-tiếp-tục-dán-vào-mọi-phiên-sau)
+- [C. Mẫu trả lời nhanh của chủ sản phẩm](#c-mẫu-trả-lời-nhanh-của-chủ-sản-phẩm)
+- [D. Nếu AI không có quyền shell/git](#d-nếu-ai-không-có-quyền-shellgit)
+
 > Dùng với một AI có **quyền shell + git** trên repo (Claude Code, Codex, Cursor agent… hoặc tương đương). Nếu công cụ thiếu quyền nào, AI sẽ ghi vào `STATE.md`/`OWNER-INBOX.md` và vẫn làm phần có thể.
 
 ## A. Prompt khởi động (dán vào phiên đầu tiên)

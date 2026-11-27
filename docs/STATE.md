@@ -1,12 +1,151 @@
 # STATE — Trạng thái dự án và bàn giao giữa các phiên
 
+## Mục lục
+
+- [0. Năng lực công cụ (AI điền ở phiên đầu tiên)](#0-năng-lực-công-cụ-ai-điền-ở-phiên-đầu-tiên)
+- [1. Vị trí hiện tại](#1-vị-trí-hiện-tại)
+- [2. Tiến độ prompt](#2-tiến-độ-prompt)
+- [3. Việc đang dở (cho phiên sau)](#3-việc-đang-dở-cho-phiên-sau)
+- [4. Quyết định và giả định gần đây](#4-quyết-định-và-giả-định-gần-đây)
+- [5. Đang chờ chủ sản phẩm](#5-đang-chờ-chủ-sản-phẩm)
+- [6. Dữ liệu/môi trường cần có (🔑) và tình trạng](#6-dữ-liệumôi-trường-cần-có-và-tình-trạng)
+- [7. Rủi ro đang theo dõi](#7-rủi-ro-đang-theo-dõi)
+- [8. Ký duyệt milestone](#8-ký-duyệt-milestone)
+- [9. Ghi chú (10 dòng — đọc & nội hóa, 2026-11-24)](#9-ghi-chú-10-dòng-đọc-nội-hóa-2026-11-24)
+- [10. Kế hoạch P0.3 — @vcs/kernel dữ liệu + @vcs/test-utils (plan-first, 2026-11-24)](#10-kế-hoạch-p03-vcskernel-dữ-liệu-vcstest-utils-plan-first-2026-11-24)
+- [11. Kế hoạch P0.4 — Orchestrator + builder + demo controller + CLI (plan-first, 2026-11-24)](#11-kế-hoạch-p04-orchestrator-builder-demo-controller-cli-plan-first-2026-11-24)
+- [12. Kế hoạch P0.5 — Server: REST/WS/SimulationService + `vcs serve` (plan-first, 2026-11-24)](#12-kế-hoạch-p05-server-restwssimulationservice-vcs-serve-plan-first-2026-11-24)
+- [13. Kế hoạch P0.6 — Web + Playwright e2e (plan-first, 2026-11-24)](#13-kế-hoạch-p06-web-playwright-e2e-plan-first-2026-11-24)
+- [14. Kế hoạch P0.7 — Tài liệu, ADR, hardening, kiểm Windows (plan-first, 2026-11-24)](#14-kế-hoạch-p07-tài-liệu-adr-hardening-kiểm-windows-plan-first-2026-11-24)
+- [Kết quả triển khai P0.7 (2026-11-24, xong local — CHƯA mở PR)](#kết-quả-triển-khai-p07-2026-11-24-xong-local-chưa-mở-pr)
+- [15. Kế hoạch P0.8 — Vá trước giao diện M4/M5: applyInbox, validateTagValue, files.comms/hmi, protocol additive, asyncStep/requiresAsync, sym: (plan-first, 2026-11-24)](#15-kế-hoạch-p08-vá-trước-giao-diện-m4m5-applyinbox-validatetagvalue-filescommshmi-protocol-additive-asyncsteprequiresasync-sym-plan-first-2026-11-24)
+- [16. Kế hoạch P1.1 — runtime-iec: types/memory/layout + vendor-siemens: address (plan-first, 2026-11-25)](#16-kế-hoạch-p11-runtime-iec-typesmemorylayout-vendor-siemens-address-plan-first-2026-11-25)
+- [17. Kế hoạch P1.2 — Lexer + parser SCL (Chevrotain) (plan-first, 2026-11-25)](#17-kế-hoạch-p12-lexer-parser-scl-chevrotain-plan-first-2026-11-25)
+- [Kết quả triển khai P1.2 (2026-11-25, xong local — CHƯA mở PR)](#kết-quả-triển-khai-p12-2026-11-25-xong-local-chưa-mở-pr)
+- [18. Kế hoạch P1.3 — Typecheck + lower AST→IR + `vcs ir dump` (plan-first, 2026-11-25)](#18-kế-hoạch-p13-typecheck-lower-astir-vcs-ir-dump-plan-first-2026-11-25)
+- [Kết quả triển khai P1.3 (2026-11-25, xong local — CHƯA mở PR)](#kết-quả-triển-khai-p13-2026-11-25-xong-local-chưa-mở-pr)
+  - [Lệch so với plan](#lệch-so-với-plan)
+  - [Sửa bug phát hiện khi viết test (nguyên nhân gốc, không sửa kỳ vọng)](#sửa-bug-phát-hiện-khi-viết-test-nguyên-nhân-gốc-không-sửa-kỳ-vọng)
+  - [Chưa làm / rủi ro còn lại](#chưa-làm-rủi-ro-còn-lại)
+- [19. Kế hoạch P1.4 — Interpreter + scheduler + SoftPlc (plan-first, 2026-11-25)](#19-kế-hoạch-p14-interpreter-scheduler-softplc-plan-first-2026-11-25)
+- [20. Kế hoạch P1.5 — System blocks: R_TRIG/F_TRIG, SR/RS, TON/TOF/TP/TONR, CTU/CTD/CTUD (plan-first, 2026-11-25)](#20-kế-hoạch-p15-system-blocks-r_trigf_trig-srrs-tontoftptonr-ctuctdctud-plan-first-2026-11-25)
+- [21. P1.6 — LAD: schema + validate + lower → IR (plan, 2026-11-25)](#21-p16-lad-schema-validate-lower-ir-plan-2026-11-25)
+- [22. P1.7 — Golden runner + demo motor-interlock + UI Watch + bench (plan, 2026-11-25)](#22-p17-golden-runner-demo-motor-interlock-ui-watch-bench-plan-2026-11-25)
+- [23. P0.9 — PWA shell + ADR HTTPS cho LAN (plan, 2026-11-25)](#23-p09-pwa-shell-adr-https-cho-lan-plan-2026-11-25)
+- [24. P2.1 — Nền plant: schemas, rng, adapter, source, FaultManager, PlantEngine, EventLog (plan, 2026-11-26)](#24-p21-nền-plant-schemas-rng-adapter-source-faultmanager-plantengine-eventlog-plan-2026-11-26)
+- [25. P2.2 — model `motor_dol` (plan)](#25-p22-model-motor_dol-plan)
+  - [Đọc](#đọc)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng)
+  - [Phạm vi](#phạm-vi)
+  - [Thiết kế](#thiết-kế)
+  - [Bảng tính tay (quy ước chung — OQ-254)](#bảng-tính-tay-quy-ước-chung-oq-254)
+  - [Test target](#test-target)
+  - [Mơ hồ (phân loại)](#mơ-hồ-phân-loại)
+  - [Rủi ro top-3](#rủi-ro-top-3)
+  - [Kết quả triển khai](#kết-quả-triển-khai)
+- [26. P2.3 — các model còn lại (plan)](#26-p23-các-model-còn-lại-plan)
+  - [Đọc](#đọc-1)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng-1)
+  - [Phạm vi](#phạm-vi-1)
+  - [Thiết kế](#thiết-kế-1)
+  - [Bảng tính tay A–K (script tham chiếu độc lập `/tmp/p23-ref.mjs` — chỉ cài luật spec, không import code repo; giá trị dưới đây là output của script, implementer dùng làm kỳ vọng golden)](#bảng-tính-tay-ak-script-tham-chiếu-độc-lập-tmpp23-refmjs-chỉ-cài-luật-spec-không-import-code-repo-giá-trị-dưới-đây-là-output-của-script-implementer-dùng-làm-kỳ-vọng-golden)
+  - [Mơ hồ (phân loại)](#mơ-hồ-phân-loại-1)
+  - [Test target + gate](#test-target-gate)
+  - [Rủi ro top-3](#rủi-ro-top-3-1)
+  - [Kết quả triển khai](#kết-quả-triển-khai-1)
+  - [Lệch so với plan](#lệch-so-với-plan-1)
+  - [File (mới/sửa)](#file-mớisửa)
+- [27. P2.4 — vòng kín + CLI `plant run` + làm lại vòng nóng (plan)](#27-p24-vòng-kín-cli-plant-run-làm-lại-vòng-nóng-plan)
+  - [Đọc](#đọc-2)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng-2)
+  - [Phạm vi](#phạm-vi-2)
+  - [Thiết kế](#thiết-kế-2)
+  - [Bảng tính tay A–D (kịch bản vòng kín — kỳ vọng cho demo + golden CLI)](#bảng-tính-tay-ad-kịch-bản-vòng-kín-kỳ-vọng-cho-demo-golden-cli)
+  - [Mơ hồ (phân loại)](#mơ-hồ-phân-loại-2)
+  - [Test target + gate](#test-target-gate-1)
+  - [Rủi ro top-3](#rủi-ro-top-3-2)
+  - [Kết quả triển khai](#kết-quả-triển-khai-2)
+  - [Lệch so với plan](#lệch-so-với-plan-2)
+  - [File (mới/sửa)](#file-mớisửa-1)
+- [28. P2.4 (tiếp) — D-008: làm A+B, hạ ngưỡng theo số đạt được (plan, 2026-11-26)](#28-p24-tiếp-d-008-làm-ab-hạ-ngưỡng-theo-số-đạt-được-plan-2026-11-26)
+  - [Đọc](#đọc-3)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng-3)
+  - [Bảng tính tay (thời gian/bước; 1 bước = 500 thiết bị)](#bảng-tính-tay-thời-gianbước-1-bước-500-thiết-bị)
+  - [Thiết kế A — kênh số cho StepCtx (commit 6)](#thiết-kế-a-kênh-số-cho-stepctx-commit-6)
+  - [Đo sau A (commit 7) — điểm quyết định, không phải tier C](#đo-sau-a-commit-7-điểm-quyết-định-không-phải-tier-c)
+  - [Thiết kế B — bench từ JS biên dịch (commit 8)](#thiết-kế-b-bench-từ-js-biên-dịch-commit-8)
+  - [Đo sau B (commit 9) — tính ngưỡng mới](#đo-sau-b-commit-9-tính-ngưỡng-mới)
+  - [Hạ ngưỡng (commit 10) — chỉ sau khi đo, commit riêng](#hạ-ngưỡng-commit-10-chỉ-sau-khi-đo-commit-riêng)
+  - [Commit 11–12 (= commit 7–8 cũ của §27, đổi số để nối tiếp — tham chiếu, không plan lại)](#commit-1112-commit-78-cũ-của-27-đổi-số-để-nối-tiếp-tham-chiếu-không-plan-lại)
+  - [Điểm quyết định tier C (tóm tắt)](#điểm-quyết-định-tier-c-tóm-tắt)
+  - [Gate + PR](#gate-pr)
+  - [File (mới/sửa)](#file-mớisửa-2)
+  - [OQ mới (OQ-320…326) + tier C còn mở](#oq-mới-oq-320326-tier-c-còn-mở)
+  - [Kết quả commit 10 — hạ ngưỡng plant §12 xuống 1500 (2026-11-26)](#kết-quả-commit-10-hạ-ngưỡng-plant-12-xuống-1500-2026-11-26)
+  - [Kết quả commit 11 — server tối thiểu + PlantFaultPanel + e2e parity (2026-11-26)](#kết-quả-commit-11-server-tối-thiểu-plantfaultpanel-e2e-parity-2026-11-26)
+  - [Kết quả commit 12 — docs §23 hoàn thiện (2026-11-26)](#kết-quả-commit-12-docs-23-hoàn-thiện-2026-11-26)
+  - [Kết quả commit 13 — ci.yml: rebase lên gói A của develop (2026-11-26, parent fix trước PR)](#kết-quả-commit-13-ciyml-rebase-lên-gói-a-của-develop-2026-11-26-parent-fix-trước-pr)
+- [29. P2.5 — đọc CSV/XLSX + mapping + transform (plan, 2026-11-26)](#29-p25-đọc-csvxlsx-mapping-transform-plan-2026-11-26)
+  - [Đọc](#đọc-4)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng-4)
+  - [Phạm vi](#phạm-vi-3)
+  - [Thiết kế](#thiết-kế-3)
+  - [Bảng tính tay (sniff / header / transform — kiểm bằng test, không sao chép từ implementation)](#bảng-tính-tay-sniff-header-transform-kiểm-bằng-test-không-sao-chép-từ-implementation)
+  - [Mơ hồ (phân loại)](#mơ-hồ-phân-loại-3)
+  - [Test target + gate](#test-target-gate-2)
+  - [Rủi ro top-3](#rủi-ro-top-3-3)
+  - [Kết quả triển khai](#kết-quả-triển-khai-3)
+  - [Commit plan (nhỏ, theo thứ tự — implementer làm tiếp)](#commit-plan-nhỏ-theo-thứ-tự-implementer-làm-tiếp)
+  - [File (mới/sửa) — dự kiến](#file-mớisửa-dự-kiến)
+  - [OQ mới (OQ-327…340) + tier C còn mở](#oq-mới-oq-327340-tier-c-còn-mở)
+- [§30 — P2.6 — Chuẩn hóa địa chỉ / validate / diff & commit (PLAN)](#30-p26-chuẩn-hóa-địa-chỉ-validate-diff-commit-plan)
+  - [Đọc (kiểm chứng bằng code thật, không suy đoán)](#đọc-kiểm-chứng-bằng-code-thật-không-suy-đoán)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng-5)
+  - [Phạm vi](#phạm-vi-4)
+  - [Thiết kế](#thiết-kế-4)
+  - [Bảng tính tay](#bảng-tính-tay)
+  - [Mơ hồ (tier A/B/C)](#mơ-hồ-tier-abc)
+  - [Test target + gate](#test-target-gate-3)
+  - [Rủi ro (top 3)](#rủi-ro-top-3-4)
+  - [Kết quả triển khai (điền sau khi implement — commit 7)](#kết-quả-triển-khai-điền-sau-khi-implement-commit-7)
+  - [Commit plan (7 commit, mỗi commit gate xanh)](#commit-plan-7-commit-mỗi-commit-gate-xanh)
+  - [File mới/sửa](#file-mớisửa-3)
+  - [OQ mới (OQ-341…360) + tier C còn mở](#oq-mới-oq-341360-tier-c-còn-mở)
+- [§31 — P2.7 — Auto-suggest thiết bị (§9) + CLI `vcs suggest` (PLAN)](#31-p27-auto-suggest-thiết-bị-9-cli-vcs-suggest-plan)
+  - [Đọc (kiểm chứng bằng code thật, không suy đoán)](#đọc-kiểm-chứng-bằng-code-thật-không-suy-đoán-1)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng-6)
+  - [X-003 — trạng thái và ranh giới chặn (đọc trước khi implement)](#x-003-trạng-thái-và-ranh-giới-chặn-đọc-trước-khi-implement)
+  - [Phạm vi](#phạm-vi-5)
+  - [Thiết kế](#thiết-kế-5)
+  - [Bảng tính tay](#bảng-tính-tay-1)
+  - [Mơ hồ (phân loại)](#mơ-hồ-phân-loại-4)
+  - [Test target + gate](#test-target-gate-4)
+  - [Rủi ro top-3](#rủi-ro-top-3-5)
+  - [Commit plan (7 commit, mỗi commit gate xanh)](#commit-plan-7-commit-mỗi-commit-gate-xanh-1)
+  - [File mới/sửa](#file-mớisửa-4)
+  - [OQ mới (OQ-361…380) + tier C còn mở](#oq-mới-oq-361380-tier-c-còn-mở)
+  - [Kết quả triển khai (điền sau khi implement — commit 6)](#kết-quả-triển-khai-điền-sau-khi-implement-commit-6)
+- [§32 — P2.8 — UI: import wizard, Tag Manager, Plant Designer, Simulation inspector (PLAN)](#32-p28-ui-import-wizard-tag-manager-plant-designer-simulation-inspector-plan)
+  - [Đọc (kiểm chứng bằng code thật, không suy đoán)](#đọc-kiểm-chứng-bằng-code-thật-không-suy-đoán-2)
+  - [Tóm tắt hiểu biết (≤ 8 dòng)](#tóm-tắt-hiểu-biết-8-dòng-7)
+  - [Phạm vi](#phạm-vi-6)
+  - [Thiết kế](#thiết-kế-6)
+  - [Bảng tính tay](#bảng-tính-tay-2)
+  - [Mơ hồ (phân loại)](#mơ-hồ-phân-loại-5)
+  - [Test target + gate](#test-target-gate-5)
+  - [Rủi ro top-3](#rủi-ro-top-3-6)
+  - [Commit plan (9 commit, mỗi commit gate xanh)](#commit-plan-9-commit-mỗi-commit-gate-xanh)
+  - [File mới/sửa](#file-mớisửa-5)
+  - [OQ mới (OQ-382…398) + tier C còn mở](#oq-mới-oq-382398-tier-c-còn-mở)
+  - [Kết quả implement](#kết-quả-implement)
+
 > **AI đọc file này đầu mỗi phiên và cập nhật cuối mỗi phiên.** Chủ sản phẩm kiểm tra và ký ở mục "Ký duyệt milestone". Giữ ngắn: tối đa ~150 dòng; lịch sử chi tiết nằm ở git và `docs/acceptance/`.
 
 ## 0. Năng lực công cụ (AI điền ở phiên đầu tiên)
 
 - Shell: bash (Linux VM) · git: bản sao làm việc local (nhánh `m0/p0.4-orchestrator`, commit local, KHÔNG push — mọi thay đổi GitHub đi qua trình duyệt UI trên máy chủ sản phẩm theo chỉ đạo 2026-11-24; `git clone` HTTPS trực tiếp bị chặn, repo private, không có credential trong VM) · `gh` CLI: 2.102.0, chưa login · Node 24.22.1, npm 10.9.4, pnpm: **không có binary** (`pnpm: command not found`, `corepack` không có) nhưng **dùng được qua `npx -y pnpm@10.15.0`** (10.15.0, ĐÃ CHẠY) · .NET SDK: **thiếu** · mạng: github.com 200, registry.npmjs.org 200 · mở được phiên reviewer độc lập: có (subagent)
 - Quirk VM (2026-11-24, P0.1; **gặp lại ở P0.2** khi `pnpm add zod/yaml/fast-check`): `pnpm install`/`pnpm add` trong `~/workspace/vcs` (btrfs `/home/hatch`) luôn lỗi cuối `EPERM chown <file tạm>` (exit 255) — chown trực tiếp lúc được lúc không; `pnpm-lock.yaml` vì thế không ghi được tại chỗ. Cách xử lý: sinh lockfile trong bản sao ở `/tmp/vcs-p02` (ở đó pnpm ghi được, exit 0) rồi chép về; `node_modules` vẫn cài đủ (đã kiểm `tsc/eslint/vitest` chạy được) nhưng link workspace `@vcs/*` phải tạo tay (`ln -s`, đã tạo 7 link) vì install dừng trước bước link. **Hậu quả: `pnpm install --frozen-lockfile` CHƯA CHẠY ĐƯỢC trong VM này — phải kiểm lại trên CI và máy Windows (T-001).** Xem OQ-007. **Sửa P0.2 (2026-11-24):** 7 link tay đã xóa; `node_modules` hiện do `pnpm install` thật tạo (đồng bộ từ `/tmp/vcs-fix`). Link tay từng che mất lỗi khai báo dependency khiến PR #9 CI đỏ (ERR_MODULE_NOT_FOUND) — xem OQ-012. **P0.4:** đồng bộ `node_modules` từ `/tmp` về phải gồm cả `node_modules` từng package (`apps/cli`, `packages/*`), không chỉ root — thiếu `apps/cli/node_modules/commander` làm lint/typecheck đỏ ở bản chính trong khi bản `/tmp` xanh dù source giống hệt (lỗi `commander` không resolve được type). **P0.5 (2026-11-24): `pnpm install --frozen-lockfile` CHẠY ĐƯỢC lần đầu trong bản sao `/tmp/vcs-p05` (exit 0, "Already up to date")** — lockfile hiện đầy đủ, không còn thiếu link workspace; trong `~/workspace/vcs` vẫn EPERM nên mọi `pnpm add/install` vẫn phải làm ở `/tmp` rồi chép lockfile + đồng bộ `node_modules` về. Lưu ý: `depcheck` ở bản chính đếm 61 module/115 dep, ở `/tmp` 57/101 — lệch do bản chính có `apps/*/dist/` (build output) cũng bị cruise; cả hai đều "no violations".
-- Hệ điều hành/ môi trường chạy: Linux VM (Muse); máy Windows của chủ sản phẩm chưa kiểm (spike S6, T-001)
+- Hệ điều hành/ môi trường chạy: Linux VM (Muse); máy Windows của chủ sản phẩm đã kiểm (T-001 xong 2026-11-24, `pnpm test` 439/439 sau fix OQ-074; e2e/.NET SDK/Playwright trên máy thật chưa báo cáo — gộp vào gate Windows M1, verify-owner-guide §4)
 
 ## 1. Vị trí hiện tại
 
@@ -27,7 +166,7 @@
 | P0.6   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p06` install thật lẫn bản sao chính; vitest 438/438, e2e 5/5 local; bench guard PASS; kiểm cuộn 20 000 dòng: probe PASS 1 lần, đo tay 45,7–60,0 FPS — xem §13; OQ-062 đã quyết (a), A19)                                                                                         | PR #13, nhánh `m0/p0.6-web` (đã merge `471a2ec` 2026-11-24 16:48 +07, CI 8/8 xanh) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (438 test vitest, 35 file; 17 test unit mới + 5 e2e) + build xanh + smoke `GET /` | xem §13 |
 | P0.7   | ✔ xong (gate xanh cả bản sao `/tmp/vcs-p07` install thật lẫn bản sao chính; test 439/439 + coverage §13 PASS + e2e 5/5; bench baseline + hồi quy; đã merge PR #14 `0188cf8` vào `develop` 2026-11-24 17:24 +07, CI 8 successful + 2 skipped) | PR #14, nhánh `m0/p0.7-docs` (đã merge) | lint/typecheck/depcheck/test (+coverage)/test:e2e/review:cheats + `docs:diagnostics --check` xanh 2026-11-24 (439 test vitest, 35 file; 1 test ghim hash mới) + build xanh + bench PASS | xem §14 |
 | P0.8   | ✔ xong (gate xanh local; đã merge PR #19 `aecb372` vào `develop` 2026-11-25 00:31 +07, CI 8 successful + 2 skipped) | PR #19, nhánh `m0/p0.8-interfaces` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` + build xanh 2026-11-24 (507 test, 36 file; 68 test mới) + bench TagDB 4/4 + orchestrator 443.627 bước/s | xem §15; OQ-075…081 đóng |
-| P0.9   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #30 `6a9d083` vào `develop` 2026-11-26 01:33 +07, CI 8 successful + 2 skipped) | nhánh `m0/p0.9-pwa` | test 1946/1946, e2e 11/11 + E7.6 | plan-first; HTTPS cho LAN ghi ADR-0009, D-007 chờ owner quyết, không tự đổi bind              |
+| P0.9   | ✔ xong (gate xanh local + parent re-verify trên bản sao sạch; đã merge PR #30 `6a9d083` vào `develop` 2026-11-26 01:33 +07, CI 8 successful + 2 skipped) | nhánh `m0/p0.9-pwa` | test 1946/1946, e2e 11/11 + E7.6 | plan-first; HTTPS cho LAN ghi ADR-0009, D-007 đã quyết A (mkcert) 2026-11-27, không tự đổi bind              |
 | G0     | ✔ đã ký 2026-11-24 (gói bằng chứng `docs/acceptance/M0.md`, 12/12 §15 ĐẠT; probe bổ sung 3/3 PASS; Windows 439/439 sau fix OQ-074) | nhánh `m0/g0-acceptance` (đã merge PR #15) | gate xanh 2026-11-24 ở bản sao sạch (439 test + coverage PASS, e2e 5/5, bench PASS, hash ghim khớp 2 lần chạy) | gói nghiệm thu M0 |
 | P1.1   | ✔ xong (gate xanh local; đã merge PR #20 `8b3dbb6` vào `develop` 2026-11-25 01:13 +07, CI xanh) | PR #20, nhánh `m1/p1.1-runtime-iec` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (651 test, 40 file; 144 test mới) + build xanh + bench guard PASS | xem §16; OQ-082…091 đóng |
 | P1.2   | ✔ xong (gate xanh local; đã merge PR #21 `278e3af` vào `develop` 2026-11-25 05:13 +07, CI 8 successful + 2 skipped) | PR #21, nhánh `m1/p1.2-scl-parser` (đã merge) | lint/typecheck/depcheck/test/test:e2e/review:cheats + `docs:diagnostics --check` xanh (746 test, 42 file; 95 test mới) + build xanh + bench guard PASS | xem §17; OQ-092…104 đóng, OQ-105 mở |
@@ -146,14 +285,18 @@ Trạng thái: ☐ chưa · ◐ đang làm · ✔ xong (gate xanh + đã kiểm)
 | 2026-11-24 | P0.5 — xong local: `apps/server` (`SimulationService`, `WsHub`, REST, config, `SERVER_EXTENSIONS`, `VERSION = '0.1.0'`) + `vcs serve` (exit 3/2/0) + script root `dev`/`build` (tsup). Test mới 51 (config 12, sim-service 11, ws 22, serve 6) — tổng **420/420, 31 file**. Gate xanh cả bản sao `/tmp/vcs-p05` (install thật, frozen-lockfile exit 0) lẫn bản chính: lint 0 lỗi, typecheck sạch, depcheck no violations (57/101 ở `/tmp`, 61/115 ở bản chính — lệch do cruise cả `dist/`), review:cheats SẠCH (82 file), diagnostics --check khớp (24 mã, +WS-E003). Bench guard: TagDB 4/4 PASS, orchestrator 514 972 bước/s bản chính / 507 739 `/tmp` | M0 §8.2, §12.4; STATE §12 |
 | 2026-11-24 | P0.6 đã merge PR #13 (`471a2ec`, 2026-11-24 16:48 +07, CI 8/8 xanh — xác minh qua MCP read: merged true, merged_at 2026-11-24T09:48:05Z) — `develop` hiện chứa web + e2e; nhánh plan P0.7 `m0/p0.7-docs` tách từ `d893736` (= nội dung `develop` sau merge) | PR #13 |
 | 2026-11-24 | P0.7 plan §14: 7 ADR (0001–0006 theo M0 §11 + 0007 main-guard hoãn từ P0.5 — OQ-071); bằng chứng §15.1 lấy theo A16, không sửa chữ spec (OQ-072); baseline bench là `bench/baseline.json` được commit, `results.json` vẫn gitignore (OQ-073); §15.5 đường async = `stepOnceAsync` + `SIM-E002` đã có từ P0.4 (T6), C1 là P0.8; §15.6 cần ghim giá trị hash; coverage §13 chưa bật | OQ-071, OQ-072, OQ-073; M0 §11, §13, §15 |
+| 2026-11-27 | D-003 — chủ sản phẩm quyết A: KHÔNG đưa dữ liệu thật vào công cụ AI / repo; chỉ dữ liệu ẩn danh ở `fixtures-real/` (đã .gitignore) hoặc kho riêng. Áp dụng X-003…X-008. Không đổi spec (AMENDMENTS E8 đã ghi nguyên tắc này). | OWNER-INBOX D-003; AMENDMENTS E8 |
+| 2026-11-27 | D-007 — chủ sản phẩm quyết A (mkcert): HTTPS cho LAN bằng mkcert; việc tiếp theo (riêng sau P0.9): `mkcert -install` trên máy chủ, tạo cert cho tên-máy/IP-LAN, server đọc `VCS_TLS_CERT`/`VCS_TLS_KEY` khi cấu hình, cài CA root lên từng tablet; mặc định vẫn HTTP + bind `127.0.0.1`. | OWNER-INBOX D-007; ADR-0009 |
+| 2026-11-27 | D-002 — chủ sản phẩm quyết A: giữ repo private, proprietary/UNLICENSED, tên gói `@vcs/*`; `package.json` không đổi, không thêm file LICENSE. R-002 (P0.1 làm theo mặc định A) nay được chốt chính thức. | OWNER-INBOX D-002 |
+| 2026-11-27 | D-006 — chủ sản phẩm quyết A: giữ nguyên 3 mã lỗi (U001/T001/P002); chỉ sửa 1 câu chữ M1 §16.5 cho đúng thực tế (SCR chỉ đổi tài liệu, không sửa code/parser/test). Ghi AMENDMENTS **D9**. | OWNER-INBOX D-006; AMENDMENTS D9; M1 §16.5 |
 
 ## 5. Đang chờ chủ sản phẩm
 
 Chỉ liệt kê **ID** (chi tiết ở `docs/OWNER-INBOX.md`; câu hỏi/ giả định ở `docs/open-questions.md`):
 
-- Chặn tiến độ: T-002, T-003 (nên làm sớm, quyết định khả thi M5); D-001/D-004 đã xong (D-001 rule `main` đã tạo, not enforced — free plan, chấp nhận; D-004 server Node)
+- Chặn tiến độ: T-002, T-003 (nên làm sớm, quyết định khả thi M5); D-001/D-004 đã xong (D-001 rule `main` đã tạo, not enforced — free plan, chấp nhận; D-004 server Node); D-003/D-007 đã quyết 2026-11-27 (D-003 A, D-007 A mkcert); D-002/D-006 đã quyết A 2026-11-27
 - Không còn mục chặn P0.6 (OQ-062 đã quyết 2026-11-24, A19).
-- Không chặn (duyệt sau): D-002, D-003, D-005, S-001, S-002, S-003, R-001, R-002; OQ-006, OQ-007, OQ-009, OQ-010, OQ-011, OQ-012, OQ-013, OQ-014, OQ-015, OQ-016, OQ-017, OQ-018, OQ-019, OQ-020, OQ-021, OQ-022, OQ-023, OQ-024, OQ-025, OQ-026, OQ-027, OQ-028, OQ-029, OQ-030, OQ-031, OQ-033, OQ-034, OQ-035, OQ-036, OQ-037, OQ-038, OQ-039, OQ-040, OQ-041, OQ-042, OQ-043, OQ-044, OQ-045, OQ-046, OQ-047, OQ-048, OQ-049, OQ-050, OQ-051, OQ-052, OQ-053, OQ-054, OQ-057, OQ-058, OQ-059, OQ-060, OQ-061, OQ-063, OQ-064, OQ-065, OQ-066, OQ-067, OQ-068, OQ-069, OQ-070, OQ-071, OQ-072, OQ-073 (mở, xem `docs/open-questions.md`)
+- Không chặn (duyệt sau): D-005, S-001, S-002, S-003, R-001, R-002; OQ-006, OQ-007, OQ-009, OQ-010, OQ-011, OQ-012, OQ-013, OQ-014, OQ-015, OQ-016, OQ-017, OQ-018, OQ-019, OQ-020, OQ-021, OQ-022, OQ-023, OQ-024, OQ-025, OQ-026, OQ-027, OQ-028, OQ-029, OQ-030, OQ-031, OQ-033, OQ-034, OQ-035, OQ-036, OQ-037, OQ-038, OQ-039, OQ-040, OQ-041, OQ-042, OQ-043, OQ-044, OQ-045, OQ-046, OQ-047, OQ-048, OQ-049, OQ-050, OQ-051, OQ-052, OQ-053, OQ-054, OQ-057, OQ-058, OQ-059, OQ-060, OQ-061, OQ-063, OQ-064, OQ-065, OQ-066, OQ-067, OQ-068, OQ-069, OQ-070, OQ-071, OQ-072, OQ-073 (mở, xem `docs/open-questions.md`)
 
 ## 6. Dữ liệu/môi trường cần có (🔑) và tình trạng
 
@@ -174,7 +317,7 @@ Chỉ liệt kê **ID** (chi tiết ở `docs/OWNER-INBOX.md`; câu hỏi/ giả
 | ------------------------------------------------------------- | --- | --------------------------------------------------------------------------- | ------------------------- |
 | Soft-PLC tự viết không tương đương PLC thật                   | C   | Chỉ conformance trên PLCSIM (M5 §10, ≥10/14 thí nghiệm) mới chứng minh được | AI + chủ sản phẩm (T-002) |
 | Chưa có dữ liệu thật nào (X-001…X-008)                        | C   | Fixture tổng hợp trước; dữ liệu thật ẩn danh khi có                         | Chủ sản phẩm              |
-| Môi trường Windows chưa được chứng minh (S6)                  | B/C | Chạy S6 sớm (T-001); VM này không có pnpm/.NET                              | Chủ sản phẩm (T-001)      |
+| Môi trường Windows đã chứng minh một phần (S6, T-001 xong 2026-11-24: `pnpm test` 439/439) — còn thiếu e2e + .NET/Playwright trên máy thật | B/C | Gộp vào gate Windows M1 (verify-owner-guide §4) khi anh chạy | Chủ sản phẩm      |
 | Hiệu năng OPC UA 2.000 monitored item @100 ms chưa có số liệu | B   | Bench S4 trước P4.4; không đạt → push (ADR)                                 | AI                        |
 | Scope creep + sai im lặng                                     | A   | Gate + review:cheats + reviewer độc lập mỗi PR                              | AI                        |
 

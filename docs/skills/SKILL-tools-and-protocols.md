@@ -1,5 +1,20 @@
 # SKILL — Viết công cụ, importer, generator và giao thức
 
+## Mục lục
+
+- [1. Nguyên tắc nền: lõi thuần + vỏ I/O mỏng](#1-nguyên-tắc-nền-lõi-thuần-vỏ-io-mỏng)
+- [2. CLI (`apps/cli`, commander)](#2-cli-appscli-commander)
+- [3. Importer (I/O list, C&E, SimaticML, bảng tag)](#3-importer-io-list-ce-simaticml-bảng-tag)
+- [4. Generator (test, báo cáo, docgen, JSON HMI)](#4-generator-test-báo-cáo-docgen-json-hmi)
+- [5. Codec và giao thức nhị phân (Modbus, S7comm, VBP/1…)](#5-codec-và-giao-thức-nhị-phân-modbus-s7comm-vbp1)
+- [6. Server/ client mạng](#6-server-client-mạng)
+- [7. Adapter ngoài (controller thật/ PLCSIM)](#7-adapter-ngoài-controller-thật-plcsim)
+- [8. Công cầu nối .NET (Bridge Agent, TIA Export)](#8-công-cầu-nối-net-bridge-agent-tia-export)
+- [9. Cấu hình và lược đồ](#9-cấu-hình-và-lược-đồ)
+- [10. Hiệu năng](#10-hiệu-năng)
+- [11. Lỗi hay gặp](#11-lỗi-hay-gặp)
+- [12. Checklist tự kiểm](#12-checklist-tự-kiểm)
+
 > Dùng khi: CLI (`vcs …`), importer (I/O list, C&E, SimaticML), generator (test, báo cáo, docgen), codec/ server/ client mạng (Modbus, S7, OPC UA, VBP), công cụ cầu nối .NET.
 > Spec thắng skill. Mẫu mã chỉ minh họa.
 

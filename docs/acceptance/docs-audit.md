@@ -1,5 +1,22 @@
 # docs-audit — Kiểm kê tài liệu VCS (bản sao local, chỉ đọc)
 
+## Mục lục
+
+- [1. Kết quả tổng quát](#1-kết-quả-tổng-quát)
+- [2. Bảng kiểm kê theo MANIFEST](#2-bảng-kiểm-kê-theo-manifest)
+- [3. Tham chiếu gãy / mơ hồ (đã kiểm bằng grep + script Python)](#3-tham-chiếu-gãy-mơ-hồ-đã-kiểm-bằng-grep-script-python)
+  - [3.1 Gãy thật (2 lần, cùng một gốc)](#31-gãy-thật-2-lần-cùng-một-gốc)
+  - [3.2 Mơ hồ về ký hiệu, không gãy hẳn](#32-mơ-hồ-về-ký-hiệu-không-gãy-hẳn)
+  - [3.3 Tham chiếu tới file chưa tồn tại — KHÔNG tính là gãy (file sẽ tạo ở prompt tương ứng)](#33-tham-chiếu-tới-file-chưa-tồn-tại-không-tính-là-gãy-file-sẽ-tạo-ở-prompt-tương-ứng)
+- [4. Mâu thuẫn ngữ nghĩa — đề xuất SCR (KHÔNG tự sửa)](#4-mâu-thuẫn-ngữ-nghĩa-đề-xuất-scr-không-tự-sửa)
+  - [SCR-001 · PRD §9 dùng M1–M8 cho lĩnh vực chức năng, trùng số với milestone M0–M5](#scr-001-prd-9-dùng-m1m8-cho-lĩnh-vực-chức-năng-trùng-số-với-milestone-m0m5)
+  - [SCR-002 · Số golden test M1: PRD §13 nói ≥ 60, M1 §16 nói ≥ 80](#scr-002-số-golden-test-m1-prd-13-nói-60-m1-16-nói-80)
+  - [SCR-003 · Thời lượng M0: PRD §13 nói 1–2 tuần, M0 spec nói 4–6 ngày công](#scr-003-thời-lượng-m0-prd-13-nói-12-tuần-m0-spec-nói-46-ngày-công)
+  - [SCR-004 · PRD §13 có M6 (Clinker cooler lite) và M7+ nhưng chưa có spec](#scr-004-prd-13-có-m6-clinker-cooler-lite-và-m7-nhưng-chưa-có-spec)
+  - [Đã kiểm và KHÔNG phải mâu thuẫn](#đã-kiểm-và-không-phải-mâu-thuẫn)
+- [5. Lỗi cơ học tầng A (sửa được ngay, không đổi ngữ nghĩa)](#5-lỗi-cơ-học-tầng-a-sửa-được-ngay-không-đổi-ngữ-nghĩa)
+- [6. Ghi chú kiểm tra khác](#6-ghi-chú-kiểm-tra-khác)
+
 > Nguồn: bản sao local `/home/hatch/workspace/vcs/`, tải từ repo `congnghetrehn/VCS`, nhánh `main`, commit `0f60c2d` "first repo upload".
 > Ngày kiểm: 2026-11-24. Phương pháp: `find` đệ quy + `grep` toàn bộ `*.md` (đường dẫn `docs/…`, `scripts/…`, `§…`, mã `P*.*`, mã AMENDMENTS `A*/B*/C*/D*/E*`, mã `H*`, link markdown) + đọc theo thứ tự AGENTS → SOUL → AUTONOMY → AMENDMENTS → PRD → M0 (đầy đủ, qua mục lục + các mục 1–17) → mục lục + tiêu chí nghiệm thu M1–M5 → PROMPTS → skills/README → SPIKES → REVIEW-CHECKLISTS → STATE / OWNER-INBOX / open-questions.
 > Quy tắc: KHÔNG sửa file gốc, KHÔNG bịa file thiếu, KHÔNG tự sửa ngữ nghĩa. File thiếu theo MANIFEST → OWNER-INBOX mục X; mâu thuẫn ngữ nghĩa → SCR mục S; lỗi cơ học → tầng A.

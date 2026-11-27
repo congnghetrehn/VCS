@@ -1,5 +1,19 @@
 # Kiến trúc VCS — Milestone M0
 
+## Mục lục
+
+- [1. Tổng quan](#1-tổng-quan)
+- [2. Monorepo và package JIT](#2-monorepo-và-package-jit)
+- [3. Luồng dữ liệu trong một bước mô phỏng](#3-luồng-dữ-liệu-trong-một-bước-mô-phỏng)
+- [4. Thời gian và tốc độ](#4-thời-gian-và-tốc-độ)
+- [5. Builder và extension](#5-builder-và-extension)
+- [6. Server và giao thức](#6-server-và-giao-thức)
+- [7. Web và CLI](#7-web-và-cli)
+- [8. Lỗi và chẩn đoán](#8-lỗi-và-chẩn-đoán)
+- [9. Test, bench và CI](#9-test-bench-và-ci)
+- [10. Thêm package / extension / lệnh CLI](#10-thêm-package-extension-lệnh-cli)
+- [11. Những gì M0 KHÔNG có (thuộc milestone sau)](#11-những-gì-m0-không-có-thuộc-milestone-sau)
+
 Tài liệu này mô tả kiến trúc **đã triển khai** ở M0 (P0.1–P0.6). Mọi khẳng định trỏ về
 file code hoặc test; chỗ nào là dự định cho milestone sau thì ghi rõ "chưa có".
 Ngữ nghĩa chi tiết (thời gian, thứ tự bước, quyền ghi): xem `docs/semantics.md`.

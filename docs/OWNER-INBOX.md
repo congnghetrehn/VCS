@@ -1,5 +1,32 @@
 # OWNER-INBOX — Hộp thư của chủ sản phẩm
 
+## Mục lục
+
+- [0. Tóm tắt (AI cập nhật mỗi lần ghi)](#0-tóm-tắt-ai-cập-nhật-mỗi-lần-ghi)
+- [1. QUYẾT ĐỊNH (D) — đang mở](#1-quyết-định-d-đang-mở)
+  - [D-001 · Bật branch protection cho `main` · Chặn: G0 · Hạn mong muốn: trước P0.1 — ✅ ĐÃ QUYẾT 2026-11-24: chọn A](#d-001-bật-branch-protection-cho-main-chặn-g0-hạn-mong-muốn-trước-p01-đã-quyết-2026-11-24-chọn-a)
+  - [D-002 · Giấy phép / tên gói (`@vcs/*`) · Chặn: P0.1 · Hạn mong muốn: trước P0.1 — ✅ ĐÃ QUYẾT 2026-11-27: chọn A](#d-002-giấy-phép-tên-gói-vcs-chặn-p01-hạn-mong-muốn-trước-p01-đã-quyết-2026-11-27-chọn-a)
+  - [D-003 · Chính sách dữ liệu khách hàng · Chặn: P2.7 · Hạn mong muốn: trước P2.7 — ✅ ĐÃ QUYẾT 2026-11-27: chọn A](#d-003-chính-sách-dữ-liệu-khách-hàng-chặn-p27-hạn-mong-muốn-trước-p27-đã-quyết-2026-11-27-chọn-a)
+  - [D-004 · Nơi chạy mô phỏng (server hay Worker) · Chặn: G0 · Hạn mong muốn: trước P0.6/P1.7 — ✅ ĐÃ QUYẾT 2026-11-24: chọn A (server Node)](#d-004-nơi-chạy-mô-phỏng-server-hay-worker-chặn-g0-hạn-mong-muốn-trước-p06p17-đã-quyết-2026-11-24-chọn-a-server-node)
+  - [D-005 · PWA (P0.9) · Chặn: không chặn M0 · Hạn mong muốn: sau M0 — ✅ ĐÃ QUYẾT 2026-11-25: chọn B](#d-005-pwa-p09-chặn-không-chặn-m0-hạn-mong-muốn-sau-m0-đã-quyết-2026-11-25-chọn-b)
+  - [D-006 · §16.5 — giữ mã lỗi tách riêng hay gom về U001? · Chặn: không chặn ký M1 · Hạn mong muốn: trước M2 — ✅ ĐÃ QUYẾT 2026-11-27: chọn A](#d-006-165-giữ-mã-lỗi-tách-riêng-hay-gom-về-u001-chặn-không-chặn-ký-m1-hạn-mong-muốn-trước-m2-đã-quyết-2026-11-27-chọn-a)
+  - [D-007 · HTTPS cho LAN (PWA trên tablet) — chọn mkcert, reverse proxy, hay chỉ localhost? · Chặn: không chặn P0.9 (PWA chạy đủ trên localhost) · Hạn mong muốn: trước khi dùng tablet witness qua LAN — ✅ ĐÃ QUYẾT 2026-11-27: chọn A (mkcert)](#d-007-https-cho-lan-pwa-trên-tablet-chọn-mkcert-reverse-proxy-hay-chỉ-localhost-chặn-không-chặn-p09-pwa-chạy-đủ-trên-localhost-hạn-mong-muốn-trước-khi-dùng-tablet-witness-qua-lan-đã-quyết-2026-11-27-chọn-a-mkcert)
+  - [D-008 · Hot-loop plant không đạt M2 §12 ≥ 5000 bước/s — ✅ ĐÃ QUYẾT 2026-11-26 13:38 +07: làm A+B, hạ ngưỡng theo số đạt được · Chặn: P2.4 (commit 6–12) + nghiệm thu M2](#d-008-hot-loop-plant-không-đạt-m2-12-5000-bướcs-đã-quyết-2026-11-26-1338-07-làm-ab-hạ-ngưỡng-theo-số-đạt-được-chặn-p24-commit-612-nghiệm-thu-m2)
+- [2. KIỂM THẬT (T) — cần anh chạy trên môi trường thật](#2-kiểm-thật-t-cần-anh-chạy-trên-môi-trường-thật)
+  - [T-001 · Spike S6 — kiểm môi trường Windows · Chặn: P0.1 · Ước tính: 30 phút · Cần: máy Windows của anh — ✅ ĐÃ XONG 2026-11-24 23:02 +07](#t-001-spike-s6-kiểm-môi-trường-windows-chặn-p01-ước-tính-30-phút-cần-máy-windows-của-anh-đã-xong-2026-11-24-2302-07)
+  - [T-002 · Spike S2 — PLCSIM Advanced "hello" · Chặn: M5 (P5.4/P5.6) · Ước tính: 1 ngày · Cần: PLCSIM Advanced + giấy phép, nhóm `PlcSimUsers`](#t-002-spike-s2-plcsim-advanced-hello-chặn-m5-p54p56-ước-tính-1-ngày-cần-plcsim-advanced-giấy-phép-nhóm-plcsimusers)
+  - [T-003 · Spike S3 — TIA Openness export · Chặn: P5.7 · Ước tính: 1 ngày · Cần: TIA (Offline), nhóm `Siemens TIA Openness`](#t-003-spike-s3-tia-openness-export-chặn-p57-ước-tính-1-ngày-cần-tia-offline-nhóm-siemens-tia-openness)
+  - [T-004 · Spike S5 — SCADA smoke test · Chặn: P4.4 · Ước tính: 0.5 ngày · Cần: SCADA đích](#t-004-spike-s5-scada-smoke-test-chặn-p44-ước-tính-05-ngày-cần-scada-đích)
+- [3. DỮ LIỆU CẦN CÓ (X)](#3-dữ-liệu-cần-có-x)
+  - [X-003 · P2.7: cần I/O list thật để đo acceptance suggest ≥ 90% (tier C — chặn nghiệm thu thật, KHÔNG chặn code/merge P2.7) · Hạn mong muốn: trước khi ký M2 (G2) — ✅ ĐÃ QUYẾT B 2026-11-26 21:55](#x-003-p27-cần-io-list-thật-để-đo-acceptance-suggest-90-tier-c-chặn-nghiệm-thu-thật-không-chặn-codemerge-p27-hạn-mong-muốn-trước-khi-ký-m2-g2-đã-quyết-b-2026-11-26-2155)
+- [4. THAY ĐỔI SPEC / LỚN (S)](#4-thay-đổi-spec-lớn-s)
+  - [S-001 · PRD §9 dùng M1–M8 cho lĩnh vực chức năng, trùng số milestone M0–M5 (Spec Change Request) · Nguồn: docs-audit §4 SCR-001, PRD §9 vs §13](#s-001-prd-9-dùng-m1m8-cho-lĩnh-vực-chức-năng-trùng-số-milestone-m0m5-spec-change-request-nguồn-docs-audit-4-scr-001-prd-9-vs-13)
+  - [S-002 · Số golden test M1: PRD §13 nói ≥ 60, M1 §16 nói ≥ 80 · Nguồn: docs-audit §4 SCR-002](#s-002-số-golden-test-m1-prd-13-nói-60-m1-16-nói-80-nguồn-docs-audit-4-scr-002)
+  - [S-003 · Thời lượng M0: PRD §13 nói 1–2 tuần, M0 spec nói 4–6 ngày công · Nguồn: docs-audit §4 SCR-003](#s-003-thời-lượng-m0-prd-13-nói-12-tuần-m0-spec-nói-46-ngày-công-nguồn-docs-audit-4-scr-003)
+- [5. KÝ DUYỆT MILESTONE (K)](#5-ký-duyệt-milestone-k)
+- [6. DUYỆT SAU (R) — AI đã chọn mặc định, anh có quyền veto](#6-duyệt-sau-r-ai-đã-chọn-mặc-định-anh-có-quyền-veto)
+- [7. Lịch sử (đã xử lý)](#7-lịch-sử-đã-xử-lý)
+
 > **Chủ sản phẩm chỉ cần đọc file này.** AI ghi vào đây mọi thứ cần anh: quyết định, kiểm thử thật, dữ liệu, thay đổi lớn, ký duyệt. Mỗi mục tự đủ ngữ cảnh để xử lý trong < 2 phút.
 > **Cách trả lời:** đánh dấu `[x]` vào lựa chọn (hoặc dán kết quả theo hướng dẫn) rồi commit, hoặc trả lời trong chat với ID mục (ví dụ "D-003: chọn B"). AI sẽ cập nhật trạng thái, ghi vào ADR/OQ nếu cần và gỡ chặn.
 > Mục đã xử lý chuyển xuống "Lịch sử" (không xóa). AI gom yêu cầu theo đợt, tối đa 1 lần/ngày làm việc, trừ khi bị chặn hoàn toàn.
@@ -7,16 +34,16 @@
 Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần cứng) · **X** DỮ LIỆU CẦN CÓ · **S** THAY ĐỔI SPEC/LỚN · **K** KÝ DUYỆT milestone · **R** DUYỆT SAU (tầng B)
 
 ## 0. Tóm tắt (AI cập nhật mỗi lần ghi)
-- Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). X-003 chặn nghiệm thu thật P2.7 (đo acceptance suggest ≥ 90% trên I/O list thật) — không chặn code/merge P2.7; ĐÃ QUYẾT B 2026-11-26 21:55 (hoãn đo, acceptance UNVERIFIED tới khi có dữ liệu). D-001/D-004/D-005 ĐÃ XONG; M0 ĐÃ KÝ 2026-11-24; M1 ĐÃ KÝ 2026-11-25.
-- Việc cần anh trong tuần này: quyết §16.5 (D-006) + OQ-161 + chọn HTTPS cho LAN (D-007: mkcert / reverse proxy / chỉ localhost); chạy T-001 (S6, môi trường Windows); chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA; VERIFY §14 với PLCSIM + mã thật (xem `docs/verify-owner-guide.md` mục 3)
-- Cập nhật lần cuối: 2026-11-26 (P2.5 merge PR #36, P2.6 merge PR #37; P2.7 plan §31, implement commit 1–6 + gate xanh; X-003 ĐÃ QUYẾT B 2026-11-26 21:55 — hoãn đo, acceptance UNVERIFIED; P2.7 MERGED PR #38 22:37 +07; P2.8 plan §32, R-010; P2.8 implement commit 1–9 + gate xanh local, OQ-381 + OQ-382…398 đã đóng, chờ PR)
+- Đang bị chặn bởi: T-002, T-003 (nên làm sớm — quyết định khả thi M5 và giấy phép). X-003 chặn nghiệm thu thật P2.7 (đo acceptance suggest ≥ 90% trên I/O list thật) — không chặn code/merge P2.7; ĐÃ QUYẾT B 2026-11-26 21:55 (hoãn đo, acceptance UNVERIFIED tới khi có dữ liệu). D-001/D-002/D-003/D-004/D-005/D-006/D-007 ĐÃ XONG; M0 ĐÃ KÝ 2026-11-24; M1 ĐÃ KÝ 2026-11-25.
+- Việc cần anh trong tuần này: quyết OQ-161; chuẩn bị T-002/T-003 sớm nếu có PLCSIM/TIA; VERIFY §14 với PLCSIM + mã thật (xem `docs/verify-owner-guide.md` mục 3)
+- Cập nhật lần cuối: 2026-11-27 (D-002 + D-006 ĐÃ QUYẾT A; D-003 ĐÃ QUYẾT A + D-007 ĐÃ QUYẾT A (mkcert); T-001 ĐÃ XONG 2026-11-24 23:02 +07; P2.8 MERGED PR #39 02:58 +07)
 - Nhãn/milestone GitHub (II.7): CHƯA CHẠY — GitHub MCP không có tool tạo nhãn/milestone (46 tool đã kiểm, không có); cần làm qua giao diện GitHub hoặc chủ sản phẩm. Không tự đổi branch protection (D-001).
 
 ---
 
 ## 1. QUYẾT ĐỊNH (D) — đang mở
 
-### D-001 · Bật branch protection cho `main` · Chặn: G0 · Hạn mong muốn: trước P0.1
+### D-001 · Bật branch protection cho `main` · Chặn: G0 · Hạn mong muốn: trước P0.1 — ✅ ĐÃ QUYẾT 2026-11-24: chọn A
 **Bối cảnh:** Repo hiện chưa có branch protection. `main` chỉ nhận từ `develop` sau khi anh ký milestone; AI chỉ merge vào `develop`.
 **Lựa chọn:**
 - [x] A — Bật: `main` yêu cầu PR + CI xanh, cho phép AI push nhánh / tạo PR
@@ -26,25 +53,47 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 **Hệ quả nếu chọn khác:** B thì `main` có thể bị ghi đè trực tiếp; AI vẫn tự giữ quy tắc không push `main`.
 **Việc đang chờ:** P0.1 (CI) và G0 · **Liên quan:** AUTONOMY §5, BOOTSTRAP bước 7
 
-### D-002 · Giấy phép / tên gói (`@vcs/*`) · Chặn: P0.1 · Hạn mong muốn: trước P0.1
-**Bối cảnh:** Repo đang private, chưa có file LICENSE, chưa có package.json. Tên gói theo spec là `@vcs/*`, lệnh `vcs`.
+### D-002 · Giấy phép / tên gói (`@vcs/*`) · Chặn: P0.1 · Hạn mong muốn: trước P0.1 — ✅ ĐÃ QUYẾT 2026-11-27: chọn A
+**Bối cảnh:** Repo đang public tạm thời (từ 2026-11-26, để mở lại Actions — sẽ về private sau), chưa có file LICENSE; `package.json:34` ghi `"license": "UNLICENSED"`. Tên gói theo spec là `@vcs/*`, lệnh `vcs`.
 **Lựa chọn:**
-- [ ] A — Repo private, proprietary/UNLICENSED, tên gói giữ nguyên `@vcs/*`
+- [x] A — Repo private, proprietary/UNLICENSED, tên gói giữ nguyên `@vcs/*`
 - [ ] B — Chọn giấy phép khác: …
-**Đề xuất của AI:** A, vì sản phẩm dùng nội bộ + có tích hợp Siemens có bản quyền.
+**✅ ĐÃ QUYẾT 2026-11-27: chọn A.** Giữ nguyên UNLICENSED: `package.json` không đổi, không thêm file LICENSE. R-002 (P0.1 làm theo mặc định A) nay được chốt chính thức. Nếu sau này anh muốn mở mã thì quyết lại (thêm file LICENSE MIT/Apache-2.0 + sửa `package.json`).
 **Hệ quả nếu chọn khác:** B thì cần ghi LICENSE tương ứng trước P0.1.
 **Việc đang chờ:** P0.1 · **Liên quan:** BOOTSTRAP bước 7
 
-### D-003 · Chính sách dữ liệu khách hàng · Chặn: P2.7 · Hạn mong muốn: trước P2.7
+**Phân tích (bổ sung 2026-11-27, theo yêu cầu của anh):**
+
+*Hiện trạng đã kiểm chứng:* `package.json` ghi `"license": "UNLICENSED"`, repo **không có file LICENSE** (P0.1 làm theo mặc định A, R-002). UNLICENSED ở đây không phải là một giấy phép — nó là cách npm ghi "chưa cấp phép gì cả".
+
+**Câu 1 — A (UNLICENSED) thì anh có dùng được trong công việc của mình không?**
+- **Được, thoải mái.** Theo mặc định của luật bản quyền, tác giả là chủ bản quyền toàn bộ code của dự án mình — không có giấy phép nào hạn chế chính chủ sở hữu. Anh dùng nội bộ, chạy demo, giao cho hệ thống của khách, sửa code — đều được.
+- **Hạn chế duy nhất của A là với người khác, không phải với anh:** không ai khác (đồng nghiệp ngoài dự án, nhà thầu, khách hàng, người xem repo) có quyền dùng/sao chép/sửa/phân phối code này nếu anh không cho phép bằng văn bản riêng. Muốn đưa code cho khách hay cộng tác viên thì cần cấp phép riêng theo từng trường hợp (hợp đồng/thỏa thuận).
+- **Lưu ý repo đang public tạm thời:** ai cũng xem được code, nhưng UNLICENSED nghĩa là xem được ≠ dùng được — họ không có quyền pháp lý để tái sử dụng. Khi anh chuyển repo về private thì điểm này hết.
+
+**Câu 2 — Nếu chọn B (giấy phép nguồn mở) thì sao?**
+- Giấy phép nguồn mở là anh **chủ động cho phép mọi người** dùng/sao chép/sửa/phân phối code, kèm điều kiện của từng loại:
+  - **MIT (đơn giản nhất):** ai cũng dùng được, kể cả mục đích thương mại; chỉ cần giữ lại dòng bản quyền của anh. Đối thủ cũng dùng được.
+  - **Apache-2.0:** như MIT, cộng thêm điều khoản bằng sáng chế (người dùng không được kiện anh về patent liên quan) + phải ghi rõ chỗ nào đã sửa.
+  - **GPL (copyleft):** ai phân phối bản sửa đổi thì phải mở mã nguồn bản đó — ràng buộc mạnh, dễ xung đột với việc giao hệ thống đóng cho khách; không khuyến nghị cho VCS.
+- **Việc phải làm nếu chọn B:** thêm file `LICENSE` (toàn văn giấy phép) + sửa `package.json` `"license"` thành `MIT`/`Apache-2.0` + ghi chú ngắn vào README. Thay đổi nhỏ, làm trong 1 commit.
+- **Không quay lại được hoàn toàn:** code đã phát hành dưới MIT thì các bản sao đã phát đi vẫn giữ quyền MIT — anh chỉ có thể đổi giấy phép cho phiên bản sau (và chỉ khi anh là chủ toàn bộ bản quyền; nếu có người khác đóng góp thì cần họ đồng ý).
+- **Rủi ro riêng của VCS:** code có phần tích hợp Siemens (S7/TIA/Openness) — kiến thức lấy từ manual/API của Siemens có thể chịu điều khoản của Siemens. Trước khi mở mã, anh nên rà soát xem có đoạn nào sao chép tài liệu/API độc quyền của Siemens không. Đây là lý do AI đề xuất A.
+
+**Đề xuất của AI (giữ nguyên):** A — cho tới khi anh có nhu cầu cụ thể muốn chia sẻ code công khai (vd công bố dự án, nhận đóng góp cộng đồng). Khi đó chọn MIT, trừ khi cần điều khoản patent thì Apache-2.0.
+> Đây là thông tin chung về bản quyền, không phải tư vấn pháp lý.
+
+### D-003 · Chính sách dữ liệu khách hàng · Chặn: P2.7 · Hạn mong muốn: trước P2.7 — ✅ ĐÃ QUYẾT 2026-11-27: chọn A
 **Bối cảnh:** Các prompt P2.7, P3.5, P4.4, P5.7 cần dữ liệu thật (I/O list, C&E, SimaticML, SCADA). Dữ liệu thật không được vào repo hay công cụ AI nếu chưa ẩn danh.
 **Lựa chọn:**
-- [ ] A — KHÔNG đưa dữ liệu thật vào công cụ AI / repo; chỉ dữ liệu ẩn danh đặt ở `fixtures-real/` (đã .gitignore) hoặc kho riêng
+- [x] A — KHÔNG đưa dữ liệu thật vào công cụ AI / repo; chỉ dữ liệu ẩn danh đặt ở `fixtures-real/` (đã .gitignore) hoặc kho riêng
 - [ ] B — Cho phép dùng dữ liệu thật có giới hạn: …
+**✅ ĐÃ QUYẾT 2026-11-27: chọn A.** Dữ liệu thật chỉ được dùng sau khi ẩn danh (xóa/đổi tên khách hàng, tên dự án, IP, ghi chú nội bộ; giữ nguyên cấu trúc cột + tên tag/thiết bị + mô tả), đặt ở `fixtures-real/` (đã .gitignore — không vào repo) hoặc kho riêng; AI chỉ đọc trong VM, không commit. Áp dụng cho X-003…X-008 (I/O list, C&E, SimaticML, SCADA). X-003 hiện đang chọn B (hoãn, 2026-11-26) — không đổi; khi nào có file thật thì phải ẩn danh theo A mới được đưa vào. Không đổi spec (AMENDMENTS E8 đã ghi nguyên tắc này). Nếu hợp đồng khách hàng yêu cầu khác thì quyết lại (mở B).
 **Đề xuất của AI:** A, vì đây là dữ liệu khách hàng + dự án TIA.
 **Hệ quả nếu chọn khác:** B thì cần quy tắc ẩn danh + kho lưu trữ cụ thể trước khi đưa.
 **Việc đang chờ:** X-003…X-008 · **Liên quan:** AGENTS §8, BOOTSTRAP bước 7
 
-### D-004 · Nơi chạy mô phỏng (server hay Worker) · Chặn: G0 · Hạn mong muốn: trước P0.6/P1.7
+### D-004 · Nơi chạy mô phỏng (server hay Worker) · Chặn: G0 · Hạn mong muốn: trước P0.6/P1.7 — ✅ ĐÃ QUYẾT 2026-11-24: chọn A (server Node)
 **Bối cảnh:** M1 §11 từng nói SoftPlc chạy trong Web Worker; AMENDMENTS A10/E6 đã đổi mặc định thành server Node, Worker chỉ là tùy chọn sau (M0 §17 mục 4).
 **Lựa chọn:**
 - [x] A — Server Node (mặc định), Worker không cần
@@ -54,7 +103,7 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 **Hệ quả nếu chọn khác:** B thì P0.6/P1.7 phải làm thêm transport Worker.
 **Việc đang chờ:** P0.6, P1.7 · **Liên quan:** AMENDMENTS A10/E6, OQ-004
 
-### D-005 · PWA (P0.9) · Chặn: không chặn M0 · Hạn mong muốn: sau M0
+### D-005 · PWA (P0.9) · Chặn: không chặn M0 · Hạn mong muốn: sau M0 — ✅ ĐÃ QUYẾT 2026-11-25: chọn B
 **Bối cảnh:** P0.9 là prompt tùy chọn (PWA shell), ngoài spec; nếu làm cần quyết HTTPS cho LAN.
 **Lựa chọn:**
 - [ ] A — Hoãn tới sau M0 (mặc định)
@@ -64,24 +113,53 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 **Hệ quả nếu chọn khác:** B thì cần anh quyết cách cấp chứng chỉ HTTPS cho LAN.
 **Việc đang chờ:** P0.9 · **Liên quan:** BOOTSTRAP bước 7, SKILL-ui-pwa-hmi §9
 
-### D-006 · §16.5 — giữ mã lỗi tách riêng hay gom về U001? · Chặn: không chặn ký M1 · Hạn mong muốn: trước M2
+### D-006 · §16.5 — giữ mã lỗi tách riêng hay gom về U001? · Chặn: không chặn ký M1 · Hạn mong muốn: trước M2 — ✅ ĐÃ QUYẾT 2026-11-27: chọn A
 **Bối cảnh:** Chữ spec §16.5 viết "SCL-U001" cho mọi lệnh chưa hỗ trợ, nhưng thực tế đã kiểm chứng bằng probe (đều lỗi ồn ào, có vị trí, exit 2 — không gì chạy sai im lặng): `String` → SCL-U001 (3:7); `POINTER`/`ANY` → SCL-T001 "kiểu chưa biết"; mảng nhiều chiều/`GOTO` → SCL-P002. Chỉ M1 §17 quy định String → U001; các trường hợp còn lại rơi vào nhánh lỗi kiểu/cú pháp trước khi tới U001. Xem `docs/acceptance/M1.md` §16.5 và `docs/verify-owner-guide.md` mục 6.
 **Lựa chọn:**
-- [ ] A — Giữ nguyên, chỉ ghi anh chấp nhận phạm vi mã này, không sửa code
+- [x] A — Giữ nguyên, chỉ ghi anh chấp nhận phạm vi mã này, không sửa code
 - [ ] B — SCR gom mọi cấu trúc ngoài EBNF về một mã U001 (đổi spec + sửa parser, làm ở phase sau)
+**✅ ĐÃ QUYẾT 2026-11-27: chọn A** (kèm sửa 1 câu chữ spec cho đúng 3 mã — SCR chỉ đổi tài liệu, không sửa code). Đã làm: M1 spec §16.5 câu 5 viết lại thành "báo lỗi ồn ào kèm vị trí — mã `SCL-U001` cho cấu trúc biết tên nhưng chưa hỗ trợ, `SCL-T001` cho kiểu chưa biết, `SCL-P002` cho cú pháp ngoài EBNF"; ghi AMENDMENTS **D9**. Không đổi parser, không đổi test/golden.
 **Đề xuất của AI:** A, vì mọi trường hợp đều đã ồn ào + có vị trí; gom mã chỉ đổi tên lỗi, không tăng an toàn.
 **Hệ quả nếu chọn khác:** B thì cần SCR + sửa parser ở phase sau.
 **Việc đang chờ:** M1 đã ký (giữ mặc định) · **Liên quan:** M1 §16.5, OQ-102
 
-### D-007 · HTTPS cho LAN (PWA trên tablet) — chọn mkcert, reverse proxy, hay chỉ localhost? · Chặn: không chặn P0.9 (PWA chạy đủ trên localhost) · Hạn mong muốn: trước khi dùng tablet witness qua LAN
+**Phân tích lại (bổ sung 2026-11-27, theo yêu cầu của anh — đọc kỹ trước khi quyết):**
+
+**1. Chữ spec viết gì (tài liệu gốc):**
+- M1 spec §16.5 (dòng 721, mục tiêu chí nghiệm thu): "Không có 'bỏ qua im lặng': lệnh/từ khóa chưa hỗ trợ cho lỗi `SCL-U001 unsupported: <tên>` kèm vị trí." Đọc theo chữ: mọi thứ chưa hỗ trợ đều về U001.
+- M1 spec §17 + bảng §4.2 (dòng 741): chỉ quy định riêng `String` → `SCL-U001` ("String: không hỗ trợ (lỗi rõ ràng)"); các kiểu khác không có trong EBNF §4.2 thì không được gọi tên ở đây.
+- `docs/acceptance/M1.md` §16.5 + `docs/verify-owner-guide.md` mục 6: đã ghi rõ phạm vi mã thực tế (xem bảng dưới).
+
+**2. Thực tế đã kiểm chứng bằng probe (không phải suy đoán):**
+
+| Cấu trúc | Mã thực tế | Vị trí | Exit | Ghi chú |
+|---|---|---|---|---|
+| `String`/`WString` | SCL-U001 | 3:7 | 2 | đúng chữ spec; OQ-102 đã đóng (P1.2) |
+| `POINTER`/`ANY` | SCL-T001 "kiểu chưa biết" | 3:7 | 2 | tên kiểu không có trong EBNF §4.2 → nhánh named-type báo T001 trước khi tới U001 |
+| Mảng nhiều chiều | SCL-P002 | 3:17 + 3:31 | 2 | lỗi cú pháp — không parse được, chưa tới bước phân loại "chưa hỗ trợ" |
+| `GOTO` | SCL-P002 | 3:8 | 2 | như trên |
+
+Cả 5 probe đều lỗi ồn ào, có vị trí, exit 2 — không có gì chạy sai im lặng. Đây là điểm M1 §16.5 thực sự yêu cầu, và nó ĐẠT. Mã U001 chỉ có 1 emitter duy nhất trong SCL (`packages/vendor-siemens/src/scl/parser.ts:733`); LAD có mã riêng `LAD-U001` (ngoài phạm vi M1 §5). Mã đăng ký trong catalog (`packages/schemas/src/diagnostics-catalog.ts:178`).
+
+**3. Vậy mâu thuẫn nằm ở đâu?**
+Không phải code sai — code làm đúng "lỗi ồn ào + vị trí". Mâu thuẫn là **chữ spec nói rộng hơn thực tế**: §16.5 viết U001 cho "mọi lệnh/từ khóa chưa hỗ trợ", nhưng parser phân loại lỗi theo tầng: kiểu lạ → T001 (lỗi kiểu), cú pháp không parse được → P002 (lỗi cú pháp), chỉ cấu trúc "biết tên nhưng chưa hỗ trợ" (String) → U001. Ba mã này cho người dùng **nhiều thông tin hơn** một mã duy nhất: T001 = "kiểu này không tồn tại trong SCL chuẩn mà tôi biết", P002 = "cú pháp này không đúng ngữ pháp", U001 = "biết cấu trúc này nhưng M1 chưa hỗ trợ".
+
+**4. Lựa chọn:**
+- **A — Giữ nguyên (AI vẫn đề xuất):** không sửa code, chỉ ghi anh chấp nhận phạm vi mã như hiện tại. Ý nghĩa: người dùng thấy 3 mã khác nhau tùy loại lỗi; tài liệu (M1.md §16.5) đã ghi rõ phạm vi. Chi phí: 0. Hạn chế duy nhất: chữ spec §16.5 vẫn viết rộng hơn thực tế — cần sửa 1 câu chữ spec cho đúng (xem mục 5), không phải sửa parser.
+- **B — SCR gom mọi cấu trúc ngoài EBNF về một mã U001:** đổi spec + sửa parser ở phase sau. Ý nghĩa: mọi thứ chưa hỗ trợ đều báo U001 — gọn trong tài liệu người dùng (1 mã để tra). Cái giá phải trả: (a) mất độ chi tiết chẩn đoán — T001/P002 hiện phân biệt "kiểu lạ" / "sai cú pháp" / "chưa hỗ trợ", gom lại thì người dùng phải đọc message mới phân biệt được; (b) sửa parser không tầm thường — `GOTO`/mảng nhiều chiều hiện lỗi ở tầng cú pháp P002, muốn báo U001 thì parser phải nhận diện được "đây là cấu trúc có thật nhưng chưa hỗ trợ" giữa vô số lỗi cú pháp khác, dễ báo nhầm; (c) churn test — các golden/probe đang ghim T001/P002 cho những trường hợp này phải sửa theo, kể cả test của P1.2/P1.3; (d) LAD-U001 đã tách riêng — gom SCL không chạm LAD, vẫn còn 2 mã.
+
+**5. Đề xuất của AI (cập nhật):** chọn **A**, kèm **sửa 1 câu chữ spec** (SCR chỉ đổi tài liệu, không sửa code): M1 §16.5 viết lại thành "lệnh/từ khóa chưa hỗ trợ báo lỗi ồn ào kèm vị trí — mã U001 cho cấu trúc biết tên nhưng chưa hỗ trợ, T001 cho kiểu chưa biết, P002 cho cú pháp ngoài EBNF". Như vậy spec đúng với thực tế đã kiểm chứng, không tốn công sửa parser, không mất độ chi tiết. Nếu anh chọn B thì AI mở SCR + sửa parser ở phase sau (M2 không chạm phần này).
+
+### D-007 · HTTPS cho LAN (PWA trên tablet) — chọn mkcert, reverse proxy, hay chỉ localhost? · Chặn: không chặn P0.9 (PWA chạy đủ trên localhost) · Hạn mong muốn: trước khi dùng tablet witness qua LAN — ✅ ĐÃ QUYẾT 2026-11-27: chọn A (mkcert)
 **Bối cảnh:** Service worker chỉ chạy trên secure context (HTTPS hoặc `localhost`). `vcs serve` mặc định bind `127.0.0.1` nên trên máy chủ thì PWA chạy đủ. Nhưng tablet witness truy cập qua `http://192.168.x.x` thì **không** phải secure context → SW không đăng ký, không cài PWA được. P0.9 viết ADR-0009 đề xuất phương án (bảng so sánh trong STATE §23 bảng A); P0.9 **không** đổi bind mặc định, **không** thêm TLS vào server — việc đó làm sau khi anh chọn.
 **Lựa chọn:**
-- [ ] A — mkcert (AI đề xuất): `mkcert -install` 1 lần trên máy chủ + `mkcert <tên-máy/IP-LAN>` tạo cert; server thêm TLS sau; cài CA root mkcert lên từng tablet 1 lần
+- [x] A — mkcert (AI đề xuất): `mkcert -install` 1 lần trên máy chủ + `mkcert <tên-máy/IP-LAN>` tạo cert; server thêm TLS sau; cài CA root mkcert lên từng tablet 1 lần
 - [ ] B — Reverse proxy TLS (Caddy/nginx): proxy terminate TLS trước server, passthrough `wss://`; không sửa code server
 - [ ] C — Chỉ localhost: không LAN PWA; tablet dùng trình duyệt thường qua http, witness xem qua máy chủ/remote desktop
+**✅ ĐÃ QUYẾT 2026-11-27: chọn A (mkcert).** Việc tiếp theo (không trong P0.9, làm riêng sau): (1) `mkcert -install` 1 lần trên máy chủ; (2) `mkcert <tên-máy/IP-LAN>` tạo cert; (3) server đọc cert/key qua env (`VCS_TLS_CERT`/`VCS_TLS_KEY` hoặc tương đương) khi được cấu hình — mặc định vẫn HTTP + bind `127.0.0.1`; (4) cài CA root mkcert lên từng tablet 1 lần; (5) gia hạn cert theo chu kỳ mkcert. WS đã tự chọn `wss:` khi `https:` nên không sửa code web. ADR-0009 đã cập nhật trạng thái đã quyết. Nếu triển khai gặp vấn đề (tablet vẫn không đăng ký được SW dù đã cài CA) → xem lại B (reverse proxy) — đã ghi trong ADR-0009.
 **Đề xuất của AI:** A, vì 1 lệnh, không thêm service chạy thường trực; cert tin cậy nội bộ sau khi cài CA.
 **Hệ quả nếu chọn khác:** B thì thêm 1 service cần vận hành + cấu hình proxy (đặc biệt passthrough WebSocket); C thì mất offline/update/kiosk trên tablet. Dù chọn A hay B đều cần thêm TLS vào server/proxy sau (việc riêng, không trong P0.9).
-**Việc đang chờ:** P0.9 (ADR-0009 viết xong, chờ anh chọn) · **Liên quan:** D-005, STATE §23 bảng A, skill UI §9
+**Việc đang chờ:** P0.9 xong; chờ triển khai TLS theo quyết định A (việc riêng sau P0.9) · **Liên quan:** D-005, STATE §23 bảng A, skill UI §9
 
 ### D-008 · Hot-loop plant không đạt M2 §12 ≥ 5000 bước/s — ✅ ĐÃ QUYẾT 2026-11-26 13:38 +07: làm A+B, hạ ngưỡng theo số đạt được · Chặn: P2.4 (commit 6–12) + nghiệm thu M2
 **Bối cảnh:** P2.4 làm lại vòng nóng plant theo quyết định A của anh (26-11-2026). Sau cả 2 lần đổi kiến trúc, bench plant (500 thiết bị hỗn hợp, bước 10 ms, trung vị 5 runs trên VM) vẫn **~1.896 bước/s** (phạm vi 1.772–2.132 qua 15 lần chạy), thiếu **×2,64** so với M2 §12 ≥ 5.000. Commit 4 (kênh tính trước): +2,8%; commit 5 (dispatch đơn hình theo model): +0,5% — đều trong dao động VM. Commit 6 (fault fast-path) đã BỎ QUA theo plan vì profile không chứng minh cần. Profile CPU sau commit 5 (`node --cpu-prof`, 52.388 mẫu): `#emit` 25,0%, `#prepareOne` 10,4%, `#applyWrite` (TagDB) 10,1%, engine `step` 8,6%, `#drainPendingObs` 5,8%, `#channelOf` 5,6%, các `model.step` ~16% tổng, GC 2,0%, `#activeSignalFaults` chỉ 0,2% — chi phí nằm ở bản thân máy móc step/emit/tag, không còn điểm nóng đơn lẻ. Bench vòng kín **1.282 bước/s ≥ 1.000 PASS** (yêu cầu vòng kín dùng thật đã đạt; chỉ bench engine-alone tổng hợp là chưa). Nhánh dừng ở commit 5 (commit 7 server/UI + commit 8 docs chưa làm). **Bổ sung 2026-11-26 13:22 +07 (spike B đo thật):** bench plant tsx 2054 → node + esbuild bundle 2331 bước/s (+13,5% cùng phiên; quy hoạch B +8–14%). A+B cộng lại (nhân) ~2200–2800, trung tâm ~2400–2550. Vòng kín chỉ +4–6% từ A+B (PLC ~79% bước). Phương án viết lại engine riêng để giữ 5000 đã phân tích cùng ngày và không chọn (cỡ P2.1+P2.2+P2.3, vòng kín chỉ +11%).
@@ -97,7 +175,7 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 
 ## 2. KIỂM THẬT (T) — cần anh chạy trên môi trường thật
 
-### T-001 · Spike S6 — kiểm môi trường Windows · Chặn: P0.1 · Ước tính: 30 phút · Cần: máy Windows của anh
+### T-001 · Spike S6 — kiểm môi trường Windows · Chặn: P0.1 · Ước tính: 30 phút · Cần: máy Windows của anh — ✅ ĐÃ XONG 2026-11-24 23:02 +07
 **Mục đích:** Biết máy anh dựng được repo không (Node, pnpm, Playwright, cổng, .NET SDK).
 **Các bước (làm đúng thứ tự):**
 1. Chạy `node scripts/doctor.mjs` (AI viết ở P0.1; trước đó chạy tay: `node --version`, `pnpm --version`, `git --version`, `dotnet --info`).
@@ -106,6 +184,12 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 **Kết quả mong đợi:** `pnpm install` + test mẫu + e2e mẫu chạy được trên máy anh.
 **Dán kết quả vào:** `docs/spikes/S6-env.md` (theo mẫu cuối `docs/SPIKES.md`) hoặc dán nguyên văn log vào chat với ID "T-001".
 **Nếu lỗi:** dán nguyên văn thông báo + ảnh chụp; AI sẽ chẩn đoán.
+**✅ ĐÃ XONG 2026-11-24 23:02 +07 — chủ sản phẩm chạy trên máy Windows thật, báo kết quả trong chat 22:45 +07 (log `user-chat/main.md`):**
+- Demo 2.1–2.4: OK; hash `--hash` trùng Linux (`21096ab2…1d53`): OK.
+- `doctor.mjs`: Node/pnpm/git OK; cổng 4170 bận (do server demo của anh còn chạy), 4840 bận (app khác — cổng OPC UA, M0 chưa cần), 1502 rảnh.
+- `pnpm test` lần 1: 437/439 — 2 lỗi thật do repo đặt trong `C:\Users\Admin\Downloads\PLC simulate\VCS` (đường dẫn có dấu cách, shell chẻ đối số) — OQ-074; fix PR #16 (bọc đường dẫn trong ngoặc kép, 2 dòng test) merge 23:00 +07.
+- `pnpm test` lần 2 (sau fix): **439/439** — xong, anh ký M0 ngay sau đó (STATE §8).
+- **Còn thiếu (ghi rõ, không chặn):** e2e mẫu trên máy Windows thật chưa chạy (CI e2e chỉ chạy ubuntu); trạng thái .NET SDK + Playwright trên máy anh chưa được báo cáo. Hai mục này gộp vào mục gate Windows cho M1 ở `docs/verify-owner-guide.md` §4 khi nào anh chạy.
 
 ### T-002 · Spike S2 — PLCSIM Advanced "hello" · Chặn: M5 (P5.4/P5.6) · Ước tính: 1 ngày · Cần: PLCSIM Advanced + giấy phép, nhóm `PlcSimUsers`
 **Mục đích:** Biết PLCSIM Advanced có làm được lockstep, tên API bulk-I/O, tốc độ và giấy phép không. **Nên làm sớm — quyết định khả thi M5 và giấy phép.**
@@ -142,7 +226,7 @@ Nhãn: **D** QUYẾT ĐỊNH · **T** KIỂM THẬT (PLCSIM/TIA/SCADA/phần c�
 - [ ] X-003 · I/O list thật + quy ước tên tag · cần trước P2.7
 - [ ] X-004 · C&E thật + biểu mẫu FAT + cách PLC nhận start/stop/reset · cần trước P3.4–P3.5
 
-### X-003 · P2.7: cần I/O list thật để đo acceptance suggest ≥ 90% (tier C — chặn nghiệm thu thật, KHÔNG chặn code/merge P2.7) · Hạn mong muốn: trước khi ký M2 (G2)
+### X-003 · P2.7: cần I/O list thật để đo acceptance suggest ≥ 90% (tier C — chặn nghiệm thu thật, KHÔNG chặn code/merge P2.7) · Hạn mong muốn: trước khi ký M2 (G2) — ✅ ĐÃ QUYẾT B 2026-11-26 21:55
 **Bối cảnh:** P2.7 đã cài xong engine auto-suggest (§9) và đo được trên fixture tổng hợp 300 tín hiệu (177 có ground truth). Nhưng fixture chỉ là xấp xỉ quy ước tên thật (M2 §16 mục 1, AMENDMENTS E8): số ≥ 90% trên fixture KHÔNG chứng minh được 90% trên dữ liệu thật. Cần I/O list thật (đã ẩn danh theo D-003) để đo acceptance và hiệu chỉnh `naming.yaml`/synonym.
 **Cần anh cung cấp (chọn 1 trong 2 cách):**
 - [ ] A — File I/O list thật (1–2 dự án, đã ẩn danh: xóa/đổi tên khách hàng, tên dự án, IP, ghi chú nội bộ; giữ nguyên cấu trúc cột + tên tag/thiết bị + mô tả): định dạng XLSX hoặc CSV, ≥ 100 tín hiệu, có cột tag / mô tả / loại / địa chỉ (cột equipment nếu có càng tốt) + file `naming.yaml` hoặc mô tả quy ước đặt tên đang dùng (vd tiền tố thiết bị, hậu tố role). Đặt file vào `fixtures-real/` (đã .gitignore — không vào repo) hoặc gửi qua kênh riêng; AI chỉ đọc trong VM, không commit.

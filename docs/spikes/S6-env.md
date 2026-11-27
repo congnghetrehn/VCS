@@ -1,7 +1,13 @@
 # S6 — Môi trường (kết quả chạy `scripts/doctor.mjs`)
 
+## Mục lục
+
+- [1. Máy VM (AI) — 2026-11-24](#1-máy-vm-ai-2026-11-24)
+- [2. Quirk phát hiện trên VM (xem OQ-007)](#2-quirk-phát-hiện-trên-vm-xem-oq-007)
+- [3. Đã xong (T-001 — chủ sản phẩm chạy trên máy Windows, 2026-11-24 22:45 +07, báo trong chat)](#3-đã-xong-t-001-chủ-sản-phẩm-chạy-trên-máy-windows-2026-11-24-2245-07-báo-trong-chat)
+
 > Mẫu theo `docs/SPIKES.md` §S6. Đây mới là kết quả trên **Linux VM của AI** —
-> phần chạy trên **máy Windows của chủ sản phẩm (T-001) vẫn đang chờ**.
+> phần chạy trên **máy Windows của chủ sản phẩm (T-001) đã xong 2026-11-24** (xem mục 3).
 
 ## 1. Máy VM (AI) — 2026-11-24
 
@@ -33,11 +39,17 @@ trực tiếp bằng Node/shell lúc được lúc không. Hậu quả:
 - `pnpm install --frozen-lockfile` **CHƯA CHẠY ĐƯỢC trong VM này** — phải kiểm lại
   trên CI và máy Windows trước khi tin gate.
 
-## 3. Còn chờ (T-001 — chủ sản phẩm chạy trên máy Windows)
+## 3. Đã xong (T-001 — chủ sản phẩm chạy trên máy Windows, 2026-11-24 22:45 +07, báo trong chat)
 
-1. Chạy `node scripts/doctor.mjs` trên máy Windows, dán kết quả vào đây hoặc vào
-   chat với ID "T-001".
-2. Kiểm cổng 4170/4840/1502 còn rảnh; kiểm `git config core.autocrlf` (nên là `false`).
-3. Chạy `pnpm install` + một test mẫu + một e2e mẫu (khi có ở P0.1/P0.6).
+| Kiểm tra | Kết quả |
+|---|---|
+| Demo 2.1–2.4 | OK |
+| Hash `--hash` trùng Linux (`21096ab2…1d53`) | OK |
+| Node/pnpm/git (`doctor.mjs`) | OK |
+| Cổng 4170 | Bận — do server demo của anh còn chạy (không phải lỗi) |
+| Cổng 4840 | Bận — app khác (cổng OPC UA, M0 chưa cần) |
+| Cổng 1502 | Rảnh |
+| `pnpm test` lần 1 | 437/439 — 2 lỗi do repo trong đường dẫn có dấu cách (`C:\Users\Admin\Downloads\PLC simulate\VCS`) — OQ-074; fix PR #16 (bọc đường dẫn trong ngoặc kép) merge 23:00 +07 |
+| `pnpm test` lần 2 (sau fix) | **439/439** — xong, anh ký M0 ngay sau đó (STATE §8) |
 
-**Đạt khi:** `pnpm install` + test mẫu + e2e mẫu chạy được trên máy anh.
+**Còn thiếu (ghi rõ, không chặn):** e2e mẫu trên máy Windows thật chưa chạy (CI e2e chỉ chạy ubuntu); trạng thái .NET SDK + Playwright trên máy anh chưa được báo cáo. Hai mục này gộp vào mục gate Windows cho M1 ở `docs/verify-owner-guide.md` §4 khi nào anh chạy.

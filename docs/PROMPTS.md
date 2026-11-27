@@ -1,5 +1,22 @@
 # PROMPTS — Thứ tự prompt và sổ tay làm việc với AI
 
+## Mục lục
+
+- [1. Nguyên tắc vận hành](#1-nguyên-tắc-vận-hành)
+- [2. Khung chuẩn (đã nằm trong mọi prompt ở mục 6)](#2-khung-chuẩn-đã-nằm-trong-mọi-prompt-ở-mục-6)
+- [3. Prompt phụ trợ (dán khi cần)](#3-prompt-phụ-trợ-dán-khi-cần)
+- [4. Cổng milestone và dữ liệu cần có trước](#4-cổng-milestone-và-dữ-liệu-cần-có-trước)
+- [5. Danh sách prompt theo thứ tự](#5-danh-sách-prompt-theo-thứ-tự)
+- [6. Nội dung từng prompt](#6-nội-dung-từng-prompt)
+  - [M0 — Skeleton](#m0-skeleton)
+  - [M1 — Soft-PLC](#m1-soft-plc)
+  - [M2 — Plant + I/O import](#m2-plant-io-import)
+  - [M3 — Test automation](#m3-test-automation)
+  - [M4 — Comms + HMI](#m4-comms-hmi)
+  - [M5 — PLCSIM / S7 / SimaticML](#m5-plcsim-s7-simaticml)
+- [7. Prompt gói nghiệm thu milestone (G0…G5)](#7-prompt-gói-nghiệm-thu-milestone-g0g5)
+- [8. Quy trình review sau mỗi prompt (anh làm)](#8-quy-trình-review-sau-mỗi-prompt-anh-làm)
+
 > **Chế độ vận hành mặc định là TỰ CHỦ (`docs/AUTONOMY.md`):** AI tự đi hết danh sách này theo thứ tự, tự rà soát, ghi `STATE.md`/`OWNER-INBOX.md`, chỉ dừng ở các mục Tầng C. Vì vậy: (a) "⚠ plan-first" nghĩa là *ghi kế hoạch + tính tay rồi đi tiếp*, không chờ xác nhận; (b) nguyên tắc 2 ở mục 1 ("gate do chính anh chạy lại") áp dụng ở **cổng milestone** (G0…G5), không áp dụng từng prompt. Các prompt dưới đây cũng dùng được thủ công khi anh muốn điều khiển từng bước.
 
 > Cách dùng: mỗi lần mở **một phiên mới**, dán **một** prompt (mục 6). Quy trình chi tiết đã nằm trong `AGENTS.md §9` nên prompt chỉ cần nêu nhiệm vụ, tài liệu cần đọc và gate. Các prompt gốc ở mục "Prompt mẫu" của từng spec được chuẩn hóa lại ở đây (thêm điều kiện trước, gate, plan-first).

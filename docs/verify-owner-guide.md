@@ -1,5 +1,22 @@
 # Hướng dẫn kiểm chứng cho chủ sản phẩm
 
+## Mục lục
+
+- [Trạng thái](#trạng-thái)
+- [M1 — Soft-PLC](#m1-soft-plc)
+  - [1. Bench trên máy anh](#1-bench-trên-máy-anh)
+  - [2. Rà `docs/semantics.md` §15–§16](#2-rà-docssemanticsmd-1516)
+  - [3. VERIFY §14 với PLCSIM + mã thật](#3-verify-14-với-plcsim-mã-thật)
+  - [4. Gate trên máy Windows thật](#4-gate-trên-máy-windows-thật)
+  - [5. Quyết OQ-161 — layout IN_OUT của multi-instance lồng](#5-quyết-oq-161-layout-in_out-của-multi-instance-lồng)
+  - [6. Phán §16.5 — giữ mã lỗi tách riêng hay gom về U001?](#6-phán-165-giữ-mã-lỗi-tách-riêng-hay-gom-về-u001)
+  - [7. Ký M1](#7-ký-m1)
+  - [Quan sát (không phải lỗi)](#quan-sát-không-phải-lỗi)
+- [P0.9 — Kiosk trên tablet thật + HTTPS cho LAN (D-007)](#p09-kiosk-trên-tablet-thật-https-cho-lan-d-007)
+  - [1. Kiosk trên tablet thật](#1-kiosk-trên-tablet-thật)
+  - [2. Quyết D-007 — HTTPS cho truy cập LAN](#2-quyết-d-007-https-cho-truy-cập-lan)
+- [Các mục verify sau này](#các-mục-verify-sau-này)
+
 > File sống: AI ghi vào đây hướng dẫn chi tiết cho mọi việc chỉ chủ sản phẩm làm
 > được (kiến thức điều khiển, máy thật, PLCSIM/TIA, quyết định). Mỗi mục tự đủ
 > ngữ cảnh: làm gì, lệnh nào, kỳ vọng số nào, báo lại bằng cách nào.
