@@ -2628,3 +2628,29 @@ Anh cứ làm việc khác đi ạ, hai việc này em lo.
 ---
 Log tới thời điểm 2026-11-27 09:56 +07.
 ---
+
+## 2026-11-27 10:00 +07 — ChaMuse
+
+Tracker VCS xong rồi ạ, anh Tiến ơi.
+
+Tracker lấy số liệu thật trong repo, ảnh chụp lúc 09:56 hôm nay: M0 và M1 đã ký (2/6 milestone), M2 xong hết P2.1–P2.8, chỉ còn chờ ký G2; 8/8 quyết định D-001–D-008 đã chốt; test 2.910/2.910. Mục "Đang chờ anh" gom 7 việc, có cả OQ-161, T-002, T-003, VERIFY §14 và R-010, mỗi việc đều ghi rõ đọc ở file nào. Có cả timeline M0–M5, chi tiết từng phase P2.1–P2.8 lọc theo nhóm, và biểu đồ test tăng từ 439 lên 2.910.
+
+Tracker là ảnh chụp tĩnh, nên khi nào anh quyết OQ-161 hay PR docs merge xong, anh bảo em là em làm mới lại cho anh ạ.
+
+---
+Log tới thời điểm 2026-11-27 10:00 +07.
+---
+
+## 2026-11-27 10:17 +07 — em My
+
+PR docs xong rồi ạ, anh Tiến ơi.
+
+PR #40 đã merge vào `develop` lúc 10:16, commit `be41113`, 42 file, +1112/−39. CI xanh trước khi merge: check 56 giây, test 1m15s (2.910/2.910), e2e 2m26s. Nhánh `docs/toc-index` em giữ lại, không xóa. Giờ anh mở file nào trong docs/ cũng thấy mục lục ở đầu, bấm là nhảy tới đúng mục ạ.
+
+Lúc đẩy có 2 file bị lỗi mã cấp quyền (SPIKES.md và ADR-0007), em đã cấp lại và đẩy đủ, không thiếu file nào.
+
+Còn chờ anh: OQ-161, T-002/T-003, VERIFY §14, R-010, X-003.
+
+---
+Log tới thời điểm 2026-11-27 10:17 +07.
+---
