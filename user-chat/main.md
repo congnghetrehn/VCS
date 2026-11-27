@@ -2732,3 +2732,427 @@ Implement đang chạy (commit 3 spec → commit 4 code+test → commit 5 semant
 ---
 Log tới thời điểm 2026-11-27 12:46 +07.
 ---
+
+## 2026-11-27 13:34 +07 — anh Tiến
+
+trong verify-owner-guide.md có mấy mục a đã confirm rồi mà chưa kết luận (ví dụ D-007, D-006 · §16.5). Em rà lại Owner-inbox và update verify-owner-guide.md tương ứng nhé. Mục nào đã xong thì update luôn
+
+## 2026-11-27 13:36 +07 — ChaMuse
+
+Dạ, em rà xong và cập nhật `docs/verify-owner-guide.md` rồi ạ, anh Tiến ơi.
+
+**Đã kết luận (theo `docs/OWNER-INBOX.md`):**
+- **§6 (§16.5, D-006): ✅ ĐÃ QUYẾT A 2026-11-27** — giữ nguyên 3 mã, không sửa code; đã sửa 1 câu chữ spec + AMENDMENTS D9. Phần hỏi "A hay B" đã bỏ.
+- **P0.9 §2 (D-007): ✅ ĐÃ QUYẾT A 2026-11-27 (mkcert)** — ghi 5 việc tiếp theo chưa làm (`mkcert -install`, tạo cert, server env, cài CA lên tablet, gia hạn); B giữ làm dự phòng.
+- **§5 (OQ-161):** D-009/D-010 đã quyết A — D-009 đang triển khai (PR đang mở), D-010 chờ anh probe FB_Probe.
+- **§4 gate Windows:** số kỳ vọng cũ (1927/1927, 6/6 — từ thời P1.7) đã cũ → mới (test 2910/2910, sau PR D-009: 2915/2915; e2e 14/14); ghi rõ T-001 đã xong, còn lại e2e Windows + .NET/Playwright.
+- **Bảng Trạng thái + §7 ký M1:** thêm D-009/D-010 đã quyết sau ký (không đổi chữ ký M1).
+- **§1 kiosk:** D-007 đã quyết A nhưng chưa triển khai TLS — kiểm kiosk đầy đủ thì mở trên máy server hoặc chờ mkcert xong.
+- **§2 rà semantics:** bỏ bullet OQ-161 (đã đóng).
+
+**Vẫn mở (để nguyên):** bench máy anh (mục 1), rà semantics §15–§16 (mục 2), VERIFY §14 (mục 3), gate Windows (mục 4), kiosk tablet (P0.9 §1), probe FB_Probe.
+
+Em cũng phát hiện TOC của `docs/STATE.md` thiếu mục §33 (plan D-009) nên đã cho script chạy lại. File guide + STATE.md mới em đã gửi cho browser task để đưa vào PR D-009 đang chạy; nếu PR đã merge trước khi nó kịp up lại thì hai file này đi cùng PR sau (bản trên máy anh đã là bản mới).
+
+---
+Log tới thời điểm 2026-11-27 13:36 +07.
+---
+
+## 2026-11-27 13:47 +07 — ChaMuse
+
+PR #41 MERGED rồi ạ, anh Tiến ơi — D-009 xong.
+
+Merge commit `b518206` lúc 13:47, nhánh `m1/d009-inout-natural` giữ lại không xóa. CI xanh run #345 (2m21s, test 2915/2915) — em kiểm trên trang Actions, tab Checks lại lag như lần trước. Em đã xác minh độc lập: PR #41 `merged=true`, file `docs/verify-owner-guide.md` + `docs/STATE.md` trên develop trùng byte với bản local (bản guide mới với D-006/D-007 đã quyết đã vào develop).
+
+Tóm tắt thay đổi: `resolveDb` + `dbForFb` layout IN_OUT theo kích thước tự nhiên, hiện field; M1 §3.5 + AMENDMENTS A23; OQ-399 đóng. DB_Sub 10→8 byte, offsets khớp TIA từng byte; bảng P giữ 38 byte. Tracker em đang làm mới (7 việc chờ anh — D-009 ra khỏi danh sách), xong em gửi ạ. Còn D-010 thì chờ anh probe FB_Probe khi rảnh, không gấp.
+
+---
+Log tới thời điểm 2026-11-27 13:47 +07.
+---
+
+## 2026-11-27 13:49 +07 — em My
+
+Tracker làm mới xong rồi ạ, anh Tiến ơi.
+
+Snapshot mới lúc 13:47 (develop `b518206`). D-009 đã ghi là xong — PR #41 merge; test thành 2.915/2.915; danh sách chờ anh còn 7 việc (D-009 ra khỏi danh sách, D-010 ghi rõ đã quyết A và chờ anh probe FB_Probe); KPI quyết định thành 10/10 đã chốt.
+
+---
+Log tới thời điểm 2026-11-27 13:49 +07.
+---
+
+## 2026-11-27 13:50 +07 — anh Tiến
+
+giờ em hướng dẫn a chạy bench trên máy anh. A gặp lỗi này khi chạy git checkout develop trên thư mục trống (máy mới):
+PS C:\Users\Public\Documents\AVEVA\Everything3D\Data2.10\DFLTS\bocad\OneDrive\Coding\VCS> git checkout develop
+fatal: not a git repository (or any of the parent directories): .git
+
+## 2026-11-27 13:50 +07 — ChaMuse
+
+Dạ, lỗi này là vì thư mục còn trống, chưa có repo ạ — `git checkout` chỉ chạy được trong thư mục đã clone. Anh làm theo thứ tự này ạ (PowerShell, đang đứng trong thư mục `VCS` trống):
+
+```text
+node --version
+pnpm --version
+git --version
+```
+
+Node cần ≥ 20; thiếu pnpm thì chạy `corepack enable` rồi `corepack prepare pnpm@10.15.0 --activate`. Rồi clone vào chính thư mục trống đang đứng:
+
+```text
+git clone https://github.com/congnghetrehn/VCS.git .
+git checkout develop
+pnpm install --frozen-lockfile
+pnpm bench
+```
+
+Chạy `pnpm bench` lúc máy rảnh. Con số quyết định là **softplc scan/s** (200 FB_Motor) — kỳ vọng ≥ 1000; anh báo lại con số đó cho em ạ. Hai lưu ý nhỏ: thư mục anh đang nằm trong OneDrive — nếu gặp lỗi lạ về file bị khóa thì tạm dừng đồng bộ OneDrive trong lúc chạy; và em đã bổ sung bước clone cho máy mới vào `docs/verify-owner-guide.md` mục 1 rồi ạ (trước đây guide chỉ viết cho máy đã có repo).
+
+---
+Log tới thời điểm 2026-11-27 13:50 +07.
+---
+
+## 2026-11-27 13:51 +07 — anh Tiến
+
+PS C:\Users\Public\Documents\AVEVA\Everything3D\Data2.10\DFLTS\bocad\OneDrive\Coding\VCS> corepack enable
+corepack : The term 'corepack' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling
+of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ corepack enable
++ ~~~~~~~~
+   + CategoryInfo          : ObjectNotFound: (corepack:String) [], CommandNotFoundException
+   + FullyQualifiedErrorId : CommandNotFoundException
+
+## 2026-11-27 13:51 +07 — em My
+
+Dạ, lỗi này nghĩa là máy mới chưa có Node (corepack đi kèm Node, mà Node chưa có trên PATH nên PowerShell không tìm thấy `corepack`). Anh kiểm tra nhanh giúp em:
+
+```text
+node --version
+npm --version
+```
+
+- Nếu cả hai đều báo "not recognized" → máy chưa có Node. Anh cài **Node 22 LTS** tại nodejs.org (bản Windows Installer, để mặc định, nhớ tick "Add to PATH"), rồi đóng PowerShell mở lại.
+- Nếu `node` chạy được mà chỉ thiếu pnpm → cài pnpm bằng `npm install -g pnpm@10.15.0` (trên Windows dùng npm cho chắc — corepack hay trục trặc PATH, em bỏ hướng corepack rồi ạ).
+
+Xong anh chạy lại `node --version` + `pnpm --version` cho em xem, rồi tiếp tục clone như hướng dẫn trước ạ. Em đã sửa `docs/verify-owner-guide.md` mục 1 theo hướng này rồi ạ.
+
+---
+Log tới thời điểm 2026-11-27 13:51 +07.
+---
+
+## 2026-11-27 13:56 +07 — anh Tiến
+
+chạy bench gặp lỗi này:
+
+PS C:\Users\Public\Documents\AVEVA\Everything3D\Data2.10\DFLTS\bocad\OneDrive\Coding\VCS\vcs> pnpm bench
+
+> vcs@0.1.0 bench C:\Users\Public\Documents\AVEVA\Everything3D\Data2.10\DFLTS\bocad\OneDrive\Coding\VCS\vcs
+> node bench/run-all-benches.mjs
+
+build-bench-bundle: bundle plant FAIL (exit null).
+bench: FAIL — build bundle lỗi, dừng trước khi đo.
+ ELIFECYCLE  Command failed with exit code 1.
+
+## 2026-11-27 13:56 +07 — em My
+
+Dạ, em đọc code bench rồi ạ — "exit null" nghĩa là bước build bundle (D-008 B) gọi `esbuild` mà tiến trình không khởi động được (không phải esbuild báo lỗi — nếu esbuild chạy mà lỗi thì đã in lỗi ra rồi). Nghi nhất là `pnpm install` chưa cài được esbuild (`node_modules\.bin\esbuild.cmd` + gói `@esbuild/win32-x64`), có thể do thư mục OneDrive làm hỏng install. Anh chạy 3 lệnh này trong thư mục repo rồi dán kết quả cho em ạ:
+
+```text
+dir node_modules\.bin\esbuild*
+dir node_modules\@esbuild
+node scripts/build-bench-bundle.mjs plant
+```
+
+Lệnh thứ 3 chạy riêng bước build để thấy lỗi thật. Nếu 2 lệnh đầu không thấy esbuild thì anh chạy lại `pnpm install --frozen-lockfile` và để ý xem có dòng lỗi nào không, rồi chạy lại 3 lệnh trên. Khi nào biết đúng nguyên nhân em sẽ ghi vào `docs/verify-owner-guide.md` mục 1 để lần sau khỏi gặp lại ạ.
+
+---
+Log tới thời điểm 2026-11-27 13:56 +07.
+---
+
+## 2026-11-27 13:59 +07 — anh Tiến
+
+ok để a thử cài lại repo trên đường dẫn khác và cài pnpm, chạy bench
+
+## 2026-11-27 13:59 +07 — ChaMuse
+
+Dạ, hướng đó đúng rồi ạ — chuyển ra khỏi OneDrive là cách chắc nhất để loại trừ vụ khóa file. Anh nhớ chọn đường dẫn ngắn, không dấu cách, ví dụ `C:\Coding\VCS`, rồi làm theo thứ tự này ạ:
+
+```text
+git clone https://github.com/congnghetrehn/VCS.git .
+git checkout develop
+npm install -g pnpm@10.15.0
+pnpm install --frozen-lockfile
+pnpm bench
+```
+
+Chạy `pnpm bench` lúc máy rảnh rồi báo lại con số **softplc scan/s** cho em ạ. Nếu vẫn gặp lỗi bundle như cũ thì anh chạy 3 lệnh chẩn đoán em gửi trước (`dir node_modules\.bin\esbuild*` …) rồi dán kết quả cho em. Em đã ghi lưu ý đường dẫn ngắn/không dấu cách/ngoài OneDrive vào `docs/verify-owner-guide.md` mục 1 rồi ạ.
+
+---
+Log tới thời điểm 2026-11-27 13:59 +07.
+---
+
+## 2026-11-27 14:07 +07 — anh Tiến
+
+kết quả bench đây em:
+
+PS F:\Coding\vcs> pnpm bench
+
+> vcs@0.1.0 bench F:\Coding\vcs
+> cross-env NODE_OPTIONS=--expose-gc tsx bench/tagdb.bench.ts && cross-env NODE_OPTIONS=--expose-gc tsx bench/orchestrator.bench.ts && cross-env NODE_OPTIONS=--expose-gc tsx bench/softplc.bench.ts
+
+bench TagDB (M0 §12.4) — trung vị, có warm-up:
+  set/get:            97,417,036 ops/s (ngưỡng ≥ 10,000,000) PASS
+  flush 5000 tag/0 đổi: 0.1 µs (ngưỡng ≤ 50) PASS
+  flush 1000 đổi + 1 sub: 0.027 ms (ngưỡng ≤ 1) PASS
+  heap +10M thao tác: -0.07 MB (ngưỡng < 1) PASS
+  kết quả: F:\Coding\VCS\bench\results.json
+bench orchestrator (M0 §12.4) — trung vị, có warm-up:
+  steps: 1,121,699 bước/s (ngưỡng ≥ 100,000) PASS
+  simTime sau bench: 1020000 ms, stepCount 102000
+  kết quả: F:\Coding\VCS\bench\results.json
+bench softplc (M1 §12.4) — FB_Motor §13 × 200, trung vị, có warm-up:
+  scans: 4,181 scan/s (ngưỡng ≥ 1,000) PASS
+  heap: +-0.25 MB / 2000 scan (ngưỡng < 1 MB) PASS
+  scanCount: 12200
+
+## 2026-11-27 14:07 +07 — em My
+
+Dạ, kết quả rất tốt ạ — cả 3 bench PASS, máy anh nhanh hơn hẳn VM: **softplc 4 181 scan/s** (gấp 4,2× ngưỡng 1 000), orchestrator 1 121 699 bước/s (gấp 11× ngưỡng), TagDB set/get 97 417 036 ops/s (gấp 9,7× ngưỡng). Mục bench M1 trên máy anh coi như đạt ạ.
+
+Nhưng có 1 điểm cần xác nhận: lệnh bench anh chạy là chuỗi 3 bench cũ, trong khi `develop` hiện tại chạy 5 bench qua `bench/run-all-benches.mjs` (thêm plant + closedloop, M2 §12). Có vẻ anh đang ở commit cũ — anh chạy giúp em 2 lệnh này để em biết chính xác ạ:
+
+```text
+git branch --show-current
+git rev-parse --short HEAD
+```
+
+Nếu chưa ở `develop` mới nhất thì anh chạy `git checkout develop`, `git pull`, `pnpm bench` để lấy đủ 5 bench — còn thiếu 2 số M2 trên máy thật (plant ≥ 1500, closed-loop ≥ 1000). Em đã ghi kết quả hôm nay vào `docs/verify-owner-guide.md` mục 1 rồi ạ (ghi rõ nhánh chưa xác nhận).
+
+---
+Log tới thời điểm 2026-11-27 14:07 +07.
+---
+
+## 2026-11-27 14:10 +07 — anh Tiến
+
+ah lúc trước anh đang ở main. A chạy bench ở develop thì bị lỗi:
+
+PS F:\Coding\vcs> git checkout develop
+branch 'develop' set up to track 'origin/develop'.
+Switched to a new branch 'develop'
+PS F:\Coding\vcs> git pull
+Already up to date.
+PS F:\Coding\vcs> pnpm bench
+
+> vcs@0.1.0 bench F:\Coding\vcs
+> node bench/run-all-benches.mjs
+
+build-bench-bundle: bundle plant FAIL (exit null).
+bench: FAIL — build bundle lỗi, dừng trước khi đo.
+ ELIFECYCLE  Command failed with exit code 1.
+
+## 2026-11-27 14:10 +07 — ChaMuse
+
+Dạ, vậy là rõ nhánh rồi ạ — lúc trước anh ở `main` nên bench chạy chuỗi 3 bench cũ; sang `develop` thì chạy runner 5 bench và vấp đúng bước build bundle như cũ. Lỗi này tái hiện trên đường dẫn mới ngoài OneDrive nên OneDrive không còn là nghi phạm nữa ạ.
+
+"Exit null" nghĩa là esbuild không khởi động được — nghi nhất là `pnpm install` chưa cài được esbuild. Anh chạy 3 lệnh chẩn đoán này trong thư mục repo rồi dán kết quả cho em ạ:
+
+```text
+dir node_modules\.bin\esbuild*
+dir node_modules\@esbuild
+node scripts/build-bench-bundle.mjs plant
+```
+
+Nếu 2 lệnh đầu không thấy esbuild thì anh chạy lại `pnpm install --frozen-lockfile` và để ý xem có dòng lỗi nào không, rồi chạy lại 3 lệnh trên. Em đã cập nhật `docs/verify-owner-guide.md` mục 1 rồi ạ (kết quả main PASS, develop đang lỗi bundle).
+
+---
+Log tới thời điểm 2026-11-27 14:10 +07.
+---
+
+## 2026-11-27 14:17 +07 — anh Tiến
+
+PS F:\Coding\vcs> pnpm install --frozen-lockfile
+Scope: all 12 workspace projects
+.                                        | +358   -6 ++++++++++++++++++++++++++++++++++++-
+.                                        | Progress: resolved 358, reused 7, downloaded 351, added 357, done
+Done in 55.7s using pnpm v10.15.0
+PS F:\Coding\vcs> dir node_modules\.bin\esbuild*
+
+
+    Directory: F:\Coding\vcs\node_modules\.bin
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        11/27/2026   2:13 PM           1058 esbuild
+-a----        11/27/2026   2:13 PM            830 esbuild.CMD
+-a----        11/27/2026   2:13 PM           1647 esbuild.ps1
+
+
+PS F:\Coding\vcs> dir node_modules\@esbuild
+dir : Cannot find path 'F:\Coding\vcs\node_modules\@esbuild' because it does not exist.
+At line:1 char:1
++ dir node_modules\@esbuild
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+   + CategoryInfo          : ObjectNotFound: (F:\Coding\vcs\node_modules\@esbuild:String) [Get-ChildItem], ItemNotFoundException
+   + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+
+PS F:\Coding\vcs> node scripts/build-bench-bundle.mjs plant
+build-bench-bundle: bundle plant FAIL (exit null).
+PS F:\Coding\vcs> dir node_modules\esbuild
+
+
+    Directory: F:\Coding\vcs\node_modules\esbuild
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        11/27/2026   2:01 PM                bin
+d-----        11/27/2026   2:01 PM                lib
+d-----        11/27/2026   2:01 PM                node_modules
+-a----        11/27/2026   2:01 PM          11773 install.js
+-a----        11/27/2026   2:01 PM          1069 LICENSE.md
+-a----        11/27/2026   2:01 PM          3980 package.json
+-a----        11/27/2026   2:01 PM          175 README.md
+
+A chỉ thấy thư mục node_modules\esbuild thay vì node_modules\@esbuild
+
+## 2026-11-27 14:17 +07 — em My
+
+Dạ, em xin đính chính một chỗ ạ: em kiểm tra lại trên máy em thì `node_modules\@esbuild` vắng mặt là **bình thường** với pnpm — gói platform nằm ở `node_modules\.pnpm\@esbuild+win32-x64@0.28.2`, còn `node_modules\esbuild` chỉ là lối tắt tới đó. Nên đó không phải nguyên nhân; em đã sửa lại ghi chú trong `docs/verify-owner-guide.md` mục 1 rồi ạ. Và `pnpm install` của anh chạy xong bình thường (55,7 giây, 357 gói), `esbuild.cmd` cũng có mặt — vậy mà bundle vẫn FAIL im lặng (exit null, không in lỗi gì).
+
+Giờ nghi nhất là bước gọi `esbuild.cmd` từ Node bị chặn/chết trước khi in ra gì (script gọi qua `cmd.exe`). Anh chạy 4 lệnh này để khoanh đúng chỗ ạ:
+
+```text
+dir node_modules\.pnpm\@esbuild*
+node_modules\.bin\esbuild.cmd --version
+node node_modules\esbuild\bin\esbuild --version
+cmd /c echo hi
+```
+
+- Nếu lệnh 1 thấy `win32-x64` (hoặc `win32-arm64`) → gói platform có đủ.
+- Nếu lệnh 2 hoặc 3 in ra `0.28.2` mà lệnh bundle vẫn FAIL → lỗi ở chỗ Node gọi file `.cmd` (lệnh 4 sẽ cho biết `cmd.exe` có bị chặn không).
+- Anh dán cả 4 kết quả cho em ạ — xong bước này là biết nên sửa script hay sửa máy.
+
+---
+Log tới thời điểm 2026-11-27 14:17 +07.
+---
+
+## 2026-11-27 14:21 +07 — anh Tiến
+
+PS F:\Coding\vcs> dir node_modules\.pnpm\@esbuild*
+
+
+    Directory: F:\Coding\vcs\node_modules\.pnpm
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        11/27/2026   2:01 PM                @esbuild+win32-x64@0.28.2
+
+
+PS F:\Coding\vcs> node_modules\.bin\esbuild.cmd --version
+0.28.2
+PS F:\Coding\vcs> node node_modules\esbuild\bin\esbuild --version
+0.28.2
+PS F:\Coding\vcs> cmd /c echo hi
+hi
+
+## 2026-11-27 14:21 +07 — ChaMuse
+
+Dạ, 4 kiểm tra đều xanh ạ: gói platform `win32-x64` có đủ, `esbuild.cmd` chạy được, `node …\bin\esbuild` chạy được, `cmd.exe` cũng chạy được. Vậy esbuild bản thân nó không hỏng — chỉ FAIL im lặng khi script Node gọi nó với tham số bundle. Khoanh hẹp thêm một nấc nữa với 3 lệnh này ạ:
+
+```text
+node -e "const {spawnSync}=require('node:child_process'); const r=spawnSync('node_modules\\.bin\\esbuild.cmd',['--version'],{stdio:'inherit'}); console.log('status='+r.status,'signal='+r.signal,'error='+r.error);"
+node_modules\.bin\esbuild.cmd bench\plant.bench.ts --bundle --format=esm --platform=node --external:yaml --outfile=bench\dist\plant.bench.mjs
+dir node_modules\.pnpm\@esbuild+win32-x64@0.28.2\node_modules\@esbuild\win32-x64\
+```
+
+- Lệnh 1 là đúng cách script gọi esbuild, nhưng với tham số `--version` (đã biết chạy tốt): nếu nó cũng ra `status=null` thì lỗi nằm ở chỗ Node gọi file `.cmd` trên máy anh; nếu ra `status=0` thì Node gọi `.cmd` bình thường.
+- Lệnh 2 chạy tay đúng lệnh bundle: nếu thành công (in ra dòng `bench/dist/plant.bench.mjs`) thì esbuild bundle được, lỗi chỉ nằm ở bước gọi từ script.
+- Lệnh 3 xem file `esbuild.exe` có còn nguyên không (đúng ra ~11 MB) — nếu thiếu/0 byte thì phần mềm diệt virus đã cách ly nó.
+
+Anh dán cả 3 kết quả cho em ạ — tới đây là biết chính xác nên sửa script hay sửa máy.
+
+---
+Log tới thời điểm 2026-11-27 14:21 +07.
+---
+
+## 2026-11-27 14:23 +07 — anh Tiến
+
+PS F:\Coding\vcs> node -e "const {spawnSync}=require('node:child_process'); const r=spawnSync('node_modules\\.bin\\esbuild.cmd',['--version'],{stdio:'inherit'}); console.log('status='+r.status,'signal='+r.signal,'error='+r.error);"
+status=null signal=null error=Error: spawnSync node_modules\.bin\esbuild.cmd EINVAL
+PS F:\Coding\vcs> node_modules\.bin\esbuild.cmd bench\plant.bench.ts --bundle --format=esm --platform=node --external:yaml --outfile=bench\dist\plant.bench.mjs
+
+  bench\dist\plant.bench.mjs  923.9kb
+
+Done in 416ms
+PS F:\Coding\vcs> dir node_modules\.pnpm\@esbuild+win32-x64@0.28.2\node_modules\@esbuild\win32-x64\
+
+
+    Directory: F:\Coding\vcs\node_modules\.pnpm\@esbuild+win32-x64@0.28.2\node_modules\@esbuild\win32-x64
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----        11/27/2026   2:01 PM       11694592 esbuild.exe
+-a----        11/27/2026   2:01 PM            374 package.json
+-a----        11/27/2026   2:01 PM            143 README.md
+
+## 2026-11-27 14:23 +07 — ChaMuse
+
+Dạ, tìm ra nguyên nhân rồi ạ — lỗi nằm ở chỗ Node gọi file `.cmd`, không phải esbuild. Bằng chứng rõ ràng: lệnh repro tối thiểu ra `spawnSync …esbuild.cmd EINVAL` (status null), trong khi cùng file `.cmd` chạy tay ở PowerShell thì bundle ngon lành (plant.bench.mjs 923,9 kb, 416 ms) và `esbuild.exe` còn nguyên 11 694 592 byte. Nói cách khác, esbuild không hỏng — Node trên máy anh không spawn được file `.cmd` thôi ạ.
+
+Cách sửa: đổi 2 script bench (`scripts/build-bench-bundle.mjs` gọi esbuild, `bench/run-all-benches.mjs` gọi tsx — chỗ tsx cũng cùng mẫu lỗi, sửa luôn cho khỏi vấp tiếp) sang gọi thẳng `node` + file JS (`node_modules/esbuild/bin/esbuild`, `node_modules/tsx/dist/cli.mjs`), không qua `.cmd` nữa. Em đang cho sửa trên nhánh `m2/bench-windows-spawn`, xong em tự kiểm gate rồi mở PR → merge vào develop; sau đó anh `git pull` rồi chạy lại `pnpm bench` là có đủ 5 số ạ.
+
+Anh cho em xin thêm `node --version` để em ghi vào bản sửa (biết đúng bản Node nào gặp lỗi này) ạ.
+
+---
+Log tới thời điểm 2026-11-27 14:23 +07.
+---
+
+## 2026-11-27 14:28 +07 — anh Tiến
+
+PS F:\Coding\vcs> node --version
+v26.13.0
+
+## 2026-11-27 14:28 +07 — em My
+
+Dạ, em ghi nhận ạ — máy anh chạy **Node v26.13.0**. Lỗi spawn `.cmd` gặp trên đúng bản này; em đã ghi version vào `docs/verify-owner-guide.md` mục 1 và nhắn cho bên đang sửa để đưa vào bản PR ạ. Bản sửa vẫn đang làm, xong em tự kiểm gate rồi mở PR → merge; sau đó anh `git pull` rồi chạy lại `pnpm bench` là có đủ 5 số ạ.
+
+---
+Log tới thời điểm 2026-11-27 14:28 +07.
+---
+
+## 2026-11-27 14:32 +07 — ChaMuse
+
+Dạ, bản sửa đã xong ạ. Em đọc kỹ diff rồi: chỉ đổi 2 file — `scripts/build-bench-bundle.mjs` gọi `node` + `node_modules/esbuild/bin/esbuild`, `bench/run-all-benches.mjs` gọi `node` + `node_modules/tsx/dist/cli.mjs`, giữ nguyên tham số/cwd/stdio; thông báo lỗi bổ sung thêm `r.error` để lần sau in lỗi thật thay vì chỉ "exit null". Bên sửa cũng đã tự kiểm gate trên máy em: lint/typecheck/depcheck/cheats đều 0, test 2915 (1 test flaky đã biết ở `sim-service.test.ts`, chạy lại riêng file thì 19/19 xanh), `pnpm bench` đủ 5 bench đều PASS (softplc 1 774, plant 2 842, closedloop 1 386 trên VM).
+
+Em đang chạy lại gate độc lập trên một bản sao sạch để kiểm chứng, xong em mở PR → chờ CI xanh → merge vào develop, rồi anh `git pull` chạy lại `pnpm bench` ạ.
+
+---
+Log tới thời điểm 2026-11-27 14:32 +07.
+---
+
+## 2026-11-27 14:38 +07 — ChaMuse
+
+Dạ, gate độc lập của em xanh toàn bộ trên bản sao sạch ạ (bản sao từ `git archive HEAD`, cài thật): install 0, lint 0, typecheck 0, depcheck 0, test 0 (**2 915/2 915**, 131 files), review:cheats 0, bench 0 — đủ 5 bench PASS trên VM (TagDB 47 838 792 ops/s; orchestrator 507 879 bước/s; softplc 1 683 scan/s; plant 2 602 bước/s; closedloop 1 358 bước/s). Em đã mở PR từ nhánh `m2/bench-windows-spawn` vào develop (3 file: 2 script sửa + guide), đang chờ CI xanh rồi merge. Xong em báo anh `git pull` rồi chạy lại `pnpm bench` ạ.
+
+---
+Log tới thời điểm 2026-11-27 14:38 +07.
+---
+
+## 2026-11-27 14:55 +07 — em My
+
+Dạ, PR #42 đã merged vào develop rồi ạ — em tự kiểm lại bằng GitHub rồi mới báo: PR merged, 2 file script trên develop trùng sha256 với bản local (build-bench-bundle `140367c4…`, run-all-benches `b143a886…`), CI #347 xanh 2m24s (test 2915/2915, e2e 2m21s), merge commit `5a9cc99`, nhánh giữ lại. Giờ anh chạy lại trên máy anh ạ:
+
+```text
+git checkout develop
+git pull
+pnpm bench
+```
+
+Chạy lúc máy rảnh rồi báo lại 5 số cho em ạ (TagDB, orchestrator, softplc, plant ≥ 1500, closed-loop ≥ 1000) — nhất là 2 số plant/closedloop còn thiếu trên máy thật. Em đã cập nhật `docs/verify-owner-guide.md` mục 1 rồi ạ.
+
+---
+Log tới thời điểm 2026-11-27 14:55 +07.
+---
